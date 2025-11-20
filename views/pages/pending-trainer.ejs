@@ -1,0 +1,41 @@
+<%- include('../partials/header.ejs', { title, bodyClass: 'dashboard-body' }) %>
+<div class="dashboard-container" style="grid-template-columns: 1fr; max-width: 800px;">
+    <main class="dashboard-main">
+      <div class="section">
+            <div class="section-header" style="text-align: center; flex-direction: column;">
+                <h1>Perfil Profissional</h1>
+                <% if (userStatus === 'pending') { %>
+                    <p>Para ativarmos sua conta, preencha suas informações profissionais. Após o envio, seu perfil será analisado.</p>
+                <% } else if (userStatus === 'pending_approval') { %>
+                    <p style="color: var(--c-accent-primary);">Seu perfil foi enviado e está aguardando aprovação. Você receberá uma notificação por e-mail.</p>
+                <% } %>
+            </div>
+
+            <div class="alert" style="background-color: #fefcbf; border: 1px solid #f9e289; color: var(--c-text-primary); margin-bottom: 2rem;">
+                <strong>Status da Conta:</strong> <%= userStatus.replace('_', ' ').toUpperCase() %>
+            </div>
+
+            <form method="POST" action="/trainer/profile" <%- userStatus === 'pending_approval' ? 'disabled' : '' %>>
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <div class="form-group">
+                    <label for="certifications">Certificações e Formação</label>
+                    <textarea id="certifications" name="certifications" rows="4" placeholder="Ex: Bacharel em Educação Física, CREF 12345-G/SP, Certificação em Treinamento Funcional..." required <%- userStatus === 'pending_approval' ? 'disabled' : '' %>><%= profile.certifications || '' %></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="experience">Experiência Profissional</label>
+                    <textarea id="experience" name="experience" rows="6" placeholder="Descreva sua trajetória, áreas de especialização, e tempo de experiência." required <%- userStatus === 'pending_approval' ? 'disabled' : '' %>><%= profile.experience || '' %></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="bio">Sua Biografia (Bio)</label>
+                    <textarea id="bio" name="bio" rows="4" placeholder="Fale um pouco sobre você, sua filosofia de treino e como você ajudará nossos clientes a alcançar o Momentum." required <%- userStatus === 'pending_approval' ? 'disabled' : '' %>><%= profile.bio || '' %></textarea>
+                </div>
+                <% if (userStatus === 'pending') { %>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Enviar para Análise</button>
+                <% } else { %>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;" disabled>Enviado</button>
+                <% } %>
+            </form>
+        </div>
+    </main>
+</div>
+<%- include('../partials/footer.ejs') %>

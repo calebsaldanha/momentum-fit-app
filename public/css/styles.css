@@ -1,0 +1,259 @@
+/* Momentum Fit - Design System - Clean Energy */
+:root {
+    --font-primary: 'Montserrat', sans-serif;
+    --c-bg: #FFFFFF;                     /* Branco Puro */
+    --c-surface: #FFFFFF;                /* Manter */
+    --c-text-primary: #222222;          /* Grafite Escuro */
+    --c-text-secondary: #718096;        /* Cinza Neutro */
+    --c-border: #E2E8F0;                /* Cinza Suave */
+    
+    /* COR DE AÇÃO PRINCIPAL: Verde Limão Elétrico */
+    --c-accent-primary: #BEF202;
+    --c-accent-gold: #BEF202;           /* Mapeado para Ação Primária */
+    
+    /* CORES REMOVIDAS/SUBSTITUÍDAS */
+    --c-accent-pink: #F8F9FA;           /* Cinza Gelo (Neutro) */
+    --c-accent-blue: #222222;           /* Grafite Escuro (Neutro) */
+    
+    --c-accent-dark: #222222;           /* Grafite Escuro */
+    --c-success: #48BB78;               /* Manter (é uma cor de sucesso genérica) */
+    --c-error: #F56565;                 /* Manter */
+    --radius: 8px;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+    font-family: var(--font-primary);
+    line-height: 1.7;
+    color: var(--c-text-primary);
+    background-color: var(--c-bg);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+.container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+h1, h2, h3, h4 { line-height: 1.3; font-weight: 700; margin-bottom: 1rem; }
+h1 { font-size: 2.5rem; }
+h2 { font-size: 2rem; }
+h3 { font-size: 1.5rem; }
+p { margin-bottom: 1rem; color: var(--c-text-secondary); }
+a { color: var(--c-accent-dark); text-decoration: none; transition: var(--transition); }
+a:hover { color: var(--c-accent-primary); /* Links hover com Verde Limão */ }
+img { max-width: 100%; height: auto; display: block; }
+.header {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    box-shadow: var(--shadow-sm);
+    border-bottom: 1px solid var(--c-border);
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+}
+.nav-container { display: flex; justify-content: space-between; align-items: center; height: 80px; }
+.nav-logo h2 { font-weight: 800; color: var(--c-text-primary); font-size: 1.5rem; }
+.nav-menu { display: flex; list-style: none; align-items: center; gap: 2.5rem; }
+.nav-link { font-weight: 600; font-size: 0.95rem; position: relative; }
+.nav-link::after { content: ''; position: absolute; width: 0; height: 2px; bottom: -5px; left: 0; background-color: var(--c-accent-primary); transition: var(--transition); }
+.nav-link:hover::after { width: 100%; }
+.hamburger { display: none; cursor: pointer; }
+.bar { width: 25px; height: 3px; background: var(--c-text-primary); margin: 5px 0; transition: var(--transition); }
+.btn { display: inline-block; padding: 0.8rem 2rem; border-radius: var(--radius); text-decoration: none; font-weight: 700; font-size: 0.9rem; transition: var(--transition); border: 2px solid transparent; cursor: pointer; text-align: center; }
+.btn-primary { 
+    background-color: var(--c-accent-primary); 
+    color: var(--c-text-primary); /* Texto Grafite Escuro sobre Verde Limão */
+    border-color: var(--c-accent-primary); 
+}
+.btn-primary:hover { 
+    background-color: #A8D902; /* Tom mais escuro do Verde Limão */
+    border-color: #A8D902; 
+    transform: translateY(-2px); 
+    box-shadow: var(--shadow); 
+}
+.btn-secondary { background: transparent; color: var(--c-text-primary); border-color: var(--c-text-primary); }
+.btn-secondary:hover { background: var(--c-text-primary); color: var(--c-surface); }
+.btn-sm { padding: 0.5rem 1rem; font-size: 0.85rem; }
+.hero { background: var(--c-accent-dark); /* Fundo da seção Hero em Grafite Escuro */
+    padding: 160px 0 100px; 
+    color: var(--c-bg); 
+}
+.hero .hero-subtitle { color: #aaa; } /* Ajusta a cor do subtítulo para melhor leitura no fundo escuro */
+.hero-container { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; }
+.hero-title { font-size: 3rem; font-weight: 800; margin-bottom: 1.5rem; }
+.hero-subtitle { font-size: 1.25rem; margin-bottom: 2.5rem; }
+.hero-buttons { display: flex; gap: 1rem; }
+.hero-image img { border-radius: var(--radius); box-shadow: var(--shadow-lg); }
+section { padding: 100px 0; }
+.section-title { text-align: center; font-size: 2.5rem; font-weight: 800; margin-bottom: 4rem; }
+.section-title::after { 
+    content: ''; 
+    display: block; 
+    width: 60px; 
+    height: 4px; 
+    background: var(--c-accent-primary); /* Destaque com Verde Limão */
+    margin: 1rem auto 0; 
+    border-radius: 2px; 
+}
+.about-steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; }
+.step { text-align: center; padding: 2rem; }
+.step-icon { 
+    width: 60px; 
+    height: 60px; 
+    background: var(--c-accent-primary); /* Icone em Verde Limão */
+    color: var(--c-text-primary); /* Texto em Grafite Escuro */
+    font-size: 1.5rem; 
+    font-weight: bold; 
+    border-radius: 50%; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    margin: 0 auto 1.5rem auto; 
+}
+.step h3 { margin-bottom: 0.5rem; }
+.features { background-color: var(--c-bg); }
+.features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; }
+.feature-card { background: var(--c-surface); padding: 2rem; border-radius: var(--radius); border: 1px solid var(--c-border); box-shadow: var(--shadow-sm); text-align: center; transition: var(--transition); }
+.feature-card:hover { transform: translateY(-5px); box-shadow: var(--shadow); border-color: var(--c-accent-primary); }
+.feature-icon { font-size: 3rem; margin-bottom: 1rem; }
+.feature-card h3 { margin-bottom: 0.5rem; }
+.footer { background: var(--c-accent-dark); /* Fundo do rodapé em Grafite Escuro */
+    color: var(--c-bg); 
+    padding: 2rem 0; 
+}
+.footer-content { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-bottom: 3rem; }
+.footer-section h4 { margin-bottom: 1.5rem; color: var(--c-accent-primary); /* Títulos do footer em Verde Limão */ }
+.footer-section ul { list-style: none; }
+.footer-section a { color: #ccc; /* Links do footer em cinza claro */ }
+.footer-section a:hover { color: var(--c-accent-primary); /* Hover em Verde Limão */ }
+.footer-bottom { text-align: center; padding-top: 2rem; border-top: 1px solid #718096; color: #aaa; }
+.auth-body { background-color: var(--c-accent-dark); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+.auth-card { background: var(--c-surface); padding: 2.5rem; border-radius: var(--radius); box-shadow: var(--shadow-lg); width: 100%; max-width: 450px; }
+.auth-header { text-align: center; margin-bottom: 2rem; }
+.form-group { margin-bottom: 1.5rem; }
+.form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.9rem; }
+.form-group input, .form-group textarea, .form-group select { width: 100%; padding: 0.8rem 1rem; border: 1px solid var(--c-border); border-radius: var(--radius); font-family: inherit; transition: var(--transition); font-size: 1rem; background-color: var(--c-bg); }
+.form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: var(--c-accent-primary); box-shadow: 0 0 0 3px rgba(190, 242, 2, 0.3); } /* Box shadow com Verde Limão */
+.alert { padding: 1rem; border-radius: var(--radius); margin-bottom: 1.5rem; border: 1px solid transparent; }
+.alert-error { background-color: #FFF5F5; border-color: #FEB2B2; color: #9B2C2C; }
+@media (max-width: 992px) { .hero-container { grid-template-columns: 1fr; text-align: center; } .hero-buttons { justify-content: center; } .hero-image { display: none; } }
+@media (max-width: 768px) {
+    .hamburger { display: flex; flex-direction: column; z-index: 1001; }
+    .nav-menu { position: fixed; left: -100%; top: 0; flex-direction: column; justify-content: center; background: var(--c-surface); width: 100%; height: 100vh; transition: 0.4s cubic-bezier(0.77, 0, 0.175, 1); }
+    .nav-menu.active { left: 0; }
+    .hamburger.active .bar:nth-child(1) { transform: rotate(-45deg) translate(-6px, 7px); }
+    .hamburger.active .bar:nth-child(2) { opacity: 0; }
+    .hamburger.active .bar:nth-child(3) { transform: rotate(45deg) translate(-6px, -7px); }
+}
+.notification-container { position: fixed; top: 20px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 10px; }
+.notification { padding: 1rem 1.5rem; border-radius: var(--radius); color: var(--c-surface); box-shadow: var(--shadow-lg); opacity: 1; transform: translateX(0); transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+.notification.hide { opacity: 0; transform: translateX(120%); }
+.notification-success { background: var(--c-success); }
+.notification-error { background: var(--c-error); }
+.notification-info { background: var(--c-accent-dark); }
+
+/* *** CORREÇÃO: Seletor modificado para não afetar o .dashboard-main *** */
+/* Fix para Header sobreposto */
+body > main {
+    padding-top: 80px; /* Altura do header */
+}
+
+/* Fix: Garante a visibilidade do botão secundário na seção hero */
+.hero .btn-secondary {
+    color: var(--c-bg); /* Usa a cor de texto clara do hero (Branco) */
+    border-color: var(--c-bg); /* Usa a mesma cor para a borda */
+}
+
+.hero .btn-secondary:hover {
+    background: var(--c-bg); /* Fundo claro ao passar o mouse */
+    color: var(--c-text-primary); /* Texto escuro ao passar o mouse */
+}
+
+/* --- CSS DE NOTIFICAÇÕES (Dashboard) --- */
+.notification-bell {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+#notificationLink {
+    color: var(--c-text-primary);
+    position: relative;
+    display: block;
+}
+#notificationLink:hover {
+    color: var(--c-accent-primary); /* Hover com Verde Limão */
+}
+
+.notification-badge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background-color: var(--c-error);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+    padding: 3px 5px;
+    border-radius: 50%;
+    display: none; /* Escondido por padrão */
+}
+
+.notification-dropdown {
+    display: none; /* Escondido por padrão */
+    position: absolute;
+    top: 100%;
+    right: 0;
+    min-width: 320px;
+    max-width: 400px;
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    z-index: 1100;
+    margin-top: 15px; /* Espaço do header */
+}
+
+.notification-header {
+    padding: 1rem;
+    font-weight: 700;
+    font-size: 1.1rem;
+    border-bottom: 1px solid var(--c-border);
+}
+
+.notification-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.notification-item {
+    display: block;
+    padding: 1rem;
+    border-bottom: 1px solid var(--c-border);
+    text-decoration: none;
+    color: var(--c-text-secondary);
+}
+.notification-item:last-child {
+    border-bottom: none;
+}
+.notification-item:hover {
+    background-color: var(--c-dashboard-bg);
+}
+
+.notification-item p {
+    margin: 0 0 0.25rem 0;
+    color: var(--c-text-primary);
+    line-height: 1.4;
+    font-weight: 500;
+}
+.notification-item .notification-time {
+    font-size: 0.8rem;
+}
+
+#noNotifications {
+    padding: 1.5rem;
+    text-align: center;
+    color: var(--c-text-secondary);
+}

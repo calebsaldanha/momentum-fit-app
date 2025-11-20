@@ -1,0 +1,56 @@
+<%- include('../partials/header.ejs', { title, bodyClass: 'dashboard-body' }) %>
+<div class="dashboard-container">
+    <aside class="dashboard-sidebar">
+        <nav class="sidebar-nav">
+             <a href="/superadmin/dashboard" class="nav-item active"><span></span>Aprovar Personais</a>
+             <a href="/superadmin/manage" class="nav-item"><span></span>Gerenciar Usuários</a>
+             <a href="/admin/dashboard" class="nav-item"><span></span>Painel Admin</a>
+        </nav>
+    </aside>
+    <main class="dashboard-main">
+        <div class="section">
+             <div class="section-header">
+                <h1>Aprovação de Novos Personais</h1>
+                <p>Analise e gerencie os pedidos de cadastro de personal trainers.</p>
+            </div>
+            <% if (trainers && trainers.length > 0) { %>
+                <div class="clients-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Email</th>
+                                <th>Data de Cadastro</th>
+                                <th style="text-align: right;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% trainers.forEach(trainer => { %>
+                                <tr>
+                                    <td><%= trainer.name %></td>
+                                    <td><%= trainer.email %></td>
+                                    <td><%= new Date(trainer.created_at).toLocaleDateString('pt-BR') %></td>
+                                    <td style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                                        <form action="/superadmin/trainers/approve/<%= trainer.id %>" method="POST" style="margin: 0;">
+                                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                            <button type="submit" class="btn btn-primary btn-sm">Aprovar</button>
+                                        </form>
+                                        <form action="/superadmin/trainers/reject/<%= trainer.id %>" method="POST" style="margin: 0;">
+                                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                            <button type="submit" class="btn btn-secondary btn-sm">Rejeitar</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+            <% } else { %>
+                <div class="empty-state">
+                    <p>Nenhum personal trainer pendente de aprovação.</p>
+                </div>
+            <% } %>
+        </div>
+    </main>
+</div>
+<%- include('../partials/footer.ejs') %>

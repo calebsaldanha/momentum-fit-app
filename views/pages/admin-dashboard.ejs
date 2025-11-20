@@ -1,0 +1,75 @@
+<%- include("../partials/header.ejs", { title, bodyClass: "dashboard-body" }) %>
+
+<div class="dashboard-container">
+    <aside class="dashboard-sidebar">
+        <nav class="sidebar-nav">
+            <a href="/admin/dashboard" class="nav-item active"><span></span> Dashboard</a>
+            <a href="/admin/clients" class="nav-item"><span></span> Clientes</a>
+            <a href="/workouts/create" class="nav-item"><span></span> Criar Treino</a>
+            <% if (user.role === 'superadmin') { %><a href="/articles/create" class="nav-item"><span></span> Criar Artigo</a>
+<% } %>
+            <a href="/chat" class="nav-item"><span></span> Chat</a>
+        </nav>
+    </aside>
+
+    <main class="dashboard-main">
+        <div class="section-header">
+            <div>
+                <h1>Painel do Administrador</h1>
+                <p>Visão geral da plataforma Momentum Fit e ações rápidas.</p>
+            </div>
+        </div>
+
+        <div class="admin-dashboard-grid">
+            <div class="admin-stats section">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon"></div>
+                        <div class="stat-info">
+                            <h3><%= stats.totalClients %></h3>
+                            <p>Clientes Ativos</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"></div>
+                        <div class="stat-info">
+                            <h3><%= stats.totalWorkouts %></h3>
+                            <p>Treinos Criados</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"></div>
+                        <div class="stat-info">
+                            <h3><%= stats.weeklyCheckins %></h3>
+                            <p>Check-ins (7 dias)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="admin-recent-clients section">
+                <div class="section-header section-header-inline" style="padding-bottom: 0; margin-bottom: 1.5rem; border: none;">
+                    <h2 style="margin: 0;">Clientes Recentes</h2>
+                    <a href="/admin/clients" class="btn btn-secondary btn-sm">Ver Todos</a>
+                </div>
+                <% if (recentClients && recentClients.length > 0) { %>
+                    <div class="recent-clients-list">
+                        <% recentClients.forEach(client => { %>
+                            <a href="/admin/clients/<%= client.id %>" class="recent-client-item">
+                                <div class="client-info">
+                                    <strong><%= client.name %></strong>
+                                    <p><%= client.email %></p>
+                                </div>
+                                <span class="view-details-btn">Ver Detalhes</span>
+                            </a>
+                        <% }); %>
+                    </div>
+                <% } else { %>
+                    <p>Nenhum cliente cadastrado ainda.</p>
+                <% } %>
+            </div>
+        </div>
+    </main>
+</div>
+
+<%- include("../partials/footer.ejs") %>

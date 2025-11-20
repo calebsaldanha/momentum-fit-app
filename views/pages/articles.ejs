@@ -1,0 +1,37 @@
+<%- include('../partials/header.ejs') %>
+
+<main style="padding-top: 120px;">
+    <section>
+        <div class="container">
+            <div class="section-header" style="text-align: center; margin-bottom: 3rem;">
+                <h1 class="section-title">Artigos</h1>
+                <p>Conhecimento e informação para potencializar seus resultados.</p>
+            </div>
+
+            <% if (articles && articles.length > 0) { %>
+                <div class="articles-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+                    <% articles.forEach(article => { %>
+                        <a href="/articles/<%= article.id %>" class="feature-card" style="text-align: left; display: flex; flex-direction: column; text-decoration: none;">
+                            <h3 style="margin-bottom: 0.5rem;"><%= article.title %></h3>
+                            <p style="font-size: 0.9rem; color: var(--c-accent-primary); margin-bottom: 1rem; font-weight: 600;"><%= article.category %></p>
+                            <p style="flex-grow: 1;"><%= article.content.substring(0, 150) %>...</p>
+                            <span style="font-size: 0.85rem; color: var(--c-text-secondary); margin-top: 1rem;">Por <%= article.author_name %> em <%= new Date(article.created_at).toLocaleDateString('pt-BR') %></span>
+                            <% if (user && user.role === 'superadmin') { %>
+                                <form action="/articles/delete/<%= article.id %>" method="POST" style="margin-top: 1rem;" onsubmit="return confirm('Tem certeza que deseja excluir este artigo?');">
+                                    <button type="submit" class="btn btn-secondary btn-sm">Excluir Artigo</button>
+                                </form>
+                            <% } %>
+                        </a>
+                    <% }); %>
+                </div>
+            <% } else { %>
+                <div class="empty-state" style="padding: 4rem 0;">
+                    <h3>Nenhum artigo publicado ainda.</h3>
+                    <p>Volte em breve para conferir as novidades!</p>
+                </div>
+            <% } %>
+        </div>
+    </section>
+</main>
+
+<%- include('../partials/footer.ejs') %>

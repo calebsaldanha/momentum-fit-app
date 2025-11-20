@@ -1,0 +1,48 @@
+<%- include('../partials/header.ejs', { title, bodyClass: 'dashboard-body' }) %>
+
+<div class="dashboard-container">
+    <aside class="dashboard-sidebar">
+        <nav class="sidebar-nav">
+            <a href="/admin/dashboard" class="nav-item"><span></span> Dashboard</a>
+            <a href="/admin/clients" class="nav-item active"><span></span> Clientes</a>
+            <a href="/workouts/create" class="nav-item"><span></span> Criar Treino</a>
+            <a href="/articles/create" class="nav-item"><span></span> Criar Artigo</a>
+            <a href="/chat" class="nav-item"><span></span> Chat</a>
+        </nav>
+    </aside>
+
+    <main class="dashboard-main">
+        <div class="section">
+            <div class="section-header">
+                <h1>Gerenciar Clientes</h1>
+                <p>Visualize e gerencie todos os seus clientes Momentum Fit.</p>
+            </div>
+          
+            <% if (clients && clients.length > 0) { %>
+                <div class="clients-grid">
+                    <% clients.forEach(client => { %>
+                        <div class="client-card">
+                            <div class="client-card-header">
+                                <h3><%= client.name %></h3>
+                                <p><%= client.email %></p>
+                            </div>
+                            <div class="client-card-info">
+                                <p><strong>Nível:</strong> <%= client.fitness_level || 'Não informado' %></p>
+                                <p><strong>Cadastro:</strong> <%= new Date(client.created_at).toLocaleDateString('pt-BR') %></p>
+                            </div>
+                            <div class="client-card-footer">
+                                <a href="/admin/clients/<%= client.id %>" class="btn btn-primary btn-sm" style="width: 100%;">Ver Detalhes</a>
+                            </div>
+                        </div>
+                    <% }); %>
+                </div>
+            <% } else { %>
+                <div class="empty-state">
+                    <p>Nenhum cliente cadastrado ainda.</p>
+                </div>
+            <% } %>
+        </div>
+    </main>
+</div>
+
+<%- include('../partials/footer.ejs') %>

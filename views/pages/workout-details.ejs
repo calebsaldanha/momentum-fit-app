@@ -1,0 +1,134 @@
+ <%- include('../partials/header.ejs', { title, bodyClass: 'dashboard-body' }) %>
+
+<div class="dashboard-container">
+    <aside class="dashboard-sidebar">
+        <nav class="sidebar-nav">
+            <% if (user.role === 'client') { %>
+                <a href="/client/dashboard" class="nav-item"><span></span> Dashboard</a>
+                <a href="/client/workouts" class="nav-item active"><span></span> Meus Treinos</a>
+                <a href="/chat" class="nav-item"><span></span> Chat</a>
+                <a href="/client/profile" class="nav-item"><span></span> Meu Perfil</a>
+            <% } else { %>
+                <a href="/admin/dashboard" class="nav-item"><span></span> Dashboard</a>
+                <a href="/admin/clients" class="nav-item"><span></span> Clientes</a>
+                <a href="/workouts/create" class="nav-item"><span></span> Criar Treino</a>
+                <a href="/articles/create" class="nav-item"><span></span> Criar Artigo</a>
+                <a href="/chat" class="nav-item"><span></span> Chat</a>
+            <% } %>
+        </nav>
+    </aside>
+
+    <main class="dashboard-main">
+        <div class="section">
+            <div class="section-header">
+  <div>
+                    <h1><%= workout.title %></h1>
+                    <p>Criado por: <strong><%= user.role === 'client' ?
+ workout.trainer_name : workout.client_name %></strong> em <%= new Date(workout.created_at).toLocaleDateString('pt-BR') %></p>
+                </div>
+            </div>
+
+            <% if (workout.description) { %>
+                <p style="margin-bottom: 2rem;"><%= workout.description %></p>
+            <% } %>
+
+            <div class="exercises-list">
+                <% exercises.forEach((exercise, index) => { %>
+                    <div class="exercise-item" style="border: 1px solid var(--c-border); border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1.5rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3 style="margin: 0;">Exercício <%= index + 1 %>: <%= exercise.name %></h3>
+                            <span class="btn btn-primary btn-sm" style="cursor: default;"><%= exercise.sets %></span>
+                        </div>
+     <% if (exercise.description) { %>
+                            <p style="margin: 0;
+ color: var(--c-text-secondary);"><%= exercise.description %></p>
+                        <% } %>
+                    </div>
+                <% }); %>
+            </div>
+        </div>
+
+        <% if (user.role === 'client') 
+ { %>
+        <div class="section">
+            <h2>Registrar Check-in</h2>
+            <p>Conte para o seu treinador como foi o treino e mantenha o seu Momentum.</p>
+            <form id="checkinForm" class="dashboard-form" style="max-width: 600px;">
+                <div class="form-group">
+                    <label>Este treino foi concluído?</label>
+                    <div style="display: flex;
+ gap: 1rem;">
+                        <label><input type="radio" name="completed" value="true" required> Sim</label>
+                        <label><input type="radio" name="completed" value="false"> Não</label>
+                    </div>
+                </div>
+           <div class="form-group">
+                    <label for="notes">Notas (Como se sentiu, dificuldades, etc.)</label>
+                    <textarea id="notes" name="notes" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+              <label for="rating">Sua nota para o treino (1 a 5)</label>
+                    <input type="number" id="rating" name="rating" min="1" max="5">
+                </div>
+                <button type="submit" class="btn btn-primary">Enviar Check-in</button>
+            </form>
+   </div>
+        <% } %>
+
+        <div class="section">
+            <h2>Histórico de Check-ins</h2>
+            <% if (checkins && checkins.length > 0) { %>
+                <% checkins.forEach(checkin => { %>
+                    <div style="border-bottom: 1px solid var(--c-border);
+ padding: 1rem 0;">
+                        <p><strong>Data:</strong> <%= new Date(checkin.created_at).toLocaleString('pt-BR') %></p>
+                        <p><strong>Concluído:</strong> <%= checkin.completed ? 'Sim' : 'Não' %></p>
+                        <% if (checkin.notes) { %><p><strong>Notas:</strong> <%= checkin.notes %></p><% } %>
+                   <% if (checkin.rating) { %><p><strong>Nota:</strong> <%= checkin.rating %> / 5</p><% } %>
+                    </div>
+                <% }); %>
+            <% } else { %>
+                <p>Nenhum 
+ check-in registrado para este treino ainda.</p>
+            <% } %>
+        </div>
+    </main>
+</div>
+
+<% if (user.role === 'client') { %>
+<script>
+document.getElementById('checkinForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const csrfToken = '<%= csrfToken %>';
+    
+    const formData = new FormData(this);
+    const data = {
+        completed: formData.get('completed'),
+        notes: formData.get('notes'),
+        rating: formData.get('rating')
+    };
+    try {
+        const response = await fetch('/workouts/<%= workout.id %>/checkin', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'CSRF-Token': csrfToken 
+            },
+            body: JSON.stringify(data)
+        });
+        const result = await response.json();
+        if (result.success) {
+            showNotification('Check-in registrado com sucesso!', 'success');
+            setTimeout(() => window.location.reload(), 1500);
+        } else {
+            throw new Error(result.message || 'Erro ao registrar check-in.');
+        }
+    } catch (error) {
+        showNotification(error.message, 'error');
+    }
+});
+ </script>
+<% } %>
+
+<%- include('../partials/footer.ejs') %>

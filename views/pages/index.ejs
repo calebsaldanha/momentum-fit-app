@@ -1,0 +1,79 @@
+<%- include('../partials/header.ejs') %>
+
+<main>
+    <section id="home" class="hero">
+        <div class="hero-container container">
+            <div class="hero-content">
+                <h1 class="hero-title">Impulsione o Seu Progresso. A Sua Jornada Começa Agora.</h1>
+                <p class="hero-subtitle">Conecte-se com personal trainers qualificados para planos de treino personalizados e acompanhamento contínuo. Alcance os seus objetivos com o Momentum Fit.</p>
+                <div class="hero-buttons">
+                    <% if (!isAuthenticated) { %>
+                        <a href="/auth/register" class="btn btn-primary">Comece Sua Transformação</a>
+                    <% } else if (user.role === 'client') { %>
+                        <a href="/client/dashboard" class="btn btn-primary">Meu Dashboard</a>
+                    <% } else { %>
+                        <a href="/admin/dashboard" class="btn btn-primary">Dashboard Admin</a>
+                    <% } %>
+                    <a href="#about" class="btn btn-secondary">Por Que Escolher-nos?</a>
+                </div>
+            </div>
+            <div class="hero-image">
+                <!-- Imagem placeholder da Hero para o novo branding (ex: pessoa em movimento com filtro verde limão/grafite) -->
+                <img src="/images/momentum-fit-hero.png" onerror="this.onerror=null; this.src='https://placehold.co/500x350/222222/BEF202?text=MOMENTUM+FIT'" alt="Pessoa se exercitando com foco">
+            </div>
+        </div>
+    </section>
+
+    <section id="about" class="about">
+        <div class="container">
+            <h2 class="section-title">O Caminho para Seus Melhores Resultados</h2>
+            <div class="about-steps">
+                <div class="step">
+                    <div class="step-icon">1</div>
+                    <h3>Defina Seu Alvo</h3>
+                    <p>Comece com um questionário rápido para entendermos seus objetivos exatos: emagrecimento, hipertrofia ou performance.</p>
+                </div>
+                <div class="step">
+                    <div class="step-icon">2</div>
+                    <h3>Plano Personalizado</h3>
+                    <p>Receba um plano de treino 100% adaptado por um de nossos especialistas, focado na sua rotina e limitações.</p>
+                </div>
+                <div class="step">
+                    <div class="step-icon">3</div>
+                    <h3>Acompanhamento Diário</h3>
+                    <p>Execute seus treinos, registre seu progresso (check-ins) e tire dúvidas em tempo real pelo chat privado.</p>
+                </div>
+                <div class="step">
+                    <div class="step-icon">4</div>
+                    <h3>Evolução Contínua</h3>
+                    <p>Seu treinador ajusta o plano com base nos seus dados e feedback, garantindo que o seu progresso nunca pare.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="features" class="features">
+        <div class="container">
+            <h2 class="section-title">A Tecnologia por Trás do Momentum</h2>
+             <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon"></div>
+                    <h3>Treinos Focados</h3>
+                    <p>Planos de treino otimizados para maximizar seus resultados, com foco em técnica e consistência.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"></div>
+                    <h3>Comunicação Direta</h3>
+                    <p>Use nosso chat embutido para ter acesso rápido ao seu personal, sem intermediários.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"></div>
+                    <h3>Métricas e Check-ins</h3>
+                    <p>Acompanhe seu desempenho e feedback de treino para ver seu progresso de forma clara e motivadora.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<%- include('../partials/footer.ejs') %>

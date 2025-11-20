@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title ? title + ' - Momentum Fit' : 'Momentum Fit' %></title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="icon" type="image/png" href="/images/momentum-fit-icon.png">
+    <% if (typeof bodyClass !== 'undefined' && bodyClass.includes('dashboard-body')) { %>
+        <link rel="stylesheet" href="/css/dashboard.css">
+    <% } %>
+</head>
+<body class="<%= typeof bodyClass !== 'undefined' ? bodyClass : '' %>">
+    <% if (typeof bodyClass === 'undefined' || !bodyClass.includes('auth-body')) { %>
+        <header class="header">
+              <div class="container">
+                <nav class="nav-container">
+                    <div class="nav-logo">
+                        <a href="/">
+                            <!-- Usar o logo completo aqui -->
+                            <img src="/images/momentum-fit-logo-completo.png" alt="Momentum Fit Logo" style="height: 50px; display: block;">
+                        </a>
+                    </div>
+                    <ul class="nav-menu">
+                        <li><a href="/" class="nav-link">Início</a></li>
+                        <li><a href="/about" class="nav-link">Sobre</a></li>
+                        <li><a href="/articles" class="nav-link">Artigos</a></li>
+                        
+                        <% if (isAuthenticated) { %>
+                             <% if (user.role === 'client') { %>
+                                <li><a href="/client/dashboard" class="nav-link">Meu Painel</a></li>
+                            <% } else { %>
+                                <% if (user.role === 'superadmin') { %>
+                                     <li><a href="/superadmin/dashboard" class="nav-link">Super Admin</a></li>
+                                <% } %>
+                                <% if (user.role === 'superadmin' || (user.role === 'trainer' && user.status === 'active')) { %>
+                                    <li><a href="/admin/dashboard" class="nav-link">Painel Admin</a></li>
+                                <% } %>
+                             <% } %>
+                             
+                             <li class="notification-bell">
+                                <a href="#" id="notificationLink" title="Notificações" style="padding: 0.5rem; position: relative;">
+                                    <span id="notificationBadge" class="notification-badge" style="display: none;"></span>
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M18 16V11C18 7.69 15.31 5 12 5S6 7.69 6 11V16H4V18H20V16H18ZM12 22C13.1 22 14 21.1 14 20H10C10 21.1 10.9 22 12 22Z" />
+                                    </svg>
+                                </a>
+                                <div id="notificationDropdown" class="notification-dropdown">
+                                    <div class="notification-header">
+                                        <span>Notificações</span>
+                                    </div>
+                                    <div id="notificationList" class="notification-list">
+                                        <div id="noNotifications" class="notification-item">Nenhuma nova notificação.</div>
+                                    </div>
+                                </div>
+                             </li>
+                             
+                            <li>
+                                <form action="/auth/logout" method="POST" style="margin:0;">
+                                     <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                     <button type="submit" class="btn btn-secondary btn-sm">Sair</button>
+                                </form>
+                            </li>
+                        <% } else { %>
+                            <li><a href="/auth/login" class="nav-link">Login</a></li>
+                            <li><a href="/auth/register" class="btn btn-primary btn-sm">Cadastre-se</a></li>
+                        <% } %>
+                     </ul>
+                    <div class="hamburger">
+                        <span class="bar"></span>
+                         <span class="bar"></span>
+                         <span class="bar"></span>
+                    </div>
+                </nav>
+            </div>
+        </header>
+    <% } %>
+
+    <% if (isAuthenticated) { %>
+        <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const link = document.getElementById('notificationLink');
+            const dropdown = document.getElementById('notificationDropdown');
+            const list = document.getElementById('notificationList');
+            const badge = document.getElementById('notificationBadge');
+            const noNotifications = document.getElementById('noNotifications');
+            const csrfToken = '<%= csrfToken %>';
+            let currentNotificationCount = 0;
+
+            // 1. Buscar notificações
+            const fetchNotifications = async () => {
+                try {
+                    const response = await fetch('/api/notifications');
+                    if (!response.ok) return;
+                    const notifications = await response.json();
+
+                    list.innerHTML = ''; 
+                    currentNotificationCount = notifications.length;
+                    
+                    if (notifications.length > 0) {
+                        badge.style.display = 'block';
+                        badge.textContent = notifications.length;
+                        
+                        notifications.forEach(notif => {
+                            const item = document.createElement('a');
+                            item.href = notif.link;
+                            item.className = 'notification-item';
+                            item.dataset.id = notif.id; // Adiciona o ID da notificação ao item
+                            item.innerHTML = `<p>${notif.message}</p><span class="notification-time">${new Date(notif.created_at).toLocaleDateString('pt-BR')}</span>`;
+                            list.appendChild(item);
+                        });
+                    } else {
+                        badge.style.display = 'none';
+                        badge.textContent = '0';
+                        list.appendChild(noNotifications.cloneNode(true)); // Clona para o caso de ser removido
+                    }
+                } catch (err) {
+                    console.error('Erro ao buscar notificações:', err);
+                }
+            };
+
+            // 2. Marcar UMA notificação como lida
+            const markAsRead = async (notificationId) => {
+                try {
+                    await fetch('/api/notifications/mark-read', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'CSRF-Token': csrfToken
+                        },
+                        body: JSON.stringify({ ids: [notificationId] }) // Envia apenas o ID clicado
+                    });
+                    
+                    // Atualiza a contagem do badge
+                    currentNotificationCount--;
+                    if (currentNotificationCount > 0) {
+                        badge.textContent = currentNotificationCount;
+                    } else {
+                        badge.style.display = 'none';
+                        badge.textContent = '0';
+                    }
+                } catch (err) {
+                    console.error('Erro ao marcar notificação como lida:', err);
+                }
+            };
+
+            // 3. Controlar o dropdown (SINO)
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const isVisible = dropdown.style.display === 'block';
+                dropdown.style.display = isVisible ? 'none' : 'block';
+            });
+
+            // 4. NOVO: Controlar o clique em UM ITEM
+            list.addEventListener('click', async (e) => {
+                const item = e.target.closest('.notification-item');
+                if (!item || !item.dataset.id) {
+                    return;
+                }
+                
+                e.preventDefault(); 
+                
+                const notifId = item.dataset.id;
+                const href = item.href;
+
+                item.style.opacity = '0.5';
+                
+                await markAsRead(notifId);
+                
+                item.remove();
+                
+                window.location.href = href;
+            });
+
+            // 5. Fechar dropdown se clicar fora
+            document.addEventListener('click', (e) => {
+                if (dropdown.style.display === 'block' && !dropdown.contains(e.target) && !link.contains(e.target)) {
+                    dropdown.style.display = 'none';
+                }
+            });
+
+            const pollNotifications = () => {
+                fetchNotifications();
+                // Verifica a cada 60 segundos (pode ajustar)
+                setTimeout(pollNotifications, 60000); 
+            };
+
+            // Inicia o polling de notificações
+            pollNotifications();
+        });
+        </script>
+    <% } %>
+
