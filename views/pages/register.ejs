@@ -1,46 +1,50 @@
 <%- include('../partials/header.ejs', { bodyClass: 'auth-body' }) %>
 
-<div class="auth-card">
-    <div class="auth-header">
-        <h2>Crie sua conta</h2>
-        <p>Comece sua jornada de transformação conosco.</p>
+<main class="auth-main">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h2>Crie sua conta</h2>
+            <p>Comece sua jornada de transformação conosco.</p>
+        </div>
+
+        <% if (typeof error !== 'undefined' && error) { %>
+            <div class="alert alert-error" style="background: #fee2e2; color: #ef4444; padding: 10px; border-radius: 6px; margin-bottom: 15px; font-size: 0.9rem;">
+                <%= error %>
+            </div>
+        <% } %>
+
+        <form class="auth-form" method="POST" action="/auth/register">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <div class="form-group">
+                <label for="name">Seu nome</label>
+                <input type="text" id="name" name="name" required placeholder="Como devemos te chamar?">
+            </div>
+            <div class="form-group">
+                <label for="email">E-mail</label>
+                <input type="email" id="email" name="email" required placeholder="seu@email.com">
+            </div>
+            <div class="form-group">
+                <label for="password">Senha (mínimo 6 caracteres)</label>
+                <input type="password" id="password" name="password" required minlength="6" placeholder="********">
+            </div>
+            <div class="form-group">
+                <label for="confirmPassword">Confirmar senha</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" required placeholder="********">
+            </div>
+            <div class="form-group">
+                <label for="userType">Tipo de conta</label>
+                <select id="userType" name="userType" class="form-control">
+                    <option value="client" selected>Sou cliente</option>
+                    <option value="trainer">Sou personal trainer</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Criar conta</button>
+        </form>
+
+        <div style="text-align: center; margin-top: 1.5rem;">
+            <p style="font-size: 0.9rem;">Já tem uma conta? <a href="/auth/login" style="color: var(--c-accent-primary); font-weight: 600;">Faça login</a></p>
+        </div>
     </div>
-
-    <% if (typeof error !== 'undefined' && error) { %>
-        <div class="alert alert-error"><%= error %></div>
-    <% } %>
-
-    <form class="auth-form" method="POST" action="/auth/register">
-        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-        <div class="form-group">
-            <label for="name">Seu nome</label>
-            <input type="text" id="name" name="name" required>
-        </div>
-        <div class="form-group">
-            <label for="email">E-mail</label>
-            <input type="email" id="email" name="email" required>
-        </div>
-        <div class="form-group">
-            <label for="password">Senha (mínimo 6 caracteres)</label>
-            <input type="password" id="password" name="password" required minlength="6">
-        </div>
-        <div class="form-group">
-            <label for="confirmPassword">Confirmar senha</label>
-            <input type="password" id="confirmPassword" name="confirmPassword" required>
-        </div>
-        <div class="form-group">
-            <label for="userType">Tipo de conta</label>
-            <select id="userType" name="userType" class="form-control">
-                <option value="client" selected>Sou cliente</option>
-                <option value="trainer">Sou personal trainer</option>
-            </select>
-        </div>
-        <button type="submit" class="btn btn-primary" style="width: 100%;">Criar conta</button>
-    </form>
-
-    <div style="text-align: center; margin-top: 1.5rem;">
-        <p>Já tem uma conta? <a href="/auth/login">Faça login</a></p>
-    </div>
-</div>
+</main>
 
 <%- include('../partials/footer.ejs') %>

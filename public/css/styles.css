@@ -1,4 +1,4 @@
-/* Momentum Fit - Design System (Ajustado) */
+/* Momentum Fit - Design System (Final) */
 :root {
     --font-primary: 'Montserrat', sans-serif;
     --c-bg: #FFFFFF;
@@ -30,9 +30,11 @@ body {
     min-height: 100vh;
 }
 
+/* Layout Básico */
 main { flex: 1; width: 100%; padding-top: var(--header-height); }
 .container { max-width: var(--max-width); margin: 0 auto; padding: 0 20px; width: 100%; }
 
+/* Tipografia */
 h1, h2, h3 { font-weight: 800; margin-bottom: 1rem; line-height: 1.2; }
 h1 { font-size: 2.5rem; }
 h2 { font-size: 2rem; }
@@ -49,7 +51,7 @@ img { max-width: 100%; height: auto; display: block; }
 .hamburger { display: none; cursor: pointer; flex-direction: column; gap: 5px; }
 .bar { width: 25px; height: 3px; background: var(--c-text-primary); }
 
-/* HERO SECTION (Com Overlay Escuro) */
+/* HERO SECTION */
 .hero {
     background-color: var(--c-accent-dark);
     color: white;
@@ -68,43 +70,52 @@ img { max-width: 100%; height: auto; display: block; }
 .hero-buttons { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
 .hero-image { display: none; }
 
-/* SEÇÕES GERAIS */
+/* SEÇÕES */
 section { padding: 5rem 0; }
 .section-title { text-align: center; font-size: 2.2rem; margin-bottom: 3rem; }
 .about { background-color: #f9fafb; }
 
-/* GRIDS (Features e Steps) - Alinhamento dos 4 elementos */
-.features-grid, .about-steps { 
-    display: grid; 
-    gap: 2rem; 
-}
-
-/* Desktop: 4 colunas para alinhar os elementos */
+/* GRIDS */
+.features-grid, .about-steps { display: grid; gap: 2rem; }
 @media (min-width: 992px) {
     .about-steps { grid-template-columns: repeat(4, 1fr); }
     .features-grid { grid-template-columns: repeat(3, 1fr); }
 }
-/* Tablet/Mobile: Ajuste automático */
-@media (max-width: 991px) {
-    .about-steps, .features-grid { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
-}
+@media (max-width: 991px) { .about-steps, .features-grid { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); } }
 
-.feature-card, .step { 
-    background: white; padding: 2rem; 
-    border-radius: var(--radius); border: 1px solid var(--c-border); 
-    text-align: center; transition: transform 0.3s ease; 
-    display: flex; flex-direction: column; align-items: center; /* Centraliza conteúdo */
-}
+.feature-card, .step { background: white; padding: 2rem; border-radius: var(--radius); border: 1px solid var(--c-border); text-align: center; transition: transform 0.3s ease; display: flex; flex-direction: column; align-items: center; }
 .feature-card:hover, .step:hover { transform: translateY(-5px); border-color: var(--c-accent-primary); }
-
-/* Ícones nos Passos (Substituindo números) */
-.step-icon-img { 
-    width: 50px; height: 50px; 
-    object-fit: contain; 
-    margin-bottom: 1.5rem; 
-    display: block; 
-}
+.step-icon-img { width: 50px; height: 50px; object-fit: contain; margin-bottom: 1.5rem; display: block; }
 .feature-icon-img { width: 64px; height: 64px; margin: 0 auto 1.5rem; object-fit: contain; }
+
+/* AUTH PAGES (Correção de Layout) */
+/* Removemos estilos conflitantes do body.auth-body para usar flex-direction column padrão */
+body.auth-body {
+    background-color: var(--c-accent-dark); /* Fundo escuro para destaque */
+}
+/* Container principal de autenticação para centralizar o card */
+.auth-main {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 1rem;
+    width: 100%;
+}
+.auth-card {
+    background: white;
+    padding: 2.5rem;
+    border-radius: 12px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    width: 100%;
+    max-width: 450px;
+    text-align: center;
+}
+.auth-header { margin-bottom: 2rem; }
+.auth-header h2 { color: var(--c-text-primary); margin-bottom: 0.5rem; }
+.form-group { margin-bottom: 1.2rem; text-align: left; }
+.form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; }
+.form-group input, .form-group select { width: 100%; padding: 0.8rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 1rem; }
+.form-group input:focus { outline: none; border-color: var(--c-accent-primary); box-shadow: 0 0 0 3px rgba(190, 242, 2, 0.2); }
 
 /* BOTÕES & FOOTER */
 .btn { display: inline-block; padding: 0.8rem 1.5rem; border-radius: 6px; font-weight: 700; text-align: center; border: 2px solid transparent; cursor: pointer; transition: all 0.2s; }
@@ -114,6 +125,7 @@ section { padding: 5rem 0; }
 .hero .btn-secondary { border-color: white; color: white; }
 .hero .btn-secondary:hover { background-color: rgba(255,255,255,0.1); }
 .btn-sm { padding: 0.5rem 1rem; font-size: 0.85rem; }
+.icon-sm { width: 20px; height: 20px; object-fit: contain; vertical-align: middle; display: inline-block; margin-right: 5px; }
 
 .footer { background-color: var(--c-accent-dark); color: white; padding: 4rem 0 2rem; margin-top: auto; }
 .footer-content { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 3rem; margin-bottom: 3rem; }
@@ -124,10 +136,7 @@ section { padding: 5rem 0; }
 .footer a:hover { color: var(--c-accent-primary); }
 .footer-bottom { border-top: 1px solid #374151; padding-top: 2rem; text-align: center; color: #6b7280; font-size: 0.9rem; }
 
-.auth-body { background-color: #f3f4f6; display: flex; align-items: center; justify-content: center; padding: 2rem; }
-.auth-card { background: white; padding: 2.5rem; border-radius: 12px; box-shadow: var(--shadow); width: 100%; max-width: 450px; }
-.icon-sm { width: 20px; height: 20px; object-fit: contain; vertical-align: middle; display: inline-block; margin-right: 5px; }
-
+/* Mobile */
 @media (max-width: 992px) {
     .nav-menu { position: fixed; left: -100%; top: 80px; flex-direction: column; background: white; width: 100%; height: calc(100vh - 80px); padding: 2rem; transition: 0.3s; align-items: flex-start; box-shadow: var(--shadow); overflow-y: auto; }
     .nav-menu.active { left: 0; }
