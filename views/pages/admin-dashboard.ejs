@@ -9,36 +9,62 @@
                 </a>
                 <div style="height: 1px; background: #e2e8f0; margin: 0.5rem 1rem;"></div>
             <% } %>
-            <a href="/admin/dashboard" class="nav-item active"><span><img src="/images/momentum-fit-icon.png" class="icon-sm"></span> Dashboard</a>
-            <a href="/admin/clients" class="nav-item"><span><img src="/images/momentum-fit-icon.png" class="icon-sm"></span> Clientes</a>
-            <a href="/workouts/create" class="nav-item"><span><img src="/images/momentum-fit-icon.png" class="icon-sm"></span> Criar Treino</a>
-            <a href="/chat" class="nav-item"><span><img src="/images/momentum-fit-icon.png" class="icon-sm"></span> Chat</a>
+            <a href="/admin/dashboard" class="nav-item active">
+                <span><img src="/images/momentum-fit-icon.png" class="icon-sm"></span> Dashboard
+            </a>
+            <a href="/admin/clients" class="nav-item">
+                <span><img src="/images/momentum-fit-icon.png" class="icon-sm"></span> Clientes
+            </a>
+            <a href="/workouts/create" class="nav-item">
+                <span><img src="/images/momentum-fit-icon.png" class="icon-sm"></span> Criar Treino
+            </a>
+            <a href="/chat" class="nav-item">
+                <span><img src="/images/momentum-fit-icon.png" class="icon-sm"></span> Chat
+            </a>
         </nav>
+        
+        <div class="sidebar-footer">
+            <form action="/auth/logout" method="POST" style="margin: 0;">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <button type="submit" class="btn-logout-sidebar">
+                    Sair
+                </button>
+            </form>
+        </div>
     </aside>
 
     <main class="dashboard-main">
         <div class="section">
             <div class="section-header">
-                <h1>Painel do Treinador</h1>
-                <p>Acompanhe o progresso e gerencie seus alunos.</p>
+                <div>
+                    <h1>Painel do Treinador</h1>
+                    <p>Visão geral do seu impacto e progresso dos alunos.</p>
+                </div>
             </div>
+            
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-icon"><img src="/images/momentum-fit-icon.png" style="width: 30px;"></div>
+                    <div class="stat-icon">
+                        <img src="/images/momentum-fit-icon.png" alt="Icon">
+                    </div>
                     <div class="stat-info">
                         <h3><%= stats.totalClients %></h3>
                         <p>Clientes Ativos</p>
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon"><img src="/images/momentum-fit-icon.png" style="width: 30px;"></div>
+                    <div class="stat-icon">
+                        <img src="/images/momentum-fit-icon.png" alt="Icon">
+                    </div>
                     <div class="stat-info">
                         <h3><%= stats.totalWorkouts %></h3>
                         <p>Treinos Criados</p>
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon"><img src="/images/momentum-fit-icon.png" style="width: 30px;"></div>
+                    <div class="stat-icon">
+                        <img src="/images/momentum-fit-icon.png" alt="Icon">
+                    </div>
                     <div class="stat-info">
                         <h3><%= stats.weeklyCheckins %></h3>
                         <p>Check-ins (Semana)</p>
@@ -49,23 +75,28 @@
 
         <div class="section">
             <div class="section-header">
-                <h2>Alunos Recentes</h2>
+                <h2 style="font-size: 1.4rem; margin:0;">Alunos Recentes</h2>
                 <a href="/admin/clients" class="btn btn-secondary btn-sm">Ver Todos</a>
             </div>
+            
             <% if (recentClients && recentClients.length > 0) { %>
-                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <div class="recent-clients-list">
                     <% recentClients.forEach(client => { %>
-                        <div class="recent-client-item">
-                            <div>
+                        <a href="/admin/clients/<%= client.id %>" class="recent-client-item">
+                            <div class="client-info">
                                 <strong><%= client.name %></strong>
-                                <span style="color: var(--c-text-secondary); font-size: 0.9rem;"> - <%= client.email %></span>
+                                <span><%= client.email %></span>
                             </div>
-                            <a href="/admin/clients/<%= client.id %>" class="btn btn-primary btn-sm">Ver Perfil</a>
-                        </div>
+                            <div class="view-details-btn" style="font-size: 0.85rem; font-weight: 600; color: var(--c-accent-primary);">
+                                Ver Detalhes →
+                            </div>
+                        </a>
                     <% }); %>
                 </div>
             <% } else { %>
-                <p>Nenhum aluno cadastrado recentemente.</p>
+                <div class="empty-state" style="padding: 2rem; text-align: center; color: var(--c-text-secondary);">
+                    <p>Nenhum aluno cadastrado recentemente.</p>
+                </div>
             <% } %>
         </div>
     </main>

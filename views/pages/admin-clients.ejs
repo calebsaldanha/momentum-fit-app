@@ -10,32 +10,35 @@
             <a href="/admin/dashboard" class="nav-item"><span><img src="/images/momentum-fit-icon.png" class="icon-sm"></span> Dashboard</a>
             <a href="/admin/clients" class="nav-item active"><span><img src="/images/momentum-fit-icon.png" class="icon-sm"></span> Clientes</a>
             <a href="/workouts/create" class="nav-item"><span><img src="/images/momentum-fit-icon.png" class="icon-sm"></span> Criar Treino</a>
-            <% if (user.role === 'superadmin') { %>
-                <a href="/articles/create" class="nav-item"><span><img src="/images/momentum-fit-icon.png" class="icon-sm"></span> Criar Artigo</a>
-            <% } %>
             <a href="/chat" class="nav-item"><span><img src="/images/momentum-fit-icon.png" class="icon-sm"></span> Chat</a>
         </nav>
+        
+        <div class="sidebar-footer">
+            <form action="/auth/logout" method="POST" style="margin: 0;">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <button type="submit" class="btn-logout-sidebar">Sair</button>
+            </form>
+        </div>
     </aside>
 
     <main class="dashboard-main">
         <div class="section">
             <div class="section-header">
                 <h1>Gerenciar Clientes</h1>
-                <p>Visualize e gerencie todos os seus clientes Momentum Fit.</p>
+                <p>Lista completa de alunos ativos na plataforma.</p>
             </div>
         
             <% if (clients && clients.length > 0) { %>
-                <div class="clients-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+                <div class="clients-grid">
                     <% clients.forEach(client => { %>
-                        <div class="client-card" style="border: 1px solid var(--c-border); padding: 1.5rem; border-radius: var(--radius); background: white;">
+                        <div class="client-card">
                              <div class="client-card-header">
                                 <h3><%= client.name %></h3>
-                                <p style="font-size: 0.9rem; color: var(--c-text-secondary);"><%= client.email %></p>
+                                <p style="font-size: 0.9rem; color: var(--c-text-secondary); margin:0;"><%= client.email %></p>
                              </div>
-                            <div class="client-card-info" style="margin: 1rem 0;">
+                            <div class="client-card-info">
                                 <p><strong>Nível:</strong> <%= client.fitness_level || 'Não informado' %></p>
                                 <p><strong>Cadastro:</strong> <%= new Date(client.created_at).toLocaleDateString('pt-BR') %></p>
-                                <p><strong>Personal:</strong> <%= client.trainer_name || 'Sem personal' %></p>
                             </div>
                             <div class="client-card-footer">
                                  <a href="/admin/clients/<%= client.id %>" class="btn btn-primary btn-sm" style="width: 100%;">Ver Detalhes</a>
@@ -44,7 +47,7 @@
                     <% }); %>
                 </div>
             <% } else { %>
-                <div class="empty-state">
+                <div class="empty-state" style="text-align: center; padding: 3rem;">
                     <p>Nenhum cliente cadastrado ainda.</p>
                 </div>
             <% } %>
