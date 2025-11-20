@@ -6,18 +6,13 @@ const express = require('express');
 const dotenv = require('dotenv');
 const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
-const { Pool } = require('pg');
+const { pool: pgPool, initDb } = require('./database/db'); // 🔑 Importa pool e initDb
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const csurf = require('csurf');
 
 // 2. Environment Configuration
 dotenv.config();
-
-// 3. Database Pool (para armazenamento de sessão)
-const pgPool = new Pool({
-    connectionString: process.env.POSTGRES_URL,
-});
 
 // 4. Inicializa o App Express
 const app = express();
@@ -35,7 +30,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(session({
     store: new pgSession({
-        pool: pgPool,
+        pool: pgPool, // Usa o pool importado
         tableName: 'session'
     }),
     secret: process.env.SESSION_SECRET || 'momentum-fit-default-secret',
@@ -59,21 +54,17 @@ app.use((req, res, next) => {
     next();
 });
 
-// 8. Rotas (Ajuste ou Descomente conforme seus arquivos de rota em 'routes/')
-
-// ESTE BLOCO DEVE SER REMOVIDO/SUBSTITUÍDO PELOS 'require' DAS SUAS ROTAS:
-app.get('/', (req, res) => {
-    // Rota temporária para carregar a página inicial (views/pages/index.ejs)
-    res.render('pages/index', {
-        title: 'Início',
-        isAuthenticated: res.locals.isAuthenticated,
-        user: res.locals.user
-    });
-});
-// EXEMPLO DE IMPORTAÇÃO CORRETA:
-// app.use('/', require('./routes/index'));
-// app.use('/auth', require('./routes/auth'));
-// ... outras rotas ...
+// 8. Rotas (Corrigido: Importando todos os módulos de rota)
+app.use('/', require('./routes/index'));
+app.use('/auth', require('./routes/auth'));
+app.use('/client', require('./routes/client'));
+app.use('/trainer', require('./routes/trainer'));
+app.use('/admin', require('./routes/admin'));
+app.use('/api', require('./routes/api'));
+app.use('/chat', require('./routes/chat'));
+app.use('/articles', require('./routes/articles'));
+app.use('/workouts', require('./routes/workouts'));
+app.use('/superadmin', require('./routes/superadmin'));
 
 
 // 9. Error Handler (CSRF)
@@ -103,10 +94,20 @@ app.use((req, res) => {
 // 11. Exporta o Express app (CRUCIAL para o Vercel)
 module.exports = app;
 
-// 12. Listen (Apenas para rodar localmente)
+// 12. Listen (Apenas para rodar localmente e garantir initDb é chamado)
 const port = process.env.PORT || 3000;
-if (process.env.NODE_ENV !== 'production' || process.env.VERCEL_ENV !== 'production') {
+const startServer = async () => {
+  try {
+    await initDb(); // 🔑 Inicializa o banco de dados
     app.listen(port, () => {
-        console.log(`Server running on http://localhost:${port}`);
+      console.log(`Server running on http://localhost:${port}`);
     });
+  } catch (error) {
+    console.error("❌ Falha ao iniciar o servidor:", error);
+    process.exit(1);
+  }
+};
+
+if (process.env.NODE_ENV !== 'production' || process.env.VERCEL_ENV !== 'production') {
+    startServer();
 }
