@@ -1,12 +1,17 @@
+const { Pool } = require('pg');
 const { Resend } = require('resend');
-const { pool } = require('../database/db');
+
+// Para inicializar a pool se o emailService for importado antes de app.js
+const pool = new Pool({
+  connectionString: process.env.POSTGRES_URL,
+});
 
 let resend;
 let isResendInitialized = false;
 
 // Cores e Marca do Momentum Fit
 const BRAND_NAME = 'Momentum Fit';
-const BRAND_COLOR = '#BEF202'; // Verde Limão Elétrico
+const BRAND_COLOR = '#BEF202'; 
 const BRAND_TEXT_COLOR = '#222222';
 
 function initializeResend() {
