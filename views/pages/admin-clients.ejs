@@ -4,15 +4,24 @@
     <aside class="dashboard-sidebar">
         <nav class="sidebar-nav">
             <% if (user.role === 'superadmin') { %>
-                <a href="/superadmin/dashboard" class="nav-item" style="color: var(--c-accent-primary);"><span><img src="/images/momentum-fit-icon.png" class="icon-sm"></span> Voltar Super Admin</a>
-                <div style="height: 1px; background: #eee; margin: 0.5rem 1rem;"></div>
+                <a href="/superadmin/dashboard" class="nav-item" style="color: var(--c-accent-dark); background: #eaff0040; border-left-color: var(--c-accent-primary);">
+                    <span><img src="/images/momentum-fit-icon.png" class="icon-sm"></span> Voltar Super Admin
+                </a>
+                <div style="height: 1px; background: #e2e8f0; margin: 0.5rem 1rem;"></div>
             <% } %>
-            <a href="/admin/dashboard" class="nav-item"><span><img src="/images/momentum-fit-icon.png" class="icon-sm"></span> Dashboard</a>
-            <a href="/admin/clients" class="nav-item active"><span><img src="/images/momentum-fit-icon.png" class="icon-sm"></span> Clientes</a>
-            <a href="/workouts/create" class="nav-item"><span><img src="/images/momentum-fit-icon.png" class="icon-sm"></span> Criar Treino</a>
-            <a href="/chat" class="nav-item"><span><img src="/images/momentum-fit-icon.png" class="icon-sm"></span> Chat</a>
+            <a href="/admin/dashboard" class="nav-item">
+                <span><img src="/images/momentum-fit-icon.png" class="icon-sm"></span> Dashboard
+            </a>
+            <a href="/admin/clients" class="nav-item active">
+                <span><img src="/images/momentum-fit-icon.png" class="icon-sm"></span> Clientes
+            </a>
+            <a href="/workouts/create" class="nav-item">
+                <span><img src="/images/momentum-fit-icon.png" class="icon-sm"></span> Criar Treino
+            </a>
+            <a href="/chat" class="nav-item">
+                <span><img src="/images/momentum-fit-icon.png" class="icon-sm"></span> Chat
+            </a>
         </nav>
-        
         <div class="sidebar-footer">
             <form action="/auth/logout" method="POST" style="margin: 0;">
                 <input type="hidden" name="_csrf" value="<%= csrfToken %>">
@@ -27,7 +36,6 @@
                 <h1>Gerenciar Clientes</h1>
                 <p>Lista completa de alunos ativos na plataforma.</p>
             </div>
-        
             <% if (clients && clients.length > 0) { %>
                 <div class="clients-grid">
                     <% clients.forEach(client => { %>
