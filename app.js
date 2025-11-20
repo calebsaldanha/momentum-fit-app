@@ -1,3 +1,4 @@
+require("dotenv").config();
 // app.js (Configuração Completa para Deploy no Vercel)
 
 // 1. Core Imports
@@ -12,7 +13,7 @@ const bodyParser = require('body-parser');
 const csurf = require('csurf');
 
 // 2. Environment Configuration
-dotenv.config();
+// dotenv.config(); movido para o topo
 
 // 4. Inicializa o App Express
 const app = express();
@@ -55,16 +56,16 @@ app.use((req, res, next) => {
 });
 
 // 8. Rotas (Corrigido: Importando todos os módulos de rota)
-app.use('/', require('./PLATAFORMA/routes/index'));
-app.use('/auth', require('./PLATAFORMA/routes/auth'));
-app.use('/client', require('./PLATAFORMA/routes/client'));
-app.use('/trainer', require('./PLATAFORMA/routes/trainer'));
-app.use('/admin', require('./PLATAFORMA/routes/admin'));
-app.use('/api', require('./PLATAFORMA/routes/api'));
-app.use('/chat', require('./PLATAFORMA/routes/chat'));
-app.use('/articles', require('./PLATAFORMA/routes/articles'));
-app.use('/workouts', require('./PLATAFORMA/routes/workouts'));
-app.use('/superadmin', require('./PLATAFORMA/routes/superadmin'));
+app.use('/', require('./routes/index'));
+app.use('/auth', require('./routes/auth'));
+app.use('/client', require('./routes/client'));
+app.use('/trainer', require('./routes/trainer'));
+app.use('/admin', require('./routes/admin'));
+app.use('/api', require('./routes/api'));
+app.use('/chat', require('./routes/chat'));
+app.use('/articles', require('./routes/articles'));
+app.use('/workouts', require('./routes/workouts'));
+app.use('/superadmin', require('./routes/superadmin'));
 
 
 // 9. Error Handler (CSRF)

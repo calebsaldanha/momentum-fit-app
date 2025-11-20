@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { pool } = require('../PLATAFORMA/database/db');
+const { pool } = require('../database/db');
 const { body, validationResult } = require('express-validator');
-const notificationService = require('../../../utils/notificationService');
+const notificationService = require('../utils/notificationService');
 
 const requireAuth = (req, res, next) => {
     if (!req.session.user) return res.redirect('/auth/login');
