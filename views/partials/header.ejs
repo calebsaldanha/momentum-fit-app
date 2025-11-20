@@ -18,7 +18,7 @@
                 <nav class="nav-container">
                     <div class="nav-logo">
                         <a href="/">
-                            <img src="/images/momentum-fit-logo-completo.png" alt="Momentum Fit" onerror="this.src='https://placehold.co/150x50/transparent/222222?text=MOMENTUM'" style="height: 45px;">
+                            <img src="/images/momentum-fit-logo-completo.png" alt="Momentum Fit" onerror="this.src='/images/momentum-fit-icon.png'" style="height: 40px;">
                         </a>
                     </div>
                     
@@ -28,37 +28,29 @@
                         <li><a href="/articles" class="nav-link">Artigos</a></li>
 
                         <% if (isAuthenticated) { %>
-                            <li class="desktop-only" style="height: 24px; border-left: 1px solid #e2e8f0; margin: 0 5px;"></li>
+                            <li class="desktop-only" style="height: 24px; border-left: 1px solid #ddd; margin: 0 10px;"></li>
 
                             <% if (user.role === 'client') { %>
-                                <li><a href="/client/dashboard" class="nav-link">Meu Dashboard</a></li>
-                                <li><a href="/client/workouts" class="nav-link">Meus Treinos</a></li>
+                                <li><a href="/client/dashboard" class="nav-link">Painel</a></li>
                             <% } %>
                             
                             <% if (user.role === 'trainer' || user.role === 'superadmin') { %>
                                 <li><a href="/admin/dashboard" class="nav-link">Painel Admin</a></li>
-                                <li><a href="/admin/clients" class="nav-link">Clientes</a></li>
-                            <% } %>
-                            
-                            <% if (user.role === 'superadmin') { %>
-                                <li><a href="/superadmin/dashboard" class="nav-link" style="color: var(--c-accent-primary);"><strong>Super Admin</strong></a></li>
                             <% } %>
 
                             <li><a href="/chat" class="nav-link">Chat</a></li>
 
-                            <li style="margin-top: 0; display: flex; flex-direction: row; align-items: center; gap: 15px; border-top: 1px solid transparent;">
-                                <div class="user-actions" style="display: flex; align-items: center; gap: 15px; width: 100%;">
-                                    <span style="font-size: 0.9rem; font-weight: 700; color: var(--c-text-primary);">
-                                        Ola, <%= user.name.split(' ')[0] %>
-                                    </span>
-                                    <form action="/auth/logout" method="POST" style="margin: 0;">
-                                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                        <button type="submit" class="btn btn-secondary btn-sm" style="white-space: nowrap;">Sair íºª</button>
-                                    </form>
-                                </div>
+                            <li style="margin-left: 10px; display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                                <span style="font-weight: 700; font-size: 0.9rem; color: var(--c-accent-dark);">
+                                    OlÃ¡, <%= user.name.split(' ')[0] %>
+                                </span>
+                                <form action="/auth/logout" method="POST" style="margin: 0;">
+                                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                    <button type="submit" class="btn btn-secondary btn-sm" style="padding: 5px 15px; font-size: 0.8rem;">Sair</button>
+                                </form>
                             </li>
                         <% } else { %>
-                            <li style="margin-left: 0.5rem;"><a href="/auth/login" class="nav-link">Login</a></li>
+                            <li style="margin-left: 10px;"><a href="/auth/login" class="nav-link">Entrar</a></li>
                             <li><a href="/auth/register" class="btn btn-primary btn-sm">ComeÃ§ar</a></li>
                         <% } %>
                     </ul>

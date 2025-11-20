@@ -2,50 +2,45 @@
 
 <main>
     <section id="home" class="hero">
-        <div class="hero-container container">
+        <div class="container hero-container">
             <div class="hero-content">
-                <h1 class="hero-title">Impulsione o Seu Progresso.<br>A Sua Jornada Começa Agora.</h1>
-                <p class="hero-subtitle">Conecte-se com personal trainers qualificados para planos de treino personalizados e acompanhamento contínuo. Alcance os seus objetivos com o Momentum Fit.</p>
+                <h1 class="hero-title">Impulsione o Seu <span class="highlight">Progresso</span>.</h1>
+                <p class="hero-subtitle">Conecte-se com personal trainers qualificados para planos de treino personalizados. Alcance seus objetivos com o Momentum Fit.</p>
                 <div class="hero-buttons">
                     <% if (!isAuthenticated) { %>
-                        <a href="/auth/register" class="btn btn-primary">Comece Sua Transformação</a>
+                        <a href="/auth/register" class="btn btn-primary">Começar Agora</a>
+                        <a href="#about" class="btn btn-secondary">Saiba Mais</a>
                     <% } else if (user.role === 'client') { %>
-                        <a href="/client/dashboard" class="btn btn-primary">Meu Dashboard</a>
+                        <a href="/client/dashboard" class="btn btn-primary">Meu Painel</a>
                     <% } else { %>
-                        <a href="/admin/dashboard" class="btn btn-primary">Dashboard Admin</a>
+                        <a href="/admin/dashboard" class="btn btn-primary">Painel Admin</a>
                     <% } %>
-                    <a href="#about" class="btn btn-secondary">Como Funciona?</a>
                 </div>
             </div>
             <div class="hero-image">
-                <img src="/images/momentum-fit-hero.png" onerror="this.onerror=null; this.src='https://placehold.co/500x350/222222/BEF202?text=MOMENTUM+FIT'" alt="Pessoa se exercitando com foco">
+                <img src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Pessoa treinando na academia">
             </div>
         </div>
     </section>
 
     <section id="about" class="about">
         <div class="container">
-            <h2 class="section-title">O Caminho para Seus Melhores Resultados</h2>
+            <h2 class="section-title">Como Funciona</h2>
             <div class="about-steps">
                 <div class="step">
                     <div class="step-icon">1</div>
-                    <h3>Defina Seu Alvo</h3>
-                    <p>Comece com um questionário rápido para entendermos seus objetivos exatos: emagrecimento, hipertrofia ou performance.</p>
+                    <h3>Defina Metas</h3>
+                    <p>Responda um questionário rápido sobre seus objetivos (emagrecimento, força, saúde).</p>
                 </div>
                 <div class="step">
                     <div class="step-icon">2</div>
-                    <h3>Plano Personalizado</h3>
-                    <p>Receba um plano de treino 100% adaptado por um de nossos especialistas, focado na sua rotina e limitações.</p>
+                    <h3>Plano Sob Medida</h3>
+                    <p>Receba um treino personalizado criado por um especialista real para você.</p>
                 </div>
                 <div class="step">
                     <div class="step-icon">3</div>
-                    <h3>Acompanhamento</h3>
-                    <p>Execute seus treinos, registre seu progresso (check-ins) e tire dúvidas em tempo real pelo chat privado.</p>
-                </div>
-                <div class="step">
-                    <div class="step-icon">4</div>
-                    <h3>Evolução</h3>
-                    <p>Seu treinador ajusta o plano com base nos seus dados e feedback, garantindo que o seu progresso nunca pare.</p>
+                    <h3>Treine & Evolua</h3>
+                    <p>Registre seus treinos, faça check-ins e receba feedback constante.</p>
                 </div>
             </div>
         </div>
@@ -53,22 +48,22 @@
 
     <section id="features" class="features">
         <div class="container">
-            <h2 class="section-title">A Tecnologia por Trás do Momentum</h2>
+            <h2 class="section-title">Recursos do Momentum</h2>
              <div class="features-grid">
                 <div class="feature-card">
-                    <img src="/images/momentum-fit-icon.png" class="feature-icon-img" alt="Ícone">
-                    <h3>Treinos Focados</h3>
-                    <p>Planos de treino otimizados para maximizar seus resultados, com foco em técnica e consistência.</p>
+                    <img src="/images/momentum-fit-icon.png" class="feature-icon-img" alt="Icone Treino">
+                    <h3>Treinos Personalizados</h3>
+                    <p>Nada de planilhas genéricas. Seu treino é montado pensando na sua rotina.</p>
                 </div>
                 <div class="feature-card">
-                    <img src="/images/momentum-fit-icon.png" class="feature-icon-img" alt="Ícone">
-                    <h3>Comunicação Direta</h3>
-                    <p>Use nosso chat embutido para ter acesso rápido ao seu personal, sem intermediários.</p>
+                    <img src="/images/momentum-fit-icon.png" class="feature-icon-img" alt="Icone Chat">
+                    <h3>Chat Direto</h3>
+                    <p>Tire dúvidas com seu treinador a qualquer momento pela plataforma.</p>
                 </div>
                 <div class="feature-card">
-                    <img src="/images/momentum-fit-icon.png" class="feature-icon-img" alt="Ícone">
-                    <h3>Métricas e Check-ins</h3>
-                    <p>Acompanhe seu desempenho e feedback de treino para ver seu progresso de forma clara e motivadora.</p>
+                    <img src="/images/momentum-fit-icon.png" class="feature-icon-img" alt="Icone Métricas">
+                    <h3>Acompanhamento</h3>
+                    <p>Gráficos de evolução baseados nos seus check-ins semanais.</p>
                 </div>
             </div>
         </div>
