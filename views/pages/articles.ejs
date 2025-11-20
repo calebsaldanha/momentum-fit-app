@@ -1,36 +1,47 @@
 <%- include('../partials/header.ejs') %>
 
-<main style="padding-top: 120px;">
-    <section>
+<main>
+    <section class="section-header-page" style="background: var(--c-accent-dark); color: white; padding: 4rem 0; text-align: center;">
         <div class="container">
-            <div class="section-header" style="text-align: center; margin-bottom: 3rem;">
-                <h1 class="section-title">Artigos</h1>
-                <p>Conhecimento e informação para potencializar seus resultados.</p>
-            </div>
-
-            <% if (articles && articles.length > 0) { %>
-                <div class="articles-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
-                    <% articles.forEach(article => { %>
-                        <a href="/articles/<%= article.id %>" class="feature-card" style="text-align: left; display: flex; flex-direction: column; text-decoration: none;">
-                            <h3 style="margin-bottom: 0.5rem;"><%= article.title %></h3>
-                            <p style="font-size: 0.9rem; color: var(--c-accent-primary); margin-bottom: 1rem; font-weight: 600;"><%= article.category %></p>
-                            <p style="flex-grow: 1;"><%= article.content.substring(0, 150) %>...</p>
-                            <span style="font-size: 0.85rem; color: var(--c-text-secondary); margin-top: 1rem;">Por <%= article.author_name %> em <%= new Date(article.created_at).toLocaleDateString('pt-BR') %></span>
-                            <% if (user && user.role === 'superadmin') { %>
-                                <form action="/articles/delete/<%= article.id %>" method="POST" style="margin-top: 1rem;" onsubmit="return confirm('Tem certeza que deseja excluir este artigo?');">
-                                    <button type="submit" class="btn btn-secondary btn-sm">Excluir Artigo</button>
-                                </form>
-                            <% } %>
-                        </a>
-                    <% }); %>
-                </div>
-            <% } else { %>
-                <div class="empty-state" style="padding: 4rem 0;">
-                    <h3>Nenhum artigo publicado ainda.</h3>
-                    <p>Volte em breve para conferir as novidades!</p>
-                </div>
-            <% } %>
+            <h1 style="margin-bottom: 0.5rem;">Blog & Dicas</h1>
+            <p style="color: #e5e7eb; max-width: 600px; margin: 0 auto;">Conteúdo exclusivo sobre treino, nutrição e mindset para acelerar seus resultados.</p>
         </div>
+    </section>
+
+    <section class="container" style="padding: 4rem 20px;">
+        <% if (articles && articles.length > 0) { %>
+            <div class="articles-grid">
+                <% articles.forEach(article => { %>
+                    <article class="article-card">
+                        <% if (article.image_url) { %>
+                            <div class="article-image">
+                                <img src="<%= article.image_url %>" alt="<%= article.title %>" onerror="this.src='https://placehold.co/600x400?text=Artigo'">
+                            </div>
+                        <% } else { %>
+                             <div class="article-image" style="background-color: #f3f4f6; display: flex; align-items: center; justify-content: center;">
+                                <img src="/images/momentum-fit-icon.png" alt="Ícone" style="width: 60px; height: 60px; opacity: 0.5;">
+                            </div>
+                        <% } %>
+                        <div class="article-content">
+                            <h3><%= article.title %></h3>
+                            <div class="article-meta">
+                                Por: <%= article.author_name || 'Equipe Momentum' %> | <%= new Date(article.created_at).toLocaleDateString('pt-BR') %>
+                            </div>
+                            <p class="article-excerpt"><%= article.content.substring(0, 120) %>...</p>
+                            <div class="article-footer">
+                                <a href="/articles/<%= article.id %>" class="btn btn-outline-primary btn-sm" style="border: 2px solid var(--c-accent-primary); color: var(--c-text-primary);">Ler Completo</a>
+                            </div>
+                        </div>
+                    </article>
+                <% }); %>
+            </div>
+        <% } else { %>
+            <div style="text-align: center; padding: 4rem 0; color: var(--c-text-secondary);">
+                <img src="/images/momentum-fit-icon.png" alt="Ícone" style="width: 80px; height: 80px; opacity: 0.3; margin: 0 auto 1rem;">
+                <h2>Nenhum artigo publicado ainda.</h2>
+                <p>Volte em breve para novidades!</p>
+            </div>
+        <% } %>
     </section>
 </main>
 

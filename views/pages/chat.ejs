@@ -10,13 +10,14 @@
             <% } else { %>
                 <% if (user.role === 'superadmin') { %>
                     <a href="/superadmin/dashboard" class="nav-item" style="color: var(--c-accent-dark); background: #eaff0040; border-left-color: var(--c-accent-primary);">
-                        <span><img src="/images/momentum-fit-icon.png" class="icon-sm"></span> Voltar Super Admin
+                        <span><img src="/images/momentum-fit-icon.png" class="icon-sm"></span> Painel Super Admin
                     </a>
                     <div style="height: 1px; background: #e2e8f0; margin: 0.5rem 1rem;"></div>
                 <% } %>
                 <a href="/admin/dashboard" class="nav-item"><span><img src="/images/momentum-fit-icon.png" class="icon-sm"></span> Dashboard</a>
                 <a href="/admin/clients" class="nav-item"><span><img src="/images/momentum-fit-icon.png" class="icon-sm"></span> Clientes</a>
                 <a href="/workouts/create" class="nav-item"><span><img src="/images/momentum-fit-icon.png" class="icon-sm"></span> Criar Treino</a>
+            <a href="/articles/create" class="nav-item"><span><img src="/images/momentum-fit-icon.png" class="icon-sm"></span> Criar Artigo</a>
                 <a href="/chat" class="nav-item active"><span><img src="/images/momentum-fit-icon.png" class="icon-sm"></span> Chat</a>
             <% } %>
         </nav>
