@@ -1,62 +1,62 @@
 require("dotenv").config();
-// app.js (Configuração Completa para Deploy no Vercel)
+// app.js (Configuração Corrigida para Vercel/Production)
 
-// 1. Core Imports
 const path = require('path');
 const express = require('express');
-const dotenv = require('dotenv');
 const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
-const { pool: pgPool, initDb } = require('./database/db'); // 🔑 Importa pool e initDb
+const { pool: pgPool, initDb } = require('./database/db');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const csurf = require('csurf');
 
-// 2. Environment Configuration
-// dotenv.config(); movido para o topo
-
-// 4. Inicializa o App Express
 const app = express();
-app.set('trust proxy', 1); // Confia no proxy da Vercel (obrigatório para cookies seguros)
 
-// 5. Configurações e Middlewares Essenciais
+// 1. CONFIGURAÇÃO CRÍTICA PARA VERCEL (Trust Proxy)
+// Isso permite que o Express saiba que está rodando atrás do proxy seguro da Vercel
+app.set('trust proxy', 1); 
+
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// Serve Arquivos Estáticos (CRUCIAL para fixar o 404 em /css e /images)
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.json());
 
-// 6. Middleware de Sessão
 app.use(cookieParser());
+
+// 2. CONFIGURAÇÃO DA SESSÃO
 app.use(session({
     store: new pgSession({
-        pool: pgPool, // Usa o pool importado
-        tableName: 'session'
+        pool: pgPool,
+        tableName: 'session',
+        createTableIfMissing: true // Tenta criar a tabela se não existir
     }),
-    secret: process.env.SESSION_SECRET || 'momentum-fit-default-secret',
+    secret: process.env.SESSION_SECRET || 'momentum-fit-secret',
     resave: false,
     saveUninitialized: false,
+    proxy: true, // Importante para cookies seguros em proxy
     cookie: { 
-        maxAge: 30 * 24 * 60 * 60 * 1000,
-        secure: process.env.NODE_ENV === 'production' 
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 dias
+        secure: process.env.NODE_ENV === 'production', // True em produção (HTTPS)
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // Melhora compatibilidade
+        httpOnly: true
     }
 }));
 
-// 7. CSRF Protection Middleware
+// 3. PROTEÇÃO CSRF
 const csrfProtection = csurf({ cookie: true });
 app.use(csrfProtection);
 
-// Middleware para expor variáveis para as views EJS
+// Middleware para variáveis globais
 app.use((req, res, next) => {
     res.locals.csrfToken = req.csrfToken();
-    res.locals.isAuthenticated = !!req.session.userId;
+    res.locals.isAuthenticated = !!req.session.user;
     res.locals.user = req.session.user || { role: 'guest' };
     next();
 });
 
-// 8. Rotas (Corrigido: Importando todos os módulos de rota)
+// Rotas
 app.use('/', require('./routes/index'));
 app.use('/auth', require('./routes/auth'));
 app.use('/client', require('./routes/client'));
@@ -68,8 +68,7 @@ app.use('/articles', require('./routes/articles'));
 app.use('/workouts', require('./routes/workouts'));
 app.use('/superadmin', require('./routes/superadmin'));
 
-
-// 9. Error Handler (CSRF)
+// Tratamento de Erros
 app.use((err, req, res, next) => {
     if (err.code !== 'EBADCSRFTOKEN') {
         console.error(err.stack);
@@ -80,36 +79,33 @@ app.use((err, req, res, next) => {
     }
     res.status(403).render('pages/error', {
         title: 'Acesso Negado',
-        message: 'O formulário expirou ou foi enviado de forma incorreta. Tente novamente.'
+        message: 'Sessão expirada ou token inválido. Tente recarregar a página.'
     });
 });
 
-// 10. 404 Fallback (Garante que rotas não mapeadas retornem a página de erro 404)
 app.use((req, res) => {
     res.status(404).render('pages/error', { 
-        title: '404 Não Encontrado', 
-        message: 'Desculpe, não conseguimos encontrar esta página.' 
+        title: '404', 
+        message: 'Página não encontrada.' 
     });
 });
 
-
-// 11. Exporta o Express app (CRUCIAL para o Vercel)
 module.exports = app;
 
-// 12. Listen (Apenas para rodar localmente e garantir initDb é chamado)
+// Inicialização Local
 const port = process.env.PORT || 3000;
 const startServer = async () => {
   try {
-    await initDb(); // 🔑 Inicializa o banco de dados
+    await initDb();
     app.listen(port, () => {
       console.log(`Server running on http://localhost:${port}`);
     });
   } catch (error) {
-    console.error("❌ Falha ao iniciar o servidor:", error);
+    console.error("❌ Falha ao iniciar:", error);
     process.exit(1);
   }
 };
 
-if (process.env.NODE_ENV !== 'production' || process.env.VERCEL_ENV !== 'production') {
+if (process.env.NODE_ENV !== 'production') {
     startServer();
 }
