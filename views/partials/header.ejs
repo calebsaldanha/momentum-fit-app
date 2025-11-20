@@ -18,7 +18,7 @@
                 <nav class="nav-container">
                     <div class="nav-logo">
                         <a href="/">
-                            <img src="/images/momentum-fit-logo-completo.png" alt="Momentum Fit" onerror="this.src='/images/momentum-fit-icon.png'" style="height: 45px;">
+                            <img src="/images/momentum-fit-logo-completo.png" alt="Momentum Fit" onerror="this.src='/images/momentum-fit-icon.png'" style="height: 40px;">
                         </a>
                     </div>
                     
@@ -28,27 +28,30 @@
                         <li><a href="/articles" class="nav-link">Artigos</a></li>
 
                         <% if (isAuthenticated) { %>
-                            <li class="desktop-only" style="border-left: 1px solid #ccc; height: 24px; margin: 0 5px;"></li>
-
                             <% if (user.role === 'client') { %>
-                                <li><a href="/client/dashboard" class="nav-link">Painel</a></li>
+                                <li><a href="/client/dashboard" class="nav-link">Meu Painel</a></li>
+                                <li><a href="/client/workouts" class="nav-link">Treinos</a></li>
                             <% } %>
                             
                             <% if (user.role === 'trainer' || user.role === 'superadmin') { %>
-                                <li><a href="/admin/dashboard" class="nav-link">Admin</a></li>
+                                <li><a href="/admin/dashboard" class="nav-link">Painel Admin</a></li>
                             <% } %>
 
                             <li><a href="/chat" class="nav-link">Chat</a></li>
 
-                            <li style="margin-left: 10px; display: flex; align-items: center; gap: 10px;">
-                                <span style="font-weight: 700; font-size: 0.9rem;">Olá, <%= user.name.split(' ')[0] %></span>
-                                <form action="/auth/logout" method="POST" style="margin: 0;">
+                            <li style="margin-left: auto; display: flex; align-items: center; gap: 15px;">
+                                <div class="user-badge">
+                                    Olá, <%= user.name.split(' ')[0] %>
+                                </div>
+                                <form action="/auth/logout" method="POST" style="display: inline; margin: 0;">
                                     <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                    <button type="submit" class="btn btn-secondary btn-sm" style="padding: 0.4rem 1rem;">Sair</button>
+                                    <button type="submit" class="btn btn-secondary btn-sm" style="white-space: nowrap; border: 1px solid #ccc;">
+                                        Sair
+                                    </button>
                                 </form>
                             </li>
                         <% } else { %>
-                            <li style="margin-left: 10px;"><a href="/auth/login" class="nav-link">Entrar</a></li>
+                            <li style="margin-left: auto;"><a href="/auth/login" class="nav-link">Entrar</a></li>
                             <li><a href="/auth/register" class="btn btn-primary btn-sm">Começar</a></li>
                         <% } %>
                     </ul>

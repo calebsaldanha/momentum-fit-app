@@ -1,17 +1,62 @@
-:root { --c-dashboard-bg: #F8F9FA; }
+:root {
+    --c-dashboard-bg: #F8F9FA;
+}
 body.dashboard-body { background-color: var(--c-dashboard-bg); }
-.dashboard-container { max-width: 1400px; margin: 0 auto; display: grid; grid-template-columns: 260px 1fr; gap: 2rem; padding: 2rem 24px; }
-.dashboard-sidebar { background: var(--c-surface); border-radius: var(--radius); border: 1px solid var(--c-border); padding: 1.5rem 0; align-self: start; position: sticky; top: 100px; }
-.sidebar-nav { display: flex; flex-direction: column; }
-.nav-item { display: flex; align-items: center; gap: 1rem; padding: 1rem 1.5rem; text-decoration: none; color: var(--c-text-secondary); font-weight: 600; transition: var(--transition); border-left: 4px solid transparent; }
-.nav-item:hover { color: var(--c-text-primary); background-color: var(--c-dashboard-bg); }
-.nav-item.active { color: var(--c-text-primary); border-left-color: var(--c-accent-primary); background-color: #F0F9FF; }
-.section { background: var(--c-surface); padding: 2rem; border-radius: var(--radius); border: 1px solid var(--c-border); margin-bottom: 2rem; }
-.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid var(--c-border); }
-.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; }
-.stat-card { background: var(--c-surface); padding: 1.5rem; border-radius: var(--radius); border: 1px solid var(--c-border); display: flex; align-items: center; gap: 1rem; }
-.stat-icon { width: 50px; height: 50px; border-radius: 50%; background: #f0fce8; display: flex; align-items: center; justify-content: center; }
-.stat-icon img { width: 30px; height: 30px; object-fit: contain; }
-.stat-info h3 { font-size: 2rem; margin: 0; }
-.icon-sm { width: 20px; height: 20px; margin-right: 8px; vertical-align: middle; }
-@media (max-width: 992px) { .dashboard-container { grid-template-columns: 1fr; padding-top: 20px; } .dashboard-sidebar { display: none; } }
+
+.dashboard-container { 
+    max-width: 1400px; 
+    margin: 0 auto; 
+    display: grid; 
+    grid-template-columns: 260px 1fr; 
+    gap: 2rem; 
+    padding: 2rem 24px; 
+}
+
+/* Sidebar */
+.dashboard-sidebar { 
+    background: white; 
+    border-radius: 8px; 
+    border: 1px solid var(--c-border); 
+    padding: 1.5rem 0; 
+    align-self: start; 
+    position: sticky; 
+    top: 100px; 
+    height: calc(100vh - 120px);
+    overflow-y: auto;
+}
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 12px 20px; color: var(--c-text-secondary); font-weight: 600; border-left: 4px solid transparent; }
+.nav-item:hover { background-color: #f3f4f6; color: var(--c-text-primary); }
+.nav-item.active { background-color: #f0fdf4; color: var(--c-text-primary); border-left-color: var(--c-accent-primary); }
+
+/* Conteúdo Principal */
+.section { background: white; padding: 2rem; border-radius: 8px; border: 1px solid var(--c-border); margin-bottom: 2rem; }
+.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+
+/* Cards de Estatísticas */
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; }
+.stat-card { background: white; padding: 1.5rem; border-radius: 8px; border: 1px solid var(--c-border); display: flex; align-items: center; gap: 1rem; }
+.stat-icon { width: 50px; height: 50px; background: #f7fee7; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.stat-icon img { width: 28px; height: 28px; }
+.stat-info h3 { font-size: 1.8rem; margin: 0; }
+.stat-info p { margin: 0; color: var(--c-text-secondary); font-size: 0.9rem; }
+
+/* Chat */
+.chat-layout { display: grid; grid-template-columns: 300px 1fr; height: 600px; background: white; border: 1px solid var(--c-border); border-radius: 8px; overflow: hidden; }
+.chat-users { border-right: 1px solid var(--c-border); background: #f9fafb; overflow-y: auto; }
+.chat-messages-area { display: flex; flex-direction: column; background: white; }
+.messages-container { flex: 1; padding: 1.5rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; background: #f3f4f6; }
+.message { padding: 10px 15px; border-radius: 12px; max-width: 75%; font-size: 0.95rem; }
+.message.own-message { background: var(--c-accent-dark); color: white; align-self: flex-end; }
+.message.other-message { background: white; border: 1px solid #e5e7eb; align-self: flex-start; }
+.user-item { padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; display: flex; align-items: center; gap: 10px; }
+.user-item:hover { background: #f3f4f6; }
+.user-item.active { background: #e5e7eb; }
+
+/* Mobile */
+@media (max-width: 992px) {
+    .dashboard-container { grid-template-columns: 1fr; padding: 1rem; }
+    .dashboard-sidebar { display: none; } /* Menu assume a navegação */
+    .chat-layout { grid-template-columns: 1fr; height: auto; min-height: 500px; }
+    .chat-users { display: none; /* Simplificação para mobile: lista ou chat */ }
+    /* Em uma implementação real de chat mobile, teríamos uma tela de lista e uma de chat separadas */
+}
