@@ -4,61 +4,55 @@
     <aside class="dashboard-sidebar">
         <nav class="sidebar-nav">
              <% if (user.role === 'client') { %>
-                <a href="/client/dashboard" class="nav-item"><span></span> Dashboard</a>
-                <a href="/client/workouts" class="nav-item"><span></span> Meus Treinos</a>
-                <a href="/chat" class="nav-item active"><span></span> Chat</a>
-                <a href="/client/profile" class="nav-item"><span></span> Meu Perfil</a>
+                <a href="/client/dashboard" class="nav-item"><span><img src="/images/momentum-fit-icon.png" class="icon-sm"></span> Dashboard</a>
+                <a href="/client/workouts" class="nav-item"><span><img src="/images/momentum-fit-icon.png" class="icon-sm"></span> Meus Treinos</a>
+                <a href="/chat" class="nav-item active"><span><img src="/images/momentum-fit-icon.png" class="icon-sm"></span> Chat</a>
             <% } else { %>
-                <a href="/admin/dashboard" class="nav-item"><span></span> Dashboard</a>
-                <a href="/admin/clients" class="nav-item"><span></span> Clientes</a>
-                <a href="/workouts/create" class="nav-item"><span></span> Criar Treino</a>
-                <a href="/articles/create" class="nav-item"><span></span> Criar Artigo</a>
-                <a href="/chat" class="nav-item active"><span></span> Chat</a>
+                <a href="/admin/dashboard" class="nav-item"><span><img src="/images/momentum-fit-icon.png" class="icon-sm"></span> Dashboard</a>
+                <a href="/admin/clients" class="nav-item"><span><img src="/images/momentum-fit-icon.png" class="icon-sm"></span> Clientes</a>
+                <a href="/chat" class="nav-item active"><span><img src="/images/momentum-fit-icon.png" class="icon-sm"></span> Chat</a>
             <% } %>
         </nav>
     </aside>
 
     <main class="dashboard-main">
-        <div class="section" style="padding: 0;">
+        <div class="section" style="padding: 0; overflow: hidden; border: 1px solid var(--c-border);">
             <div class="chat-layout">
                 <div class="chat-users">
-                    <h3>Conversas</h3>
-                    <div class="users-list">
+                    <h3 style="padding: 1rem; border-bottom: 1px solid var(--c-border); margin: 0;">Conversas</h3>
+                    <div class="users-list" style="overflow-y: auto; height: 100%;">
                         <% if (chatUsers && chatUsers.length > 0) { %>
                             <% chatUsers.forEach(chatUser => { %>
                                 <div class="user-item" data-user-id="<%= chatUser.id %>" data-user-name="<%= chatUser.name %>">
-                                    <div class="user-avatar">
-                                        <%= chatUser.name.charAt(0) %>
-                                    </div>
+                                    <div class="user-avatar" style="background: var(--c-accent-primary); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;"><%= chatUser.name.charAt(0) %></div>
                                     <div class="user-info">
-                                        <h4><%= chatUser.name %></h4>
-                                        <!-- Pronomes removidos do chat, conforme nova identidade -->
+                                        <h4 style="margin: 0; font-size: 0.95rem;"><%= chatUser.name %></h4>
                                     </div>
                                 </div>
                             <% }); %>
                         <% } else { %>
-                            <p style="padding: 1rem;">Nenhum usuário para conversar.</p>
+                            <p style="padding: 1rem; text-align: center; color: var(--c-text-secondary);">Nenhum contato disponível.</p>
                         <% } %>
                     </div>
                 </div>
 
                 <div class="chat-messages-area">
                     <div class="messages-header">
-                        <h3 id="currentChatUser">Selecione uma conversa</h3>
+                        <h3 id="currentChatUser" style="margin: 0; padding: 1rem; font-size: 1.1rem;">Selecione uma conversa</h3>
                     </div>
+                    
                     <div class="messages-container" id="messagesContainer">
-                         <div class="empty-state">
-                            <div class="empty-icon"></div>
-                            <p>Selecione uma conversa na lista ao lado para começar.</p>
+                         <div class="empty-state" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
+                             <div style="font-size: 3rem;"><img src="/images/momentum-fit-icon.png" style="width: 60px; opacity: 0.5;"></div>
+                             <p>Escolha alguém ao lado para conversar.</p>
                         </div>
                     </div>
+                    
                     <div class="message-input-container">
-                        <form id="chatForm" style="display: none;">
+                        <form id="chatForm" style="display: flex; gap: 10px; width: 100%; padding: 1rem;">
                             <input type="file" id="fileInput" accept="image/*,video/*" style="display: none;">
-                            
-                            <label for="fileInput" class="btn btn-secondary btn-sm" id="uploadButton" style="padding: 0.5rem 0.8rem; font-size: 1.2rem; cursor: pointer; margin-bottom: 0;">&#128206;</label>
-
-                            <input type="text" id="messageInput" placeholder="Digite sua mensagem..." autocomplete="off">
+                            <label for="fileInput" class="btn btn-secondary" style="padding: 0.8rem; display: flex; align-items: center; margin:0;">���</label>
+                            <input type="text" id="messageInput" placeholder="Digite sua mensagem..." autocomplete="off" style="flex: 1; padding: 0.8rem; border: 1px solid #ccc; border-radius: 4px;">
                             <button type="submit" class="btn btn-primary">Enviar</button>
                         </form>
                     </div>
@@ -73,7 +67,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const currentUserId = '<%= user.id %>';
     let activeContactId = null;
     const csrfToken = '<%= csrfToken %>';
-
     const messagesContainer = document.getElementById('messagesContainer');
     const chatForm = document.getElementById('chatForm');
     const messageInput = document.getElementById('messageInput');
@@ -87,12 +80,12 @@ document.addEventListener('DOMContentLoaded', () => {
     async function loadMessages(contactId) {
         try {
             const response = await fetch(`/chat/messages/${contactId}`);
-            if (!response.ok) throw new Error('Falha ao carregar mensagens');
+            if (!response.ok) throw new Error('Erro');
             const messages = await response.json();
             
             messagesContainer.innerHTML = '';
             if (messages.length === 0) {
-                 messagesContainer.innerHTML = '<div class="empty-state"><p>Ainda não há mensagens nesta conversa. Envie a primeira!</p></div>';
+                 messagesContainer.innerHTML = '<div class="empty-state" style="padding: 2rem; text-align: center; color: #777;"><p>Nenhuma mensagem ainda.</p></div>';
             } else {
                 messages.forEach(msg => {
                     const messageDiv = document.createElement('div');
@@ -100,13 +93,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     messageDiv.classList.add(msg.sender_id == currentUserId ? 'own-message' : 'other-message');
         
                     if (msg.message_type === 'image') {
-                        messageDiv.innerHTML = `<img src="${msg.content}" alt="Imagem enviada" style="max-width: 100%; border-radius: 12px; display: block;">`;
-                        messageDiv.style.padding = '5px';
-                        messageDiv.style.backgroundColor = 'transparent';
-                    } else if (msg.message_type === 'video') {
-                        messageDiv.innerHTML = `<video src="${msg.content}" controls style="max-width: 100%; border-radius: 12px; display: block;"></video>`;
-                        messageDiv.style.padding = '5px';
-                        messageDiv.style.backgroundColor = 'transparent';
+                        messageDiv.innerHTML = `<img src="${msg.content}" style="max-width: 200px; border-radius: 8px;">`;
+                        messageDiv.style.background = 'transparent';
+                        messageDiv.style.padding = '0';
                     } else {
                         messageDiv.textContent = msg.content;
                     }
@@ -116,22 +105,15 @@ document.addEventListener('DOMContentLoaded', () => {
             scrollToBottom();
         } catch (error) {
             console.error(error);
-            showNotification('Erro ao carregar mensagens.', 'error');
         }
     }
 
     document.querySelectorAll('.user-item').forEach(item => {
         item.addEventListener('click', () => {
             activeContactId = item.dataset.userId;
-            const activeContactName = item.dataset.userName;
-
             document.querySelectorAll('.user-item').forEach(el => el.classList.remove('active'));
             item.classList.add('active');
-
-            currentChatUserEl.textContent = `Conversando com ${activeContactName}`;
-            chatForm.style.display = 'flex';
-            messageInput.focus();
-
+            currentChatUserEl.textContent = item.dataset.userName;
             loadMessages(activeContactId);
         });
     });
@@ -139,113 +121,25 @@ document.addEventListener('DOMContentLoaded', () => {
     chatForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const content = messageInput.value.trim();
-        
-        if (!content || !activeContactId) {
-            return; 
-        }
+        if (!content || !activeContactId) return;
 
         try {
              const response = await fetch('/chat/send', {
                 method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'CSRF-Token': csrfToken
-                },
-                body: JSON.stringify({ 
-                    receiver_id: activeContactId, 
-                    content: content,
-                    message_type: 'text'
-                })
+                headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
+                body: JSON.stringify({ receiver_id: activeContactId, content: content, message_type: 'text' })
             });
-
-            if (!response.ok) throw new Error('Falha ao enviar mensagem');
-            
-            const newMessage = await response.json();
-            
-            const messageDiv = document.createElement('div');
-            messageDiv.classList.add('message', 'own-message');
-            messageDiv.textContent = newMessage.content;
-            
-            if(messagesContainer.querySelector('.empty-state')) messagesContainer.innerHTML = '';
-            messagesContainer.appendChild(messageDiv);
-            
-            messageInput.value = '';
-            scrollToBottom();
-        } catch (error) {
-            console.error(error);
-            showNotification('Erro ao enviar mensagem.', 'error');
-        }
-    });
-
-    fileInput.addEventListener('change', async (e) => {
-        const file = e.target.files[0];
-        if (!file || !activeContactId) return;
-
-        e.target.value = null;
-        showNotification('Enviando mídia...', 'info');
-
-        try {
-            const formData = new FormData();
-            formData.append('file', file);
-
-            const uploadResponse = await fetch('/api/upload', {
-                method: 'POST',
-                headers: {
-                    'CSRF-Token': csrfToken
-                },
-                body: formData
-            });
-
-            if (!uploadResponse.ok) {
-                const errData = await uploadResponse.json();
-                throw new Error(errData.error || 'Falha ao enviar arquivo para o servidor.');
+            if (response.ok) {
+                const msg = await response.json();
+                const div = document.createElement('div');
+                div.className = 'message own-message';
+                div.textContent = msg.content;
+                messagesContainer.appendChild(div);
+                messageInput.value = '';
+                scrollToBottom();
             }
-
-            const blobData = await uploadResponse.json();
-            const mediaUrl = blobData.url;
-            const type = file.type.split('/')[0];
-
-            const response = await fetch('/chat/send', {
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'CSRF-Token': csrfToken
-                },
-                body: JSON.stringify({
-                    receiver_id: activeContactId,
-                    content: mediaUrl,
-                    message_type: type 
-                })
-            });
-            if (!response.ok) throw new Error('Falha ao enviar mensagem de mídia');
-            
-            const newMessage = await response.json();
-            
-            const messageDiv = document.createElement('div');
-            messageDiv.classList.add('message', 'own-message');
-            if (newMessage.message_type === 'image') {
-                messageDiv.innerHTML = `<img src="${newMessage.content}" alt="Imagem enviada" style="max-width: 100%; border-radius: 12px; display: block;">`;
-                messageDiv.style.padding = '5px';
-                messageDiv.style.backgroundColor = 'transparent';
-            } else if (newMessage.message_type === 'video') {
-                messageDiv.innerHTML = `<video src="${newMessage.content}" controls style="max-width: 100%; border-radius: 12px; display: block;"></video>`;
-                messageDiv.style.padding = '5px';
-                messageDiv.style.backgroundColor = 'transparent';
-            }
-
-            if(messagesContainer.querySelector('.empty-state')) messagesContainer.innerHTML = '';
-            messagesContainer.appendChild(messageDiv);
-            
-            messageInput.value = '';
-            scrollToBottom();
-
-        } catch (error) {
-            console.error(error);
-            showNotification(error.message || 'Erro ao enviar mídia.', 'error');
-        }
+        } catch (err) { console.error(err); }
     });
-
 });
 </script>
-
 <%- include('../partials/footer.ejs') %>
