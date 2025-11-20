@@ -17,6 +17,7 @@ const csurf = require('csurf');
 
 // 4. Inicializa o App Express
 const app = express();
+app.set('trust proxy', 1); // Confia no proxy da Vercel (obrigatório para cookies seguros)
 
 // 5. Configurações e Middlewares Essenciais
 app.set('view engine', 'ejs');
