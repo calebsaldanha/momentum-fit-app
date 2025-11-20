@@ -18,7 +18,7 @@
                 <nav class="nav-container">
                     <div class="nav-logo">
                         <a href="/">
-                            <img src="/images/momentum-fit-logo-completo.png" alt="Momentum Fit" onerror="this.src='/images/momentum-fit-icon.png'" style="height: 40px;">
+                            <img src="/images/momentum-fit-logo-completo.png" alt="Momentum Fit" onerror="this.src='/images/momentum-fit-icon.png'" style="height: 45px;">
                         </a>
                     </div>
                     
@@ -28,7 +28,7 @@
                         <li><a href="/articles" class="nav-link">Artigos</a></li>
 
                         <% if (isAuthenticated) { %>
-                            <li class="desktop-only" style="height: 24px; border-left: 1px solid #ddd; margin: 0 10px;"></li>
+                            <li class="desktop-only" style="height: 20px; border-left: 1px solid #ddd; margin: 0 5px;"></li>
 
                             <% if (user.role === 'client') { %>
                                 <li><a href="/client/dashboard" class="nav-link">Painel</a></li>
@@ -38,19 +38,23 @@
                                 <li><a href="/admin/dashboard" class="nav-link">Painel Admin</a></li>
                             <% } %>
 
+                            <% if (user.role === 'superadmin') { %>
+                                <li><a href="/superadmin/dashboard" class="nav-link" style="color: var(--c-accent-primary);">Super Admin</a></li>
+                            <% } %>
+                            
                             <li><a href="/chat" class="nav-link">Chat</a></li>
 
-                            <li style="margin-left: 10px; display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                            <li style="display: flex; align-items: center; gap: 15px; margin-left: 10px;">
                                 <span style="font-weight: 700; font-size: 0.9rem; color: var(--c-accent-dark);">
                                     Olá, <%= user.name.split(' ')[0] %>
                                 </span>
                                 <form action="/auth/logout" method="POST" style="margin: 0;">
                                     <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                    <button type="submit" class="btn btn-secondary btn-sm" style="padding: 5px 15px; font-size: 0.8rem;">Sair</button>
+                                    <button type="submit" class="btn btn-secondary btn-sm" style="padding: 0.5rem 1.2rem; border: 1px solid var(--c-border);">Sair</button>
                                 </form>
                             </li>
                         <% } else { %>
-                            <li style="margin-left: 10px;"><a href="/auth/login" class="nav-link">Entrar</a></li>
+                            <li style="margin-left: 10px;"><a href="/auth/login" class="nav-link">Login</a></li>
                             <li><a href="/auth/register" class="btn btn-primary btn-sm">Começar</a></li>
                         <% } %>
                     </ul>
@@ -65,8 +69,8 @@
         </header>
     <% } %>
 
-    <% if (isAuthenticated) { %>
     <script>
+        // Menu Mobile
         document.addEventListener('DOMContentLoaded', () => {
             const hamburger = document.querySelector('.hamburger');
             const navMenu = document.querySelector('.nav-menu');
@@ -78,4 +82,3 @@
             }
         });
     </script>
-    <% } %>
