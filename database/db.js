@@ -15,7 +15,7 @@ const initDb = async () => {
   try {
     client = await pool.connect();
 
-    // Tabela USERS (Removida a coluna 'pronouns')
+    // Tabela USERS
     await client.query(`
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
@@ -28,7 +28,7 @@ const initDb = async () => {
       );
     `);
 
-    // Tabela CLIENT_PROFILES (Removidas as colunas 'gender_identity' e 'transition_related')
+    // Tabela CLIENT_PROFILES
     await client.query(`
       CREATE TABLE IF NOT EXISTS client_profiles (
         id SERIAL PRIMARY KEY,
@@ -44,7 +44,7 @@ const initDb = async () => {
       );
     `);
 
-    // --- MANUTENÇÃO (REMOÇÃO DE COLUNAS LEGADAS, para garantir consistência) ---
+    // Manutenção de colunas legadas (Mantido do seu código original)
     await client.query(`
       DO $$ BEGIN
         IF EXISTS(SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='pronouns')
@@ -111,6 +111,19 @@ const initDb = async () => {
         content TEXT NOT NULL, 
         message_type TEXT DEFAULT 'text' NOT NULL CHECK (message_type IN ('text', 'image', 'video')),
         read BOOLEAN DEFAULT false,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    // --- ADICIONADO: Tabela ARTICLES (Estava faltando) ---
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS articles (
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        content TEXT NOT NULL,
+        author_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+        category TEXT,
+        image_url TEXT, -- Adicionei suporte a imagem caso queira usar no futuro
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       );
     `);
