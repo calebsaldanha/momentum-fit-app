@@ -1,45 +1,75 @@
 <%- include('../partials/header.ejs') %>
 
 <main>
-    <section class="section-header-page" style="background: var(--c-accent-dark); color: white; padding: 4rem 0; text-align: center;">
-        <div class="container">
-            <h1 style="margin-bottom: 0.5rem;">Blog & Dicas</h1>
-            <p style="color: #e5e7eb; max-width: 600px; margin: 0 auto;">Conteúdo exclusivo sobre treino, nutrição e mindset para acelerar seus resultados.</p>
+    <section class="section-header-page" style="background-color: var(--c-accent-dark); color: white; padding: 6rem 0 4rem; text-align: center; position: relative; overflow: hidden;">
+        <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; border-radius: 50%; border: 20px solid rgba(190, 242, 2, 0.1);"></div>
+        
+        <div class="container" style="position: relative; z-index: 1;">
+            <h1 style="margin-bottom: 1rem; font-size: 3rem; color: white;">Blog & Dicas</h1>
+            <p style="color: #d1d5db; max-width: 600px; margin: 0 auto; font-size: 1.1rem;">
+                Conteúdo exclusivo sobre treino, nutrição e mindset para acelerar seus resultados e manter o Momentum.
+            </p>
         </div>
     </section>
 
     <section class="container" style="padding: 4rem 20px;">
         <% if (articles && articles.length > 0) { %>
-            <div class="articles-grid">
+            <div class="articles-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2.5rem;">
                 <% articles.forEach(article => { %>
-                    <article class="article-card">
+                    <article class="article-card" style="background: white; border: 1px solid var(--c-border); border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; transition: transform 0.3s ease, box-shadow 0.3s ease;">
+                        
                         <% if (article.image_url) { %>
-                            <div class="article-image">
-                                <img src="<%= article.image_url %>" alt="<%= article.title %>" onerror="this.src='https://placehold.co/600x400?text=Artigo'">
+                            <div class="article-image" style="height: 200px; overflow: hidden;">
+                                <img src="<%= article.image_url %>" alt="<%= article.title %>" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease;" onerror="this.src='https://placehold.co/600x400/222/BEF202?text=Momentum+Fit'">
                             </div>
                         <% } else { %>
-                             <div class="article-image" style="background-color: #f3f4f6; display: flex; align-items: center; justify-content: center;">
-                                <img src="/images/momentum-fit-icon.png" alt="Ícone" style="width: 60px; height: 60px; opacity: 0.5;">
+                             <div class="article-image" style="height: 200px; background-color: #f9fafb; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid var(--c-border);">
+                                <img src="/images/momentum-fit-icon.png" alt="Ícone" style="width: 60px; height: 60px; opacity: 0.5; filter: grayscale(100%);">
                             </div>
                         <% } %>
-                        <div class="article-content">
-                            <h3><%= article.title %></h3>
-                            <div class="article-meta">
-                                Por: <%= article.author_name || 'Equipe Momentum' %> | <%= new Date(article.created_at).toLocaleDateString('pt-BR') %>
+
+                        <div class="article-content" style="padding: 1.5rem; flex-grow: 1; display: flex; flex-direction: column;">
+                            <h3 style="margin-bottom: 0.5rem; font-size: 1.25rem;">
+                                <a href="/articles/<%= article.id %>" style="color: var(--c-text-primary); text-decoration: none;"><%= article.title %></a>
+                            </h3>
+                            
+                            <div class="article-meta" style="font-size: 0.85rem; color: var(--c-text-secondary); margin-bottom: 1rem; display: flex; align-items:center; gap: 5px;">
+                                <span style="background-color: #f3f4f6; padding: 2px 8px; border-radius: 4px; font-weight: 600; color: var(--c-accent-dark);"><%= article.category %></span>
+                                <span>• <%= new Date(article.created_at).toLocaleDateString('pt-BR') %></span>
                             </div>
-                            <p class="article-excerpt"><%= article.content.substring(0, 120) %>...</p>
-                            <div class="article-footer">
-                                <a href="/articles/<%= article.id %>" class="btn btn-outline-primary btn-sm" style="border: 2px solid var(--c-accent-primary); color: var(--c-text-primary);">Ler Completo</a>
+                            
+                            <p class="article-excerpt" style="font-size: 0.95rem; color: var(--c-text-secondary); flex-grow: 1; margin-bottom: 1.5rem;">
+                                <%= article.content.replace(/<[^>]*>/g, '').substring(0, 120) %>...
+                            </p>
+                            
+                            <div class="article-footer" style="border-top: 1px solid var(--c-border); padding-top: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                                <a href="/articles/<%= article.id %>" style="font-weight: 700; color: var(--c-accent-dark); font-size: 0.9rem; display: inline-flex; align-items: center; gap: 5px;">
+                                    Ler Artigo <span style="color: var(--c-accent-primary);">→</span>
+                                </a>
+
+                                <% if (user && user.role === 'superadmin') { %>
+                                    <form action="/articles/delete/<%= article.id %>" method="POST" style="margin: 0;" onsubmit="return confirm('Tem certeza que deseja excluir este artigo?');">
+                                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                        <button type="submit" class="btn btn-sm" style="background: transparent; border: 1px solid var(--c-error); color: var(--c-error); padding: 0.3rem 0.8rem; font-size: 0.8rem; cursor: pointer; border-radius: 4px; transition: all 0.2s;">
+                                            Excluir
+                                        </button>
+                                    </form>
+                                <% } %>
                             </div>
                         </div>
                     </article>
                 <% }); %>
             </div>
         <% } else { %>
-            <div style="text-align: center; padding: 4rem 0; color: var(--c-text-secondary);">
-                <img src="/images/momentum-fit-icon.png" alt="Ícone" style="width: 80px; height: 80px; opacity: 0.3; margin: 0 auto 1rem;">
-                <h2>Nenhum artigo publicado ainda.</h2>
-                <p>Volte em breve para novidades!</p>
+            <div class="empty-state" style="text-align: center; padding: 6rem 0; color: var(--c-text-secondary);">
+                <div style="background-color: #f3f4f6; width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
+                    <img src="/images/momentum-fit-icon.png" alt="Ícone" style="width: 40px; height: 40px; opacity: 0.4; filter: grayscale(100%);">
+                </div>
+                <h3 style="color: var(--c-text-primary); margin-bottom: 0.5rem;">Ainda não há artigos</h3>
+                <p>Estamos preparando conteúdo de alta performance para você.</p>
+                <% if (user && user.role === 'superadmin') { %>
+                    <a href="/articles/create" class="btn btn-primary" style="margin-top: 1rem;">Escrever Primeiro Artigo</a>
+                <% } %>
             </div>
         <% } %>
     </section>
