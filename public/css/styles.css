@@ -3,28 +3,28 @@
     --font-primary: 'Montserrat', sans-serif;
     
     /* PALETA CINEMATIC DARK */
-    --c-bg-darkest: #050505;     /* Preto quase absoluto para bordas */
-    --c-bg-surface: #121212;     /* Fundo padrão para superfícies */
-    --c-bg-card: #1A1A1A;        /* Fundo de cartões (ligeiramente mais claro para profundidade) */
+    --c-bg-darkest: #050505;     /* Preto quase absoluto (bordas/fundo) */
+    --c-bg-surface: #121212;     /* Fundo padrão de superfícies */
+    --c-bg-card: #181818;        /* Fundo de cartões (efeito flutuante) */
     
-    --c-text-primary: #FFFFFF;   /* Branco puro para máximo contraste */
-    --c-text-secondary: #A3A3A3; /* Cinza médio para subtítulos */
-    --c-border: #2A2A2A;         /* Bordas muito sutis */
+    --c-text-primary: #FFFFFF;   /* Branco puro */
+    --c-text-secondary: #A3A3A3; /* Cinza médio */
+    --c-border: #2A2A2A;         /* Bordas sutis */
     
     --c-accent-primary: #BEF202; /* VERDE NEON (Marca) */
-    --c-accent-hover: #d2ff2e;
-    --c-accent-dark: #000000;    /* Contraste em botões */
+    --c-accent-hover: #d2ff2e;   /* Verde mais claro no hover */
+    --c-accent-dark: #000000;    /* Contraste para texto em botões */
     
     --c-success: #48BB78;
     --c-error: #EF4444;
     
-    --radius: 12px; /* Bordas um pouco mais arredondadas */
-    --shadow-sm: 0 4px 6px rgba(0,0,0,0.3);
-    /* Sombra profunda para efeito de flutuação */
-    --shadow-deep: 0 20px 40px -10px rgba(0, 0, 0, 0.8);
-    
-    --max-width: 1200px;
+    --radius: 12px;
     --header-height: 80px;
+    
+    /* Efeitos de Profundidade e Luz */
+    --shadow-sm: 0 4px 6px rgba(0,0,0,0.3);
+    --shadow-deep: 0 20px 40px -10px rgba(0, 0, 0, 0.8); /* Sombra difusa */
+    --glow-green: 0 0 15px rgba(190, 242, 2, 0.3);       /* Brilho neon */
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -34,29 +34,30 @@ body {
     font-family: var(--font-primary);
     line-height: 1.6;
     color: var(--c-text-primary);
-    /* Fundo com gradiente radial para criar um "centro de luz" sutil, evitando o preto chapado */
+    /* Gradiente radial sutil para evitar o "preto chapado" */
     background: radial-gradient(circle at top center, #1a1a1a 0%, var(--c-bg-darkest) 100%);
+    background-color: var(--c-bg-darkest);
     display: flex;
     flex-direction: column;
     min-height: 100vh;
 }
 
-/* Layout Básico */
+/* Layout */
 main { flex: 1; width: 100%; padding-top: var(--header-height); }
-.container { max-width: var(--max-width); margin: 0 auto; padding: 0 24px; width: 100%; }
+.container { max-width: 1200px; margin: 0 auto; padding: 0 24px; width: 100%; }
 
-/* Tipografia e Elementos */
+/* Tipografia */
 h1, h2, h3, h4 { font-weight: 800; margin-bottom: 1rem; line-height: 1.1; color: var(--c-text-primary); letter-spacing: -0.5px; }
-h1 { font-size: 3rem; }
+h1 { font-size: 3rem; text-shadow: 0 4px 20px rgba(0,0,0,0.5); }
 h2 { font-size: 2.25rem; }
 p { margin-bottom: 1.2rem; color: var(--c-text-secondary); font-size: 1.05rem; }
 a { text-decoration: none; color: inherit; transition: 0.3s; }
 img { max-width: 100%; height: auto; display: block; }
 
-/* HEADER com Efeito Glass */
+/* --- HEADER GLASSMORPHISM --- */
 .header { 
-    background: rgba(5, 5, 5, 0.85); /* Fundo translúcido */
-    border-bottom: 1px solid rgba(255,255,255,0.05);
+    background: rgba(5, 5, 5, 0.7); /* Translúcido */
+    border-bottom: 1px solid rgba(255,255,255,0.08);
     position: fixed; 
     width: 100%; 
     top: 0; 
@@ -64,144 +65,188 @@ img { max-width: 100%; height: auto; display: block; }
     height: var(--header-height); 
     display: flex; 
     align-items: center; 
-    backdrop-filter: blur(12px); /* Efeito de desfoque (glassmorphism) */
+    backdrop-filter: blur(12px); /* Efeito de vidro fosco */
 }
-.nav-container { display: flex; justify-content: space-between; align-items: center; }
+.nav-container { display: flex; justify-content: space-between; align-items: center; width: 100%; }
 
-/* Logo no Header */
-.logo-link { display: flex; align-items: center; gap: 12px; }
-.header-logo-img { height: 40px; width: auto; filter: drop-shadow(0 0 8px rgba(190, 242, 2, 0.3)); } /* Brilho verde sutil no logo */
+.logo-link { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+.header-logo-img { 
+    height: 45px; 
+    width: auto; 
+    filter: drop-shadow(0 0 8px rgba(190, 242, 2, 0.4)); /* Glow no logo 3D */
+    transition: transform 0.3s;
+}
+.logo-link:hover .header-logo-img { transform: scale(1.05) rotate(5deg); }
 .logo-text { font-size: 1.4rem; font-weight: 900; letter-spacing: 1px; color: white; }
 
-.nav-menu { display: flex; align-items: center; gap: 2.5rem; list-style: none; }
+.nav-menu { display: flex; align-items: center; gap: 2.5rem; list-style: none; margin: 0; padding: 0; }
 .nav-link { font-weight: 600; color: var(--c-text-secondary); font-size: 0.95rem; position: relative; }
-.nav-link::after { content: ''; position: absolute; width: 0; height: 2px; bottom: -4px; left: 0; background-color: var(--c-accent-primary); transition: width 0.3s; }
-.nav-link:hover { color: var(--c-accent-primary); }
+.nav-link::after { content: ''; position: absolute; width: 0; height: 2px; bottom: -4px; left: 0; background-color: var(--c-accent-primary); transition: width 0.3s; box-shadow: var(--glow-green); }
+.nav-link:hover { color: var(--c-text-primary); }
 .nav-link:hover::after { width: 100%; }
 
-/* HERO SECTION (Usando a imagem Dia 0.png) */
+.user-badge { color: var(--c-accent-primary); font-weight: 700; text-shadow: var(--glow-green); }
+
+/* --- HERO SECTION (IMPACTO 3D) --- */
 .hero {
-    /* Gradiente escuro sobrepondo a imagem 3D para garantir leitura do texto */
-    background: linear-gradient(to bottom, rgba(5, 5, 5, 0.6) 0%, rgba(5, 5, 5, 0.9) 80%, var(--c-bg-darkest) 100%), 
-                url('/img/Dia 0.png');
+    /* Overlay escuro + Imagem 3D (Dia 0.png renomeada) */
+    background: linear-gradient(to bottom, rgba(5, 5, 5, 0.5) 0%, rgba(5, 5, 5, 0.9) 80%, var(--c-bg-darkest) 100%), 
+                url('/images/hero-bg.png');
     background-size: cover;
-    background-position: center center;
-    padding: 12rem 0 8rem; /* Mais espaço no topo para destacar a imagem */
+    background-position: center;
+    padding: 10rem 0 8rem;
     display: flex;
     align-items: center;
-    min-height: 85vh; /* Ocupa quase toda a tela */
-    text-align: left; /* Texto alinhado à esquerda para estilo mais moderno */
+    min-height: 85vh;
     position: relative;
 }
-/* Efeito de luz neon na borda inferior do hero */
+/* Linha de energia na base do hero */
 .hero::after {
     content: ''; position: absolute; bottom: 0; left: 0; right: 0;
-    height: 2px; background: linear-gradient(90deg, transparent, var(--c-accent-primary), transparent);
-    opacity: 0.7;
+    height: 1px; background: linear-gradient(90deg, transparent, var(--c-accent-primary), transparent);
+    opacity: 0.6; box-shadow: 0 -2px 10px rgba(190, 242, 2, 0.2);
 }
 
-.hero-container { max-width: 700px; }
+.hero-container { max-width: 700px; } /* Foco no conteúdo à esquerda ou centro */
 .hero-title { 
     font-size: 4rem; 
-    color: white; 
-    margin-bottom: 1.5rem; 
-    text-shadow: 0 2px 15px rgba(0,0,0,0.9); /* Sombra forte no texto */
-    line-height: 1;
+    line-height: 1; 
+    margin-bottom: 1.5rem;
+    background: linear-gradient(to right, #fff, #e0e0e0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
-.hero-subtitle { 
-    color: #e5e7eb; 
-    font-size: 1.35rem; 
-    margin-bottom: 3rem; 
-    max-width: 600px;
-    font-weight: 500;
-}
-.text-highlight { color: var(--c-accent-primary); text-shadow: 0 0 15px rgba(190, 242, 2, 0.4); }
+.hero-subtitle { color: #d1d5db; font-size: 1.35rem; margin-bottom: 3rem; font-weight: 500; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+.hero-buttons { display: flex; gap: 1rem; flex-wrap: wrap; }
 
-/* SEÇÕES COM PROFUNDIDADE */
+/* --- SEÇÕES E CARDS (PROFUNDIDADE) --- */
 section { padding: 7rem 0; position: relative; }
-/* Alternância sutil de fundos para criar ritmo */
-.features { background-color: var(--c-bg-surface); }
 .about { background: linear-gradient(to bottom, var(--c-bg-surface), #0c0c0c); }
+.features { background-color: var(--c-bg-surface); }
 
-/* CARDS COM EFEITO DE FLUTUAÇÃO */
+.features-grid, .about-steps { display: grid; gap: 2rem; }
+@media (min-width: 992px) {
+    .about-steps { grid-template-columns: repeat(4, 1fr); }
+    .features-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* Estilo dos Cartões */
 .feature-card, .step { 
-    background: linear-gradient(145deg, #222222, #1a1a1a); /* Gradiente sutil no próprio card */
+    background: linear-gradient(145deg, #1e1e1e, #161616); /* Gradiente sutil no card */
     padding: 2.5rem 2rem; 
     border-radius: var(--radius); 
-    border: 1px solid rgba(255, 255, 255, 0.05); /* Borda quase invisível */
-    box-shadow: var(--shadow-deep); /* Sombra profunda */
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-    position: relative; overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.03); 
+    box-shadow: var(--shadow-deep);
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); 
+    position: relative; 
+    overflow: hidden;
+    display: flex; flex-direction: column; align-items: center; text-align: center;
 }
-/* Efeito de luz ao passar o mouse */
+/* Brilho interno no hover */
 .feature-card::before, .step::before {
     content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    background: radial-gradient(circle at top right, rgba(190, 242, 2, 0.1), transparent 60%);
-    opacity: 0; transition: opacity 0.4s;
+    background: radial-gradient(circle at top right, rgba(190, 242, 2, 0.08), transparent 60%);
+    opacity: 0; transition: opacity 0.4s; pointer-events: none;
 }
 .feature-card:hover, .step:hover { 
-    transform: translateY(-10px) scale(1.02); /* Movimento mais fluido */
-    border-color: var(--c-accent-primary); 
-    box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.9), 0 0 20px rgba(190, 242, 2, 0.2); /* Sombra + Glow */
+    transform: translateY(-10px); 
+    border-color: rgba(190, 242, 2, 0.3); 
+    box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.7), var(--glow-green);
 }
 .feature-card:hover::before, .step:hover::before { opacity: 1; }
 
-.feature-icon { font-size: 2.5rem; margin-bottom: 1.5rem; color: var(--c-accent-primary); filter: drop-shadow(0 0 10px rgba(190, 242, 2, 0.3)); }
+.feature-icon-img, .step-icon-img { 
+    width: 60px; height: 60px; margin-bottom: 1.5rem; 
+    filter: drop-shadow(0 0 8px rgba(190, 242, 2, 0.4)); /* Ícones brilham */
+}
 
-/* PÁGINAS DE AUTH (Usando Dia 29...png) */
+/* --- AUTH PAGES (Textura Urbana) --- */
 .auth-main {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 4rem 1rem;
-    min-height: 100vh;
-    /* Imagem de fundo com textura de tijolos neon + overlay escuro */
+    display: flex; align-items: center; justify-content: center;
+    padding: 4rem 1rem; width: 100%; min-height: 100vh;
+    /* Textura de parede com neon (Dia 29.png renomeada) */
     background: linear-gradient(to bottom, rgba(5,5,5,0.85), rgba(5,5,5,0.95)),
-                url('/img/Dia 29 (Segunda) - Tarde.png');
+                url('/images/auth-bg.png');
     background-size: cover;
     background-position: center;
-    background-attachment: fixed; /* Efeito parallax sutil */
+    background-attachment: fixed;
 }
 .auth-card {
-    background: rgba(26, 26, 26, 0.9); /* Fundo translúcido */
-    backdrop-filter: blur(15px); /* Desfoque forte atrás do cartão */
+    background: rgba(30, 30, 30, 0.7); /* Vidro escuro */
     padding: 3rem;
     border-radius: 16px;
-    box-shadow: 0 40px 80px -20px rgba(0,0,0,1); /* Sombra muito profunda */
-    border: 1px solid rgba(190, 242, 2, 0.1);
-    width: 100%;
-    max-width: 480px;
-    text-align: center;
+    box-shadow: 0 40px 80px -20px rgba(0,0,0,0.9);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px); /* Desfoque forte */
+    width: 100%; max-width: 450px; text-align: center;
 }
+.auth-header h2 { color: white; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
 
-/* Formulários Premium */
+/* Formulários Modernos */
+.form-group { margin-bottom: 1.2rem; text-align: left; }
+label { display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.9rem; color: #ccc; }
 input, select, textarea {
     width: 100%; padding: 1rem; 
-    border: 2px solid var(--c-border); 
-    border-radius: 8px; 
-    font-size: 1rem;
-    background-color: rgba(10, 10, 10, 0.8); /* Input mais escuro */
-    color: var(--c-text-primary);
-    transition: all 0.3s;
+    border: 1px solid var(--c-border); 
+    border-radius: 8px; font-size: 1rem;
+    background-color: rgba(10, 10, 10, 0.6); /* Fundo semi-transparente */
+    color: white; transition: all 0.3s;
 }
-input:focus, select:focus { 
+input:focus, select:focus, textarea:focus { 
     outline: none; 
     border-color: var(--c-accent-primary); 
-    background-color: #000;
-    box-shadow: 0 0 25px rgba(190, 242, 2, 0.15); /* Glow interno */
+    background-color: rgba(0, 0, 0, 0.8);
+    box-shadow: 0 0 0 2px rgba(190, 242, 2, 0.2); 
 }
-label { text-align: left; margin-left: 4px; font-size: 0.9rem; }
 
-/* Botões */
+/* Botões "High Voltage" */
+.btn { display: inline-block; padding: 1rem 2rem; border-radius: 8px; font-weight: 800; text-align: center; border: none; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 1px; font-size: 0.9rem; }
+
 .btn-primary { 
-    background: linear-gradient(135deg, var(--c-accent-primary), var(--c-accent-hover));
-    color: #000; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
-    border: none; box-shadow: 0 4px 20px rgba(190, 242, 2, 0.3);
+    background: linear-gradient(135deg, var(--c-accent-primary), #a3cf02);
+    color: var(--c-accent-dark); 
+    box-shadow: 0 4px 15px rgba(190, 242, 2, 0.3);
 }
 .btn-primary:hover { 
     transform: translateY(-2px); 
-    box-shadow: 0 8px 30px rgba(190, 242, 2, 0.5); 
+    box-shadow: 0 8px 25px rgba(190, 242, 2, 0.5); 
+    filter: brightness(1.1);
 }
 
+.btn-secondary { 
+    background: rgba(255, 255, 255, 0.05); 
+    border: 1px solid rgba(255, 255, 255, 0.1); 
+    color: white; 
+}
+.btn-secondary:hover { 
+    background: rgba(255, 255, 255, 0.1); 
+    border-color: white; 
+}
+.btn-sm { padding: 0.6rem 1.2rem; font-size: 0.8rem; }
+
 /* FOOTER */
-.footer { background: #050505; border-top: 1px solid #1a1a1a; padding: 5rem 0 2rem; }
+.footer { background-color: #080808; color: white; padding: 5rem 0 2rem; border-top: 1px solid #1a1a1a; margin-top: auto; }
+.footer-content { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 3rem; margin-bottom: 3rem; }
+.footer h4 { color: var(--c-accent-primary); margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 1px; }
+.footer ul { list-style: none; padding: 0; }
+.footer li { margin-bottom: 0.8rem; }
+.footer a { color: #888; transition: 0.3s; }
+.footer a:hover { color: var(--c-accent-primary); padding-left: 5px; }
+.footer-bottom { border-top: 1px solid #222; padding-top: 2rem; text-align: center; color: #555; font-size: 0.85rem; }
+
+/* Mobile */
+.hamburger { display: none; cursor: pointer; flex-direction: column; gap: 6px; }
+.bar { width: 28px; height: 3px; background: white; border-radius: 3px; transition: 0.3s; }
+
+@media (max-width: 992px) {
+    .nav-menu { 
+        position: fixed; left: -100%; top: 80px; flex-direction: column; 
+        background: rgba(15, 15, 15, 0.98); width: 100%; height: calc(100vh - 80px); 
+        padding: 2rem; transition: 0.3s; align-items: flex-start; 
+        backdrop-filter: blur(15px); overflow-y: auto; 
+    }
+    .nav-menu.active { left: 0; }
+    .nav-menu li { width: 100%; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 1rem; margin-bottom: 1rem; }
+    .hamburger { display: flex; }
+    .hero-title { font-size: 2.5rem; }
+}
