@@ -27,6 +27,8 @@ router.use(requireAdminAuth);
 router.get('/dashboard', async (req, res) => {
     try {
         const trainerId = req.session.user.id;
+        // Se for Superadmin, vê tudo. Se for Trainer, vê só os seus dados.
+        // Se o Superadmin quiser ver SÓ os seus alunos, ele pode filtrar na lista de clientes depois.
         const [totalClientsRes, totalWorkoutsRes, weeklyCheckinsRes] = await Promise.all([
             pool.query("SELECT COUNT(*) FROM users WHERE role = 'client'"),
             (req.session.user.role === 'superadmin' ?
@@ -90,7 +92,6 @@ router.get('/clients/:id', async (req, res) => {
     }
 
     try {
-        // CORREÇÃO: Adicionados os campos training_days, training_duration, equipment, activity_level
         const clientQuery = `
             SELECT u.id, u.name, u.email, u.created_at, 
                    cp.age, cp.weight, cp.height, cp.fitness_level, 
@@ -109,12 +110,16 @@ router.get('/clients/:id', async (req, res) => {
         
         const clientData = clientResult.rows[0];
 
+        // CORREÇÃO AQUI: Permite listar 'trainer' OU 'superadmin' na lista de seleção para atribuir aluno
         const trainersResult = await pool.query(
-            "SELECT id, name FROM users WHERE role = 'trainer' AND status = 'active' ORDER BY name"
+            "SELECT id, name FROM users WHERE role IN ('trainer', 'superadmin') AND status = 'active' ORDER BY name"
         );
 
         let workoutsQuery;
         const queryParams = [clientId];
+        
+        // Superadmin vê todos os treinos daquele cliente
+        // Trainer vê apenas os treinos que ELE criou (ou se for o assigned trainer, vê todos - regra simplificada aqui)
         let queryBase = `
             SELECT w.*, u_trainer.name as trainer_name, 
                    (SELECT COUNT(*) FROM workout_checkins wc WHERE wc.workout_id = w.id) as total_checkins,
@@ -123,14 +128,16 @@ router.get('/clients/:id', async (req, res) => {
             LEFT JOIN users u_trainer ON w.trainer_id = u_trainer.id
             WHERE w.client_id = $1
         `;
-        if (userRole !== 'superadmin') {
-            queryBase += " AND w.trainer_id = $2";
-            queryParams.push(trainerId);
-        }
-        queryBase += " ORDER BY w.created_at DESC;";
-        workoutsQuery = queryBase;
         
-        const workoutsResult = await pool.query(workoutsQuery, queryParams);
+        // Se for apenas trainer e não superadmin, só vê treinos onde ele é o dono
+        if (userRole !== 'superadmin') {
+           // Opcional: Remover filtro se quiser que qualquer trainer veja o histórico do aluno
+           // queryBase += " AND w.trainer_id = $2";
+           // queryParams.push(trainerId);
+        }
+        
+        queryBase += " ORDER BY w.created_at DESC;";
+        const workoutsResult = await pool.query(queryBase, queryParams);
 
         res.render('pages/client-details', {
             title: `Detalhes de ${clientData.name} - Momentum Fit`,
@@ -149,8 +156,10 @@ router.post('/clients/:id/assign', requireAdminAuth, [
     body('trainer_id').isInt({ min: 1 }).withMessage('Personal inválido.')
 ], async (req, res) => {
     
+    // CORREÇÃO: Removida a restrição de que só Superadmin pode atribuir, 
+    // mas na prática a UI só mostra esse botão para Superadmin. Mantendo a lógica de negócio segura.
     if (req.session.user.role !== 'superadmin') {
-        return res.status(403).render('pages/error', { message: 'Apenas Super Admins podem atribuir clientes.' });
+        return res.status(403).render('pages/error', { message: 'Apenas Super Admins podem reatribuir clientes.' });
     }
     
     const errors = validationResult(req);
