@@ -8,40 +8,28 @@
              <div style="height: 1px; background: #e2e8f0; margin: 0.5rem 1rem;"></div>
              <a href="/admin/dashboard" class="nav-item"><span></span> Painel Admin</a>
         </nav>
+        <div class="sidebar-footer">
+            <form action="/auth/logout" method="POST" style="margin: 0;">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <button type="submit" class="btn-logout-sidebar">Sair</button>
+            </form>
+        </div>
     </aside>
     <main class="dashboard-main">
         <div class="section">
-            <div class="section-header">
-                <h1>Aprovação de Personais</h1>
-                <p>Personais aguardando liberação na plataforma.</p>
-            </div>
+            <div class="section-header"><h1>Aprovação de Personais</h1><p>Personais aguardando liberação na plataforma.</p></div>
             <% if (trainers && trainers.length > 0) { %>
                 <div style="overflow-x: auto;">
                     <table>
-                        <thead>
-                            <tr>
-                                <th>Nome</th>
-                                <th>Email</th>
-                                <th>Data Cadastro</th>
-                                <th style="text-align: right;">Ações</th>
-                            </tr>
-                        </thead>
+                        <thead><tr><th>Nome</th><th>Email</th><th>Data Cadastro</th><th style="text-align: right;">Ações</th></tr></thead>
                         <tbody>
                             <% trainers.forEach(trainer => { %>
                                 <tr>
-                                    <td><%= trainer.name %></td>
-                                    <td><%= trainer.email %></td>
-                                    <td><%= new Date(trainer.created_at).toLocaleDateString('pt-BR') %></td>
+                                    <td><%= trainer.name %></td><td><%= trainer.email %></td><td><%= new Date(trainer.created_at).toLocaleDateString('pt-BR') %></td>
                                     <td style="text-align: right;">
                                         <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
-                                            <form action="/superadmin/trainers/approve/<%= trainer.id %>" method="POST" style="margin:0;">
-                                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                                <button type="submit" class="btn btn-primary btn-sm">Aprovar</button>
-                                            </form>
-                                            <form action="/superadmin/trainers/reject/<%= trainer.id %>" method="POST" style="margin:0;">
-                                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                                <button type="submit" class="btn btn-secondary btn-sm">Rejeitar</button>
-                                            </form>
+                                            <form action="/superadmin/trainers/approve/<%= trainer.id %>" method="POST" style="margin:0;"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button type="submit" class="btn btn-primary btn-sm">Aprovar</button></form>
+                                            <form action="/superadmin/trainers/reject/<%= trainer.id %>" method="POST" style="margin:0;"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button type="submit" class="btn btn-secondary btn-sm">Rejeitar</button></form>
                                         </div>
                                     </td>
                                 </tr>
@@ -50,9 +38,7 @@
                     </table>
                 </div>
             <% } else { %>
-                <div style="text-align: center; padding: 3rem;">
-                    <p style="font-size: 1.2rem; color: var(--c-text-secondary);">Tudo limpo! Nenhum personal pendente.</p>
-                </div>
+                <div style="text-align: center; padding: 3rem;"><p style="font-size: 1.2rem; color: var(--c-text-secondary);">Tudo limpo! Nenhum personal pendente.</p></div>
             <% } %>
         </div>
     </main>

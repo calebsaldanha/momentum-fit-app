@@ -4,9 +4,7 @@
     <aside class="dashboard-sidebar">
         <nav class="sidebar-nav">
             <% if (user.role === 'superadmin') { %>
-                <a href="/superadmin/dashboard" class="nav-item" style="color: var(--c-accent-dark); background: #eaff0040; border-left-color: var(--c-accent-primary);">
-                    <span></span> Painel Super Admin
-                </a>
+                <a href="/superadmin/dashboard" class="nav-item" style="color: var(--c-accent-dark); background: #eaff0040; border-left-color: var(--c-accent-primary);"><span></span> Painel Super Admin</a>
                 <div style="height: 1px; background: #e2e8f0; margin: 0.5rem 1rem;"></div>
             <% } %>
             <a href="/admin/dashboard" class="nav-item active"><span></span> Dashboard</a>
@@ -33,15 +31,15 @@
             </div>
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-icon"><img src="/images/momentum-fit-icon.png" alt="Icon"></div>
+                    <div class="stat-icon"><img src="/images/logo-3d.png" alt="Icon"></div>
                     <div class="stat-info"><h3><%= stats.totalClients %></h3><p>Clientes Ativos</p></div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon"><img src="/images/momentum-fit-icon.png" alt="Icon"></div>
+                    <div class="stat-icon"><img src="/images/logo-3d.png" alt="Icon"></div>
                     <div class="stat-info"><h3><%= stats.totalWorkouts %></h3><p>Treinos Criados</p></div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon"><img src="/images/momentum-fit-icon.png" alt="Icon"></div>
+                    <div class="stat-icon"><img src="/images/logo-3d.png" alt="Icon"></div>
                     <div class="stat-info"><h3><%= stats.weeklyCheckins %></h3><p>Check-ins (Semana)</p></div>
                 </div>
             </div>

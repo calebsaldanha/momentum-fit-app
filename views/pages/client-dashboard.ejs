@@ -1,5 +1,4 @@
 <%- include('../partials/header.ejs', { title, bodyClass: 'dashboard-body' }) %>
-
 <div class="dashboard-container">
     <aside class="dashboard-sidebar">
         <nav class="sidebar-nav">
@@ -8,69 +7,41 @@
             <a href="/chat" class="nav-item"><span></span> Chat</a>
             <a href="/client/profile" class="nav-item"><span></span> Meu Perfil</a>
         </nav>
-    </aside>
-
-   
- <main class="dashboard-main">
-        <div class="section-header">
-            <div>
-                <h1>Bem-vinde de volta, <%= user.name %>!</h1>
-                <p>Aqui está um resumo do seu Momentum.</p>
-            </div>
+        <div class="sidebar-footer">
+            <form action="/auth/logout" method="POST" style="margin: 0;">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <button type="submit" class="btn-logout-sidebar">Sair</button>
+            </form>
         </div>
-
-        <% if (workouts && workouts.length > 
-0) { %>
+    </aside>
+    <main class="dashboard-main">
+        <div class="section-header">
+            <div><h1>Bem-vinde de volta, <%= user.name %>!</h1><p>Aqui está um resumo do seu Momentum.</p></div>
+        </div>
+        <% if (workouts && workouts.length > 0) { %>
             <div class="section">
-                <div class="section-header section-header-inline">
-                    <h2>Seu Treino Ativo</h2>
-                    <a href="/client/workouts" class="btn btn-secondary btn-sm">Ver Todos</a>
-                </div>
-    
-            <div class="workouts-grid">
+                <div class="section-header section-header-inline"><h2>Seu Treino Ativo</h2><a href="/client/workouts" class="btn btn-secondary btn-sm">Ver Todos</a></div>
+                <div class="workouts-grid">
                     <% workouts.slice(0, 1).forEach(workout => { %>
                         <div class="workout-card">
                             <div class="card-content">
-        
-                        <h3><%= workout.title %></h3>
-                                <div class="workout-meta">
-                                    <span>Por: <%= workout.trainer_name %></span>
-  
-                                  <span>Criado em: <%= new Date(workout.created_at).toLocaleDateString('pt-BR') %></span>
-                                </div>
-                             
-   <p class="workout-desc"><%= workout.description.substring(0, 100) %>...</p>
+                                <h3><%= workout.title %></h3>
+                                <div class="workout-meta"><span>Por: <%= workout.trainer_name %></span><span>Criado em: <%= new Date(workout.created_at).toLocaleDateString('pt-BR') %></span></div>
+                                <p class="workout-desc"><%= workout.description.substring(0, 100) %>...</p>
                             </div>
-                            <div class="card-footer">
-                                <a href="/workouts/<%= workout.id %>" 
-class="btn btn-primary btn-sm">Ver Treino Completo</a>
-                            </div>
+                            <div class="card-footer"><a href="/workouts/<%= workout.id %>" class="btn btn-primary btn-sm">Ver Treino Completo</a></div>
                         </div>
-                    <% });
-%>
+                    <% }); %>
                 </div>
             </div>
         <% } else { %>
-            <div class="empty-state">
-                <div class="empty-icon"></div>
-                <h3>Nenhum treino para você ainda.</h3>
-          
-      <p>Seu treinador irá montar seu plano em breve.
-Mantenha o Momentum enviando uma mensagem!</p>
-                <a href="/chat" class="btn btn-primary">Iniciar Conversa</a>
-            </div>
+            <div class="empty-state"><div class="empty-icon"></div><h3>Nenhum treino para você ainda.</h3><p>Seu treinador irá montar seu plano em breve. Mantenha o Momentum enviando uma mensagem!</p><a href="/chat" class="btn btn-primary">Iniciar Conversa</a></div>
         <% } %>
-
         <% if (checkins && checkins.length > 0) { %>
-            <div class="section">
-                <h2>Seus últimos check-ins</h2>
-      
-  <div style="max-width: 600px; margin-top: 2rem;"><canvas id="progressChart"></canvas></div>
-            </div>
+            <div class="section"><h2>Seus últimos check-ins</h2><div style="max-width: 600px; margin-top: 2rem;"><canvas id="progressChart"></canvas></div></div>
         <% } %>
     </main>
 </div>
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -78,43 +49,14 @@ Mantenha o Momentum enviando uma mensagem!</p>
         if (checkins && checkins.length > 0) {
             const ctx = document.getElementById('progressChart').getContext('2d');
             new Chart(ctx, {
-    
-            type: 'line',
+                type: 'line',
                 data: {
                     labels: checkins.map(c => new Date(c.created_at).toLocaleDateString('pt-BR')).reverse(),
-                    datasets: [{
-                        label: 
-'Nota do Treino (1-5)',
-                        data: checkins.map(c => c.rating).reverse(),
-                        borderColor: 'var(--c-accent-primary)', 
-                        tension: 0.1
-                   
- }]
+                    datasets: [{ label: 'Nota do Treino (1-5)', data: checkins.map(c => c.rating).reverse(), borderColor: 'var(--c-accent-primary)', tension: 0.1 }]
                 },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        
-legend: {
-                            position: 'top',
-                        },
-                        title: {
-                     
-       display: true,
-                            text: 'Sua Evolução no Treino'
-                        }
-                    },
-                
-    scales: {
-                        y: {
-                            min: 0,
-                            max: 5,
-            
-            }
-                    }
-                }
+                options: { responsive: true, plugins: { legend: { position: 'top', }, title: { display: true, text: 'Sua Evolução no Treino' } }, scales: { y: { min: 0, max: 5, } } }
             });
-}
+        }
     });
 </script>
 <%- include('../partials/footer.ejs') %>

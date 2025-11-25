@@ -20,10 +20,15 @@
                 <a href="/chat" class="nav-item active"><span></span> Chat</a>
             <% } %>
         </nav>
-        <div class="sidebar-footer"><form action="/auth/logout" method="POST" style="margin: 0;"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button type="submit" class="btn-logout-sidebar">Sair</button></form></div>
+        <div class="sidebar-footer">
+            <form action="/auth/logout" method="POST" style="margin: 0;">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <button type="submit" class="btn-logout-sidebar">Sair</button>
+            </form>
+        </div>
     </aside>
     <main class="dashboard-main">
-        <div class="section" style="padding: 0; overflow: hidden; border: 1px solid var(--c-border);">
+        <div class="section" style="padding: 0; overflow: hidden; border: 1px solid var(--c-border); height: calc(100vh - 140px);">
             <div class="chat-layout">
                 <div class="chat-users">
                     <h3 style="padding: 1rem; border-bottom: 1px solid var(--c-border); margin: 0;">Conversas</h3>
@@ -40,7 +45,12 @@
                 </div>
                 <div class="chat-messages-area">
                     <div class="messages-header"><h3 id="currentChatUser" style="margin: 0; padding: 1rem; font-size: 1.1rem;">Selecione uma conversa</h3></div>
-                    <div class="messages-container" id="messagesContainer"><div class="empty-state" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;"><div style="font-size: 3rem; opacity: 0.3;">Ì≤¨</div><p>Escolha algu√©m ao lado.</p></div></div>
+                    <div class="messages-container" id="messagesContainer">
+                        <div class="empty-state" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
+                            <img src="/images/logo-3d.png" style="width: 80px; height: 80px; opacity: 0.3; border-radius: 50%; margin-bottom: 1rem;">
+                            <p>Escolha algu√©m ao lado.</p>
+                        </div>
+                    </div>
                     <div class="message-input-container">
                         <form id="chatForm" style="display: flex; gap: 10px; width: 100%; padding: 1rem;">
                             <input type="text" id="messageInput" placeholder="Mensagem..." autocomplete="off" style="flex: 1; padding: 0.8rem; border: 1px solid #ccc; border-radius: 4px;">
