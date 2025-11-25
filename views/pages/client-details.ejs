@@ -3,18 +3,23 @@
     <aside class="dashboard-sidebar">
         <nav class="sidebar-nav">
             <% if (user.role === 'superadmin') { %>
-                <a href="/superadmin/dashboard" class="nav-item" style="color: var(--c-accent-dark); background: #eaff0040; border-left-color: var(--c-accent-primary);"><span><img src="/images/momentum-fit-icon.png" class="icon-sm"></span> Painel Super Admin</a>
+                <a href="/superadmin/dashboard" class="nav-item"><span></span> Painel Super Admin</a>
                 <div style="height: 1px; background: #e2e8f0; margin: 0.5rem 1rem;"></div>
             <% } %>
-            <a href="/admin/dashboard" class="nav-item"><span><img src="/images/momentum-fit-icon.png" class="icon-sm"></span> Dashboard</a>
-            <a href="/admin/clients" class="nav-item active"><span><img src="/images/momentum-fit-icon.png" class="icon-sm"></span> Clientes</a>
-            <a href="/workouts/create" class="nav-item"><span><img src="/images/momentum-fit-icon.png" class="icon-sm"></span> Criar Treino</a>
+            <a href="/admin/dashboard" class="nav-item"><span></span> Dashboard</a>
+            <a href="/admin/clients" class="nav-item active"><span></span> Clientes</a>
+            <a href="/workouts/create" class="nav-item"><span></span> Criar Treino</a>
             <% if (user.role === 'superadmin') { %>
-                <a href="/articles/create" class="nav-item"><span><img src="/images/momentum-fit-icon.png" class="icon-sm"></span> Criar Artigo</a>
+                <a href="/articles/create" class="nav-item"><span></span> Criar Artigo</a>
             <% } %>
-            <a href="/chat" class="nav-item"><span><img src="/images/momentum-fit-icon.png" class="icon-sm"></span> Chat</a>
+            <a href="/chat" class="nav-item"><span></span> Chat</a>
         </nav>
-        <div class="sidebar-footer"><form action="/auth/logout" method="POST" style="margin: 0;"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button type="submit" class="btn-logout-sidebar">Sair</button></form></div>
+        <div class="sidebar-footer">
+            <form action="/auth/logout" method="POST" style="margin: 0;">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <button type="submit" class="btn-logout-sidebar">Sair</button>
+            </form>
+        </div>
     </aside>
     <main class="dashboard-main">
         <div class="section">
@@ -22,19 +27,48 @@
                 <div><h1><%= clientProfile.name %></h1><p>Email: <%= clientProfile.email %></p></div>
                 <a href="/workouts/create?clientId=<%= clientProfile.id %>" class="btn btn-primary">Criar Novo Treino</a>
             </div>
+            
             <% if (user.role === 'superadmin') { %>
-            <div class="info-card" style="background-color: var(--c-dashboard-bg); padding: 1rem; border-radius: var(--radius); margin-bottom: 2rem;">
-                <form method="POST" action="/admin/clients/<%= clientProfile.id %>/assign" style="display: flex; align-items: center; gap: 1rem; justify-content: space-between;">
+            <div class="info-card" style="margin-bottom: 2rem; background: rgba(190, 242, 2, 0.05); border-color: var(--c-accent-primary);">
+                <form method="POST" action="/admin/clients/<%= clientProfile.id %>/assign" style="display: flex; align-items: flex-end; gap: 1rem; flex-wrap: wrap;">
                     <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                    <div><label for="trainer_id" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Atribuir a um Personal</label><select name="trainer_id" id="trainer_id" style="padding: 0.5rem; border-radius: var(--radius); border: 1px solid var(--c-border);"><option value="">Selecione um personal</option><% allTrainers.forEach(trainer => { %><option value="<%= trainer.id %>" <%= clientProfile.assigned_trainer_id == trainer.id ? 'selected' : '' %>><%= trainer.name %></option><% }); %></select></div>
-                    <button type="submit" class="btn btn-primary btn-sm" style="align-self: flex-end;">Salvar</button>
+                    <div style="flex: 1; min-width: 250px;">
+                        <label for="trainer_id" style="font-weight: 600; display: block; margin-bottom: 0.5rem; color: var(--c-accent-primary);">Atribuir Personal Trainer</label>
+                        <select name="trainer_id" id="trainer_id">
+                            <option value="">Selecione um personal</option>
+                            <% allTrainers.forEach(trainer => { %>
+                                <option value="<%= trainer.id %>" <%= clientProfile.assigned_trainer_id == trainer.id ? 'selected' : '' %>><%= trainer.name %></option>
+                            <% }); %>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm" style="margin-bottom: 4px;">Salvar Atribuição</button>
                 </form>
             </div>
             <% } %>
-            <div class="client-info-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-bottom: 2rem;">
-                <div class="info-card"><h4>Informações Básicas</h4><p><strong>Idade:</strong> <%= clientProfile.age || 'Não informado' %></p><p><strong>Nível:</strong> <%= clientProfile.fitness_level || 'Não informado' %></p></div>
-                <div class="info-card"><h4>Saúde</h4><p><strong>Condições:</strong> <%= clientProfile.medical_conditions || 'Nenhuma' %></p></div>
-                <div class="info-card" style="grid-column: 1 / -1;"><h4>Objetivos</h4><p><%= clientProfile.goals || 'Nenhum objetivo.' %></p></div>
+      
+            <div class="client-info-grid">
+                <div class="info-card">
+                    <h4>Informações Básicas</h4>
+                    <p><strong>Idade:</strong> <%= clientProfile.age || '-' %></p>
+                    <p><strong>Peso:</strong> <%= clientProfile.weight ? clientProfile.weight + 'kg' : '-' %></p>
+                    <p><strong>Altura:</strong> <%= clientProfile.height ? clientProfile.height + 'cm' : '-' %></p>
+                    <p><strong>Nível:</strong> <%= clientProfile.fitness_level || '-' %></p>
+                </div>
+                <div class="info-card">
+                    <h4>Rotina e Equipamento</h4>
+                    <p><strong>Dias/Semana:</strong> <%= clientProfile.training_days || '-' %></p>
+                    <p><strong>Duração:</strong> <%= clientProfile.training_duration || '-' %></p>
+                    <p><strong>Local:</strong> <%= clientProfile.equipment || '-' %></p>
+                    <p><strong>Atividade:</strong> <%= clientProfile.activity_level || '-' %></p>
+                </div>
+                <div class="info-card">
+                    <h4>Saúde e Condições</h4>
+                    <p><%= clientProfile.medical_conditions || 'Nenhuma condição informada.' %></p>
+                </div>
+                <div class="info-card" style="grid-column: 1 / -1;">
+                    <h4>Objetivos Principais</h4>
+                    <p style="font-size: 1rem; color: white;"><%= clientProfile.goals || 'Nenhum objetivo detalhado.' %></p>
+                </div>
             </div>
         </div>
     </main>

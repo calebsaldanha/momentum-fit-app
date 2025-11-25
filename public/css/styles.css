@@ -195,3 +195,49 @@ input, select, textarea { width: 100%; padding: 1rem; background: rgba(10, 10, 1
     .hamburger { display: flex; }
     .hero-title { font-size: 2.5rem; }
 }
+
+/* --- TABELAS E LISTAS (Gestão e Detalhes) --- */
+.table-container {
+    overflow-x: auto;
+    background: var(--c-bg-card);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+}
+table { width: 100%; border-collapse: collapse; min-width: 600px; }
+th, td { padding: 1rem; text-align: left; border-bottom: 1px solid var(--c-border); }
+th { background: rgba(255,255,255,0.03); color: var(--c-accent-primary); font-weight: 700; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px; }
+td { color: var(--c-text-secondary); font-size: 0.95rem; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,255,255,0.02); color: var(--c-text-primary); }
+
+/* --- INFO CARDS (Detalhes do Cliente) --- */
+.client-info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+.info-card {
+    background: var(--c-bg-card);
+    border: 1px solid var(--c-border);
+    padding: 1.5rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.3s;
+}
+.info-card:hover { border-color: rgba(255,255,255,0.1); transform: translateY(-3px); }
+.info-card h4 { color: var(--c-accent-primary); font-size: 1.1rem; margin-bottom: 1rem; border-bottom: 1px solid var(--c-border); padding-bottom: 0.5rem; }
+.info-card p { margin-bottom: 0.5rem; color: #ccc; font-size: 0.95rem; }
+.info-card strong { color: white; }
+
+/* --- EXERCÍCIOS (Lista de Treino) --- */
+.exercise-item {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--c-border);
+    border-radius: 8px;
+    padding: 1.2rem;
+    margin-bottom: 1rem;
+    transition: 0.3s;
+}
+.exercise-item:hover { border-color: var(--c-accent-primary); background: rgba(190, 242, 2, 0.02); }
+.exercise-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+.exercise-title { font-weight: 700; color: white; font-size: 1.1rem; }
+.exercise-sets { background: var(--c-accent-primary); color: black; padding: 0.2rem 0.6rem; border-radius: 4px; font-weight: 700; font-size: 0.85rem; }
+.exercise-desc { color: var(--c-text-secondary); font-size: 0.9rem; }
+

@@ -1,6 +1,6 @@
 <%- include('../partials/header.ejs', { title, bodyClass: 'dashboard-body' }) %>
-<div class="dashboard-container" style="grid-template-columns: 1fr; max-width: 800px;">
-    <main class="dashboard-main">
+<div class="dashboard-container" style="justify-content: center;">
+    <main class="dashboard-main" style="max-width: 800px; margin: 0 auto;">
       <div class="section">
             <div class="section-header" style="text-align: center; flex-direction: column;">
                 <h1>Perfil Profissional</h1>
@@ -11,11 +11,11 @@
                 <% } %>
             </div>
 
-            <div class="alert" style="background-color: #fefcbf; border: 1px solid #f9e289; color: var(--c-text-primary); margin-bottom: 2rem;">
-                <strong>Status da Conta:</strong> <%= userStatus.replace('_', ' ').toUpperCase() %>
+            <div class="alert" style="background-color: rgba(190, 242, 2, 0.1); border: 1px solid var(--c-accent-primary); color: white; margin-bottom: 2rem; padding: 1rem; border-radius: var(--radius); text-align: center;">
+                <strong>Status da Conta:</strong> <span style="color: var(--c-accent-primary);"><%= userStatus.replace('_', ' ').toUpperCase() %></span>
             </div>
 
-            <form method="POST" action="/trainer/profile" <%- userStatus === 'pending_approval' ? 'disabled' : '' %>>
+            <form method="POST" action="/trainer/profile" <%- userStatus === 'pending_approval' ? 'disabled' : '' %> class="dashboard-form">
                 <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                 <div class="form-group">
                     <label for="certifications">Certificações e Formação</label>
@@ -32,9 +32,16 @@
                 <% if (userStatus === 'pending') { %>
                     <button type="submit" class="btn btn-primary" style="width: 100%;">Enviar para Análise</button>
                 <% } else { %>
-                    <button type="submit" class="btn btn-primary" style="width: 100%;" disabled>Enviado</button>
+                    <button type="submit" class="btn btn-secondary" style="width: 100%;" disabled>Aguardando Aprovação</button>
                 <% } %>
             </form>
+            
+            <div style="text-align: center; margin-top: 2rem;">
+                <form action="/auth/logout" method="POST" style="display: inline;">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button type="submit" class="btn btn-sm" style="background: transparent; border: 1px solid var(--c-border); color: var(--c-text-secondary);">Sair da Conta</button>
+                </form>
+            </div>
         </div>
     </main>
 </div>
