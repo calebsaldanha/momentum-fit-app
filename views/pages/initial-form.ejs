@@ -5,11 +5,13 @@
     .split-layout {
         display: grid;
         grid-template-columns: 1fr;
-        min-height: calc(100vh - 80px);
+        min-height: 100vh; /* Garante que ocupe a altura total da tela */
     }
     
     .form-side {
         padding: 2rem;
+        /* CORREÇÃO AQUI: Adiciona espaço no topo para compensar o Header Fixo (80px + espaçamento) */
+        padding-top: 120px; 
         background: linear-gradient(to bottom, #0f0f0f, #050505);
         display: flex;
         justify-content: center;
@@ -19,7 +21,7 @@
     .form-container {
         width: 100%;
         max-width: 600px;
-        padding-top: 2rem;
+        /* Removemos o padding-top extra daqui pois já aplicamos no container pai */
         padding-bottom: 4rem;
     }
 
