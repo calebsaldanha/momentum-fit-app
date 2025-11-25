@@ -54,7 +54,7 @@ router.get('/profile', async (req, res) => {
 
 router.post('/profile', async (req, res) => {
     const userId = req.session.user.id;
-    // Novos campos adicionados
+    // CORREÇÃO: Incluídos os campos novos na desestruturação
     const { 
         name, age, weight, height, fitness_level, goals, medical_conditions,
         training_days, training_duration, equipment, activity_level 
@@ -62,6 +62,8 @@ router.post('/profile', async (req, res) => {
 
     try {
         await pool.query('UPDATE users SET name = $1 WHERE id = $2', [name, userId]);
+        
+        // CORREÇÃO: Query atualizada para salvar os campos novos
         const profileQuery = `
             INSERT INTO client_profiles (
                 user_id, age, weight, height, fitness_level, goals, medical_conditions,
@@ -99,13 +101,14 @@ router.get('/initial-form', (req, res) => {
 
 router.post('/initial-form', async (req, res) => {
     const userId = req.session.user.id;
-    // Novos campos adicionados
+    // CORREÇÃO: Incluídos os campos novos na desestruturação
     const { 
         age, weight, height, fitness_level, goals, medical_conditions,
         training_days, training_duration, equipment, activity_level
     } = req.body;
 
     try {
+        // CORREÇÃO: Query atualizada para salvar os campos novos
         await pool.query(`
             INSERT INTO client_profiles (
                 user_id, age, weight, height, fitness_level, goals, medical_conditions,

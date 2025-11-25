@@ -90,11 +90,13 @@ router.get('/clients/:id', async (req, res) => {
     }
 
     try {
+        // CORREÇÃO: Adicionados os campos training_days, training_duration, equipment, activity_level
         const clientQuery = `
             SELECT u.id, u.name, u.email, u.created_at, 
                    cp.age, cp.weight, cp.height, cp.fitness_level, 
                    cp.goals, cp.medical_conditions,
-                   cp.assigned_trainer_id
+                   cp.assigned_trainer_id,
+                   cp.training_days, cp.training_duration, cp.equipment, cp.activity_level
             FROM users u
             LEFT JOIN client_profiles cp ON u.id = cp.user_id
             WHERE u.id = $1 AND u.role = 'client';
