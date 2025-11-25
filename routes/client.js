@@ -54,18 +54,37 @@ router.get('/profile', async (req, res) => {
 
 router.post('/profile', async (req, res) => {
     const userId = req.session.user.id;
-    // Campos removidos: pronouns, gender_identity, transition_related
-    const { name, age, weight, height, fitness_level, goals, medical_conditions } = req.body;
+    // Novos campos adicionados
+    const { 
+        name, age, weight, height, fitness_level, goals, medical_conditions,
+        training_days, training_duration, equipment, activity_level 
+    } = req.body;
+
     try {
         await pool.query('UPDATE users SET name = $1 WHERE id = $2', [name, userId]);
         const profileQuery = `
-            INSERT INTO client_profiles (user_id, age, weight, height, fitness_level, goals, medical_conditions)
-            VALUES ($1, $2, $3, $4, $5, $6, $7)
+            INSERT INTO client_profiles (
+                user_id, age, weight, height, fitness_level, goals, medical_conditions,
+                training_days, training_duration, equipment, activity_level
+            )
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
             ON CONFLICT (user_id) DO UPDATE SET
-                age = EXCLUDED.age, weight = EXCLUDED.weight, height = EXCLUDED.height,
-                fitness_level = EXCLUDED.fitness_level, goals = EXCLUDED.goals, medical_conditions = EXCLUDED.medical_conditions;
+                age = EXCLUDED.age, 
+                weight = EXCLUDED.weight, 
+                height = EXCLUDED.height,
+                fitness_level = EXCLUDED.fitness_level, 
+                goals = EXCLUDED.goals, 
+                medical_conditions = EXCLUDED.medical_conditions,
+                training_days = EXCLUDED.training_days,
+                training_duration = EXCLUDED.training_duration,
+                equipment = EXCLUDED.equipment,
+                activity_level = EXCLUDED.activity_level;
         `;
-        await pool.query(profileQuery, [userId, age, weight || null, height || null, fitness_level, goals, medical_conditions]);
+        await pool.query(profileQuery, [
+            userId, age, weight || null, height || null, fitness_level, goals, medical_conditions,
+            training_days || null, training_duration, equipment, activity_level
+        ]);
+        
         req.session.user.name = name;
         req.session.save(() => res.redirect('/client/profile'));
     } catch (err) {
@@ -80,15 +99,34 @@ router.get('/initial-form', (req, res) => {
 
 router.post('/initial-form', async (req, res) => {
     const userId = req.session.user.id;
-    // Campos removidos: pronouns, gender_identity, transition_related
-    const { age, weight, height, fitness_level, goals, medical_conditions } = req.body;
+    // Novos campos adicionados
+    const { 
+        age, weight, height, fitness_level, goals, medical_conditions,
+        training_days, training_duration, equipment, activity_level
+    } = req.body;
+
     try {
         await pool.query(`
-            INSERT INTO client_profiles (user_id, age, weight, height, fitness_level, goals, medical_conditions)
-            VALUES ($1, $2, $3, $4, $5, $6, $7) ON CONFLICT (user_id) DO UPDATE SET
-                age = EXCLUDED.age, weight = EXCLUDED.weight, height = EXCLUDED.height,
-                fitness_level = EXCLUDED.fitness_level, goals = EXCLUDED.goals, medical_conditions = EXCLUDED.medical_conditions;
-        `, [userId, age, weight || null, height || null, fitness_level, goals, medical_conditions]);
+            INSERT INTO client_profiles (
+                user_id, age, weight, height, fitness_level, goals, medical_conditions,
+                training_days, training_duration, equipment, activity_level
+            )
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) 
+            ON CONFLICT (user_id) DO UPDATE SET
+                age = EXCLUDED.age, 
+                weight = EXCLUDED.weight, 
+                height = EXCLUDED.height,
+                fitness_level = EXCLUDED.fitness_level, 
+                goals = EXCLUDED.goals, 
+                medical_conditions = EXCLUDED.medical_conditions,
+                training_days = EXCLUDED.training_days,
+                training_duration = EXCLUDED.training_duration,
+                equipment = EXCLUDED.equipment,
+                activity_level = EXCLUDED.activity_level;
+        `, [
+            userId, age, weight || null, height || null, fitness_level, goals, medical_conditions,
+            training_days || null, training_duration, equipment, activity_level
+        ]);
         res.redirect('/client/dashboard');
     } catch (err) {
         console.error("Erro ao salvar formulário inicial:", err);

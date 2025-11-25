@@ -39,14 +39,22 @@ const initDb = async () => {
         fitness_level TEXT,
         goals TEXT,
         medical_conditions TEXT,
-        assigned_trainer_id INTEGER REFERENCES users(id) ON DELETE SET NULL, 
+        assigned_trainer_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+        
+        -- Novos Campos para o Questionário Detalhado
+        training_days INTEGER,
+        training_duration TEXT,
+        equipment TEXT,
+        activity_level TEXT,
+        
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       );
     `);
 
-    // Manutenção de colunas legadas (Mantido do seu código original)
+    // Manutenção de colunas (Migrações)
     await client.query(`
       DO $$ BEGIN
+        -- Remoção de colunas antigas (limpeza)
         IF EXISTS(SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='pronouns')
         THEN ALTER TABLE "users" DROP COLUMN "pronouns";
         END IF;
@@ -56,8 +64,26 @@ const initDb = async () => {
         IF EXISTS(SELECT 1 FROM information_schema.columns WHERE table_name='client_profiles' AND column_name='transition_related')
         THEN ALTER TABLE "client_profiles" DROP COLUMN "transition_related";
         END IF;
+
+        -- Adição de novas colunas se não existirem
         IF NOT EXISTS(SELECT 1 FROM information_schema.columns WHERE table_name='client_profiles' AND column_name='assigned_trainer_id')
         THEN ALTER TABLE "client_profiles" ADD COLUMN "assigned_trainer_id" INTEGER REFERENCES users(id) ON DELETE SET NULL;
+        END IF;
+
+        IF NOT EXISTS(SELECT 1 FROM information_schema.columns WHERE table_name='client_profiles' AND column_name='training_days')
+        THEN ALTER TABLE "client_profiles" ADD COLUMN "training_days" INTEGER;
+        END IF;
+
+        IF NOT EXISTS(SELECT 1 FROM information_schema.columns WHERE table_name='client_profiles' AND column_name='training_duration')
+        THEN ALTER TABLE "client_profiles" ADD COLUMN "training_duration" TEXT;
+        END IF;
+
+        IF NOT EXISTS(SELECT 1 FROM information_schema.columns WHERE table_name='client_profiles' AND column_name='equipment')
+        THEN ALTER TABLE "client_profiles" ADD COLUMN "equipment" TEXT;
+        END IF;
+
+        IF NOT EXISTS(SELECT 1 FROM information_schema.columns WHERE table_name='client_profiles' AND column_name='activity_level')
+        THEN ALTER TABLE "client_profiles" ADD COLUMN "activity_level" TEXT;
         END IF;
       END$$;
     `);
@@ -115,7 +141,7 @@ const initDb = async () => {
       );
     `);
 
-    // --- ADICIONADO: Tabela ARTICLES (Estava faltando) ---
+    // Tabela ARTICLES
     await client.query(`
       CREATE TABLE IF NOT EXISTS articles (
         id SERIAL PRIMARY KEY,
@@ -123,7 +149,7 @@ const initDb = async () => {
         content TEXT NOT NULL,
         author_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
         category TEXT,
-        image_url TEXT, -- Adicionei suporte a imagem caso queira usar no futuro
+        image_url TEXT,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       );
     `);
