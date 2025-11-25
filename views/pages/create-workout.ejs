@@ -5,15 +5,13 @@
             <% if (user.role === 'superadmin') { %>
                 <a href="/superadmin/dashboard" class="nav-item" style="color: var(--c-accent-dark); background: #eaff0040; border-left-color: var(--c-accent-primary);"><span></span> Painel Super Admin</a>
                 <div style="height: 1px; background: #e2e8f0; margin: 0.5rem 1rem;"></div>
-        
-    <% } %>
+            <% } %>
             <a href="/admin/dashboard" class="nav-item"><span></span> Dashboard</a>
             <a href="/admin/clients" class="nav-item"><span></span> Clientes</a>
             <a href="/workouts/create" class="nav-item active"><span></span> Criar Treino</a>
             <% if (user.role === 'superadmin') { %>
                 <a href="/articles/create" class="nav-item"><span></span> Criar Artigo</a>
- 
-           <% } %>
+            <% } %>
             <a href="/chat" class="nav-item"><span></span> Chat</a>
         </nav>
         <div class="sidebar-footer">
@@ -22,17 +20,14 @@
     </aside>
     <main class="dashboard-main">
         <div class="section">
-    
-        <div class="section-header"><h1>Criar Novo Treino</h1><p>Desenvolva um plano personalizado.</p></div>
+            <div class="section-header"><h1>Criar Novo Treino</h1><p>Desenvolva um plano personalizado.</p></div>
             <form id="createWorkoutForm" class="dashboard-form" style="max-width: 800px;">
-                <div class="form-group"><label for="client_id">Cliente *</label><select id="client_id" name="client_id" required><option value="">Selecione um cliente</option><% clients.forEach(client => { %><option value="<%= client.id %>"><%= client.name %> (<%= client.email %>)</option><% });
-%></select></div>
+                <div class="form-group"><label for="client_id">Cliente *</label><select id="client_id" name="client_id" required><option value="">Selecione um cliente</option><% clients.forEach(client => { %><option value="<%= client.id %>"><%= client.name %> (<%= client.email %>)</option><% }); %></select></div>
                 <div class="form-group"><label for="title">Título do Treino *</label><input type="text" id="title" name="title" required placeholder="Ex: Treino A"></div>
                 <div class="form-group"><label for="description">Descrição</label><textarea id="description" name="description" rows="3"></textarea></div>
                 <div id="exercisesContainer"></div>
                 <button type="button" class="btn btn-outline" id="addExerciseBtn" style="margin-top: 1rem;">+ Adicionar Exercício</button>
-          
-      <div class="form-actions" style="margin-top: 2rem; display: flex; justify-content: flex-end; gap: 1rem;"><a href="/admin/dashboard" class="btn btn-secondary">Cancelar</a><button type="submit" class="btn btn-primary">Salvar Treino</button></div>
+                <div class="form-actions" style="margin-top: 2rem; display: flex; justify-content: flex-end; gap: 1rem;"><a href="/admin/dashboard" class="btn btn-secondary">Cancelar</a><button type="submit" class="btn btn-primary">Salvar Treino</button></div>
             </form>
         </div>
     </main>
@@ -41,13 +36,13 @@
 document.addEventListener('DOMContentLoaded', function() {
     function addExercise() {
         const container = document.getElementById('exercisesContainer');
-const exerciseHTML = `<div class="exercise-item" style="border: 1px solid var(--c-border); border-radius: var(--radius); padding: 1.5rem; margin-top: 1.5rem;"><div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;"><div class="form-group"><label>Exercício *</label><input type="text" class="exercise-name" required></div><div class="form-group"><label>Séries x Reps *</label><input type="text" class="exercise-sets" required></div></div><div class="form-group"><label>Observações</label><textarea class="exercise-description" rows="2"></textarea></div><button type="button" class="btn btn-secondary btn-sm remove-exercise">Remover</button></div>`;
-container.insertAdjacentHTML('beforeend', exerciseHTML);
+        const exerciseHTML = `<div class="exercise-item" style="border: 1px solid var(--c-border); border-radius: var(--radius); padding: 1.5rem; margin-top: 1.5rem;"><div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;"><div class="form-group"><label>Exercício *</label><input type="text" class="exercise-name" required></div><div class="form-group"><label>Séries x Reps *</label><input type="text" class="exercise-sets" required></div></div><div class="form-group"><label>Observações</label><textarea class="exercise-description" rows="2"></textarea></div><button type="button" class="btn btn-secondary btn-sm remove-exercise">Remover</button></div>`;
+        container.insertAdjacentHTML('beforeend', exerciseHTML);
     }
     document.getElementById('addExerciseBtn').addEventListener('click', addExercise);
     document.getElementById('exercisesContainer').addEventListener('click', function(e) { if (e.target && e.target.classList.contains('remove-exercise')) { e.target.closest('.exercise-item').remove(); } });
     addExercise();
-document.getElementById('createWorkoutForm').addEventListener('submit', async function(e) {
+    document.getElementById('createWorkoutForm').addEventListener('submit', async function(e) {
         e.preventDefault();
         const csrfToken = '<%= csrfToken %>';
         const exercises = [];
@@ -55,16 +50,13 @@ document.getElementById('createWorkoutForm').addEventListener('submit', async fu
             const name = item.querySelector('.exercise-name').value;
             const sets = item.querySelector('.exercise-sets').value;
             if (name && sets) { exercises.push({ name, sets, description: item.querySelector('.exercise-description').value }); }
-  
-      });
+        });
         const formData = { client_id: document.getElementById('client_id').value, title: document.getElementById('title').value, description: document.getElementById('description').value, exercises };
         try {
             const response = await fetch('/workouts/create', { method: 'POST', headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken }, body: JSON.stringify(formData) });
             const result = await response.json();
-            if (response.ok && result.success) { alert('Treino criado!');
-window.location.href = '/admin/dashboard'; } else { throw new Error(result.message); }
-        } catch (error) { alert('Erro: ' + error.message);
-}
+            if (response.ok && result.success) { alert('Treino criado!'); window.location.href = '/admin/dashboard'; } else { throw new Error(result.message); }
+        } catch (error) { alert('Erro: ' + error.message); }
     });
 });
 </script>

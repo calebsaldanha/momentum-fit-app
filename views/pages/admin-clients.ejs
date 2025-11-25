@@ -5,15 +5,13 @@
             <% if (user.role === 'superadmin') { %>
                 <a href="/superadmin/dashboard" class="nav-item" style="color: var(--c-accent-dark); background: #eaff0040; border-left-color: var(--c-accent-primary);"><span></span> Painel Super Admin</a>
                 <div style="height: 1px; background: #e2e8f0; margin: 0.5rem 1rem;"></div>
-        
-    <% } %>
+            <% } %>
             <a href="/admin/dashboard" class="nav-item"><span></span> Dashboard</a>
             <a href="/admin/clients" class="nav-item active"><span></span> Clientes</a>
             <a href="/workouts/create" class="nav-item"><span></span> Criar Treino</a>
             <% if (user.role === 'superadmin') { %>
                 <a href="/articles/create" class="nav-item"><span></span> Criar Artigo</a>
- 
-           <% } %>
+            <% } %>
             <a href="/chat" class="nav-item"><span></span> Chat</a>
         </nav>
         <div class="sidebar-footer">
@@ -22,24 +20,19 @@
     </aside>
     <main class="dashboard-main">
         <div class="section">
-    
-        <div class="section-header"><h1>Gerenciar Clientes</h1><p>Lista completa de alunos ativos.</p></div>
+            <div class="section-header"><h1>Gerenciar Clientes</h1><p>Lista completa de alunos ativos.</p></div>
             <% if (clients && clients.length > 0) { %>
                 <div class="clients-grid">
                     <% clients.forEach(client => { %>
-                        <div 
-class="client-card">
-                             <div class="client-card-header"><h3><%= client.name %></h3><p style="font-size: 0.9rem;
-color: var(--c-text-secondary); margin:0;"><%= client.email %></p></div>
+                        <div class="client-card">
+                             <div class="client-card-header"><h3><%= client.name %></h3><p style="font-size: 0.9rem; color: var(--c-text-secondary); margin:0;"><%= client.email %></p></div>
                             <div class="client-card-info"><p><strong>Nível:</strong> <%= client.fitness_level || 'Não informado' %></p><p><strong>Cadastro:</strong> <%= new Date(client.created_at).toLocaleDateString('pt-BR') %></p></div>
                             <div class="client-card-footer"><a href="/admin/clients/<%= client.id %>" class="btn btn-primary btn-sm" style="width: 100%;">Ver Detalhes</a></div>
-                   
-     </div>
+                        </div>
                     <% }); %>
                 </div>
             <% } else { %>
-                <div class="empty-state" style="text-align: center;
-padding: 3rem;"><p>Nenhum cliente cadastrado ainda.</p></div>
+                <div class="empty-state" style="text-align: center; padding: 3rem;"><p>Nenhum cliente cadastrado ainda.</p></div>
             <% } %>
         </div>
     </main>

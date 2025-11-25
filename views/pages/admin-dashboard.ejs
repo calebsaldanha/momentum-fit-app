@@ -6,23 +6,20 @@
             <% if (user.role === 'superadmin') { %>
                 <a href="/superadmin/dashboard" class="nav-item" style="color: var(--c-accent-dark); background: #eaff0040; border-left-color: var(--c-accent-primary);">
                     <span></span> Painel Super Admin
-           
-     </a>
+                </a>
                 <div style="height: 1px; background: #e2e8f0; margin: 0.5rem 1rem;"></div>
             <% } %>
             <a href="/admin/dashboard" class="nav-item active"><span></span> Dashboard</a>
             <a href="/admin/clients" class="nav-item"><span></span> Clientes</a>
             <a href="/workouts/create" class="nav-item"><span></span> Criar Treino</a>
-     
-       <% if (user.role === 'superadmin') { %>
+            <% if (user.role === 'superadmin') { %>
                 <a href="/articles/create" class="nav-item"><span></span> Criar Artigo</a>
             <% } %>
             <a href="/chat" class="nav-item"><span></span> Chat</a>
         </nav>
         <div class="sidebar-footer">
             <form action="/auth/logout" method="POST" style="margin: 0;">
- 
-               <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                 <button type="submit" class="btn-logout-sidebar">Sair</button>
             </form>
         </div>
@@ -31,48 +28,40 @@
     <main class="dashboard-main">
         <div class="section">
             <div class="section-header">
-           
-     <h1>Painel do Treinador</h1>
+                <h1>Painel do Treinador</h1>
                 <p>Visão geral do seu impacto e progresso dos alunos.</p>
             </div>
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-icon"><img src="/images/momentum-fit-icon.png" alt="Icon"></div>
-    
-                <div class="stat-info"><h3><%= stats.totalClients %></h3><p>Clientes Ativos</p></div>
+                    <div class="stat-info"><h3><%= stats.totalClients %></h3><p>Clientes Ativos</p></div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon"><img src="/images/momentum-fit-icon.png" alt="Icon"></div>
-                    <div class="stat-info"><h3><%= stats.totalWorkouts %></h3><p>Treinos 
-Criados</p></div>
+                    <div class="stat-info"><h3><%= stats.totalWorkouts %></h3><p>Treinos Criados</p></div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon"><img src="/images/momentum-fit-icon.png" alt="Icon"></div>
                     <div class="stat-info"><h3><%= stats.weeklyCheckins %></h3><p>Check-ins (Semana)</p></div>
                 </div>
-    
-        </div>
+            </div>
         </div>
         <div class="section">
             <div class="section-header">
                 <h2>Alunos Recentes</h2>
                 <a href="/admin/clients" class="btn btn-secondary btn-sm">Ver Todos</a>
             </div>
-            
-<% if (recentClients && recentClients.length > 0) { %>
+            <% if (recentClients && recentClients.length > 0) { %>
                 <div class="recent-clients-list">
                     <% recentClients.forEach(client => { %>
                         <a href="/admin/clients/<%= client.id %>" class="recent-client-item">
-                       
-     <div class="client-info"><strong><%= client.name %></strong><span><%= client.email %></span></div>
-                            <div class="view-details-btn" style="font-size: 0.85rem;
-font-weight: 600; color: var(--c-accent-primary);">Ver Detalhes →</div>
+                            <div class="client-info"><strong><%= client.name %></strong><span><%= client.email %></span></div>
+                            <div class="view-details-btn" style="font-size: 0.85rem; font-weight: 600; color: var(--c-accent-primary);">Ver Detalhes →</div>
                         </a>
                     <% }); %>
                 </div>
             <% } else { %>
-                <div 
-class="empty-state" style="padding: 2rem; text-align: center; color: var(--c-text-secondary);"><p>Nenhum aluno cadastrado recentemente.</p></div>
+                <div class="empty-state" style="padding: 2rem; text-align: center; color: var(--c-text-secondary);"><p>Nenhum aluno cadastrado recentemente.</p></div>
             <% } %>
         </div>
     </main>
