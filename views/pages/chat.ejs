@@ -6,6 +6,7 @@
                 <a href="/client/dashboard" class="nav-item"><span></span> Dashboard</a>
                 <a href="/client/workouts" class="nav-item"><span></span> Meus Treinos</a>
                 <a href="/chat" class="nav-item active"><span></span> Chat</a>
+                <a href="/client/profile" class="nav-item"><span></span> Meu Perfil</a>
             <% } else { %>
                  <% if (user.role === 'superadmin') { %>
                     <a href="/superadmin/dashboard" class="nav-item" style="color: var(--c-accent-dark); background: #eaff0040; border-left-color: var(--c-accent-primary);"><span></span> Painel Super Admin</a>
@@ -51,10 +52,24 @@
                             <p>Escolha algu√©m ao lado.</p>
                         </div>
                     </div>
+                    
+                    <div id="filePreview" style="display: none; padding: 0.5rem 1rem; background: rgba(255,255,255,0.05); border-top: 1px solid var(--c-border); align-items: center; justify-content: space-between;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 1.2rem;">Ì≥é</span>
+                            <span id="fileName" style="font-size: 0.85rem; color: var(--c-accent-primary);"></span>
+                        </div>
+                        <button type="button" id="clearFileBtn" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 1.2rem;">&times;</button>
+                    </div>
+
                     <div class="message-input-container">
-                        <form id="chatForm" style="display: flex; gap: 10px; width: 100%; padding: 1rem;">
-                            <input type="text" id="messageInput" placeholder="Mensagem..." autocomplete="off" style="flex: 1; padding: 0.8rem; border: 1px solid #ccc; border-radius: 4px;">
-                            <button type="submit" class="btn btn-primary">Enviar</button>
+                        <form id="chatForm" style="display: flex; gap: 10px; width: 100%; padding: 1rem; align-items: center;" enctype="multipart/form-data">
+                            <label for="fileInput" class="btn-attach" style="cursor: pointer; padding: 0.5rem; color: var(--c-text-secondary); display: flex; align-items: center; transition: color 0.2s;">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+                            </label>
+                            <input type="file" id="fileInput" name="file" accept="image/*,video/*" style="display: none;">
+                            
+                            <input type="text" id="messageInput" name="content" placeholder="Mensagem..." autocomplete="off" style="flex: 1; padding: 0.8rem; border: 1px solid #ccc; border-radius: 4px;">
+                            <button type="submit" id="sendBtn" class="btn btn-primary">Enviar</button>
                         </form>
                     </div>
                 </div>
@@ -66,34 +81,126 @@
 document.addEventListener('DOMContentLoaded', () => {
     const currentUserId = '<%= user.id %>';
     let activeContactId = null;
-    const csrfToken = '<%= csrfToken %>';
+    const csrfToken = '<%= csrfToken %>'; 
     const messagesContainer = document.getElementById('messagesContainer');
     const chatForm = document.getElementById('chatForm');
     const messageInput = document.getElementById('messageInput');
+    const fileInput = document.getElementById('fileInput');
+    const filePreview = document.getElementById('filePreview');
+    const fileNameSpan = document.getElementById('fileName');
+    const clearFileBtn = document.getElementById('clearFileBtn');
     const currentChatUserEl = document.getElementById('currentChatUser');
+    const sendBtn = document.getElementById('sendBtn');
+
     function scrollToBottom() { messagesContainer.scrollTop = messagesContainer.scrollHeight; }
+
+    function renderMessageContent(msg) {
+        if (msg.message_type === 'image') {
+            return \`<a href="\${msg.content}" target="_blank"><img src="\${msg.content}" alt="Imagem" style="max-width: 200px; max-height: 200px; border-radius: 8px; object-fit: cover;"></a>\`;
+        } else if (msg.message_type === 'video') {
+            return \`<video src="\${msg.content}" controls style="max-width: 250px; border-radius: 8px;"></video>\`;
+        } else {
+            return msg.content;
+        }
+    }
+
     async function loadMessages(contactId) {
         try {
-            const response = await fetch(`/chat/messages/${contactId}`);
+            const response = await fetch(\`/chat/messages/\${contactId}\`);
             if (!response.ok) throw new Error('Erro');
             const messages = await response.json();
             messagesContainer.innerHTML = '';
-            if (messages.length === 0) { messagesContainer.innerHTML = '<div style="padding:2rem;text-align:center;color:#777;"><p>Nenhuma mensagem.</p></div>';
-            } 
-            else { messages.forEach(msg => { const d = document.createElement('div'); d.className = 'message ' + (msg.sender_id == currentUserId ? 'own-message' : 'other-message'); d.textContent = msg.content; messagesContainer.appendChild(d); });
+            if (messages.length === 0) { 
+                messagesContainer.innerHTML = '<div style="padding:2rem;text-align:center;color:#777;"><p>Nenhuma mensagem.</p></div>';
+            } else { 
+                messages.forEach(msg => { 
+                    const d = document.createElement('div'); 
+                    d.className = 'message ' + (msg.sender_id == currentUserId ? 'own-message' : 'other-message'); 
+                    d.innerHTML = renderMessageContent(msg); 
+                    messagesContainer.appendChild(d); 
+                });
             }
             scrollToBottom();
         } catch (error) { console.error(error); }
     }
-    document.querySelectorAll('.user-item').forEach(item => { item.addEventListener('click', () => { activeContactId = item.dataset.userId; document.querySelectorAll('.user-item').forEach(el => el.classList.remove('active')); item.classList.add('active'); currentChatUserEl.textContent = item.dataset.userName; loadMessages(activeContactId); }); });
+
+    fileInput.addEventListener('change', function() {
+        if (this.files && this.files[0]) {
+            filePreview.style.display = 'flex';
+            fileNameSpan.textContent = this.files[0].name;
+            messageInput.placeholder = 'Adicione uma legenda (opcional)...';
+        }
+    });
+
+    clearFileBtn.addEventListener('click', function() {
+        fileInput.value = '';
+        filePreview.style.display = 'none';
+        fileNameSpan.textContent = '';
+        messageInput.placeholder = 'Mensagem...';
+    });
+
+    document.querySelectorAll('.user-item').forEach(item => { 
+        item.addEventListener('click', () => { 
+            activeContactId = item.dataset.userId; 
+            document.querySelectorAll('.user-item').forEach(el => el.classList.remove('active')); 
+            item.classList.add('active'); 
+            currentChatUserEl.textContent = item.dataset.userName; 
+            loadMessages(activeContactId); 
+        }); 
+    });
+
     chatForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const content = messageInput.value.trim();
-        if (!content || !activeContactId) return;
+        
+        if (!activeContactId) {
+            alert("Selecione uma conversa primeiro.");
+            return;
+        }
+
+        const hasText = messageInput.value.trim().length > 0;
+        const hasFile = fileInput.files.length > 0;
+
+        if (!hasText && !hasFile) return;
+
+        // Feedback de envio
+        const originalBtnText = sendBtn.innerText;
+        sendBtn.innerText = 'Enviando...';
+        sendBtn.disabled = true;
+
+        const formData = new FormData();
+        formData.append('receiver_id', activeContactId);
+        if (hasText) formData.append('content', messageInput.value.trim());
+        if (hasFile) formData.append('file', fileInput.files[0]);
+
         try {
-             const response = await fetch('/chat/send', { method: 'POST', headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken }, body: JSON.stringify({ receiver_id: activeContactId, content: content, message_type: 'text' }) });
-            if (response.ok) { const msg = await response.json(); const d = document.createElement('div'); d.className = 'message own-message'; d.textContent = msg.content; messagesContainer.appendChild(d); messageInput.value = ''; scrollToBottom(); }
-        } catch (err) { console.error(err); }
+             const response = await fetch('/chat/send', { 
+                 method: 'POST', 
+                 headers: { 'CSRF-Token': csrfToken }, 
+                 body: formData 
+             });
+             
+            if (response.ok) { 
+                const msg = await response.json(); 
+                const d = document.createElement('div'); 
+                d.className = 'message own-message'; 
+                d.innerHTML = renderMessageContent(msg); 
+                messagesContainer.appendChild(d); 
+                
+                // Reset
+                messageInput.value = ''; 
+                fileInput.value = '';
+                filePreview.style.display = 'none';
+                messageInput.placeholder = 'Mensagem...';
+                scrollToBottom(); 
+            } else {
+                const err = await response.json();
+                alert("Erro ao enviar: " + (err.error || 'Desconhecido'));
+            }
+        } catch (err) { console.error(err); alert('Erro de conex√£o.'); }
+        finally {
+            sendBtn.innerText = originalBtnText;
+            sendBtn.disabled = false;
+        }
     });
 });
 </script>
