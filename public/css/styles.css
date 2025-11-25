@@ -34,7 +34,6 @@ body {
     font-family: var(--font-primary);
     line-height: 1.6;
     color: var(--c-text-primary);
-    /* Gradiente radial sutil para evitar o "preto chapado" */
     background: radial-gradient(circle at top center, #1a1a1a 0%, var(--c-bg-darkest) 100%);
     background-color: var(--c-bg-darkest);
     display: flex;
@@ -54,78 +53,59 @@ p { margin-bottom: 1.2rem; color: var(--c-text-secondary); font-size: 1.05rem; }
 a { text-decoration: none; color: inherit; transition: 0.3s; }
 img { max-width: 100%; height: auto; display: block; }
 
-/* --- HEADER GLASSMORPHISM --- */
+/* --- HEADER --- */
 .header { 
-    background: rgba(5, 5, 5, 0.7); /* Translúcido */
+    background: rgba(5, 5, 5, 0.7); 
     border-bottom: 1px solid rgba(255,255,255,0.08);
-    position: fixed; 
-    width: 100%; 
-    top: 0; 
-    z-index: 1000; 
-    height: var(--header-height); 
-    display: flex; 
-    align-items: center; 
-    backdrop-filter: blur(12px); /* Efeito de vidro fosco */
+    position: fixed; width: 100%; top: 0; z-index: 1000; 
+    height: var(--header-height); display: flex; align-items: center; 
+    backdrop-filter: blur(12px); 
 }
 .nav-container { display: flex; justify-content: space-between; align-items: center; width: 100%; }
 
 .logo-link { display: flex; align-items: center; gap: 12px; text-decoration: none; }
 .header-logo-img { 
-    height: 45px; 
-    width: auto; 
-    filter: drop-shadow(0 0 8px rgba(190, 242, 2, 0.4)); /* Glow no logo 3D */
+    height: 45px; width: auto; 
+    filter: drop-shadow(0 0 8px rgba(190, 242, 2, 0.4));
     transition: transform 0.3s;
 }
 .logo-link:hover .header-logo-img { transform: scale(1.05) rotate(5deg); }
-.logo-text { font-size: 1.4rem; font-weight: 900; letter-spacing: 1px; color: white; }
 
 .nav-menu { display: flex; align-items: center; gap: 2.5rem; list-style: none; margin: 0; padding: 0; }
 .nav-link { font-weight: 600; color: var(--c-text-secondary); font-size: 0.95rem; position: relative; }
 .nav-link::after { content: ''; position: absolute; width: 0; height: 2px; bottom: -4px; left: 0; background-color: var(--c-accent-primary); transition: width 0.3s; box-shadow: var(--glow-green); }
 .nav-link:hover { color: var(--c-text-primary); }
 .nav-link:hover::after { width: 100%; }
-
 .user-badge { color: var(--c-accent-primary); font-weight: 700; text-shadow: var(--glow-green); }
 
-/* --- HERO SECTION (IMPACTO 3D) --- */
+/* --- HERO SECTION --- */
 .hero {
-    /* Overlay escuro + Imagem 3D */
     background: linear-gradient(to bottom, rgba(5, 5, 5, 0.5) 0%, rgba(5, 5, 5, 0.9) 80%, var(--c-bg-darkest) 100%), 
                 url('/images/hero-bg.png');
-    background-size: cover;
-    background-position: center;
-    padding: 10rem 0 8rem;
-    display: flex;
-    align-items: center;
-    min-height: 85vh;
-    position: relative;
+    background-size: cover; background-position: center;
+    padding: 10rem 0 8rem; display: flex; align-items: center; min-height: 85vh; position: relative;
 }
-/* Linha de energia na base do hero */
 .hero::after {
     content: ''; position: absolute; bottom: 0; left: 0; right: 0;
     height: 1px; background: linear-gradient(90deg, transparent, var(--c-accent-primary), transparent);
     opacity: 0.6; box-shadow: 0 -2px 10px rgba(190, 242, 2, 0.2);
 }
-
-.hero-container { max-width: 700px; } /* Foco no conteúdo à esquerda ou centro */
+.hero-container { max-width: 700px; }
 .hero-title { 
-    font-size: 4rem; 
-    line-height: 1; 
-    margin-bottom: 1.5rem;
+    font-size: 4rem; line-height: 1; margin-bottom: 1.5rem;
     background: linear-gradient(to right, #fff, #e0e0e0);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
 }
 .hero-subtitle { color: #d1d5db; font-size: 1.35rem; margin-bottom: 3rem; font-weight: 500; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
 .hero-buttons { display: flex; gap: 1rem; flex-wrap: wrap; }
 
-/* --- SEÇÕES E CARDS (PROFUNDIDADE) --- */
+/* --- SEÇÕES GERAIS --- */
 section { padding: 7rem 0; position: relative; }
 .about { background: linear-gradient(to bottom, var(--c-bg-surface), #0c0c0c); }
 
-/* --- FEATURES SECTION (ATUALIZADA) --- */
+/* --- FEATURES SECTION (Com fundo novo) --- */
 .features {
-    /* Mesma técnica do Hero: Imagem de fundo + Overlay para legibilidade */
+    /* Imagem de fundo renomeada para features-bg.png */
     background: linear-gradient(to bottom, rgba(5, 5, 5, 0.85) 0%, rgba(5, 5, 5, 0.95) 100%), 
                 url('/images/features-bg.png');
     background-size: cover;
@@ -139,19 +119,16 @@ section { padding: 7rem 0; position: relative; }
     .features-grid { grid-template-columns: repeat(3, 1fr); }
 }
 
-/* Estilo dos Cartões */
+/* CARDS */
 .feature-card, .step { 
-    background: linear-gradient(145deg, #1e1e1e, #161616); /* Gradiente sutil no card */
-    padding: 2.5rem 2rem; 
-    border-radius: var(--radius); 
+    background: linear-gradient(145deg, #1e1e1e, #161616);
+    padding: 2.5rem 2rem; border-radius: var(--radius); 
     border: 1px solid rgba(255, 255, 255, 0.03); 
     box-shadow: var(--shadow-deep);
     transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); 
-    position: relative; 
-    overflow: hidden;
+    position: relative; overflow: hidden;
     display: flex; flex-direction: column; align-items: center; text-align: center;
 }
-/* Brilho interno no hover */
 .feature-card::before, .step::before {
     content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
     background: radial-gradient(circle at top right, rgba(190, 242, 2, 0.08), transparent 60%);
@@ -164,53 +141,47 @@ section { padding: 7rem 0; position: relative; }
 }
 .feature-card:hover::before, .step:hover::before { opacity: 1; }
 
+/* ÍCONES 3D REDONDOS */
 .feature-icon-img, .step-icon-img { 
-    width: 60px; height: 60px; margin-bottom: 1.5rem; 
-    filter: drop-shadow(0 0 8px rgba(190, 242, 2, 0.4)); /* Ícones brilham */
+    width: 60px; 
+    height: 60px; 
+    margin-bottom: 1.5rem; 
+    filter: drop-shadow(0 0 8px rgba(190, 242, 2, 0.4));
+    border-radius: 50%; /* Garante que fiquem redondos */
+    object-fit: cover;
 }
 
-/* --- AUTH PAGES (Textura Urbana) --- */
+/* --- AUTH & FORMS --- */
 .auth-main {
     display: flex; align-items: center; justify-content: center;
     padding: 4rem 1rem; width: 100%; min-height: 100vh;
-    /* Textura de parede com neon */
     background: linear-gradient(to bottom, rgba(5,5,5,0.85), rgba(5,5,5,0.95)),
                 url('/images/auth-bg.png');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
+    background-size: cover; background-position: center; background-attachment: fixed;
 }
 .auth-card {
-    background: rgba(30, 30, 30, 0.7); /* Vidro escuro */
-    padding: 3rem;
-    border-radius: 16px;
-    box-shadow: 0 40px 80px -20px rgba(0,0,0,0.9);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(20px); /* Desfoque forte */
+    background: rgba(30, 30, 30, 0.7); padding: 3rem;
+    border-radius: 16px; box-shadow: 0 40px 80px -20px rgba(0,0,0,0.9);
+    border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px);
     width: 100%; max-width: 450px; text-align: center;
 }
 .auth-header h2 { color: white; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
 
-/* Formulários Modernos */
 .form-group { margin-bottom: 1.2rem; text-align: left; }
 label { display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.9rem; color: #ccc; }
 input, select, textarea {
-    width: 100%; padding: 1rem; 
-    border: 1px solid var(--c-border); 
+    width: 100%; padding: 1rem; border: 1px solid var(--c-border); 
     border-radius: 8px; font-size: 1rem;
-    background-color: rgba(10, 10, 10, 0.6); /* Fundo semi-transparente */
-    color: white; transition: all 0.3s;
+    background-color: rgba(10, 10, 10, 0.6); color: white; transition: all 0.3s;
 }
 input:focus, select:focus, textarea:focus { 
-    outline: none; 
-    border-color: var(--c-accent-primary); 
+    outline: none; border-color: var(--c-accent-primary); 
     background-color: rgba(0, 0, 0, 0.8);
     box-shadow: 0 0 0 2px rgba(190, 242, 2, 0.2); 
 }
 
-/* Botões "High Voltage" */
+/* BUTTONS */
 .btn { display: inline-block; padding: 1rem 2rem; border-radius: 8px; font-weight: 800; text-align: center; border: none; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 1px; font-size: 0.9rem; }
-
 .btn-primary { 
     background: linear-gradient(135deg, var(--c-accent-primary), #a3cf02);
     color: var(--c-accent-dark); 
@@ -221,7 +192,6 @@ input:focus, select:focus, textarea:focus {
     box-shadow: 0 8px 25px rgba(190, 242, 2, 0.5); 
     filter: brightness(1.1);
 }
-
 .btn-secondary { 
     background: rgba(255, 255, 255, 0.05); 
     border: 1px solid rgba(255, 255, 255, 0.1); 

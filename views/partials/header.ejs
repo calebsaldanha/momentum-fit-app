@@ -5,12 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= typeof title !== 'undefined' ? title : 'Momentum Fit' %></title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/styles.css">
+    
+    <link rel="stylesheet" href="/css/styles.css?v=<%= Date.now() %>">
     
     <link rel="icon" type="image/png" href="/images/logo-3d.png">
 
     <% if (typeof bodyClass !== 'undefined' && bodyClass.includes('dashboard-body')) { %>
-        <link rel="stylesheet" href="/css/dashboard.css">
+        <link rel="stylesheet" href="/css/dashboard.css?v=<%= Date.now() %>">
     <% } %>
 </head>
 <body class="<%= typeof bodyClass !== 'undefined' ? bodyClass : '' %>">
@@ -74,7 +75,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // 1. Lógica do Menu Hamburger (Mobile)
+            // 1. Menu Mobile
             const hamburger = document.querySelector('.hamburger');
             const navMenu = document.querySelector('.nav-menu');
             if (hamburger) {
@@ -84,36 +85,36 @@
                 });
             }
 
-            // 2. Lógica para arredondar o Favicon dinamicamente
-            // Como CSS não funciona na aba do navegador, usamos Canvas para recortar a imagem
-            const faviconLink = document.querySelector("link[rel~='icon']");
-            if (faviconLink) {
+            // 2. Favicon Circular Dinâmico
+            const updateFavicon = () => {
+                const link = document.querySelector("link[rel~='icon']");
+                if (!link) return;
+                
                 const img = new Image();
-                img.src = '/images/logo-3d.png'; // Carrega a imagem original quadrada
-                // Configuração para evitar problemas de CORS se necessário (geralmente local ok)
-                img.crossOrigin = "Anonymous"; 
+                img.crossOrigin = "Anonymous";
+                img.src = '/images/logo-3d.png?v=' + new Date().getTime(); // Evita cache da imagem
                 
                 img.onload = function() {
-                    // Cria um canvas temporário
                     const canvas = document.createElement('canvas');
-                    const size = Math.min(img.width, img.height);
-                    canvas.width = size;
-                    canvas.height = size;
-                    
+                    canvas.width = 64;  // Tamanho padrão de favicon de alta resolução
+                    canvas.height = 64;
                     const ctx = canvas.getContext('2d');
                     
-                    // Desenha o caminho circular
+                    // Cria círculo
                     ctx.beginPath();
-                    ctx.arc(size/2, size/2, size/2, 0, 2 * Math.PI);
+                    ctx.arc(32, 32, 32, 0, 2 * Math.PI);
                     ctx.closePath();
-                    ctx.clip(); // Aplica o recorte
+                    ctx.clip();
                     
-                    // Desenha a imagem dentro do recorte
-                    ctx.drawImage(img, (img.width - size)/2, (img.height - size)/2, size, size, 0, 0, size, size);
+                    // Desenha imagem
+                    ctx.drawImage(img, 0, 0, 64, 64);
                     
-                    // Substitui o favicon pela versão recortada (Data URL)
-                    faviconLink.href = canvas.toDataURL();
+                    // Atualiza o ícone
+                    link.href = canvas.toDataURL();
                 };
-            }
+            };
+            
+            // Executa a atualização do favicon
+            updateFavicon();
         });
     </script>
