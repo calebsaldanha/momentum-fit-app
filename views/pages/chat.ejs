@@ -1,4 +1,49 @@
 <%- include('../partials/header.ejs', { title, bodyClass: 'dashboard-body' }) %>
+
+<style>
+    #imageModal {
+        display: none; /* Escondido por padrão */
+        position: fixed; 
+        z-index: 2000; /* Fica sobre tudo */
+        padding-top: 50px; 
+        left: 0;
+        top: 0;
+        width: 100%; 
+        height: 100%; 
+        overflow: auto; 
+        background-color: rgba(0,0,0,0.9); /* Fundo preto transparente */
+    }
+    #modalImage {
+        margin: auto;
+        display: block;
+        max-width: 90%;
+        max-height: 90vh;
+        border-radius: 8px;
+        border: 2px solid var(--c-border);
+    }
+    #closeModal {
+        position: absolute;
+        top: 15px;
+        right: 35px;
+        color: #f1f1f1;
+        font-size: 40px;
+        font-weight: bold;
+        transition: 0.3s;
+        cursor: pointer;
+    }
+    #closeModal:hover,
+    #closeModal:focus {
+        color: var(--c-accent-primary);
+        text-decoration: none;
+        cursor: pointer;
+    }
+</style>
+
+<div id="imageModal">
+  <span id="closeModal">&times;</span>
+  <img id="modalImage">
+</div>
+
 <div class="dashboard-container">
     <aside class="dashboard-sidebar">
         <nav class="sidebar-nav">
@@ -56,9 +101,9 @@
                     </div>
                     
                     <div id="filePreview" style="display: none; padding: 0.8rem; background: rgba(255,255,255,0.05); border-top: 1px solid var(--c-border); align-items: center; justify-content: space-between;">
-                        <div style="display: flex; align-items: center; gap: 10px;">
+                        <div style="display: flex; align-items: center; gap: 10px; overflow: hidden;">
                             <span style="font-size: 1.2rem;">���</span>
-                            <span id="fileName" style="font-size: 0.9rem; color: var(--c-accent-primary);"></span>
+                            <span id="fileName" style="font-size: 0.9rem; color: var(--c-accent-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;"></span>
                         </div>
                         <button type="button" id="clearFileBtn" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 1.2rem;">&times;</button>
                     </div>
@@ -94,13 +139,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const clearFileBtn = document.getElementById('clearFileBtn');
     const currentChatUserEl = document.getElementById('currentChatUser');
     const sendBtn = document.getElementById('sendBtn');
+    
+    // Elementos do Modal
+    const imageModal = document.getElementById('imageModal');
+    const modalImage = document.getElementById('modalImage');
+    const closeModal = document.getElementById('closeModal');
 
     function scrollToBottom() { messagesContainer.scrollTop = messagesContainer.scrollHeight; }
+
+    // Função para abrir o modal de imagem
+    window.openImageModal = function(src) {
+        modalImage.src = src;
+        imageModal.style.display = "block";
+    }
+
+    // Fechar o modal
+    closeModal.onclick = function() { imageModal.style.display = "none"; }
+    window.onclick = function(event) { if (event.target == imageModal) { imageModal.style.display = "none"; } }
 
     // Função para renderizar mídia (Imagens/Vídeos)
     function renderMessageContent(msg) {
         if (msg.message_type === 'image') {
-            return `<a href="${msg.content}" target="_blank"><img src="${msg.content}" alt="Imagem" style="max-width: 200px; max-height: 200px; border-radius: 8px; object-fit: cover; border: 1px solid #333;"></a>`;
+            // CORREÇÃO: Chama a função openImageModal em vez de abrir nova aba
+            return `<img src="${msg.content}" alt="Imagem" class="chat-image" style="max-width: 200px; max-height: 200px; border-radius: 8px; object-fit: cover; border: 1px solid #333; cursor: pointer;" onclick="openImageModal('${msg.content}')">`;
         } else if (msg.message_type === 'video') {
             return `<video src="${msg.content}" controls style="max-width: 250px; border-radius: 8px; border: 1px solid #333;"></video>`;
         } else {
@@ -110,11 +171,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Carregar Mensagens
     async function loadMessages(contactId) {
-        // Feedback visual imediato
         messagesContainer.innerHTML = '<div style="display:flex; height:100%; align-items:center; justify-content:center; color:#777;"><p>Carregando conversas...</p></div>';
         
         try {
-            // CORREÇÃO: Template string limpa, sem barras invertidas
             const response = await fetch(`/chat/messages/${contactId}`);
             if (!response.ok) throw new Error('Erro na rede');
             const messages = await response.json();
@@ -138,11 +197,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Preview do Arquivo
+    // Preview do Arquivo (CORREÇÃO: Sanitização do Nome)
     fileInput.addEventListener('change', function() {
         if (this.files && this.files[0]) {
+            const file = this.files[0];
+            // Remove caracteres não-ASCII (emojis, símbolos estranhos) para exibição
+            let safeName = file.name.replace(/[^\x00-\x7F]/g, ""); 
+            if (safeName.length === 0) safeName = "Arquivo"; // Fallback se o nome for só emoji
+
             filePreview.style.display = 'flex';
-            fileNameSpan.textContent = this.files[0].name;
+            fileNameSpan.textContent = safeName;
             messageInput.placeholder = 'Adicione uma legenda (opcional)...';
             messageInput.focus();
         }
