@@ -44,31 +44,33 @@
                         <% } else { %><p style="padding: 1rem; text-align: center;">Nenhum contato.</p><% } %>
                     </div>
                 </div>
+
                 <div class="chat-messages-area">
                     <div class="messages-header"><h3 id="currentChatUser" style="margin: 0; padding: 1rem; font-size: 1.1rem;">Selecione uma conversa</h3></div>
+                    
                     <div class="messages-container" id="messagesContainer">
                         <div class="empty-state" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
-                            <img src="/images/logo-3d.png" style="width: 80px; height: 80px; opacity: 0.3; border-radius: 50%; margin-bottom: 1rem;">
-                            <p>Escolha alguém ao lado.</p>
+                            <img src="/images/logo-3d.png" style="width: 80px; height: 80px; opacity: 0.3; border-radius: 50%; margin-bottom: 1rem; object-fit: cover;">
+                            <p>Escolha alguém ao lado para começar.</p>
                         </div>
                     </div>
                     
-                    <div id="filePreview" style="display: none; padding: 0.5rem 1rem; background: rgba(255,255,255,0.05); border-top: 1px solid var(--c-border); align-items: center; justify-content: space-between;">
+                    <div id="filePreview" style="display: none; padding: 0.8rem; background: rgba(255,255,255,0.05); border-top: 1px solid var(--c-border); align-items: center; justify-content: space-between;">
                         <div style="display: flex; align-items: center; gap: 10px;">
                             <span style="font-size: 1.2rem;">���</span>
-                            <span id="fileName" style="font-size: 0.85rem; color: var(--c-accent-primary);"></span>
+                            <span id="fileName" style="font-size: 0.9rem; color: var(--c-accent-primary);"></span>
                         </div>
                         <button type="button" id="clearFileBtn" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 1.2rem;">&times;</button>
                     </div>
 
                     <div class="message-input-container">
-                        <form id="chatForm" style="display: flex; gap: 10px; width: 100%; padding: 1rem; align-items: center;" enctype="multipart/form-data">
-                            <label for="fileInput" class="btn-attach" style="cursor: pointer; padding: 0.5rem; color: var(--c-text-secondary); display: flex; align-items: center; transition: color 0.2s;">
+                        <form id="chatForm" style="display: flex; gap: 10px; width: 100%; align-items: center;" enctype="multipart/form-data">
+                            <label for="fileInput" class="btn-attach" style="cursor: pointer; padding: 0.5rem; color: var(--c-text-secondary); display: flex; align-items: center; transition: color 0.2s;" title="Enviar foto ou vídeo">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
                             </label>
                             <input type="file" id="fileInput" name="file" accept="image/*,video/*" style="display: none;">
                             
-                            <input type="text" id="messageInput" name="content" placeholder="Mensagem..." autocomplete="off" style="flex: 1; padding: 0.8rem; border: 1px solid #ccc; border-radius: 4px;">
+                            <input type="text" id="messageInput" name="content" placeholder="Digite sua mensagem..." autocomplete="off" style="flex: 1; padding: 0.8rem; border: 1px solid #333; border-radius: 8px; background: #050505; color: white;">
                             <button type="submit" id="sendBtn" class="btn btn-primary">Enviar</button>
                         </form>
                     </div>
@@ -77,6 +79,7 @@
         </div>
     </main>
 </div>
+
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const currentUserId = '<%= user.id %>';
@@ -94,24 +97,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function scrollToBottom() { messagesContainer.scrollTop = messagesContainer.scrollHeight; }
 
+    // Função para renderizar mídia (Imagens/Vídeos)
     function renderMessageContent(msg) {
         if (msg.message_type === 'image') {
-            return \`<a href="\${msg.content}" target="_blank"><img src="\${msg.content}" alt="Imagem" style="max-width: 200px; max-height: 200px; border-radius: 8px; object-fit: cover;"></a>\`;
+            return \`<a href="\${msg.content}" target="_blank"><img src="\${msg.content}" alt="Imagem" style="max-width: 200px; max-height: 200px; border-radius: 8px; object-fit: cover; border: 1px solid #333;"></a>\`;
         } else if (msg.message_type === 'video') {
-            return \`<video src="\${msg.content}" controls style="max-width: 250px; border-radius: 8px;"></video>\`;
+            return \`<video src="\${msg.content}" controls style="max-width: 250px; border-radius: 8px; border: 1px solid #333;"></video>\`;
         } else {
             return msg.content;
         }
     }
 
+    // Carregar Mensagens
     async function loadMessages(contactId) {
+        // Feedback visual imediato
+        messagesContainer.innerHTML = '<div style="display:flex; height:100%; align-items:center; justify-content:center; color:#777;"><p>Carregando conversas...</p></div>';
+        
         try {
             const response = await fetch(\`/chat/messages/\${contactId}\`);
-            if (!response.ok) throw new Error('Erro');
+            if (!response.ok) throw new Error('Erro na rede');
             const messages = await response.json();
+            
             messagesContainer.innerHTML = '';
+            
             if (messages.length === 0) { 
-                messagesContainer.innerHTML = '<div style="padding:2rem;text-align:center;color:#777;"><p>Nenhuma mensagem.</p></div>';
+                messagesContainer.innerHTML = '<div style="padding:2rem; text-align:center; color:#555; margin-top:auto;"><p>Nenhuma mensagem ainda. Diga olá! ���</p></div>';
             } else { 
                 messages.forEach(msg => { 
                     const d = document.createElement('div'); 
@@ -121,14 +131,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
             scrollToBottom();
-        } catch (error) { console.error(error); }
+        } catch (error) { 
+            console.error(error);
+            messagesContainer.innerHTML = '<div style="padding:2rem; text-align:center; color:var(--c-error);"><p>Erro ao carregar mensagens.</p></div>';
+        }
     }
 
+    // Preview do Arquivo
     fileInput.addEventListener('change', function() {
         if (this.files && this.files[0]) {
             filePreview.style.display = 'flex';
             fileNameSpan.textContent = this.files[0].name;
             messageInput.placeholder = 'Adicione uma legenda (opcional)...';
+            messageInput.focus();
         }
     });
 
@@ -136,19 +151,25 @@ document.addEventListener('DOMContentLoaded', () => {
         fileInput.value = '';
         filePreview.style.display = 'none';
         fileNameSpan.textContent = '';
-        messageInput.placeholder = 'Mensagem...';
+        messageInput.placeholder = 'Digite sua mensagem...';
     });
 
+    // Clique no usuário da lista
     document.querySelectorAll('.user-item').forEach(item => { 
         item.addEventListener('click', () => { 
             activeContactId = item.dataset.userId; 
+            
+            // Atualiza UI
             document.querySelectorAll('.user-item').forEach(el => el.classList.remove('active')); 
             item.classList.add('active'); 
             currentChatUserEl.textContent = item.dataset.userName; 
+            
+            // Carrega
             loadMessages(activeContactId); 
         }); 
     });
 
+    // Enviar Mensagem
     chatForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
@@ -166,6 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const originalBtnText = sendBtn.innerText;
         sendBtn.innerText = 'Enviando...';
         sendBtn.disabled = true;
+        sendBtn.style.opacity = '0.7';
 
         const formData = new FormData();
         formData.append('receiver_id', activeContactId);
@@ -181,6 +203,12 @@ document.addEventListener('DOMContentLoaded', () => {
              
             if (response.ok) { 
                 const msg = await response.json(); 
+                
+                // Remove mensagem de "vazio" se houver
+                if(messagesContainer.innerText.includes('Nenhuma mensagem')) {
+                    messagesContainer.innerHTML = '';
+                }
+
                 const d = document.createElement('div'); 
                 d.className = 'message own-message'; 
                 d.innerHTML = renderMessageContent(msg); 
@@ -190,16 +218,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 messageInput.value = ''; 
                 fileInput.value = '';
                 filePreview.style.display = 'none';
-                messageInput.placeholder = 'Mensagem...';
+                messageInput.placeholder = 'Digite sua mensagem...';
+                
                 scrollToBottom(); 
             } else {
                 const err = await response.json();
                 alert("Erro ao enviar: " + (err.error || 'Desconhecido'));
             }
-        } catch (err) { console.error(err); alert('Erro de conexão.'); }
-        finally {
+        } catch (err) { 
+            console.error(err); 
+            alert('Erro de conexão.'); 
+        } finally {
             sendBtn.innerText = originalBtnText;
             sendBtn.disabled = false;
+            sendBtn.style.opacity = '1';
         }
     });
 });

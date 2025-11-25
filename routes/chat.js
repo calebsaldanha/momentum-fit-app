@@ -3,13 +3,12 @@ const router = express.Router();
 const { pool } = require('../database/db');
 const notificationService = require('../utils/notificationService');
 const multer = require('multer');
-const { put } = require('@vercel/blob'); // Importa função do Vercel Blob
+const { put } = require('@vercel/blob'); 
 
-// Configura o Multer para usar a memória (não salva em disco)
-// O arquivo fica na RAM temporariamente até enviarmos para o Vercel Blob
+// Configuração Multer (Memória)
 const upload = multer({ 
     storage: multer.memoryStorage(),
-    limits: { fileSize: 50 * 1024 * 1024 } // Limite de 50MB
+    limits: { fileSize: 50 * 1024 * 1024 } // 50MB limit
 });
 
 const requireAuth = (req, res, next) => {
@@ -24,11 +23,12 @@ router.get('/', async (req, res) => {
         const { id: userId, role: userRole } = req.session.user;
         let users = [];
 
+        // Se for personal/admin, vê clientes. Se for cliente, vê personais/admins.
         if (userRole === 'trainer' || userRole === 'superadmin') {
             const result = await pool.query("SELECT id, name FROM users WHERE role = 'client' ORDER BY name");
             users = result.rows;
         } else {
-            const result = await pool.query("SELECT id, name FROM users WHERE role = 'trainer' OR role = 'superadmin' ORDER BY name");
+            const result = await pool.query("SELECT id, name FROM users WHERE role IN ('trainer', 'superadmin') ORDER BY name");
             users = result.rows;
         }
 
@@ -42,17 +42,18 @@ router.get('/', async (req, res) => {
     }
 });
 
+// Buscar mensagens
 router.get('/messages/:contactId', async (req, res) => {
     try {
         const { id: userId } = req.session.user;
         const { contactId } = req.params;
 
-        const query = `
+        const query = \`
             SELECT id, sender_id, content, message_type, created_at
             FROM messages
             WHERE (sender_id = $1 AND receiver_id = $2) OR (sender_id = $2 AND receiver_id = $1)
             ORDER BY created_at ASC;
-        `;
+        \`;
         const result = await pool.query(query, [userId, contactId]);
         res.json(result.rows);
     } catch (err) {
@@ -61,7 +62,7 @@ router.get('/messages/:contactId', async (req, res) => {
     }
 });
 
-// Rota de Envio com Suporte a Vercel Blob
+// Enviar mensagem (Texto ou Arquivo via Blob)
 router.post('/send', requireAuth, upload.single('file'), async (req, res) => {
     try {
         const { id: sender_id, name: senderName } = req.session.user;
@@ -70,18 +71,14 @@ router.post('/send', requireAuth, upload.single('file'), async (req, res) => {
         let messageContent = content || '';
         let messageType = 'text';
 
-        // Se houver arquivo, faz upload para o Vercel Blob
+        // Upload para Vercel Blob se houver arquivo
         if (req.file) {
-            console.log('Iniciando upload para Vercel Blob:', req.file.originalname);
-            
-            // Upload para o Vercel Blob
             const blob = await put(req.file.originalname, req.file.buffer, { 
                 access: 'public',
                 contentType: req.file.mimetype
             });
-
-            // A URL pública do arquivo é salva como conteúdo da mensagem
-            messageContent = blob.url;
+            
+            messageContent = blob.url; // Salva a URL do Blob
             
             if (req.file.mimetype.startsWith('image/')) {
                 messageType = 'image';
@@ -102,7 +99,7 @@ router.post('/send', requireAuth, upload.single('file'), async (req, res) => {
         res.status(201).json(result.rows[0]);
     } catch (err) {
         console.error("Erro ao enviar mensagem:", err);
-        res.status(500).json({ error: "Erro ao processar mensagem: " + err.message });
+        res.status(500).json({ error: "Erro ao processar mensagem." });
     }
 });
 
