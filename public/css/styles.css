@@ -89,7 +89,7 @@ img { max-width: 100%; height: auto; display: block; }
 
 /* --- HERO SECTION (IMPACTO 3D) --- */
 .hero {
-    /* Overlay escuro + Imagem 3D (Dia 0.png renomeada) */
+    /* Overlay escuro + Imagem 3D */
     background: linear-gradient(to bottom, rgba(5, 5, 5, 0.5) 0%, rgba(5, 5, 5, 0.9) 80%, var(--c-bg-darkest) 100%), 
                 url('/images/hero-bg.png');
     background-size: cover;
@@ -122,7 +122,16 @@ img { max-width: 100%; height: auto; display: block; }
 /* --- SEÇÕES E CARDS (PROFUNDIDADE) --- */
 section { padding: 7rem 0; position: relative; }
 .about { background: linear-gradient(to bottom, var(--c-bg-surface), #0c0c0c); }
-.features { background-color: var(--c-bg-surface); }
+
+/* --- FEATURES SECTION (ATUALIZADA) --- */
+.features {
+    /* Mesma técnica do Hero: Imagem de fundo + Overlay para legibilidade */
+    background: linear-gradient(to bottom, rgba(5, 5, 5, 0.85) 0%, rgba(5, 5, 5, 0.95) 100%), 
+                url('/images/features-bg.png');
+    background-size: cover;
+    background-position: center;
+    border-top: 1px solid rgba(255,255,255,0.05);
+}
 
 .features-grid, .about-steps { display: grid; gap: 2rem; }
 @media (min-width: 992px) {
@@ -164,7 +173,7 @@ section { padding: 7rem 0; position: relative; }
 .auth-main {
     display: flex; align-items: center; justify-content: center;
     padding: 4rem 1rem; width: 100%; min-height: 100vh;
-    /* Textura de parede com neon (Dia 29.png renomeada) */
+    /* Textura de parede com neon */
     background: linear-gradient(to bottom, rgba(5,5,5,0.85), rgba(5,5,5,0.95)),
                 url('/images/auth-bg.png');
     background-size: cover;
