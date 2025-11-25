@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= typeof title !== 'undefined' ? title : 'Momentum Fit' %></title>
+    <title><%= typeof title !== 'undefined' ?
+title : 'Momentum Fit' %></title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/styles.css">
     <link rel="icon" type="image/png" href="/images/momentum-fit-icon.png">
@@ -15,50 +16,63 @@
     <% if (typeof bodyClass === 'undefined' || !bodyClass.includes('auth-body')) { %>
         <header class="header">
             <div class="container">
-                <nav class="nav-container">
+   
+             <nav class="nav-container">
                     <div class="nav-logo">
                         <a href="/">
-                            <img src="/images/momentum-fit-logo-completo.png" alt="Momentum Fit" onerror="this.src='/images/momentum-fit-icon.png'" style="height: 40px;">
-                        </a>
+                            <img src="/images/logo-3d.png" alt="Momentum Fit" onerror="this.src='/images/momentum-fit-icon.png'" style="height: 40px;">
+      
+                  </a>
                     </div>
                     
                     <ul class="nav-menu">
-                        <li><a href="/" class="nav-link">Início</a></li>
+                     
+   <li><a href="/" class="nav-link">Início</a></li>
                         <li><a href="/about" class="nav-link">Sobre</a></li>
                         <li><a href="/articles" class="nav-link">Artigos</a></li>
 
                         <% if (isAuthenticated) { %>
-                            <% if (user.role === 'client') { %>
+               
+             <% if (user.role === 'client') { %>
                                 <li><a href="/client/dashboard" class="nav-link">Meu Painel</a></li>
                                 <li><a href="/client/workouts" class="nav-link">Treinos</a></li>
-                            <% } %>
+            
+                <% } %>
                             
-                            <% if (user.role === 'trainer' || user.role === 'superadmin') { %>
+                            <% if (user.role === 'trainer' ||
+user.role === 'superadmin') { %>
                                 <li><a href="/admin/dashboard" class="nav-link">Painel Admin</a></li>
                             <% } %>
 
                             <li><a href="/chat" class="nav-link">Chat</a></li>
 
-                            <li style="margin-left: auto; display: flex; align-items: center; gap: 15px;">
+ 
+                           <li style="margin-left: auto; display: flex; align-items: center; gap: 15px;">
                                 <div class="user-badge">
-                                    Olá, <%= user.name.split(' ')[0] %>
+                                
+    Olá, <%= user.name.split(' ')[0] %>
                                 </div>
                                 <form action="/auth/logout" method="POST" style="display: inline; margin: 0;">
-                                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                      
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                                     <button type="submit" class="btn btn-secondary btn-sm" style="white-space: nowrap; border: 1px solid #ccc;">
-                                        Sair
+                                   
+     Sair
                                     </button>
                                 </form>
-                            </li>
+                           
+ </li>
                         <% } else { %>
                             <li style="margin-left: auto;"><a href="/auth/login" class="nav-link">Entrar</a></li>
                             <li><a href="/auth/register" class="btn btn-primary btn-sm">Começar</a></li>
-                        <% } %>
+       
+                 <% } %>
                     </ul>
 
                     <div class="hamburger">
                         <span class="bar"></span>
-                        <span class="bar"></span>
+               
+         <span class="bar"></span>
                         <span class="bar"></span>
                     </div>
                 </nav>
@@ -66,17 +80,18 @@
         </header>
     <% } %>
 
-    <% if (isAuthenticated) { %>
+   
+ <% if (isAuthenticated) { %>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const hamburger = document.querySelector('.hamburger');
-            const navMenu = document.querySelector('.nav-menu');
+const navMenu = document.querySelector('.nav-menu');
             if (hamburger) {
                 hamburger.addEventListener('click', () => {
                     hamburger.classList.toggle('active');
                     navMenu.classList.toggle('active');
                 });
-            }
+}
         });
     </script>
     <% } %>

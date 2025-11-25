@@ -10,36 +10,46 @@
         </nav>
     </aside>
 
-    <main class="dashboard-main">
+   
+ <main class="dashboard-main">
         <div class="section">
             <div class="section-header">
                 <h1>Meus Treinos</h1>
-                <p>Aqui estão todos os seus planos de treino. Mantenha o Momentum!</p>
+                <p>Aqui estão todos os seus planos de treino.
+Mantenha o Momentum!</p>
             </div>
 
             <% if (workouts && workouts.length > 0) { %>
                 <div class="workouts-grid" style="grid-template-columns: 1fr;">
                     <% workouts.forEach(workout => { %>
-                        <div class="workout-card">
+                       
+ <div class="workout-card">
                             <div class="card-content">
                                 <h3><%= workout.title %></h3>
                                 <div class="workout-meta">
-                                    <span>Por: <%= workout.trainer_name %></span>
+  
+                                  <span>Por: <%= workout.trainer_name %></span>
                                     <span>Criado em: <%= new Date(workout.created_at).toLocaleDateString('pt-BR') %></span>
-                                </div>
+                      
+          </div>
                                 <p class="workout-desc"><%= workout.description %></p>
                             </div>
-                            <div class="card-footer">
+                           
+ <div class="card-footer">
                                 <a href="/workouts/<%= workout.id %>" class="btn btn-primary btn-sm">Ver Detalhes do Treino</a>
                             </div>
                         </div>
-                    <% }); %>
+     
+               <% });
+%>
                 </div>
             <% } else { %>
                 <div class="empty-state">
                     <div class="empty-icon"></div>
                     <h3>Nenhum treino atribuído ainda.</h3>
-                    <p>Seu treinador irá montar seu plano em breve. Enquanto isso, que tal enviar uma mensagem?</p>
+       
+             <p>Seu treinador irá montar seu plano em breve.
+Enquanto isso, que tal enviar uma mensagem?</p>
                     <a href="/chat" class="btn btn-primary">Iniciar Conversa</a>
                 </div>
             <% } %>

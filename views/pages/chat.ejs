@@ -3,52 +3,68 @@
     <aside class="dashboard-sidebar">
         <nav class="sidebar-nav">
              <% if (user.role === 'client') { %>
-                <a href="/client/dashboard" class="nav-item"><span><img src="/images/momentum-fit-icon.png" class="icon-sm"></span> Dashboard</a>
-                <a href="/client/workouts" class="nav-item"><span><img src="/images/momentum-fit-icon.png" class="icon-sm"></span> Meus Treinos</a>
-                <a href="/chat" class="nav-item active"><span><img src="/images/momentum-fit-icon.png" class="icon-sm"></span> Chat</a>
+                <a href="/client/dashboard" class="nav-item"><span></span> Dashboard</a>
+                <a href="/client/workouts" class="nav-item"><span></span> Meus Treinos</a>
+                
+<a href="/chat" class="nav-item active"><span></span> Chat</a>
             <% } else { %>
                  <% if (user.role === 'superadmin') { %>
-                    <a href="/superadmin/dashboard" class="nav-item" style="color: var(--c-accent-dark); background: #eaff0040; border-left-color: var(--c-accent-primary);"><span><img src="/images/momentum-fit-icon.png" class="icon-sm"></span> Painel Super Admin</a>
-                    <div style="height: 1px; background: #e2e8f0; margin: 0.5rem 1rem;"></div>
+                    <a href="/superadmin/dashboard" class="nav-item" style="color: var(--c-accent-dark); background: #eaff0040; border-left-color: var(--c-accent-primary);"><span></span> Painel Super Admin</a>
+                    <div style="height: 
+1px; background: #e2e8f0; margin: 0.5rem 1rem;"></div>
                 <% } %>
-                <a href="/admin/dashboard" class="nav-item"><span><img src="/images/momentum-fit-icon.png" class="icon-sm"></span> Dashboard</a>
-                <a href="/admin/clients" class="nav-item"><span><img src="/images/momentum-fit-icon.png" class="icon-sm"></span> Clientes</a>
-                <a href="/workouts/create" class="nav-item"><span><img src="/images/momentum-fit-icon.png" class="icon-sm"></span> Criar Treino</a>
-                <% if (user.role === 'superadmin') { %>
-                    <a href="/articles/create" class="nav-item"><span><img src="/images/momentum-fit-icon.png" class="icon-sm"></span> Criar Artigo</a>
+                <a href="/admin/dashboard" class="nav-item"><span></span> Dashboard</a>
+                <a href="/admin/clients" class="nav-item"><span></span> Clientes</a>
+                <a href="/workouts/create" class="nav-item"><span></span> Criar Treino</a>
+             
+   <% if (user.role === 'superadmin') { %>
+                    <a href="/articles/create" class="nav-item"><span></span> Criar Artigo</a>
                 <% } %>
-                <a href="/chat" class="nav-item active"><span><img src="/images/momentum-fit-icon.png" class="icon-sm"></span> Chat</a>
+                <a href="/chat" class="nav-item active"><span></span> Chat</a>
             <% } %>
         </nav>
-        <div class="sidebar-footer"><form action="/auth/logout" method="POST" style="margin: 0;"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button type="submit" class="btn-logout-sidebar">Sair</button></form></div>
+   
+     <div class="sidebar-footer"><form action="/auth/logout" method="POST" style="margin: 0;"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button type="submit" class="btn-logout-sidebar">Sair</button></form></div>
     </aside>
     <main class="dashboard-main">
-        <div class="section" style="padding: 0; overflow: hidden; border: 1px solid var(--c-border);">
+        <div class="section" style="padding: 0;
+overflow: hidden; border: 1px solid var(--c-border);">
             <div class="chat-layout">
                 <div class="chat-users">
-                    <h3 style="padding: 1rem; border-bottom: 1px solid var(--c-border); margin: 0;">Conversas</h3>
-                    <div class="users-list" style="overflow-y: auto; height: 100%;">
+                    <h3 style="padding: 1rem;
+border-bottom: 1px solid var(--c-border); margin: 0;">Conversas</h3>
+                    <div class="users-list" style="overflow-y: auto;
+height: 100%;">
                         <% if (chatUsers && chatUsers.length > 0) { %>
                             <% chatUsers.forEach(chatUser => { %>
-                                <div class="user-item" data-user-id="<%= chatUser.id %>" data-user-name="<%= chatUser.name %>">
+                                <div class="user-item" data-user-id="<%= 
+chatUser.id %>" data-user-name="<%= chatUser.name %>">
                                     <div class="user-avatar"><%= chatUser.name.charAt(0) %></div>
                                     <div class="user-info"><h4 style="margin: 0; font-size: 0.95rem;"><%= chatUser.name %></h4></div>
-                                </div>
+              
+                  </div>
                             <% }); %>
-                        <% } else { %><p style="padding: 1rem; text-align: center;">Nenhum contato.</p><% } %>
+                        <% } else { %><p style="padding: 1rem;
+text-align: center;">Nenhum contato.</p><% } %>
                     </div>
                 </div>
                 <div class="chat-messages-area">
-                    <div class="messages-header"><h3 id="currentChatUser" style="margin: 0; padding: 1rem; font-size: 1.1rem;">Selecione uma conversa</h3></div>
-                    <div class="messages-container" id="messagesContainer"><div class="empty-state" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;"><div style="font-size: 3rem; opacity: 0.3;">Ì≤¨</div><p>Escolha algu√©m ao lado.</p></div></div>
+                    <div class="messages-header"><h3 id="currentChatUser" style="margin: 0;
+padding: 1rem; font-size: 1.1rem;">Selecione uma conversa</h3></div>
+                    <div class="messages-container" id="messagesContainer"><div class="empty-state" style="display: flex;
+flex-direction: column; align-items: center; justify-content: center; height: 100%;"><div style="font-size: 3rem;
+opacity: 0.3;"></div><p>Escolha algu√©m ao lado.</p></div></div>
                     <div class="message-input-container">
-                        <form id="chatForm" style="display: flex; gap: 10px; width: 100%; padding: 1rem;">
-                            <input type="text" id="messageInput" placeholder="Mensagem..." autocomplete="off" style="flex: 1; padding: 0.8rem; border: 1px solid #ccc; border-radius: 4px;">
+                        <form id="chatForm" style="display: flex;
+gap: 10px; width: 100%; padding: 1rem;">
+                            <input type="text" id="messageInput" placeholder="Mensagem..." autocomplete="off" style="flex: 1;
+padding: 0.8rem; border: 1px solid #ccc; border-radius: 4px;">
                             <button type="submit" class="btn btn-primary">Enviar</button>
                         </form>
                     </div>
                 </div>
-            </div>
+  
+          </div>
         </div>
     </main>
 </div>
@@ -64,24 +80,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const currentChatUserEl = document.getElementById('currentChatUser');
     function scrollToBottom() { messagesContainer.scrollTop = messagesContainer.scrollHeight; }
     async function loadMessages(contactId) {
-        try {
+  
+      try {
             const response = await fetch(`/chat/messages/${contactId}`);
             if (!response.ok) throw new Error('Erro');
-            const messages = await response.json();
+const messages = await response.json();
             messagesContainer.innerHTML = '';
-            if (messages.length === 0) { messagesContainer.innerHTML = '<div style="padding:2rem;text-align:center;color:#777;"><p>Nenhuma mensagem.</p></div>'; } 
-            else { messages.forEach(msg => { const d = document.createElement('div'); d.className = 'message ' + (msg.sender_id == currentUserId ? 'own-message' : 'other-message'); d.textContent = msg.content; messagesContainer.appendChild(d); }); }
+            if (messages.length === 0) { messagesContainer.innerHTML = '<div style="padding:2rem;text-align:center;color:#777;"><p>Nenhuma mensagem.</p></div>';
+} 
+            else { messages.forEach(msg => { const d = document.createElement('div'); d.className = 'message ' + (msg.sender_id == currentUserId ? 'own-message' : 'other-message'); d.textContent = msg.content; messagesContainer.appendChild(d); });
+}
             scrollToBottom();
-        } catch (error) { console.error(error); }
+        } catch (error) { console.error(error);
+}
     }
     document.querySelectorAll('.user-item').forEach(item => { item.addEventListener('click', () => { activeContactId = item.dataset.userId; document.querySelectorAll('.user-item').forEach(el => el.classList.remove('active')); item.classList.add('active'); currentChatUserEl.textContent = item.dataset.userName; loadMessages(activeContactId); }); });
-    chatForm.addEventListener('submit', async (e) => {
+chatForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const content = messageInput.value.trim();
         if (!content || !activeContactId) return;
         try {
              const response = await fetch('/chat/send', { method: 'POST', headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken }, body: JSON.stringify({ receiver_id: activeContactId, content: content, message_type: 'text' }) });
-            if (response.ok) { const msg = await response.json(); const d = document.createElement('div'); d.className = 'message own-message'; d.textContent = msg.content; messagesContainer.appendChild(d); messageInput.value = ''; scrollToBottom(); }
+            if (response.ok) { const msg = await 
+response.json(); const d = document.createElement('div'); d.className = 'message own-message'; d.textContent = msg.content; messagesContainer.appendChild(d); messageInput.value = ''; scrollToBottom(); }
         } catch (err) { console.error(err); }
     });
 });
