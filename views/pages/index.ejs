@@ -1,5 +1,69 @@
 <%- include('../partials/header.ejs') %>
 
+<style>
+    /* Seção de Tecnologia com mais profundidade */
+    #features {
+        position: relative;
+        background: linear-gradient(135deg, #f8fafc 0%, #ffffff 50%, #f0fdf4 100%);
+        overflow: hidden;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    /* Detalhes verdes de fundo (Shapes abstratos) */
+    #features::before {
+        content: '';
+        position: absolute;
+        top: -100px;
+        right: -50px;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(163, 230, 53, 0.10) 0%, transparent 70%);
+        border-radius: 50%;
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    #features::after {
+        content: '';
+        position: absolute;
+        bottom: -100px;
+        left: -50px;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(163, 230, 53, 0.10) 0%, transparent 70%);
+        border-radius: 50%;
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    /* Ajuste para garantir que o conteúdo fique sobre o fundo */
+    .features .container {
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Cards com efeito de vidro e borda sutil verde */
+    .feature-card {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(163, 230, 53, 0.2);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        border-color: rgba(163, 230, 53, 0.5);
+    }
+    
+    /* Ajuste dos ícones 3D nos cards */
+    .step-icon-img, .feature-icon-img {
+        object-fit: contain;
+        filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+    }
+</style>
+
 <main>
     <section id="home" class="hero">
         <div class="container hero-container">
@@ -25,22 +89,22 @@
             <h2 class="section-title">O Caminho para Seus Melhores Resultados</h2>
             <div class="about-steps">
                 <div class="step">
-                    <img src="/images/momentum-fit-icon.png" class="step-icon-img" alt="Passo 1">
+                    <img src="/images/logo-3d.png" class="step-icon-img" alt="Passo 1">
                     <h3>Defina Seu Alvo</h3>
                     <p>Comece com um questionário rápido para entendermos seus objetivos exatos: emagrecimento, hipertrofia ou performance.</p>
                 </div>
                 <div class="step">
-                    <img src="/images/momentum-fit-icon.png" class="step-icon-img" alt="Passo 2">
+                    <img src="/images/logo-3d.png" class="step-icon-img" alt="Passo 2">
                     <h3>Plano Personalizado</h3>
                     <p>Receba um plano de treino 100% adaptado por um de nossos especialistas, focado na sua rotina e limitações.</p>
                 </div>
                 <div class="step">
-                    <img src="/images/momentum-fit-icon.png" class="step-icon-img" alt="Passo 3">
+                    <img src="/images/logo-3d.png" class="step-icon-img" alt="Passo 3">
                     <h3>Acompanhamento</h3>
                     <p>Execute seus treinos, registre seu progresso (check-ins) e tire dúvidas em tempo real pelo chat privado.</p>
                 </div>
                 <div class="step">
-                    <img src="/images/momentum-fit-icon.png" class="step-icon-img" alt="Passo 4">
+                    <img src="/images/logo-3d.png" class="step-icon-img" alt="Passo 4">
                     <h3>Evolução</h3>
                     <p>Seu treinador ajusta o plano com base nos seus dados e feedback, garantindo que o seu progresso nunca pare.</p>
                 </div>
@@ -53,17 +117,17 @@
             <h2 class="section-title">A Tecnologia por Trás do Momentum</h2>
              <div class="features-grid">
                 <div class="feature-card">
-                    <img src="/images/momentum-fit-icon.png" class="feature-icon-img" alt="Ícone">
+                    <img src="/images/logo-3d.png" class="feature-icon-img" alt="Ícone">
                     <h3>Treinos Focados</h3>
                     <p>Planos de treino otimizados para maximizar seus resultados, com foco em técnica e consistência.</p>
                 </div>
                 <div class="feature-card">
-                    <img src="/images/momentum-fit-icon.png" class="feature-icon-img" alt="Ícone">
+                    <img src="/images/logo-3d.png" class="feature-icon-img" alt="Ícone">
                     <h3>Comunicação Direta</h3>
                     <p>Use nosso chat embutido para ter acesso rápido ao seu personal, sem intermediários.</p>
                 </div>
                 <div class="feature-card">
-                    <img src="/images/momentum-fit-icon.png" class="feature-icon-img" alt="Ícone">
+                    <img src="/images/logo-3d.png" class="feature-icon-img" alt="Ícone">
                     <h3>Métricas e Check-ins</h3>
                     <p>Acompanhe seu desempenho e feedback de treino para ver seu progresso de forma clara e motivadora.</p>
                 </div>
