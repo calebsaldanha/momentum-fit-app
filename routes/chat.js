@@ -8,7 +8,7 @@ const { put } = require('@vercel/blob');
 // Configuração Multer (Memória para Serverless)
 const upload = multer({ 
     storage: multer.memoryStorage(),
-    limits: { fileSize: 50 * 1024 * 1024 } // 50MB
+    limits: { fileSize: 50 * 1024 * 1024 } // 50MB limit
 });
 
 const requireAuth = (req, res, next) => {
@@ -24,7 +24,7 @@ router.get('/', async (req, res) => {
         const { id: userId, role: userRole } = req.session.user;
         let users = [];
 
-        // Lógica de lista de contatos
+        // Se for personal/admin, vê clientes. Se for cliente, vê personais/admins.
         if (userRole === 'trainer' || userRole === 'superadmin') {
             const result = await pool.query("SELECT id, name FROM users WHERE role = 'client' ORDER BY name");
             users = result.rows;
@@ -38,12 +38,12 @@ router.get('/', async (req, res) => {
             chatUsers: users
         });
     } catch (err) {
-        console.error("Erro ao carregar chat:", err);
-        res.status(500).render('pages/error', { message: "Erro ao carregar o sistema de chat." });
+        console.error("Erro ao carregar página de chat:", err);
+        res.status(500).render('pages/error', { message: "Não foi possível carregar o chat." });
     }
 });
 
-// API: Buscar mensagens
+// API: Buscar mensagens (Correção: Template String limpa)
 router.get('/messages/:contactId', async (req, res) => {
     try {
         const { id: userId } = req.session.user;
@@ -58,8 +58,8 @@ router.get('/messages/:contactId', async (req, res) => {
         const result = await pool.query(query, [userId, contactId]);
         res.json(result.rows);
     } catch (err) {
-        console.error("Erro mensagens:", err);
-        res.status(500).json({ error: "Erro ao buscar histórico." });
+        console.error("Erro ao buscar mensagens:", err);
+        res.status(500).json({ error: "Erro ao buscar mensagens" });
     }
 });
 

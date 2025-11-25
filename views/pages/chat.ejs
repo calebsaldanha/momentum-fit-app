@@ -100,9 +100,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Função para renderizar mídia (Imagens/Vídeos)
     function renderMessageContent(msg) {
         if (msg.message_type === 'image') {
-            return \`<a href="\${msg.content}" target="_blank"><img src="\${msg.content}" alt="Imagem" style="max-width: 200px; max-height: 200px; border-radius: 8px; object-fit: cover; border: 1px solid #333;"></a>\`;
+            return `<a href="${msg.content}" target="_blank"><img src="${msg.content}" alt="Imagem" style="max-width: 200px; max-height: 200px; border-radius: 8px; object-fit: cover; border: 1px solid #333;"></a>`;
         } else if (msg.message_type === 'video') {
-            return \`<video src="\${msg.content}" controls style="max-width: 250px; border-radius: 8px; border: 1px solid #333;"></video>\`;
+            return `<video src="${msg.content}" controls style="max-width: 250px; border-radius: 8px; border: 1px solid #333;"></video>`;
         } else {
             return msg.content;
         }
@@ -114,7 +114,8 @@ document.addEventListener('DOMContentLoaded', () => {
         messagesContainer.innerHTML = '<div style="display:flex; height:100%; align-items:center; justify-content:center; color:#777;"><p>Carregando conversas...</p></div>';
         
         try {
-            const response = await fetch(\`/chat/messages/\${contactId}\`);
+            // CORREÇÃO: Template string limpa, sem barras invertidas
+            const response = await fetch(`/chat/messages/${contactId}`);
             if (!response.ok) throw new Error('Erro na rede');
             const messages = await response.json();
             
