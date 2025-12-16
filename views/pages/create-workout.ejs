@@ -57,16 +57,16 @@ document.addEventListener('DOMContentLoaded', function() {
     function addExercise() {
         const container = document.getElementById('exercisesContainer');
         const count = container.children.length + 1;
-        const exerciseHTML = \`
+        const exerciseHTML = `
             <div class="exercise-item" style="border: 1px solid var(--c-border); background: var(--c-bg-card); border-radius: var(--radius); padding: 1.5rem; margin-top: 1.5rem; position: relative;">
-                <h4 style="margin-bottom: 1rem; color: var(--c-accent-primary);">Exercício \${count}</h4>
+                <h4 style="margin-bottom: 1rem; color: var(--c-accent-primary);">Exercício ${count}</h4>
                 <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                     <div class="form-group"><label>Nome do Exercício *</label><input type="text" class="exercise-name" required placeholder="Ex: Agachamento Livre"></div>
                     <div class="form-group"><label>Séries x Reps *</label><input type="text" class="exercise-sets" required placeholder="Ex: 4x12"></div>
                 </div>
                 <div class="form-group"><label>Observações / Técnica</label><textarea class="exercise-description" rows="2" placeholder="Ex: Cadência 2020, foco na descida..."></textarea></div>
                 <button type="button" class="btn btn-secondary btn-sm remove-exercise" style="border-color: var(--c-error); color: var(--c-error);">Remover</button>
-            </div>\`;
+            </div>`;
         container.insertAdjacentHTML('beforeend', exerciseHTML);
     }
     
@@ -98,7 +98,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }); 
             }
         });
-        
+
         if (exercises.length === 0) {
             alert('Adicione pelo menos um exercício.');
             return;
@@ -110,22 +110,23 @@ document.addEventListener('DOMContentLoaded', function() {
             description: document.getElementById('description').value, 
             exercises 
         };
-        
+
         try {
             const response = await fetch('/workouts/create', { 
                 method: 'POST', 
                 headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken }, 
                 body: JSON.stringify(formData) 
             });
+
             const result = await response.json();
             if (response.ok && result.success) { 
-                alert('Treino criado com sucesso!'); 
+                alert('Treino criado com sucesso!');
                 window.location.href = '/admin/dashboard'; 
             } else { 
-                throw new Error(result.message); 
+                throw new Error(result.message);
             }
         } catch (error) { 
-            alert('Erro: ' + error.message); 
+            alert('Erro: ' + error.message);
         }
     });
 });
