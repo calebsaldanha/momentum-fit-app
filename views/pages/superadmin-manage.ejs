@@ -4,56 +4,45 @@
     <main class="dashboard-main">
         <div class="section">
             <div class="section-header"><h1>Gerenciar Personais Ativos</h1></div>
-            <% if (trainers && trainers.length > 0) { %>
-                <div class="table-container">
-                    <table>
-                        <thead><tr><th>Nome</th><th>Email</th><th style="text-align: right;">Ações</th></tr></thead>
-                        <tbody>
-                            <% trainers.forEach(user => { %>
-                             <tr>
-                                <td><%= user.name %></td>
-                                <td><%= user.email %></td>
-                                <td style="text-align: right;">
-                                    <form action="/superadmin/users/delete/<%= user.id %>" method="POST" onsubmit="return confirm('Excluir este personal?');">
-                                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                        <button type="submit" class="btn btn-secondary btn-sm" style="color: var(--c-error);">Excluir</button>
-                                    </form>
-                                </td>
-                            </tr>
-                            <% }); %>
-                         </tbody>
-                    </table>
-                </div>
-            <% } else { %>
-                 <div class="empty-state"><p>Nenhum personal ativo.</p></div>
-            <% } %>
+            <div class="table-container">
+                <table>
+                    <thead><tr><th>Nome</th><th>Email</th><th style="text-align: right;">Ações</th></tr></thead>
+                    <tbody>
+                        <% trainers.forEach(user => { %>
+                        <tr>
+                            <td><%= user.name %></td><td><%= user.email %></td>
+                            <td style="text-align: right;">
+                                <form action="/superadmin/users/delete/<%= user.id %>" method="POST" onsubmit="return confirm('Excluir este personal?');">
+                                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                    <button type="submit" class="btn btn-secondary btn-sm" style="color: var(--c-error);">Excluir</button>
+                                </form>
+                            </td>
+                        </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
         </div>
-
         <div class="section">
             <div class="section-header"><h1>Gerenciar Clientes</h1></div>
-            <% if (clients && clients.length > 0) { %>
-                <div class="table-container">
-                    <table>
-                         <thead><tr><th>Nome</th><th>Email</th><th style="text-align: right;">Ações</th></tr></thead>
-                         <tbody>
-                            <% clients.forEach(user => { %>
-                                <tr>
-                                    <td><%= user.name %></td>
-                                    <td><%= user.email %></td>
-                                    <td style="text-align: right;">
-                                        <form action="/superadmin/users/delete/<%= user.id %>" method="POST" onsubmit="return confirm('Excluir este cliente?');">
-                                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                            <button type="submit" class="btn btn-secondary btn-sm" style="color: var(--c-error);">Excluir</button>
-                                        </form>
-                                     </td>
-                                </tr>
-                            <% }); %>
-                         </tbody>
-                    </table>
-                </div>
-            <% } else { %>
-                 <div class="empty-state"><p>Nenhum cliente cadastrado.</p></div>
-            <% } %>
+            <div class="table-container">
+                <table>
+                    <thead><tr><th>Nome</th><th>Email</th><th style="text-align: right;">Ações</th></tr></thead>
+                    <tbody>
+                        <% clients.forEach(user => { %>
+                        <tr>
+                            <td><%= user.name %></td><td><%= user.email %></td>
+                            <td style="text-align: right;">
+                                <form action="/superadmin/users/delete/<%= user.id %>" method="POST" onsubmit="return confirm('Excluir este cliente?');">
+                                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                    <button type="submit" class="btn btn-secondary btn-sm" style="color: var(--c-error);">Excluir</button>
+                                </form>
+                            </td>
+                        </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </main>
 </div>

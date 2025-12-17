@@ -37,7 +37,7 @@ router.get('/', async (req, res) => {
 });
 
 router.get('/create', requireSuperAdminAuth, (req, res) => {
-    res.render('pages/create-article', { title: 'Criar Novo Artigo - Momentum Fit' });
+    res.render('pages/create-article', { currentPage: 'create-article', title: 'Criar Novo Artigo - Momentum Fit' });
 });
 
 router.post('/create', requireSuperAdminAuth, [

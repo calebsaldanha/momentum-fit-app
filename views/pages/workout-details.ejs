@@ -1,9 +1,9 @@
 <%- include('../partials/header.ejs', { title, bodyClass: 'dashboard-body' }) %>
 <div class="dashboard-container">
     <% if (user.role === 'client') { %>
-        <%- include('../partials/client-sidebar.ejs', { currentPage: 'workouts' }) %>
+        <%- include('../partials/client-sidebar.ejs', { currentPage: 'client-workouts' }) %>
     <% } else { %>
-        <%- include('../partials/admin-sidebar.ejs', { currentPage: 'clients' }) %>
+        <%- include('../partials/admin-sidebar.ejs', { currentPage: 'admin-clients' }) %>
     <% } %>
 
     <main class="dashboard-main">
@@ -22,15 +22,10 @@
                     <% } %>
                 </div>
             </div>
-
             <div class="table-container">
                 <table>
                     <thead>
-                        <tr>
-                            <th>Exercício</th>
-                            <th>Séries x Reps</th>
-                            <th>Notas / Observações</th>
-                        </tr>
+                        <tr><th>Exercício</th><th>Séries x Reps</th><th>Notas</th></tr>
                     </thead>
                     <tbody>
                         <% (workout.exercises || []).forEach(ex => { %>

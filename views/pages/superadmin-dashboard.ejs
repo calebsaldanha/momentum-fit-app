@@ -10,7 +10,7 @@
             <% if (trainers && trainers.length > 0) { %>
                 <div class="table-container">
                     <table>
-                        <thead><tr><th>Nome</th><th>Email</th><th>Data Cadastro</th><th style="text-align: right;">Ações</th></tr></thead>
+                        <thead><tr><th>Nome</th><th>Email</th><th>Cadastro</th><th style="text-align: right;">Ações</th></tr></thead>
                         <tbody>
                             <% trainers.forEach(trainer => { %>
                             <tr>
@@ -19,11 +19,11 @@
                                 <td><%= new Date(trainer.created_at).toLocaleDateString('pt-BR') %></td>
                                 <td style="text-align: right;">
                                     <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
-                                        <form action="/superadmin/trainers/approve/<%= trainer.id %>" method="POST" style="margin:0;">
+                                        <form action="/superadmin/trainers/approve/<%= trainer.id %>" method="POST">
                                             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                                             <button type="submit" class="btn btn-primary btn-sm">Aprovar</button>
                                         </form>
-                                        <form action="/superadmin/trainers/reject/<%= trainer.id %>" method="POST" style="margin:0;">
+                                        <form action="/superadmin/trainers/reject/<%= trainer.id %>" method="POST">
                                             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                                             <button type="submit" class="btn btn-secondary btn-sm">Rejeitar</button>
                                         </form>
@@ -35,7 +35,7 @@
                     </table>
                 </div>
             <% } else { %>
-                <div class="empty-state"><p>Tudo limpo! Nenhum personal pendente.</p></div>
+                <div class="empty-state"><p>Nenhum personal pendente.</p></div>
             <% } %>
         </div>
     </main>

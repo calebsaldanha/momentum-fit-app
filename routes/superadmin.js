@@ -14,7 +14,7 @@ router.use(requireSuperAdminAuth);
 router.get('/dashboard', async (req, res) => {
     try {
         const pendingTrainers = await pool.query("SELECT id, name, email, created_at FROM users WHERE role = 'trainer' AND status = 'pending_approval' ORDER BY created_at DESC");
-        res.render('pages/superadmin-dashboard', { currentPage: 'super-dashboard',
+        res.render('pages/superadmin-dashboard', { currentPage: 'super-dashboard', currentPage: 'super-dashboard',
             title: 'Painel Super Admin - Momentum Fit',
             trainers: pendingTrainers.rows, currentPage: 'super-dashboard'
         });
@@ -48,7 +48,7 @@ router.get('/manage', async (req, res) => {
     try {
         const trainers = await pool.query("SELECT id, name, email, created_at FROM users WHERE role = 'trainer' AND status = 'active' ORDER BY name");
         const clients = await pool.query("SELECT id, name, email, created_at FROM users WHERE role = 'client' ORDER BY name");
-        res.render('pages/superadmin-manage', { currentPage: 'super-manage',
+        res.render('pages/superadmin-manage', { currentPage: 'super-manage', currentPage: 'super-manage',
             title: 'Gerenciar Usuários - Momentum Fit',
             trainers: trainers.rows,
             clients: clients.rows, currentPage: 'super-manage'
