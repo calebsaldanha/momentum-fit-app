@@ -16,13 +16,15 @@
             <div class="section-header">
                 <div>
                     <h1><%= workout.title %></h1>
-                    <p>Instrutor: <%= workout.trainer_name %></p>
+                    <p style="color: var(--c-text-secondary);">Instrutor: <%= workout.trainer_name %></p>
                 </div>
                 <div style="display: flex; gap: 1rem;">
                     <% if (user.role !== 'client') { %>
-                        <a href="/workouts/<%= workout.id %>/edit" class="btn btn-secondary">Editar</a>
+                        <a href="/workouts/<%= workout.id %>/edit" class="btn btn-secondary">Editar Treino</a>
+                        <a href="/admin/clients/<%= workout.client_id %>" class="btn btn-outline">Voltar ao Cliente</a>
+                    <% } else { %>
+                        <a href="/client/workouts" class="btn btn-secondary">Voltar aos Treinos</a>
                     <% } %>
-                    <a href="<%= user.role === 'client' ? '/client/workouts' : '/admin/dashboard' %>" class="btn btn-secondary">Voltar</a>
                 </div>
             </div>
 
@@ -32,7 +34,7 @@
                         <tr>
                             <th>Exercício</th>
                             <th>Séries x Reps</th>
-                            <th>Notas</th>
+                            <th>Notas / Observações</th>
                         </tr>
                     </thead>
                     <tbody>

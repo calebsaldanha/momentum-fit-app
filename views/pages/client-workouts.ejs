@@ -1,10 +1,29 @@
 <%- include('../partials/header.ejs', { title: 'Meus Treinos', bodyClass: 'dashboard-body' }) %>
 <div class="dashboard-container">
-    <main class="dashboard-main" style="margin-left:0; padding: 2rem;">
+    <aside class="dashboard-sidebar">
+        <nav class="sidebar-nav">
+            <a href="/client/dashboard" class="nav-item">Painel Geral</a>
+            <a href="/client/workouts" class="nav-item active">Meus Treinos</a>
+            <a href="/chat" class="nav-item">Chat</a>
+            <a href="/client/profile" class="nav-item">Meu Perfil</a>
+        </nav>
+        <div class="sidebar-footer">
+            <form action="/auth/logout" method="POST" style="margin: 0;">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <button type="submit" class="btn-logout-sidebar">Sair</button>
+            </form>
+        </div>
+    </aside>
+
+    <main class="dashboard-main">
         <section class="section">
-            <h1>Meus Treinos</h1>
+            <div class="section-header">
+                <h1>Meus Treinos</h1>
+                <p>Consulte aqui todos os seus planos de treino ativos e passados.</p>
+            </div>
+
             <div class="workouts-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
-                <% if (workouts.length > 0) { %>
+                <% if (workouts && workouts.length > 0) { %>
                     <% workouts.forEach(workout => { %>
                         <div class="info-card">
                             <h3><%= workout.title %></h3>
@@ -15,7 +34,10 @@
                         </div>
                     <% }) %>
                 <% } else { %>
-                    <p>Você ainda não possui treinos atribuídos.</p>
+                    <div class="empty-state" style="grid-column: 1/-1; text-align: center; padding: 3rem;">
+                        <p>Você ainda não possui treinos atribuídos.</p>
+                        <a href="/chat" class="btn btn-secondary">Contactar Treinador</a>
+                    </div>
                 <% } %>
             </div>
         </section>
