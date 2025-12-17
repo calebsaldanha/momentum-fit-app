@@ -9,9 +9,25 @@
     </aside>
     <main class="dashboard-main">
         <section class="section">
-            <div class="section-header">
-                <h1><%= clientProfile.name %></h1>
+            <div class="section-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h1><%= clientProfile.name %></h1>
+                    <p><%= clientProfile.email %></p>
+                </div>
                 <a href="/workouts/create?clientId=<%= clientProfile.id %>" class="btn btn-primary">Novo Treino</a>
+            </div>
+
+            <div class="client-info-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-top: 2rem;">
+                <div class="info-card">
+                    <h4>Informações Físicas</h4>
+                    <p>Peso: <%= clientProfile.weight || '--' %>kg</p>
+                    <p>Altura: <%= clientProfile.height || '--' %>cm</p>
+                    <p>Nível: <%= clientProfile.fitness_level || 'Não informado' %></p>
+                </div>
+                <div class="info-card">
+                    <h4>Objetivos</h4>
+                    <p><%= clientProfile.goals || 'Sem objetivos definidos.' %></p>
+                </div>
             </div>
 
             <div class="table-container" style="margin-top: 2rem;">
@@ -26,22 +42,27 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <% workouts.forEach(workout => { %>
-                        <tr>
-                            <td><%= workout.title %></td>
-                            <td><%= new Date(workout.created_at).toLocaleDateString('pt-BR') %></td>
-                            <td><%= workout.trainer_name %></td>
-                            <td>
-                                <div style="display: flex; gap: 0.5rem;">
-                                    <a href="/workouts/edit/<%= workout.id %>" class="btn btn-secondary btn-sm">Editar</a>
-                                    <form action="/admin/workouts/<%= workout.id %>/delete" method="POST" onsubmit="return confirm('Excluir este treino?')">
-                                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                        <button type="submit" class="btn btn-error btn-sm" style="background: var(--c-error);">Excluir</button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                        <% }) %>
+                        <% if (workouts && workouts.length > 0) { %>
+                            <% workouts.forEach(workout => { %>
+                            <tr>
+                                <td><%= workout.title %></td>
+                                <td><%= new Date(workout.created_at).toLocaleDateString('pt-BR') %></td>
+                                <td><%= workout.trainer_name %></td>
+                                <td>
+                                    <div style="display: flex; gap: 0.5rem;">
+                                        <form action="/admin/workouts/<%= workout.id %>/delete" method="POST" onsubmit="return confirm('Excluir treino?')">
+                                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                            <button type="submit" class="btn btn-sm" style="background: var(--c-error); color: white;">Excluir</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="4" style="text-align: center;">Nenhum treino registrado.</td>
+                            </tr>
+                        <% } %>
                     </tbody>
                 </table>
             </div>
