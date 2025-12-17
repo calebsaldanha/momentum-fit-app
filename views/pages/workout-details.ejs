@@ -15,36 +15,17 @@
                     <p>Cliente: <%= workout.client_name %></p>
                 </div>
                 <div style="display: flex; gap: 1rem;">
-                    <a href="/workouts/edit/<%= workout.id %>" class="btn btn-secondary">Editar</a>
-                    <a href="/admin/clients/<%= workout.client_id %>" class="btn btn-outline">Voltar</a>
+                    <a href="/workouts/edit/<%= workout.id %>" class="btn btn-secondary">Editar Treino</a>
+                    <a href="/admin/clients/<%= workout.client_id %>" class="btn btn-outline">Voltar ao Cliente</a>
                 </div>
             </div>
-
             <div class="table-container">
                 <table>
-                    <thead>
-                        <tr>
-                            <th>Exercício</th>
-                            <th>Séries</th>
-                            <th>Reps</th>
-                            <th>Descanso</th>
-                            <th>Notas</th>
-                        </tr>
-                    </thead>
+                    <thead><tr><th>Exercício</th><th>Séries x Reps</th><th>Notas</th></tr></thead>
                     <tbody>
-                        <% if (workout.exercises && Array.isArray(workout.exercises)) { %>
-                            <% workout.exercises.forEach(ex => { %>
-                            <tr>
-                                <td><strong><%= ex.name %></strong></td>
-                                <td><%= ex.sets %></td>
-                                <td><%= ex.reps %></td>
-                                <td><%= ex.rest %>s</td>
-                                <td><%= ex.notes || '-' %></td>
-                            </tr>
-                            <% }) %>
-                        <% } else { %>
-                            <tr><td colspan="5" style="text-align:center;">Nenhum exercício listado.</td></tr>
-                        <% } %>
+                        <% (workout.exercises || []).forEach(ex => { %>
+                        <tr><td><strong><%= ex.name %></strong></td><td><%= ex.sets %></td><td><%= ex.description || ex.notes || '-' %></td></tr>
+                        <% }) %>
                     </tbody>
                 </table>
             </div>

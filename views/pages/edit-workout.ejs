@@ -2,16 +2,16 @@
 <div class="dashboard-container">
     <aside class="dashboard-sidebar">
         <nav class="sidebar-nav">
-            <a href="/admin/dashboard" class="nav-item"><span></span> Dashboard</a>
-            <a href="/admin/clients" class="nav-item"><span></span> Clientes</a>
-            <a href="/chat" class="nav-item"><span></span> Chat</a>
+            <a href="/admin/dashboard" class="nav-item">Dashboard</a>
+            <a href="/admin/clients" class="nav-item">Clientes</a>
+            <a href="/chat" class="nav-item">Chat</a>
         </nav>
     </aside>
     <main class="dashboard-main">
         <div class="section">
             <div class="section-header">
                 <h1>Editar Treino</h1>
-                <p>Editando treino de: <strong><%= clients.find(c => c.id == workout.client_id)?.name || 'Cliente' %></strong></p>
+                <p>Editando treino de: <strong><%= workout.client_name %></strong></p>
             </div>
             
             <form id="editWorkoutForm" class="dashboard-form" style="max-width: 800px;">
@@ -30,9 +30,7 @@
                 <h3 style="margin: 2rem 0 1rem;">Exercícios</h3>
                 <div id="exercisesContainer"></div>
                 
-                <button type="button" class="btn btn-outline" id="addExerciseBtn" style="margin-top: 1rem; width: 100%; border-style: dashed;">
-                    + Adicionar Exercício
-                </button>
+                <button type="button" class="btn btn-outline" id="addExerciseBtn" style="margin-top: 1rem; width: 100%; border-style: dashed;">+ Adicionar Exercício</button>
                 
                 <div class="form-actions" style="margin-top: 2rem; display: flex; justify-content: flex-end; gap: 1rem;">
                     <a href="/admin/clients/<%= workout.client_id %>" class="btn btn-secondary">Voltar</a>
@@ -45,8 +43,10 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('exercisesContainer');
+    const existingExercises = <%- JSON.stringify(workout.exercises || []) %>;
+
     function addExercise(data = {}) {
-        const container = document.getElementById('exercisesContainer');
         const count = container.children.length + 1;
         const exerciseHTML = `
             <div class="exercise-item" style="border: 1px solid var(--c-border); background: var(--c-bg-card); border-radius: var(--radius); padding: 1.5rem; margin-top: 1.5rem; position: relative;">
@@ -55,39 +55,26 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="form-group"><label>Nome *</label><input type="text" class="exercise-name" required value="${data.name || ''}"></div>
                     <div class="form-group"><label>Séries x Reps *</label><input type="text" class="exercise-sets" required value="${data.sets || ''}"></div>
                 </div>
-                <div class="form-group"><label>Obs</label><textarea class="exercise-description" rows="2">${data.description || ''}</textarea></div>
+                <div class="form-group"><label>Obs</label><textarea class="exercise-description" rows="2">${data.description || data.notes || ''}</textarea></div>
                 <button type="button" class="btn btn-secondary btn-sm remove-exercise" style="border-color: var(--c-error); color: var(--c-error);">Remover</button>
             </div>`;
         container.insertAdjacentHTML('beforeend', exerciseHTML);
     }
 
-    const existingExercises = <%- JSON.stringify(workout.exercises || []) %>;
-    if (existingExercises.length > 0) {
-        existingExercises.forEach(ex => addExercise(ex));
-    } else {
-        addExercise();
-    }
+    if (existingExercises.length > 0) existingExercises.forEach(ex => addExercise(ex));
+    else addExercise();
     
     document.getElementById('addExerciseBtn').addEventListener('click', () => addExercise());
+    container.addEventListener('click', (e) => { if (e.target.classList.contains('remove-exercise')) e.target.closest('.exercise-item').remove(); });
     
-    document.getElementById('exercisesContainer').addEventListener('click', function(e) { 
-        if (e.target && e.target.classList.contains('remove-exercise')) { 
-            e.target.closest('.exercise-item').remove(); 
-        } 
-    });
-    
-    document.getElementById('editWorkoutForm').addEventListener('submit', async function(e) {
+    document.getElementById('editWorkoutForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const exercises = [];
         document.querySelectorAll('.exercise-item').forEach(item => {
             const name = item.querySelector('.exercise-name').value;
             const sets = item.querySelector('.exercise-sets').value;
-            if (name && sets) { 
-                exercises.push({ name, sets, description: item.querySelector('.exercise-description').value });
-            }
+            if (name && sets) exercises.push({ name, sets, description: item.querySelector('.exercise-description').value });
         });
-
-        if (exercises.length === 0) { alert('Adicione pelo menos um exercício.'); return; }
 
         const formData = { 
             client_id: document.getElementById('client_id').value,
@@ -96,23 +83,18 @@ document.addEventListener('DOMContentLoaded', function() {
             exercises 
         };
 
-        const csrfToken = '<%= typeof csrfToken !== "undefined" ? csrfToken : "" %>';
         try {
-            const response = await fetch('/workouts/<%= workout.id %>/edit', { 
+            const response = await fetch('/workouts/edit/<%= workout.id %>', { 
                 method: 'POST', 
-                headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken }, 
+                headers: { 'Content-Type': 'application/json', 'CSRF-Token': '<%= csrfToken %>' }, 
                 body: JSON.stringify(formData) 
             });
             const result = await response.json();
-            if (response.ok && result.success) { 
-                alert('Treino atualizado com sucesso!');
-                window.location.href = `/admin/clients/${result.clientId}`; 
-            } else { 
-                throw new Error(result.message);
-            }
-        } catch (error) { 
-            alert('Erro: ' + error.message);
-        }
+            if (result.success) { 
+                alert('Sucesso!');
+                window.location.href = '/admin/clients/' + result.clientId; 
+            } else throw new Error(result.message);
+        } catch (err) { alert('Erro: ' + err.message); }
     });
 });
 </script>
