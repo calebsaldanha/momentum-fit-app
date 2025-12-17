@@ -1,21 +1,13 @@
 <aside class="dashboard-sidebar">
     <nav class="sidebar-nav">
         <% if (user.role === 'superadmin') { %>
-            <a href="/superadmin/dashboard" class="nav-item">Painel Super Admin</a>
+            <a href="/superadmin/dashboard" class="nav-item" style="color: var(--c-accent-dark); background: rgba(190, 242, 2, 0.1);">Painel Super Admin</a>
             <div style="height: 1px; background: rgba(255,255,255,0.1); margin: 0.5rem 1rem;"></div>
         <% } %>
-        <a href="/admin/dashboard" class="nav-item <%= currentPage === 'admin-dashboard' ? 'active' : '' %>">
-            Painel Geral
-        </a>
-        <a href="/admin/clients" class="nav-item <%= currentPage === 'admin-clients' ? 'active' : '' %>">
-            Gerenciar Clientes
-        </a>
-        <a href="/workouts/create" class="nav-item <%= currentPage === 'create-workout' ? 'active' : '' %>">
-            Novo Treino
-        </a>
-        <a href="/chat" class="nav-item <%= currentPage === 'chat' ? 'active' : '' %>">
-            Mensagens
-        </a>
+        <a href="/admin/dashboard" class="nav-item <%= currentPage === 'admin-dashboard' ? 'active' : '' %>">Painel Geral</a>
+        <a href="/admin/clients" class="nav-item <%= currentPage === 'admin-clients' ? 'active' : '' %>">Gerenciar Clientes</a>
+        <a href="/workouts/create" class="nav-item <%= currentPage === 'create-workout' ? 'active' : '' %>">Novo Treino</a>
+        <a href="/chat" class="nav-item <%= currentPage === 'chat' ? 'active' : '' %>">Mensagens</a>
     </nav>
     <div class="sidebar-footer">
         <form action="/auth/logout" method="POST" style="margin: 0;">

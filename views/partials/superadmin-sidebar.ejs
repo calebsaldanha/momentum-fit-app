@@ -1,18 +1,10 @@
 <aside class="dashboard-sidebar">
     <nav class="sidebar-nav">
-        <a href="/superadmin/dashboard" class="nav-item <%= currentPage === 'super-dashboard' ? 'active' : '' %>">
-            Aprovação de Personais
-        </a>
-        <a href="/superadmin/manage" class="nav-item <%= currentPage === 'super-manage' ? 'active' : '' %>">
-            Gerenciar Usuários
-        </a>
-        <a href="/articles/create" class="nav-item <%= currentPage === 'create-article' ? 'active' : '' %>">
-            Criar Artigo
-        </a>
+        <a href="/superadmin/dashboard" class="nav-item <%= currentPage === 'super-dashboard' ? 'active' : '' %>">Aprovação de Personais</a>
+        <a href="/superadmin/manage" class="nav-item <%= currentPage === 'super-manage' ? 'active' : '' %>">Gerenciar Usuários</a>
+        <a href="/articles/create" class="nav-item <%= currentPage === 'create-article' ? 'active' : '' %>">Criar Artigo</a>
         <div style="height: 1px; background: rgba(255,255,255,0.1); margin: 0.5rem 1rem;"></div>
-        <a href="/admin/dashboard" class="nav-item">
-            Painel Admin (Geral)
-        </a>
+        <a href="/admin/dashboard" class="nav-item">Painel Admin</a>
     </nav>
     <div class="sidebar-footer">
         <form action="/auth/logout" method="POST" style="margin: 0;">

@@ -1,17 +1,9 @@
 <aside class="dashboard-sidebar">
     <nav class="sidebar-nav">
-        <a href="/client/dashboard" class="nav-item <%= currentPage === 'client-dashboard' ? 'active' : '' %>">
-            Painel Geral
-        </a>
-        <a href="/client/workouts" class="nav-item <%= currentPage === 'client-workouts' ? 'active' : '' %>">
-            Meus Treinos
-        </a>
-        <a href="/chat" class="nav-item <%= currentPage === 'chat' ? 'active' : '' %>">
-            Mensagens
-        </a>
-        <a href="/client/profile" class="nav-item <%= currentPage === 'client-profile' ? 'active' : '' %>">
-            Meu Perfil
-        </a>
+        <a href="/client/dashboard" class="nav-item <%= currentPage === 'client-dashboard' ? 'active' : '' %>">Painel Geral</a>
+        <a href="/client/workouts" class="nav-item <%= currentPage === 'client-workouts' ? 'active' : '' %>">Meus Treinos</a>
+        <a href="/chat" class="nav-item <%= currentPage === 'chat' ? 'active' : '' %>">Mensagens</a>
+        <a href="/client/profile" class="nav-item <%= currentPage === 'client-profile' ? 'active' : '' %>">Meu Perfil</a>
     </nav>
     <div class="sidebar-footer">
         <form action="/auth/logout" method="POST" style="margin: 0;">
