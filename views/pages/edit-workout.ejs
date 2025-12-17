@@ -1,0 +1,50 @@
+<%- include('../partials/header.ejs', { title, bodyClass: 'dashboard-body' }) %>
+<div class="dashboard-container">
+    <main class="dashboard-main" style="margin-left: 0; padding: 2rem;">
+        <div class="section">
+            <h1>Editar Treino: <%= workout.title %></h1>
+            <form id="editWorkoutForm" style="margin-top: 2rem;">
+                <div class="form-group" style="margin-bottom: 1.5rem;">
+                    <label style="display:block; margin-bottom: 0.5rem;">Título</label>
+                    <input type="text" name="title" value="<%= workout.title %>" required style="width: 100%; padding: 0.8rem; background: #1a1a1a; border: 1px solid #333; color: white;">
+                </div>
+                <div id="exercisesContainer">
+                    <% exercises.forEach((ex, index) => { %>
+                        <div class="exercise-row" style="background: #111; padding: 1rem; margin-bottom: 1rem; border-radius: 8px; display: flex; gap: 1rem; flex-wrap: wrap;">
+                            <input type="text" placeholder="Exercício" value="<%= ex.name %>" required style="flex: 2;">
+                            <input type="text" placeholder="Séries" value="<%= ex.sets %>" style="width: 80px;">
+                            <input type="text" placeholder="Reps" value="<%= ex.reps %>" style="width: 80px;">
+                            <input type="text" placeholder="Descanso" value="<%= ex.rest %>" style="width: 80px;">
+                        </div>
+                    <% }) %>
+                </div>
+                <button type="submit" class="btn btn-primary">Atualizar Treino</button>
+            </form>
+        </div>
+    </main>
+</div>
+<script>
+document.getElementById('editWorkoutForm').onsubmit = async (e) => {
+    e.preventDefault();
+    const rows = document.querySelectorAll('.exercise-row');
+    const exercises = Array.from(rows).map(row => {
+        const inputs = row.querySelectorAll('input');
+        return { name: inputs[0].value, sets: inputs[1].value, reps: inputs[2].value, rest: inputs[3].value };
+    });
+    
+    const res = await fetch('/workouts/edit/<%= workout.id %>', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'CSRF-Token': '<%= csrfToken %>' },
+        body: JSON.stringify({
+            title: e.target.title.value,
+            exercises: exercises
+        })
+    });
+    const result = await res.json();
+    if(result.success) {
+        alert('Treino atualizado com sucesso!');
+        window.location.href = '/workouts/<%= workout.id %>';
+    }
+};
+</script>
+<%- include('../partials/footer.ejs') %>
