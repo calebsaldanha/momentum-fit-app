@@ -35,7 +35,8 @@ router.get('/:id', requireAuth, async (req, res) => {
 
         res.render('pages/workout-details', {
             title: `Treino: ${workout.title}`,
-            workout: workout
+            workout: workout,
+            user: req.session.user
         });
     } catch (err) {
         res.status(500).render('pages/error', { title: 'Erro', message: 'Erro ao carregar treino.' });
