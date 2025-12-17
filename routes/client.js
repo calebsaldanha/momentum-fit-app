@@ -26,7 +26,7 @@ router.get('/dashboard', async (req, res) => {
         );
 
         res.render('pages/client-dashboard', {
-            title: 'Meu Dashboard - Momentum Fit',
+            title: 'Painel Geral - Momentum Fit',
             workouts: workoutsRes.rows || [],
             checkins: checkinsRes.rows || [],
             profile: profileRes.rows[0] || {},
@@ -45,7 +45,7 @@ router.get('/workouts', async (req, res) => {
             "SELECT w.*, u.name as trainer_name FROM workouts w LEFT JOIN users u ON w.trainer_id = u.id WHERE w.client_id = $1",
             [req.session.user.id]
         );
-        res.render('pages/client-workouts', { title: 'Meus Treinos', workouts: workoutsRes.rows });
+        res.render('pages/client-workouts', { title: 'Meus Treinos - Momentum Fit', workouts: workoutsRes.rows });
     } catch (err) {
         res.status(500).render('pages/error', { message: 'Erro ao carregar treinos.' });
     }
@@ -58,7 +58,7 @@ router.get('/profile', async (req, res) => {
             "SELECT u.name, u.email, cp.* FROM users u JOIN client_profiles cp ON u.id = cp.user_id WHERE u.id = $1",
             [req.session.user.id]
         );
-        res.render('pages/client-profile', { title: 'Meu Perfil', profile: result.rows[0] || {} });
+        res.render('pages/client-profile', { title: 'Meu Perfil - Momentum Fit', profile: result.rows[0] || {} });
     } catch (err) {
         res.status(500).render('pages/error', { message: 'Erro ao carregar perfil.' });
     }
