@@ -1,17 +1,11 @@
 <%- include('../partials/header.ejs', { title, bodyClass: 'dashboard-body' }) %>
-
 <div class="dashboard-container">
     <aside class="dashboard-sidebar">
         <nav class="sidebar-nav">
-            <a href="/client/dashboard" class="nav-item active">
-                <img src="/images/momentum-fit-icon.png" class="icon-sm" style="width:20px"> Painel Geral
-            </a>
-            <a href="/client/workouts" class="nav-item">
-                <img src="/images/momentum-fit-icon.png" class="icon-sm" style="width:20px"> Meus Treinos
-            </a>
-            <a href="/chat" class="nav-item">
-                <img src="/images/momentum-fit-icon.png" class="icon-sm" style="width:20px"> Mensagens
-            </a>
+            <a href="/client/dashboard" class="nav-item active">Painel Geral</a>
+            <a href="/client/workouts" class="nav-item">Meus Treinos</a>
+            <a href="/chat" class="nav-item">Chat</a>
+            <a href="/client/profile" class="nav-item">Meu Perfil</a>
         </nav>
     </aside>
 
@@ -19,66 +13,44 @@
         <section class="section">
             <div class="section-header">
                 <h1>Bem-vindo, <%= user.name %>!</h1>
-                <p>Aqui estão os seus planos de treino ativos.</p>
             </div>
 
-            <div class="workouts-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
-                <% if (workouts && workouts.length > 0) { %>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <h3><%= profile.weight || '--' %> <small>kg</small></h3>
+                        <p>Peso Atual</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <h3><%= workouts.length %></h3>
+                        <p>Planos Ativos</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <h3><%= profile.fitness_level || 'Definir' %></h3>
+                        <p>Nível</p>
+                    </div>
+                </div>
+            </div>
+
+            <h2 style="margin-top: 3rem;">Treinos Recentes</h2>
+            <div class="workouts-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1rem;">
+                <% if (workouts.length > 0) { %>
                     <% workouts.forEach(workout => { %>
                         <div class="info-card">
                             <h3><%= workout.title %></h3>
-                            <p style="color: var(--c-text-secondary); margin-bottom: 1.5rem;">Treinador: <%= workout.trainer_name %></p>
-                            <a href="/workouts/<%= workout.id %>" class="btn btn-primary">Ver Treino Completo</a>
+                            <p>Instrutor: <%= workout.trainer_name %></p>
+                            <a href="/workouts/<%= workout.id %>" class="btn btn-primary btn-sm">Ver Detalhes</a>
                         </div>
                     <% }) %>
                 <% } else { %>
-                    <div class="empty-state" style="text-align: center; padding: 3rem;">
-                        <h3>Nenhum treino para você ainda.</h3>
-                        <p>O seu treinador irá montar o seu plano em breve.</p>
-                        <a href="/chat" class="btn btn-secondary">Enviar Mensagem</a>
-                    </div>
+                    <p>Sem treinos atribuídos. <a href="/chat">Fale com seu treinador.</a></p>
                 <% } %>
             </div>
         </section>
-
-        <% if (checkins && checkins.length > 0) { %>
-            <section class="section" style="margin-top: 3rem;">
-                <h2>A sua Evolução</h2>
-                <div style="max-width: 800px; margin-top: 2rem; background: var(--c-bg-card); padding: 1.5rem; border-radius: var(--radius);">
-                    <canvas id="progressChart"></canvas>
-                </div>
-            </section>
-            
-            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-            <script>
-                const ctx = document.getElementById('progressChart').getContext('2d');
-                const checkinData = <%- JSON.stringify(checkins) %>;
-                
-                new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: checkinData.map(c => new Date(c.date).toLocaleDateString()),
-                        datasets: [{
-                            label: 'Treinos Concluídos',
-                            data: checkinData.map(c => c.count),
-                            borderColor: '#BEF202',
-                            backgroundColor: 'rgba(190, 242, 2, 0.1)',
-                            tension: 0.4,
-                            fill: true
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: { legend: { display: false } },
-                        scales: {
-                            y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } },
-                            x: { grid: { display: false } }
-                        }
-                    }
-                });
-            </script>
-        <% } %>
     </main>
 </div>
-
 <%- include('../partials/footer.ejs') %>

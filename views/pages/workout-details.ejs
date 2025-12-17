@@ -1,19 +1,28 @@
 <%- include('../partials/header.ejs', { title, bodyClass: 'dashboard-body' }) %>
 <div class="dashboard-container">
-    <main class="dashboard-main" style="margin-left: 0; padding: 2rem;">
+    <% if (user.role === 'client') { %>
+    <aside class="dashboard-sidebar">
+        <nav class="sidebar-nav">
+            <a href="/client/dashboard" class="nav-item">Painel Geral</a>
+            <a href="/client/workouts" class="nav-item active">Meus Treinos</a>
+            <a href="/chat" class="nav-item">Chat</a>
+            <a href="/client/profile" class="nav-item">Meu Perfil</a>
+        </nav>
+    </aside>
+    <% } %>
+
+    <main class="dashboard-main">
         <section class="section">
-            <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <div class="section-header">
                 <div>
                     <h1><%= workout.title %></h1>
-                    <p style="color: var(--c-text-secondary);">Instrutor: <%= workout.trainer_name %></p>
+                    <p>Instrutor: <%= workout.trainer_name %></p>
                 </div>
                 <div style="display: flex; gap: 1rem;">
                     <% if (user.role !== 'client') { %>
-                        <a href="/workouts/<%= workout.id %>/edit" class="btn btn-secondary">Editar Treino</a>
-                        <a href="/admin/clients/<%= workout.client_id %>" class="btn btn-outline">Voltar ao Cliente</a>
-                    <% } else { %>
-                        <a href="/client/dashboard" class="btn btn-outline">Voltar ao Início</a>
+                        <a href="/workouts/<%= workout.id %>/edit" class="btn btn-secondary">Editar</a>
                     <% } %>
+                    <a href="<%= user.role === 'client' ? '/client/workouts' : '/admin/dashboard' %>" class="btn btn-secondary">Voltar</a>
                 </div>
             </div>
 
