@@ -16,7 +16,7 @@ router.get('/dashboard', async (req, res) => {
         const pendingTrainers = await pool.query("SELECT id, name, email, created_at FROM users WHERE role = 'trainer' AND status = 'pending_approval' ORDER BY created_at DESC");
         res.render('pages/superadmin-dashboard', {
             title: 'Painel Super Admin - Momentum Fit',
-            trainers: pendingTrainers.rows
+            trainers: pendingTrainers.rows, currentPage: 'super-dashboard'
         });
     } catch (err) {
         console.error(err);
@@ -51,7 +51,7 @@ router.get('/manage', async (req, res) => {
         res.render('pages/superadmin-manage', {
             title: 'Gerenciar Usuários - Momentum Fit',
             trainers: trainers.rows,
-            clients: clients.rows
+            clients: clients.rows, currentPage: 'super-manage'
         });
     } catch (err) {
         console.error(err);
