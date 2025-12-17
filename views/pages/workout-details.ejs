@@ -9,7 +9,7 @@
                 </div>
                 <div style="display: flex; gap: 1rem;">
                     <% if (user.role !== 'client') { %>
-                        <a href="/workouts/edit/<%= workout.id %>" class="btn btn-secondary">Editar Treino</a>
+                        <a href="/workouts/<%= workout.id %>/edit" class="btn btn-secondary">Editar Treino</a>
                         <a href="/admin/clients/<%= workout.client_id %>" class="btn btn-outline">Voltar ao Cliente</a>
                     <% } else { %>
                         <a href="/client/dashboard" class="btn btn-outline">Voltar ao Início</a>

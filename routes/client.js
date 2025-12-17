@@ -3,9 +3,7 @@ const router = express.Router();
 const { pool } = require('../database/db');
 
 const requireClientAuth = (req, res, next) => {
-    if (req.session.user && req.session.user.role === 'client') {
-        return next();
-    }
+    if (req.session.user && req.session.user.role === 'client') return next();
     res.redirect('/auth/login');
 };
 
@@ -19,7 +17,7 @@ router.get('/dashboard', requireClientAuth, async (req, res) => {
             [userId]
         );
 
-        // Busca o histórico de check-ins para o gráfico de progresso
+        // Busca o histórico de check-ins para evitar ReferenceError no dashboard
         const checkinsRes = await pool.query(
             "SELECT * FROM workout_checkins WHERE client_id = $1 ORDER BY created_at ASC",
             [userId]
@@ -27,8 +25,8 @@ router.get('/dashboard', requireClientAuth, async (req, res) => {
 
         res.render('pages/client-dashboard', {
             title: 'Meu Dashboard - Momentum Fit',
-            workouts: workoutsRes.rows,
-            checkins: checkinsRes.rows,
+            workouts: workoutsRes.rows || [],
+            checkins: checkinsRes.rows || [],
             user: req.session.user
         });
     } catch (err) {
