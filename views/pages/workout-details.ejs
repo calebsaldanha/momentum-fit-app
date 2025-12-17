@@ -1,4 +1,4 @@
-<%- include('../partials/header.ejs', { title: 'Detalhes do Treino', bodyClass: 'dashboard-body' }) %>
+<%- include('../partials/header.ejs', { title, bodyClass: 'dashboard-body' }) %>
 <div class="dashboard-container">
     <aside class="dashboard-sidebar">
         <nav class="sidebar-nav">
@@ -12,16 +12,16 @@
             <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
                 <div>
                     <h1><%= workout.title %></h1>
-                    <p style="color: var(--c-text-secondary);">Criado em: <%= new Date(workout.created_at).toLocaleDateString('pt-BR') %></p>
+                    <p>Cliente: <%= workout.client_name %></p>
                 </div>
                 <div style="display: flex; gap: 1rem;">
-                    <a href="/workouts/edit/<%= workout.id %>" class="btn btn-secondary">Editar Treino</a>
-                    <a href="/admin/clients/<%= workout.client_id %>" class="btn btn-outline">Voltar ao Cliente</a>
+                    <a href="/workouts/edit/<%= workout.id %>" class="btn btn-secondary">Editar</a>
+                    <a href="/admin/clients/<%= workout.client_id %>" class="btn btn-outline">Voltar</a>
                 </div>
             </div>
 
             <div class="table-container">
-                <table style="width: 100%; border-collapse: collapse;">
+                <table>
                     <thead>
                         <tr>
                             <th>Exercício</th>
@@ -32,15 +32,19 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <% JSON.parse(workout.exercises).forEach(ex => { %>
-                        <tr>
-                            <td><strong><%= ex.name %></strong></td>
-                            <td><%= ex.sets %></td>
-                            <td><%= ex.reps %></td>
-                            <td><%= ex.rest %>s</td>
-                            <td><%= ex.notes || '-' %></td>
-                        </tr>
-                        <% }) %>
+                        <% if (workout.exercises && Array.isArray(workout.exercises)) { %>
+                            <% workout.exercises.forEach(ex => { %>
+                            <tr>
+                                <td><strong><%= ex.name %></strong></td>
+                                <td><%= ex.sets %></td>
+                                <td><%= ex.reps %></td>
+                                <td><%= ex.rest %>s</td>
+                                <td><%= ex.notes || '-' %></td>
+                            </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr><td colspan="5" style="text-align:center;">Nenhum exercício listado.</td></tr>
+                        <% } %>
                     </tbody>
                 </table>
             </div>
