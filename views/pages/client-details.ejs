@@ -5,33 +5,64 @@
             <a href="/admin/dashboard" class="nav-item">Dashboard</a>
             <a href="/admin/clients" class="nav-item active">Clientes</a>
             <a href="/workouts/create" class="nav-item">Criar Treino</a>
+            <a href="/chat" class="nav-item">Chat</a>
         </nav>
     </aside>
     <main class="dashboard-main">
-        <section class="section">
-            <div class="section-header" style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="section">
+            <div class="section-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem;">
                 <div>
                     <h1><%= clientProfile.name %></h1>
-                    <p><%= clientProfile.email %></p>
+                    <p>Email: <%= clientProfile.email %></p>
                 </div>
-                <a href="/workouts/create?clientId=<%= clientProfile.id %>" class="btn btn-primary">Novo Treino</a>
+                <a href="/workouts/create?clientId=<%= clientProfile.id %>" class="btn btn-primary">Criar Novo Treino</a>
             </div>
 
-            <div class="client-info-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-top: 2rem;">
+            <% if (user.role === 'superadmin') { %>
+            <div class="info-card" style="margin-bottom: 2rem; background: rgba(190, 242, 2, 0.05); border-color: var(--c-accent-primary); padding: 1.5rem; border-radius: 12px;">
+                <form method="POST" action="/admin/clients/<%= clientProfile.id %>/assign" style="display: flex; align-items: flex-end; gap: 1rem; flex-wrap: wrap;">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <div style="flex: 1; min-width: 250px;">
+                        <label style="font-weight: 600; display: block; margin-bottom: 0.5rem; color: var(--c-accent-primary);">Atribuir Personal Trainer</label>
+                        <select name="trainer_id" style="width: 100%; padding: 0.8rem; background: #1a1a1a; color: white; border: 1px solid var(--c-border); border-radius: 8px;">
+                            <option value="">Selecione um personal</option>
+                            <% allTrainers.forEach(trainer => { %>
+                                <option value="<%= trainer.id %>" <%= clientProfile.assigned_trainer_id == trainer.id ? 'selected' : '' %>><%= trainer.name %></option>
+                            <% }); %>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm">Salvar Atribuição</button>
+                </form>
+            </div>
+            <% } %>
+
+            <div class="client-info-grid">
                 <div class="info-card">
-                    <h4>Informações Físicas</h4>
-                    <p>Peso: <%= clientProfile.weight || '--' %>kg</p>
-                    <p>Altura: <%= clientProfile.height || '--' %>cm</p>
-                    <p>Nível: <%= clientProfile.fitness_level || 'Não informado' %></p>
+                    <h4>Informações Básicas</h4>
+                    <p><strong>Idade:</strong> <%= clientProfile.age || '-' %></p>
+                    <p><strong>Peso:</strong> <%= clientProfile.weight ? clientProfile.weight + 'kg' : '-' %></p>
+                    <p><strong>Altura:</strong> <%= clientProfile.height ? clientProfile.height + 'cm' : '-' %></p>
+                    <p><strong>Nível:</strong> <%= clientProfile.fitness_level || '-' %></p>
                 </div>
                 <div class="info-card">
-                    <h4>Objetivos</h4>
-                    <p><%= clientProfile.goals || 'Sem objetivos definidos.' %></p>
+                    <h4>Rotina e Equipamento</h4>
+                    <p><strong>Dias/Semana:</strong> <%= clientProfile.training_days || '-' %></p>
+                    <p><strong>Duração:</strong> <%= clientProfile.training_duration || '-' %></p>
+                    <p><strong>Local:</strong> <%= clientProfile.equipment || '-' %></p>
+                    <p><strong>Atividade:</strong> <%= clientProfile.activity_level || '-' %></p>
+                </div>
+                <div class="info-card">
+                    <h4>Saúde e Condições</h4>
+                    <p><%= clientProfile.medical_conditions || 'Nenhuma condição informada.' %></p>
+                </div>
+                <div class="info-card" style="grid-column: 1 / -1;">
+                    <h4>Objetivos Principais</h4>
+                    <p style="font-size: 1rem; color: white;"><%= clientProfile.goals || 'Nenhum objetivo detalhado.' %></p>
                 </div>
             </div>
 
-            <div class="table-container" style="margin-top: 2rem;">
-                <h3>Histórico de Treinos</h3>
+            <div class="table-container" style="margin-top: 3rem;">
+                <h3 style="margin-bottom: 1.5rem; color: var(--c-accent-primary);">Histórico de Treinos</h3>
                 <table>
                     <thead>
                         <tr>
@@ -45,12 +76,13 @@
                         <% if (workouts && workouts.length > 0) { %>
                             <% workouts.forEach(workout => { %>
                             <tr>
-                                <td><%= workout.title %></td>
+                                <td><strong><%= workout.title %></strong></td>
                                 <td><%= new Date(workout.created_at).toLocaleDateString('pt-BR') %></td>
                                 <td><%= workout.trainer_name %></td>
                                 <td>
                                     <div style="display: flex; gap: 0.5rem;">
-                                        <form action="/admin/workouts/<%= workout.id %>/delete" method="POST" onsubmit="return confirm('Excluir treino?')">
+                                        <a href="/workouts/<%= workout.id %>" class="btn btn-secondary btn-sm">Ver</a>
+                                        <form action="/admin/workouts/<%= workout.id %>/delete" method="POST" onsubmit="return confirm('Excluir este treino permanentemente?')">
                                             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                                             <button type="submit" class="btn btn-sm" style="background: var(--c-error); color: white;">Excluir</button>
                                         </form>
@@ -60,13 +92,13 @@
                             <% }) %>
                         <% } else { %>
                             <tr>
-                                <td colspan="4" style="text-align: center;">Nenhum treino registrado.</td>
+                                <td colspan="4" style="text-align: center; padding: 2rem;">Nenhum treino registrado para este cliente.</td>
                             </tr>
                         <% } %>
                     </tbody>
                 </table>
             </div>
-        </section>
+        </div>
     </main>
 </div>
 <%- include('../partials/footer.ejs') %>

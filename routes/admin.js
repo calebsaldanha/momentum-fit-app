@@ -13,10 +13,17 @@ const requireAdminAuth = (req, res, next) => {
 router.get('/clients/:id', requireAdminAuth, async (req, res) => {
     const { id: clientId } = req.params;
     try {
-        const clientResult = await pool.query(
-            "SELECT u.id, u.name, u.email, u.created_at, cp.* FROM users u LEFT JOIN client_profiles cp ON u.id = cp.user_id WHERE u.id = $1 AND u.role = 'client'", 
-            [clientId]
-        );
+        const clientQuery = `
+            SELECT u.id, u.name, u.email, u.created_at, 
+                   cp.age, cp.weight, cp.height, cp.fitness_level, 
+                   cp.goals, cp.medical_conditions,
+                   cp.assigned_trainer_id,
+                   cp.training_days, cp.training_duration, cp.equipment, cp.activity_level
+            FROM users u
+            LEFT JOIN client_profiles cp ON u.id = cp.user_id
+            WHERE u.id = $1 AND u.role = 'client';
+        `;
+        const clientResult = await pool.query(clientQuery, [clientId]);
 
         if (clientResult.rows.length === 0) {
             return res.status(404).render('pages/error', { message: 'Cliente não encontrado.' });
@@ -27,7 +34,7 @@ router.get('/clients/:id', requireAdminAuth, async (req, res) => {
         );
 
         const workoutsResult = await pool.query(
-            "SELECT w.*, u.name as trainer_name FROM workouts w JOIN users u ON w.trainer_id = u.id WHERE w.client_id = $1 ORDER BY w.created_at DESC", 
+            "SELECT w.*, u.name as trainer_name FROM workouts w JOIN users u ON w.trainer_id = u.id WHERE w.client_id = $1 ORDER BY w.created_at DESC",
             [clientId]
         );
 
