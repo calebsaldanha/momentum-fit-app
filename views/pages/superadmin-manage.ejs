@@ -1,19 +1,6 @@
 <%- include('../partials/header.ejs', { title, bodyClass: 'dashboard-body' }) %>
 <div class="dashboard-container">
-    <aside class="dashboard-sidebar">
-        <nav class="sidebar-nav">
-             <a href="/superadmin/dashboard" class="nav-item"><span></span>Aprovar Personais</a>
-             <a href="/superadmin/manage" class="nav-item active"><span></span>Gerenciar Usuários</a>
-             <div style="height: 1px; background: #e2e8f0; margin: 0.5rem 1rem;"></div>
-             <a href="/admin/dashboard" class="nav-item"><span></span>Painel Admin</a>
-        </nav>
-        <div class="sidebar-footer">
-            <form action="/auth/logout" method="POST" style="margin: 0;">
-                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                <button type="submit" class="btn-logout-sidebar">Sair</button>
-            </form>
-        </div>
-    </aside>
+    <%- include('../partials/superadmin-sidebar.ejs', { currentPage: 'super-manage' }) %>
     <main class="dashboard-main">
         <div class="section">
             <div class="section-header"><h1>Gerenciar Personais Ativos</h1></div>
@@ -27,9 +14,9 @@
                                 <td><%= user.name %></td>
                                 <td><%= user.email %></td>
                                 <td style="text-align: right;">
-                                    <form action="/superadmin/users/delete/<%= user.id %>" method="POST" onsubmit="return confirm('Tem certeza que deseja excluir este personal? Esta ação não pode ser desfeita.');">
+                                    <form action="/superadmin/users/delete/<%= user.id %>" method="POST" onsubmit="return confirm('Excluir este personal?');">
                                         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                        <button type="submit" class="btn btn-secondary btn-sm" style="border-color: var(--c-error); color: var(--c-error);">Excluir</button>
+                                        <button type="submit" class="btn btn-secondary btn-sm" style="color: var(--c-error);">Excluir</button>
                                     </form>
                                 </td>
                             </tr>
@@ -38,7 +25,7 @@
                     </table>
                 </div>
             <% } else { %>
-                 <div class="empty-state"><p>Nenhum personal ativo no momento.</p></div>
+                 <div class="empty-state"><p>Nenhum personal ativo.</p></div>
             <% } %>
         </div>
 
@@ -54,9 +41,9 @@
                                     <td><%= user.name %></td>
                                     <td><%= user.email %></td>
                                     <td style="text-align: right;">
-                                        <form action="/superadmin/users/delete/<%= user.id %>" method="POST" onsubmit="return confirm('Tem certeza que deseja excluir este cliente? Esta ação não pode ser desfeita.');">
+                                        <form action="/superadmin/users/delete/<%= user.id %>" method="POST" onsubmit="return confirm('Excluir este cliente?');">
                                             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                            <button type="submit" class="btn btn-secondary btn-sm" style="border-color: var(--c-error); color: var(--c-error);">Excluir</button>
+                                            <button type="submit" class="btn btn-secondary btn-sm" style="color: var(--c-error);">Excluir</button>
                                         </form>
                                      </td>
                                 </tr>

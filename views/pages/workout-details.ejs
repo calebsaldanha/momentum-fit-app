@@ -1,14 +1,9 @@
 <%- include('../partials/header.ejs', { title, bodyClass: 'dashboard-body' }) %>
 <div class="dashboard-container">
     <% if (user.role === 'client') { %>
-    <aside class="dashboard-sidebar">
-        <nav class="sidebar-nav">
-            <a href="/client/dashboard" class="nav-item">Painel Geral</a>
-            <a href="/client/workouts" class="nav-item active">Meus Treinos</a>
-            <a href="/chat" class="nav-item">Chat</a>
-            <a href="/client/profile" class="nav-item">Meu Perfil</a>
-        </nav>
-    </aside>
+        <%- include('../partials/client-sidebar.ejs', { currentPage: 'workouts' }) %>
+    <% } else { %>
+        <%- include('../partials/admin-sidebar.ejs', { currentPage: 'clients' }) %>
     <% } %>
 
     <main class="dashboard-main">
