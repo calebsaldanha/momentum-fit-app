@@ -1,148 +1,50 @@
-<%- include('../partials/header.ejs', { title, bodyClass: 'dashboard-body' }) %>
-
+<%- include('../partials/header.ejs', { title: 'Detalhes do Treino', bodyClass: 'dashboard-body' }) %>
 <div class="dashboard-container">
     <aside class="dashboard-sidebar">
         <nav class="sidebar-nav">
-            <% if (user.role === 'client') { %>
-                <a href="/client/dashboard" class="nav-item"><span></span> Dashboard</a>
-                <a href="/client/workouts" class="nav-item active"><span></span> Meus Treinos</a>
-                <a href="/chat" class="nav-item"><span></span> Chat</a>
-                <a href="/client/profile" class="nav-item"><span></span> Meu Perfil</a>
-            <% } else { %>
-                <% if (user.role === 'superadmin') { %>
-                    <a href="/superadmin/dashboard" class="nav-item"><span></span> Painel Super Admin</a>
-                    <div style="height: 1px; background: #e2e8f0; margin: 0.5rem 1rem;"></div>
-                <% } %>
-                <a href="/admin/dashboard" class="nav-item"><span></span> Dashboard</a>
-                <a href="/admin/clients" class="nav-item"><span></span> Clientes</a>
-                <a href="/workouts/create" class="nav-item"><span></span> Criar Treino</a>
-                <% if (user.role === 'superadmin') { %>
-                    <a href="/articles/create" class="nav-item"><span></span> Criar Artigo</a>
-                <% } %>
-                <a href="/chat" class="nav-item"><span></span> Chat</a>
-            <% } %>
+            <a href="/admin/dashboard" class="nav-item">Dashboard</a>
+            <a href="/admin/clients" class="nav-item">Clientes</a>
+            <a href="/workouts/create" class="nav-item">Criar Treino</a>
         </nav>
-        <div class="sidebar-footer">
-            <form action="/auth/logout" method="POST" style="margin: 0;">
-                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                <button type="submit" class="btn-logout-sidebar">Sair</button>
-            </form>
-        </div>
     </aside>
-
     <main class="dashboard-main">
-        <div class="section">
-            <div class="section-header">
+        <section class="section">
+            <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
                 <div>
                     <h1><%= workout.title %></h1>
-                    <p>Criado por: <strong><%= user.role === 'client' ? workout.trainer_name : workout.client_name %></strong> em <%= new Date(workout.created_at).toLocaleDateString('pt-BR') %></p>
+                    <p style="color: var(--c-text-secondary);">Criado em: <%= new Date(workout.created_at).toLocaleDateString('pt-BR') %></p>
+                </div>
+                <div style="display: flex; gap: 1rem;">
+                    <a href="/workouts/edit/<%= workout.id %>" class="btn btn-secondary">Editar Treino</a>
+                    <a href="/admin/clients/<%= workout.client_id %>" class="btn btn-outline">Voltar ao Cliente</a>
                 </div>
             </div>
 
-            <% if (workout.description) { %>
-                <div style="background: var(--c-bg-card); padding: 1.5rem; border-radius: var(--radius); border: 1px solid var(--c-border); margin-bottom: 2rem;">
-                    <h4 style="color: var(--c-accent-primary); margin-bottom: 0.5rem;">Instruções Gerais</h4>
-                    <p style="margin: 0; color: white;"><%= workout.description %></p>
-                </div>
-            <% } %>
-
-            <h3 style="margin-bottom: 1.5rem;">Exercícios do Plano</h3>
-            <div class="exercises-list">
-                <% exercises.forEach((exercise, index) => { %>
-                    <div class="exercise-item">
-                        <div class="exercise-header">
-                            <div class="exercise-title"><%= index + 1 %>. <%= exercise.name %></div>
-                            <span class="exercise-sets"><%= exercise.sets %></span>
-                        </div>
-                        <% if (exercise.description) { %>
-                           <p class="exercise-desc"><%= exercise.description %></p>
-                        <% } %>
-                    </div>
-                <% }); %>
+            <div class="table-container">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr>
+                            <th>Exercício</th>
+                            <th>Séries</th>
+                            <th>Reps</th>
+                            <th>Descanso</th>
+                            <th>Notas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% JSON.parse(workout.exercises).forEach(ex => { %>
+                        <tr>
+                            <td><strong><%= ex.name %></strong></td>
+                            <td><%= ex.sets %></td>
+                            <td><%= ex.reps %></td>
+                            <td><%= ex.rest %>s</td>
+                            <td><%= ex.notes || '-' %></td>
+                        </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
             </div>
-        </div>
-
-        <% if (user.role === 'client') { %>
-        <div class="section" style="border-top: 1px solid var(--c-border); padding-top: 2rem; margin-top: 3rem;">
-            <h2>Registrar Check-in</h2>
-            <p>Conte para o seu treinador como foi o treino e mantenha o seu Momentum.</p>
-            <form id="checkinForm" class="dashboard-form" style="max-width: 600px;">
-                <div class="form-group">
-                    <label>Este treino foi concluído?</label>
-                    <div style="display: flex; gap: 1.5rem;">
-                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;"><input type="radio" name="completed" value="true" required> <span style="color: var(--c-success); font-weight: bold;">Sim, completei!</span></label>
-                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;"><input type="radio" name="completed" value="false"> <span style="color: var(--c-text-secondary);">Não consegui</span></label>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="notes">Notas (Como se sentiu, dificuldades, etc.)</label>
-                    <textarea id="notes" name="notes" rows="3"></textarea>
-                </div>
-                <div class="form-group">
-                   <label for="rating">Sua nota para o treino (1 a 5)</label>
-                   <input type="number" id="rating" name="rating" min="1" max="5" placeholder="5">
-                </div>
-                <button type="submit" class="btn btn-primary">Enviar Check-in</button>
-            </form>
-        </div>
-        <% } %>
-
-        <div class="section">
-            <h2>Histórico de Check-ins</h2>
-            <% if (checkins && checkins.length > 0) { %>
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Data</th>
-                                <th>Status</th>
-                                <th>Nota</th>
-                                <th>Observações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% checkins.forEach(checkin => { %>
-                                <tr>
-                                    <td><%= new Date(checkin.created_at).toLocaleString('pt-BR') %></td>
-                                    <td>
-                                        <% if(checkin.completed) { %>
-                                            <span style="color: var(--c-success); font-weight: bold;">Concluído</span>
-                                        <% } else { %>
-                                            <span style="color: var(--c-error);">Não Concluído</span>
-                                        <% } %>
-                                    </td>
-                                    <td><%= checkin.rating ? checkin.rating + '/5' : '-' %></td>
-                                    <td><%= checkin.notes || '-' %></td>
-                                </tr>
-                            <% }); %>
-                        </tbody>
-                    </table>
-                </div>
-            <% } else { %>
-                <div class="empty-state"><p>Nenhum check-in registrado para este treino ainda.</p></div>
-            <% } %>
-        </div>
+        </section>
     </main>
 </div>
-
-<% if (user.role === 'client') { %>
-<script>
-document.getElementById('checkinForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const csrfToken = '<%= csrfToken %>';
-    const formData = new FormData(this);
-    const data = { completed: formData.get('completed'), notes: formData.get('notes'), rating: formData.get('rating') };
-    try {
-        const response = await fetch('/workouts/<%= workout.id %>/checkin', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'CSRF-Token': csrfToken },
-            body: JSON.stringify(data)
-        });
-        const result = await response.json();
-        if (result.success) { showNotification('Check-in registrado com sucesso!', 'success'); setTimeout(() => window.location.reload(), 1500); } 
-        else { throw new Error(result.message || 'Erro ao registrar check-in.'); }
-    } catch (error) { showNotification(error.message, 'error'); }
-});
-</script>
-<% } %>
 <%- include('../partials/footer.ejs') %>
