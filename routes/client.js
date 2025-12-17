@@ -11,15 +11,15 @@ router.get('/dashboard', requireClientAuth, async (req, res) => {
     try {
         const userId = req.session.user.id;
         
-        // Busca todos os treinos do aluno (suporta múltiplos treinos ativos)
+        // Busca treinos com LEFT JOIN para garantir que apareçam mesmo sem treinador vinculado
         const workoutsRes = await pool.query(
-            "SELECT w.*, u.name as trainer_name FROM workouts w JOIN users u ON w.trainer_id = u.id WHERE w.client_id = $1 ORDER BY w.created_at DESC",
+            "SELECT w.*, COALESCE(u.name, 'Sem Treinador') as trainer_name FROM workouts w LEFT JOIN users u ON w.trainer_id = u.id WHERE w.client_id = $1 ORDER BY w.created_at DESC",
             [userId]
         );
 
-        // Busca o histórico de check-ins para evitar ReferenceError no dashboard
+        // Busca histórico de check-ins para o gráfico
         const checkinsRes = await pool.query(
-            "SELECT * FROM workout_checkins WHERE client_id = $1 ORDER BY created_at ASC",
+            "SELECT created_at::date as date, COUNT(*) as count FROM workout_checkins WHERE client_id = $1 AND completed = true GROUP BY date ORDER BY date ASC LIMIT 7",
             [userId]
         );
 

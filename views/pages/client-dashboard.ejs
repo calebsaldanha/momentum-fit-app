@@ -1,6 +1,21 @@
 <%- include('../partials/header.ejs', { title, bodyClass: 'dashboard-body' }) %>
+
 <div class="dashboard-container">
-    <main class="dashboard-main" style="margin-left: 0; padding: 2rem;">
+    <aside class="dashboard-sidebar">
+        <nav class="sidebar-nav">
+            <a href="/client/dashboard" class="nav-item active">
+                <img src="/images/momentum-fit-icon.png" class="icon-sm" style="width:20px"> Painel Geral
+            </a>
+            <a href="/client/workouts" class="nav-item">
+                <img src="/images/momentum-fit-icon.png" class="icon-sm" style="width:20px"> Meus Treinos
+            </a>
+            <a href="/chat" class="nav-item">
+                <img src="/images/momentum-fit-icon.png" class="icon-sm" style="width:20px"> Mensagens
+            </a>
+        </nav>
+    </aside>
+
+    <main class="dashboard-main">
         <section class="section">
             <div class="section-header">
                 <h1>Bem-vindo, <%= user.name %>!</h1>
@@ -17,10 +32,10 @@
                         </div>
                     <% }) %>
                 <% } else { %>
-                    <div class="empty-state">
+                    <div class="empty-state" style="text-align: center; padding: 3rem;">
                         <h3>Nenhum treino para você ainda.</h3>
                         <p>O seu treinador irá montar o seu plano em breve.</p>
-                        <a href="/chat" class="btn btn-outline">Enviar Mensagem</a>
+                        <a href="/chat" class="btn btn-secondary">Enviar Mensagem</a>
                     </div>
                 <% } %>
             </div>
@@ -33,7 +48,37 @@
                     <canvas id="progressChart"></canvas>
                 </div>
             </section>
+            
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+            <script>
+                const ctx = document.getElementById('progressChart').getContext('2d');
+                const checkinData = <%- JSON.stringify(checkins) %>;
+                
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: checkinData.map(c => new Date(c.date).toLocaleDateString()),
+                        datasets: [{
+                            label: 'Treinos Concluídos',
+                            data: checkinData.map(c => c.count),
+                            borderColor: '#BEF202',
+                            backgroundColor: 'rgba(190, 242, 2, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } },
+                            x: { grid: { display: false } }
+                        }
+                    }
+                });
+            </script>
         <% } %>
     </main>
 </div>
+
 <%- include('../partials/footer.ejs') %>
