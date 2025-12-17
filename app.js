@@ -1,6 +1,4 @@
 require("dotenv").config();
-// app.js (Configuração Corrigida para Vercel/Production)
-
 const path = require('path');
 const express = require('express');
 const session = require('express-session');
@@ -12,51 +10,48 @@ const csurf = require('csurf');
 
 const app = express();
 
-// 1. CONFIGURAÇÃO CRÍTICA PARA VERCEL (Trust Proxy)
-// Isso permite que o Express saiba que está rodando atrás do proxy seguro da Vercel
 app.set('trust proxy', 1); 
-
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.json());
-
 app.use(cookieParser());
 
-// 2. CONFIGURAÇÃO DA SESSÃO
+// Configuração da Sessão (Deve vir antes do CSRF e das rotas)
 app.use(session({
     store: new pgSession({
         pool: pgPool,
         tableName: 'session',
-        createTableIfMissing: true // Tenta criar a tabela se não existir
+        createTableIfMissing: true
     }),
     secret: process.env.SESSION_SECRET || 'momentum-fit-secret',
     resave: false,
     saveUninitialized: false,
-    proxy: true, // Importante para cookies seguros em proxy
+    proxy: true,
     cookie: { 
-        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 dias
-        secure: process.env.NODE_ENV === 'production', // True em produção (HTTPS)
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // Melhora compatibilidade
+        maxAge: 30 * 24 * 60 * 60 * 1000,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
         httpOnly: true
     }
 }));
 
-// 3. PROTEÇÃO CSRF
 const csrfProtection = csurf({ cookie: true });
 app.use(csrfProtection);
 
-// Middleware para variáveis globais
+// Middleware para variáveis globais (Deve vir após a sessão)
 app.use((req, res, next) => {
     res.locals.csrfToken = req.csrfToken();
     res.locals.isAuthenticated = !!req.session.user;
-    res.locals.user = req.session.user || { role: 'guest' };
+    res.locals.user = req.session.user || null;
+    res.locals.success_msg = null;
+    res.locals.error_msg = null;
     next();
 });
 
-// Rotas
+// Definição de Rotas
 app.use('/', require('./routes/index'));
 app.use('/auth', require('./routes/auth'));
 app.use('/client', require('./routes/client'));
@@ -70,42 +65,24 @@ app.use('/superadmin', require('./routes/superadmin'));
 
 // Tratamento de Erros
 app.use((err, req, res, next) => {
-    if (err.code !== 'EBADCSRFTOKEN') {
-        console.error(err.stack);
-        return res.status(500).render('pages/error', {
-            title: 'Erro no Servidor',
-            message: 'Algo inesperado aconteceu.'
-        });
+    if (err.code === 'EBADCSRFTOKEN') {
+        return res.status(403).render('pages/error', { title: 'Acesso Negado', message: 'Sessão expirada ou token inválido.' });
     }
-    res.status(403).render('pages/error', {
-        title: 'Acesso Negado',
-        message: 'Sessão expirada ou token inválido. Tente recarregar a página.'
-    });
+    console.error(err.stack);
+    res.status(500).render('pages/error', { title: 'Erro no Servidor', message: 'Algo inesperado aconteceu.' });
 });
 
+// Catch 404
 app.use((req, res) => {
-    res.status(404).render('pages/error', { 
-        title: '404', 
-        message: 'Página não encontrada.' 
-    });
+    res.status(404).render('pages/error', { title: '404', message: 'Página não encontrada.' });
 });
+
+// Inicialização do Banco de Dados
+initDb().catch(err => console.error("Falha ao inicializar banco de dados:", err));
 
 module.exports = app;
 
-// Inicialização Local
 const port = process.env.PORT || 3000;
-const startServer = async () => {
-  try {
-    await initDb();
-    app.listen(port, () => {
-      console.log(`Server running on http://localhost:${port}`);
-    });
-  } catch (error) {
-    console.error("❌ Falha ao iniciar:", error);
-    process.exit(1);
-  }
-};
-
 if (process.env.NODE_ENV !== 'production') {
-    startServer();
+    app.listen(port, () => console.log(`Servidor rodando em http://localhost:${port}`));
 }

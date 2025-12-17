@@ -5,17 +5,42 @@
             <a href="/admin/dashboard" class="nav-item">Dashboard</a>
             <a href="/admin/clients" class="nav-item active">Clientes</a>
             <a href="/workouts/create" class="nav-item">Criar Treino</a>
+            <a href="/chat" class="nav-item">Chat</a>
         </nav>
+        <div class="sidebar-footer">
+            <form action="/auth/logout" method="POST">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <button type="submit" class="btn-logout-sidebar">Sair</button>
+            </form>
+        </div>
     </aside>
     <main class="dashboard-main">
         <div class="section">
-            <div class="section-header" style="display: flex; justify-content: space-between; margin-bottom: 2rem;">
+            <div class="section-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem;">
                 <div>
                     <h1><%= clientProfile.name %></h1>
                     <p>Email: <%= clientProfile.email %></p>
                 </div>
-                <a href="/workouts/create?clientId=<%= clientProfile.id %>" class="btn btn-primary">Novo Treino</a>
+                <a href="/workouts/create?clientId=<%= clientProfile.id %>" class="btn btn-primary">Criar Novo Treino</a>
             </div>
+
+            <% if (user.role === 'superadmin') { %>
+            <div class="info-card" style="margin-bottom: 2rem; background: rgba(190, 242, 2, 0.05); border-color: var(--c-accent-primary); border-radius: 12px;">
+                <form method="POST" action="/admin/clients/<%= clientProfile.id %>/assign" style="display: flex; align-items: flex-end; gap: 1rem; flex-wrap: wrap; padding: 1.5rem;">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <div style="flex: 1; min-width: 250px;">
+                        <label style="color: var(--c-accent-primary); font-weight: 600; margin-bottom: 0.5rem; display: block;">Atribuir Personal Trainer</label>
+                        <select name="trainer_id" style="width: 100%; padding: 0.8rem; background: #1a1a1a; color: white; border: 1px solid var(--c-border); border-radius: 8px;">
+                            <option value="">Selecione um personal</option>
+                            <% allTrainers.forEach(trainer => { %>
+                                <option value="<%= trainer.id %>" <%= clientProfile.assigned_trainer_id == trainer.id ? 'selected' : '' %>><%= trainer.name %></option>
+                            <% }); %>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm">Salvar Atribuição</button>
+                </form>
+            </div>
+            <% } %>
 
             <div class="client-info-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
                 <div class="info-card">
@@ -36,6 +61,10 @@
                     <h4>Saúde e Condições</h4>
                     <p><%= clientProfile.medical_conditions || 'Nenhuma condição informada.' %></p>
                 </div>
+                <div class="info-card" style="grid-column: 1 / -1;">
+                    <h4>Objetivos Principais</h4>
+                    <p style="color: white; font-size: 1rem;"><%= clientProfile.goals || 'Nenhum objetivo detalhado.' %></p>
+                </div>
             </div>
 
             <div class="table-container" style="margin-top: 3rem;">
@@ -50,17 +79,20 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <% if (workouts.length > 0) { %>
+                        <% if (workouts && workouts.length > 0) { %>
                             <% workouts.forEach(workout => { %>
                             <tr>
                                 <td><strong><%= workout.title %></strong></td>
                                 <td><%= new Date(workout.created_at).toLocaleDateString('pt-BR') %></td>
                                 <td><%= workout.trainer_name %></td>
                                 <td>
-                                    <form action="/admin/workouts/<%= workout.id %>/delete" method="POST" onsubmit="return confirm('Excluir este treino?')">
-                                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                        <button type="submit" class="btn btn-sm" style="background: var(--c-error); color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">Excluir</button>
-                                    </form>
+                                    <div style="display: flex; gap: 0.5rem;">
+                                        <a href="/workouts/<%= workout.id %>" class="btn btn-secondary btn-sm">Ver</a>
+                                        <form action="/admin/workouts/<%= workout.id %>/delete" method="POST" onsubmit="return confirm('Excluir este treino permanentemente?')">
+                                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                            <button type="submit" class="btn btn-sm" style="background: var(--c-error); color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">Excluir</button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                             <% }) %>
