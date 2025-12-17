@@ -1,24 +1,11 @@
 <%- include('../partials/header.ejs', { title, bodyClass: 'dashboard-body' }) %>
 <div class="dashboard-container">
-    <aside class="dashboard-sidebar">
-        <nav class="sidebar-nav">
-            <% if (user.role === 'client') { %>
-                <a href="/client/dashboard" class="nav-item">Dashboard</a>
-                <a href="/client/workouts" class="nav-item active">Meus Treinos</a>
-            <% } else { %>
-                <a href="/admin/dashboard" class="nav-item">Dashboard</a>
-                <a href="/admin/clients" class="nav-item">Clientes</a>
-                <a href="/workouts/create" class="nav-item">Criar Treino</a>
-            <% } %>
-            <a href="/chat" class="nav-item">Chat</a>
-        </nav>
-    </aside>
-    <main class="dashboard-main">
+    <main class="dashboard-main" style="margin-left: 0; padding: 2rem;">
         <section class="section">
             <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
                 <div>
                     <h1><%= workout.title %></h1>
-                    <p style="color: var(--c-text-secondary);">Treinador: <%= workout.trainer_name %></p>
+                    <p style="color: var(--c-text-secondary);">Instrutor: <%= workout.trainer_name %></p>
                 </div>
                 <div style="display: flex; gap: 1rem;">
                     <% if (user.role !== 'client') { %>
