@@ -1,50 +1,118 @@
 <%- include('../partials/header.ejs', { title, bodyClass: 'dashboard-body' }) %>
 <div class="dashboard-container">
-    <main class="dashboard-main" style="margin-left: 0; padding: 2rem;">
+    <aside class="dashboard-sidebar">
+        <nav class="sidebar-nav">
+            <% if (user.role === 'superadmin') { %>
+                <a href="/superadmin/dashboard" class="nav-item"><span></span> Painel Super Admin</a>
+                <div style="height: 1px; background: #e2e8f0; margin: 0.5rem 1rem;"></div>
+            <% } %>
+            <a href="/admin/dashboard" class="nav-item"><span></span> Dashboard</a>
+            <a href="/admin/clients" class="nav-item"><span></span> Clientes</a>
+            <a href="/workouts/create" class="nav-item"><span></span> Criar Treino</a>
+            <a href="/chat" class="nav-item"><span></span> Chat</a>
+        </nav>
+        <div class="sidebar-footer">
+            <form action="/auth/logout" method="POST" style="margin: 0;">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <button type="submit" class="btn-logout-sidebar">Sair</button>
+            </form>
+        </div>
+    </aside>
+    <main class="dashboard-main">
         <div class="section">
-            <h1>Editar Treino: <%= workout.title %></h1>
-            <form id="editWorkoutForm" style="margin-top: 2rem;">
-                <div class="form-group" style="margin-bottom: 1.5rem;">
-                    <label style="display:block; margin-bottom: 0.5rem;">Título</label>
-                    <input type="text" name="title" value="<%= workout.title %>" required style="width: 100%; padding: 0.8rem; background: #1a1a1a; border: 1px solid #333; color: white;">
+            <div class="section-header"><h1>Editar Treino</h1><p>Atualize os detalhes do plano.</p></div>
+            <form id="editWorkoutForm" class="dashboard-form" style="max-width: 800px;">
+                <div class="form-group">
+                    <label for="client_id">Cliente *</label>
+                    <select id="client_id" name="client_id" required>
+                        <% clients.forEach(client => { %>
+                            <option value="<%= client.id %>" <%= workout.client_id == client.id ? 'selected' : '' %>>
+                                <%= client.name %> (<%= client.email %>)
+                            </option>
+                        <% }); %>
+                    </select>
                 </div>
+                <div class="form-group"><label for="title">Título do Treino *</label><input type="text" id="title" name="title" value="<%= workout.title %>" required></div>
+                <div class="form-group"><label for="description">Descrição / Instruções</label><textarea id="description" name="description" rows="3"><%= workout.description %></textarea></div>
+                
+                <h3 style="margin: 2rem 0 1rem;">Exercícios</h3>
                 <div id="exercisesContainer">
                     <% exercises.forEach((ex, index) => { %>
-                        <div class="exercise-row" style="background: #111; padding: 1rem; margin-bottom: 1rem; border-radius: 8px; display: flex; gap: 1rem; flex-wrap: wrap;">
-                            <input type="text" placeholder="Exercício" value="<%= ex.name %>" required style="flex: 2;">
-                            <input type="text" placeholder="Séries" value="<%= ex.sets %>" style="width: 80px;">
-                            <input type="text" placeholder="Reps" value="<%= ex.reps %>" style="width: 80px;">
-                            <input type="text" placeholder="Descanso" value="<%= ex.rest %>" style="width: 80px;">
+                        <div class="exercise-item" style="border: 1px solid var(--c-border); background: var(--c-bg-card); border-radius: var(--radius); padding: 1.5rem; margin-top: 1.5rem; position: relative;">
+                            <h4 style="margin-bottom: 1rem; color: var(--c-accent-primary);">Exercício <%= index + 1 %></h4>
+                            <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                <div class="form-group"><label>Nome do Exercício *</label><input type="text" class="exercise-name" value="<%= ex.name %>" required></div>
+                                <div class="form-group"><label>Séries x Reps *</label><input type="text" class="exercise-sets" value="<%= ex.sets %>" required></div>
+                            </div>
+                            <div class="form-group"><label>Observações / Técnica</label><textarea class="exercise-description" rows="2"><%= ex.description || ex.notes %></textarea></div>
+                            <button type="button" class="btn btn-secondary btn-sm remove-exercise" style="border-color: var(--c-error); color: var(--c-error);">Remover</button>
                         </div>
-                    <% }) %>
+                    <% }); %>
                 </div>
-                <button type="submit" class="btn btn-primary">Atualizar Treino</button>
+                
+                <button type="button" class="btn btn-outline" id="addExerciseBtn" style="margin-top: 1rem; width: 100%; border-style: dashed;">+ Adicionar Exercício</button>
+                
+                <div class="form-actions" style="margin-top: 2rem; display: flex; justify-content: flex-end; gap: 1rem;">
+                    <a href="/workouts/<%= workout.id %>" class="btn btn-secondary">Cancelar</a>
+                    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                </div>
             </form>
         </div>
     </main>
 </div>
 <script>
-document.getElementById('editWorkoutForm').onsubmit = async (e) => {
-    e.preventDefault();
-    const rows = document.querySelectorAll('.exercise-row');
-    const exercises = Array.from(rows).map(row => {
-        const inputs = row.querySelectorAll('input');
-        return { name: inputs[0].value, sets: inputs[1].value, reps: inputs[2].value, rest: inputs[3].value };
-    });
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('exercisesContainer');
     
-    const res = await fetch('/workouts/edit/<%= workout.id %>', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'CSRF-Token': '<%= csrfToken %>' },
-        body: JSON.stringify({
-            title: e.target.title.value,
-            exercises: exercises
-        })
-    });
-    const result = await res.json();
-    if(result.success) {
-        alert('Treino atualizado com sucesso!');
-        window.location.href = '/workouts/<%= workout.id %>';
+    function addExercise() {
+        const count = container.children.length + 1;
+        const exerciseHTML = `
+            <div class="exercise-item" style="border: 1px solid var(--c-border); background: var(--c-bg-card); border-radius: var(--radius); padding: 1.5rem; margin-top: 1.5rem; position: relative;">
+                <h4 style="margin-bottom: 1rem; color: var(--c-accent-primary);">Exercício ${count}</h4>
+                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group"><label>Nome do Exercício *</label><input type="text" class="exercise-name" required placeholder="Ex: Agachamento Livre"></div>
+                    <div class="form-group"><label>Séries x Reps *</label><input type="text" class="exercise-sets" required placeholder="Ex: 4x12"></div>
+                </div>
+                <div class="form-group"><label>Observações / Técnica</label><textarea class="exercise-description" rows="2" placeholder="Ex: Cadência 2020..."></textarea></div>
+                <button type="button" class="btn btn-secondary btn-sm remove-exercise" style="border-color: var(--c-error); color: var(--c-error);">Remover</button>
+            </div>`;
+        container.insertAdjacentHTML('beforeend', exerciseHTML);
     }
-};
+    
+    document.getElementById('addExerciseBtn').addEventListener('click', addExercise);
+    container.addEventListener('click', function(e) { if (e.target.classList.contains('remove-exercise')) e.target.closest('.exercise-item').remove(); });
+
+    document.getElementById('editWorkoutForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const exercises = [];
+        document.querySelectorAll('.exercise-item').forEach(item => {
+            const name = item.querySelector('.exercise-name').value;
+            const sets = item.querySelector('.exercise-sets').value;
+            if (name && sets) {
+                exercises.push({ name, sets, description: item.querySelector('.exercise-description').value });
+            }
+        });
+
+        const formData = {
+            client_id: document.getElementById('client_id').value,
+            title: document.getElementById('title').value,
+            description: document.getElementById('description').value,
+            exercises
+        };
+
+        try {
+            const res = await fetch('/workouts/edit/<%= workout.id %>', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'CSRF-Token': '<%= csrfToken %>' },
+                body: JSON.stringify(formData)
+            });
+            const result = await res.json();
+            if (result.success) {
+                alert('Treino atualizado com sucesso!');
+                window.location.href = '/workouts/<%= workout.id %>';
+            } else { throw new Error(result.message); }
+        } catch (error) { alert('Erro: ' + error.message); }
+    });
+});
 </script>
 <%- include('../partials/footer.ejs') %>
