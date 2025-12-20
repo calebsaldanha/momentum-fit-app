@@ -53,6 +53,8 @@ app.use('/workouts', require('./routes/workouts'));
 app.use('/chat', require('./routes/chat'));
 app.use('/superadmin', require('./routes/superadmin'));
 app.use('/articles', require('./routes/articles'));
+app.use('/api', require('./routes/api'));
+app.use('/trainer', require('./routes/trainer'));
 
 app.use((err, req, res, next) => {
     if (err.code === 'EBADCSRFTOKEN') return res.status(403).render('pages/error', { title: 'Erro de Segurança', message: 'Sessão inválida.' });
