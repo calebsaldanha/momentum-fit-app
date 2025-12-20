@@ -16,7 +16,7 @@ const getHtmlTemplate = (title, message, actionLink = '', actionText = 'Acessar 
     const year = new Date().getFullYear();
     const logoCid = 'logo-momentum-fit';
     
-    return \`
+    return `
     <!DOCTYPE html>
     <html lang="pt-BR">
     <head>
@@ -36,22 +36,22 @@ const getHtmlTemplate = (title, message, actionLink = '', actionText = 'Acessar 
     <body>
         <div class="container">
             <div class="header">
-                <img src="cid:\${logoCid}" alt="Momentum Fit">
+                <img src="cid:${logoCid}" alt="Momentum Fit">
             </div>
             <div class="content">
-                <h1 class="h1">\${title}</h1>
-                <p>\${message.replace(/\\n/g, '<br>')}</p>
+                <h1 class="h1">${title}</h1>
+                <p>${message.replace(/\n/g, '<br>')}</p>
                 
-                \${actionLink ? \`<a href="\${process.env.BASE_URL || 'http://localhost:3000'}\${actionLink}" class="btn">\${actionText}</a>\` : ''}
+                ${actionLink ? `<a href="${process.env.BASE_URL || 'http://localhost:3000'}${actionLink}" class="btn">${actionText}</a>` : ''}
             </div>
             <div class="footer">
-                <p>&copy; \${year} Momentum Fit. Todos os direitos reservados.</p>
+                <p>&copy; ${year} Momentum Fit. Todos os direitos reservados.</p>
                 <p>Este é um e-mail automático, por favor não responda.</p>
             </div>
         </div>
     </body>
     </html>
-    \`;
+    `;
 };
 
 const sendEmail = async (to, subject, title, textMessage, link = null, linkText = null) => {

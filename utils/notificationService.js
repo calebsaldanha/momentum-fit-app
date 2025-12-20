@@ -24,15 +24,15 @@ const notificationService = {
     async notifyNewClient(clientName, clientId) {
         const admins = await getAdmins();
         for (const admin of admins) {
-            await createNotification(admin.id, 'Novo Cliente Cadastrado', \`O cliente \${clientName} acabou de se cadastrar e aguarda atribuição.\`, 'alert', \`/admin/clients/\${clientId}\`);
+            await createNotification(admin.id, 'Novo Cliente Cadastrado', `O cliente ${clientName} acabou de se cadastrar e aguarda atribuição.`, 'alert', `/admin/clients/${clientId}`);
             
             // Envia Email
             emailService.sendEmail(
                 admin.email, 
                 'Novo Cliente na Momentum Fit', 
                 'Novo Cliente Cadastrado', 
-                \`O cliente \${clientName} se cadastrou na plataforma. Acesse o painel para gerenciar.\`,
-                \`/admin/clients/\${clientId}\`,
+                `O cliente ${clientName} se cadastrou na plataforma. Acesse o painel para gerenciar.`,
+                `/admin/clients/${clientId}`,
                 'Ver Cliente'
             );
         }
@@ -42,13 +42,13 @@ const notificationService = {
     async notifyNewTrainer(trainerName) {
         const admins = await pool.query("SELECT id, email FROM users WHERE role = 'superadmin'");
         for (const admin of admins.rows) {
-            await createNotification(admin.id, 'Novo Treinador Pendente', \`O personal \${trainerName} solicitou cadastro.\`, 'warning', '/superadmin/manage');
+            await createNotification(admin.id, 'Novo Treinador Pendente', `O personal ${trainerName} solicitou cadastro.`, 'warning', '/superadmin/manage');
             
             emailService.sendEmail(
                 admin.email,
                 'Aprovação Pendente: Novo Treinador',
                 'Novo Treinador Registrado',
-                \`\${trainerName} solicitou acesso como treinador. Revise o cadastro para aprovar.\`,
+                `${trainerName} solicitou acesso como treinador. Revise o cadastro para aprovar.`,
                 '/superadmin/manage',
                 'Gerenciar Acessos'
             );
@@ -61,14 +61,14 @@ const notificationService = {
         if (res.rows.length === 0) return;
         const client = res.rows[0];
 
-        await createNotification(clientId, 'Novo Treino Disponível', \`Seu treino "\${workoutTitle}" já está disponível.\`, 'success', \`/workouts/\${workoutId}\`);
+        await createNotification(clientId, 'Novo Treino Disponível', `Seu treino "${workoutTitle}" já está disponível.`, 'success', `/workouts/${workoutId}`);
 
         emailService.sendEmail(
             client.email,
             'Hora de Treinar! Novo treino adicionado',
             'Novo Treino Disponível',
-            \`Olá \${client.name}, seu personal acabou de adicionar o treino "\${workoutTitle}" à sua rotina.\`,
-            \`/workouts/\${workoutId}\`,
+            `Olá ${client.name}, seu personal acabou de adicionar o treino "${workoutTitle}" à sua rotina.`,
+            `/workouts/${workoutId}`,
             'Ver Treino'
         );
     },
@@ -79,14 +79,14 @@ const notificationService = {
         if (res.rows.length === 0) return;
         const trainer = res.rows[0];
 
-        await createNotification(trainerId, 'Novo Aluno Atribuído', \`Você agora é responsável pelo aluno \${clientName}.\`, 'info', \`/admin/clients/\${clientId}\`);
+        await createNotification(trainerId, 'Novo Aluno Atribuído', `Você agora é responsável pelo aluno ${clientName}.`, 'info', `/admin/clients/${clientId}`);
 
         emailService.sendEmail(
             trainer.email,
             'Novo Aluno Atribuído',
             'Você tem um novo aluno!',
-            \`O aluno \${clientName} foi vinculado à sua conta. Comece criando um plano de treino.\`,
-            \`/admin/clients/\${clientId}\`,
+            `O aluno ${clientName} foi vinculado à sua conta. Comece criando um plano de treino.`,
+            `/admin/clients/${clientId}`,
             'Ver Perfil do Aluno'
         );
     },
@@ -95,18 +95,15 @@ const notificationService = {
     async notifyNewArticle(articleTitle, articleId) {
         const users = await pool.query("SELECT id, email, name FROM users WHERE role IN ('client', 'trainer') AND status = 'active'");
         
-        // Loop para criar notificações (pode ser otimizado com bulk insert no futuro)
         for (const user of users.rows) {
-            await createNotification(user.id, 'Novo Artigo no Blog', \`Confira: \${articleTitle}\`, 'info', \`/articles/\${articleId}\`);
+            await createNotification(user.id, 'Novo Artigo no Blog', `Confira: ${articleTitle}`, 'info', `/articles/${articleId}`);
             
-            // Email em massa (cuidado com limites do Gmail SMTP)
-            // Para produção, usar filas (queues). Aqui faremos direto.
             emailService.sendEmail(
                 user.email,
-                \`Novo Artigo: \${articleTitle}\`,
+                `Novo Artigo: ${articleTitle}`,
                 'Novidade no Blog Momentum Fit',
-                \`Acabamos de publicar um novo conteúdo: "\${articleTitle}".\`,
-                \`/articles/\${articleId}\`,
+                `Acabamos de publicar um novo conteúdo: "${articleTitle}".`,
+                `/articles/${articleId}`,
                 'Ler Artigo'
             );
         }
@@ -118,16 +115,13 @@ const notificationService = {
         if (res.rows.length === 0) return;
         const receiver = res.rows[0];
 
-        await createNotification(receiverId, 'Nova Mensagem', \`\${senderName} enviou uma mensagem para você.\`, 'info', '/chat');
+        await createNotification(receiverId, 'Nova Mensagem', `${senderName} enviou uma mensagem para você.`, 'info', '/chat');
 
-        // Opcional: Não enviar email para cada mensagem de chat para não fazer spam, 
-        // ou enviar apenas se estiver offline (lógica complexa).
-        // Por enquanto, enviaremos.
         emailService.sendEmail(
             receiver.email,
-            \`Nova mensagem de \${senderName}\`,
+            `Nova mensagem de ${senderName}`,
             'Você recebeu uma mensagem',
-            \`\${senderName} enviou uma nova mensagem no chat da plataforma.\`,
+            `${senderName} enviou uma nova mensagem no chat da plataforma.`,
             '/chat',
             'Ir para o Chat'
         );
