@@ -22,7 +22,6 @@ router.get('/', async (req, res) => {
         const { id: userId, role: userRole } = req.session.user;
         let query;
 
-        // Lógica de quem vê quem
         if (userRole === 'client') {
             query = "SELECT id, name FROM users WHERE role IN ('trainer', 'superadmin') ORDER BY name";
         } else {
@@ -59,8 +58,8 @@ router.post('/send', requireAuth, upload.single('file'), async (req, res) => {
 
         if (req.file) {
             try {
-                // CORREÇÃO: Timestamp para evitar sobrescrita
-                const filename = \`\${Date.now()}-\${req.file.originalname}\`;
+                // SINTAXE CORRIGIDA AQUI:
+                const filename = `${Date.now()}-${req.file.originalname}`;
                 
                 const blob = await put(filename, req.file.buffer, { 
                     access: 'public',

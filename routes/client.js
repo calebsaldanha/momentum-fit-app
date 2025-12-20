@@ -20,7 +20,8 @@ router.post('/initial-form', async (req, res) => {
     const { age, weight, height, fitness_level, goals, medical_conditions, training_days, equipment } = req.body;
     try {
         await pool.query(
-            `INSERT INTO client_profiles (user_id, age, weight, height, fitness_level, goals, medical_conditions, training_days, equipment, created_at)
+            `INSERT INTO client_profiles 
+            (user_id, age, weight, height, fitness_level, goals, medical_conditions, training_days, equipment, created_at)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW())`,
             [age, weight, height, fitness_level, goals, medical_conditions, training_days, equipment]
         );
@@ -58,7 +59,6 @@ router.get('/dashboard', async (req, res) => {
 
 router.get('/workouts', async (req, res) => {
     try {
-        // Busca treinos e verifica se já foi feito check-in hoje
         const query = `
             SELECT w.*, u.name as trainer_name,
             (SELECT COUNT(*) FROM workout_checkins wc WHERE wc.workout_id = w.id AND wc.created_at::date = CURRENT_DATE) as checked_in_today
@@ -74,7 +74,6 @@ router.get('/workouts', async (req, res) => {
     }
 });
 
-// NOVA ROTA: Check-in
 router.post('/workouts/checkin/:id', async (req, res) => {
     try {
         const workoutId = req.params.id;
