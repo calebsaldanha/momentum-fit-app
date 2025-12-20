@@ -26,7 +26,7 @@ const sessionStore = new pgSession({
     pool: pgPool, 
     tableName: 'session', 
     createTableIfMissing: true,
-    pruneSessionInterval: 60 * 15 // Prune a cada 15 min para não sobrecarregar startup
+    pruneSessionInterval: 60 * 15 // Prune a cada 15 min
 });
 
 app.use(session({
@@ -46,7 +46,7 @@ app.use(session({
 const csrfProtection = csurf({ cookie: true });
 app.use(csrfProtection);
 
-// Middleware Global de Variáveis
+// Middleware Global de Variáveis (ASYNC adicionado aqui)
 app.use(async (req, res, next) => {
     res.locals.csrfToken = req.csrfToken();
     res.locals.isAuthenticated = !!req.session.user;
@@ -58,10 +58,11 @@ app.use(async (req, res, next) => {
         try {
             const notifRes = await pgPool.query('SELECT * FROM notifications WHERE user_id = $1 AND is_read = false ORDER BY created_at DESC LIMIT 5', [req.session.user.id]);
             res.locals.notifications = notifRes.rows;
+            
             const countRes = await pgPool.query('SELECT COUNT(*) FROM notifications WHERE user_id = $1 AND is_read = false', [req.session.user.id]);
             res.locals.unreadCount = countRes.rows[0].count;
         } catch (e) {
-            console.error("Erro ao carregar notificações:", e.message);
+            console.error("Erro ao carregar notificações (ignorando para não travar app):", e.message);
             res.locals.notifications = [];
             res.locals.unreadCount = 0;
         }
@@ -88,7 +89,7 @@ app.use('/notifications', require('./routes/notifications'));
 // Tratamento de Erros
 app.use((err, req, res, next) => {
     if (err.code === 'EBADCSRFTOKEN') {
-        return res.status(403).render('pages/error', { title: 'Erro de Segurança', message: 'Sessão expirada. Recarregue a página.' });
+        return res.status(403).render('pages/error', { title: 'Erro de Segurança', message: 'Sessão expirada ou token inválido. Tente recarregar a página.' });
     }
     console.error('App Error:', err);
     res.status(500).render('pages/error', { title: 'Erro', message: 'Erro interno no servidor.' });
@@ -99,7 +100,8 @@ initDb().catch(err => console.error('Falha na inicialização do DB:', err));
 
 module.exports = app;
 
+// Inicia servidor apenas se executado diretamente (não importado)
 if (require.main === module) {
     const port = process.env.PORT || 3000;
-    app.listen(port, () => console.log(\`Servidor local em http://localhost:\${port}\`));
+    app.listen(port, () => console.log(`Servidor rodando em http://localhost:${port}`));
 }
