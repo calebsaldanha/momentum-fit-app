@@ -52,10 +52,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // Função para adicionar campos de exercício
     function addExercise() {
         const count = container.children.length + 1;
-        const exerciseHTML = \`
+        // CORREÇÃO: Uso de crases limpas e template string correto
+        const exerciseHTML = `
             <div class="exercise-item" style="background: var(--c-bg-card); border: 1px solid var(--c-border); padding: 1.5rem; border-radius: var(--radius); margin-bottom: 1.5rem; position: relative;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <h4 style="color: var(--c-accent-primary); margin: 0;">Exercício \${count}</h4>
+                    <h4 style="color: var(--c-accent-primary); margin: 0;">Exercício ${count}</h4>
                     <button type="button" class="btn btn-sm btn-outline remove-exercise" style="color: var(--c-error); border-color: var(--c-error);">Remover</button>
                 </div>
                 
@@ -75,7 +76,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <textarea class="exercise-description" rows="2"></textarea>
                 </div>
             </div>
-        \`;
+        `;
         container.insertAdjacentHTML('beforeend', exerciseHTML);
     }
 
@@ -89,7 +90,7 @@ document.addEventListener('DOMContentLoaded', function() {
     container.addEventListener('click', (e) => {
         if (e.target.classList.contains('remove-exercise')) {
             e.target.closest('.exercise-item').remove();
-            // Renumerar títulos (opcional, mas bom para UX)
+            // Renumerar títulos
             document.querySelectorAll('.exercise-item h4').forEach((h4, index) => {
                 h4.textContent = 'Exercício ' + (index + 1);
             });
@@ -130,7 +131,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'CSRF-Token': '<%= csrfToken %>' // Importante: Token CSRF
+                    'CSRF-Token': '<%= csrfToken %>'
                 },
                 body: JSON.stringify(formData)
             });
