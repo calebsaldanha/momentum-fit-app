@@ -5,44 +5,53 @@ const { pool } = require('../database/db');
 const { body, validationResult } = require('express-validator');
 const notificationService = require('../utils/notificationService');
 
-const redirectToDashboard = (role, res) => {
-    if (role === 'client') {
+// Função auxiliar centralizada para redirecionamento
+const handleRedirect = (user, res) => {
+    if (user.role === 'client') {
         return res.redirect('/client/dashboard');
     }
-    return res.redirect('/admin/dashboard');
+    if (user.role === 'superadmin') {
+        return res.redirect('/superadmin/dashboard');
+    }
+    if (user.role === 'trainer') {
+        if (user.status === 'active') {
+            return res.redirect('/admin/dashboard');
+        } else {
+            return res.redirect('/trainer/profile');
+        }
+    }
+    // Fallback
+    return res.redirect('/');
 };
 
 router.get('/login', (req, res) => {
-    if (req.session.user) return redirectToDashboard(req.session.user.role, res);
+    if (req.session.user) return handleRedirect(req.session.user, res);
     res.render('pages/login', { error: null, title: 'Login - Momentum Fit' });
 });
 
 router.get('/register', (req, res) => {
-    if (req.session.user) return redirectToDashboard(req.session.user.role, res);
+    if (req.session.user) return handleRedirect(req.session.user, res);
     res.render('pages/register', { error: null, title: 'Cadastro - Momentum Fit' });
 });
 
 router.post('/login', [
-    body('email', 'Por favor, insira um e-mail válido.').isEmail().normalizeEmail(),
-    body('password', 'A senha não pode estar vazia.').notEmpty()
+    body('email').isEmail().normalizeEmail(),
+    body('password').notEmpty()
 ], async (req, res) => {
-    
     const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.render('pages/login', { 
-            error: errors.array()[0].msg,
-            title: 'Login - Momentum Fit' 
-        });
-    }
+    if (!errors.isEmpty()) return res.render('pages/login', { error: 'Dados inválidos.', title: 'Login' });
 
     const { email, password } = req.body;
+    
     try {
         const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
         const user = result.rows[0];
+
         if (!user || !await bcrypt.compare(password, user.password)) {
-            return res.render('pages/login', { error: 'E-mail ou senha incorretos.', title: 'Login - Momentum Fit' });
+            return res.render('pages/login', { error: 'Credenciais inválidas.', title: 'Login' });
         }
         
+        // Configura sessão
         req.session.user = {
             id: user.id,
             name: user.name,
@@ -52,49 +61,31 @@ router.post('/login', [
         };
 
         req.session.save(async (err) => {
-            if (err) {
-                console.error("Erro ao salvar a sessão:", err);
-                return res.render('pages/login', { error: 'Ocorreu um erro ao iniciar sua sessão.', title: 'Login - Momentum Fit' });
-            }
+            if (err) return res.render('pages/login', { error: 'Erro de sessão.', title: 'Login' });
+
+            // Verificação especial para clientes sem perfil
             if (user.role === 'client') {
-                try {
-                    const profileResult = await pool.query('SELECT 1 FROM client_profiles WHERE user_id = $1', [user.id]);
-                    if (profileResult.rows.length === 0) {
-                        return res.redirect('/client/initial-form');
-                    }
-                } catch (dbError) {
-                     console.error("Erro ao checar perfil do cliente:", dbError);
-                     return res.render('pages/login', { error: 'Ocorreu um erro ao carregar seu perfil.', title: 'Login - Momentum Fit' });
-                }
+                const profileCheck = await pool.query('SELECT 1 FROM client_profiles WHERE user_id = $1', [user.id]);
+                if (profileCheck.rows.length === 0) return res.redirect('/client/initial-form');
             }
-            if (user.role === 'client') { redirectToDashboard(user.role, res); } else if (user.role === 'trainer' || user.role === 'superadmin') { if (user.status === 'active') { redirectToDashboard(user.role, res); } else { res.redirect('/trainer/profile'); } } else { res.render('pages/login', { error: 'Status de conta inválido.', title: 'Login - Momentum Fit' }); }
+
+            return handleRedirect(user, res);
         });
+
     } catch (err) {
-        console.error("Erro no login:", err);
-        res.render('pages/login', { error: 'Ocorreu um erro no servidor. Tente novamente.', title: 'Login - Momentum Fit' });
+        console.error(err);
+        res.render('pages/login', { error: 'Erro interno.', title: 'Login' });
     }
 });
 
 router.post('/register', [
-    body('name', 'O nome é obrigatório.').notEmpty().trim().escape(),
-    body('email', 'Por favor, insira um e-mail válido.').isEmail().normalizeEmail(),
-    body('password', 'A senha deve ter pelo menos 6 caracteres.').isLength({ min: 6 }),
-    body('confirmPassword').custom((value, { req }) => {
-        if (value !== req.body.password) {
-            throw new Error('As senhas não coincidem.');
-        }
-        return true;
-    }),
-    body('userType', 'Tipo de conta inválido.').isIn(['client', 'trainer'])
+    body('name').notEmpty().trim(),
+    body('email').isEmail(),
+    body('password').isLength({ min: 6 }),
+    body('userType').isIn(['client', 'trainer'])
 ], async (req, res) => {
-    
     const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.render('pages/register', { 
-            error: errors.array()[0].msg, 
-            title: 'Cadastro - Momentum Fit' 
-        });
-    }
+    if (!errors.isEmpty()) return res.render('pages/register', { error: errors.array()[0].msg, title: 'Cadastro' });
 
     const { name, email, password, userType } = req.body;
     
@@ -103,44 +94,32 @@ router.post('/register', [
         const role = userType === 'trainer' ? 'trainer' : 'client';
         const status = role === 'trainer' ? 'pending' : 'active';
         
-        // A tabela 'users' do Momentum Fit não tem a coluna 'pronouns'
-        const query = 'INSERT INTO users (name, email, password, role, status) VALUES ($1, $2, $3, $4, $5) RETURNING id';
-        const result = await pool.query(query, [name, email, hashedPassword, role, status]);
+        const result = await pool.query(
+            'INSERT INTO users (name, email, password, role, status) VALUES ($1, $2, $3, $4, $5) RETURNING id', 
+            [name, email, hashedPassword, role, status]
+        );
         const userId = result.rows[0].id;
 
+        // Notificações
+        if (role === 'client') notificationService.notifyNewClient(name, userId).catch(console.error);
+        if (role === 'trainer') notificationService.notifyNewTrainer(name).catch(console.error);
+
+        // Login automático
         req.session.user = { id: userId, name, email, role, status };
-
-        if (role === 'client') {
-            await notificationService.notifyNewClient(name, userId);
-        } else if (role === 'trainer') {
-            await notificationService.notifyNewTrainer(name);
-        }
-
-        req.session.save((err) => {
-            if (err) {
-                console.error("Erro ao salvar a sessão após registro:", err);
-            }
-            if (role === 'client') {
-                res.redirect('/client/initial-form');
-            } else {
-                res.redirect('/trainer/profile'); 
-            }
+        
+        req.session.save(() => {
+            if (role === 'client') return res.redirect('/client/initial-form');
+            return res.redirect('/trainer/profile');
         });
 
     } catch (err) {
-        if (err.code === '23505') {
-            return res.render('pages/register', { error: 'Este e-mail já está cadastrado.', title: 'Cadastro - Momentum Fit' });
-        }
-        console.error('Erro ao registrar:', err);
-        res.render('pages/register', { error: 'Ocorreu um erro no servidor. Tente novamente.', title: 'Cadastro - Momentum Fit' });
+        if (err.code === '23505') return res.render('pages/register', { error: 'E-mail já cadastrado.', title: 'Cadastro' });
+        res.render('pages/register', { error: 'Erro no servidor.', title: 'Cadastro' });
     }
 });
 
 router.post('/logout', (req, res) => {
-    req.session.destroy(err => {
-        if (err) console.error('Erro ao fazer logout:', err);
-        res.redirect('/');
-    });
+    req.session.destroy(() => res.redirect('/'));
 });
 
 module.exports = router;
