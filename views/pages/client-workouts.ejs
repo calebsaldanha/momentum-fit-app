@@ -1,45 +1,53 @@
-<%- include('../partials/header.ejs', { title: 'Meus Treinos', bodyClass: 'dashboard-body' }) %>
+<%- include('../partials/header.ejs', { title, bodyClass: 'dashboard-body' }) %>
 <div class="dashboard-container">
-    <aside class="dashboard-sidebar">
-        <nav class="sidebar-nav">
-            <a href="/client/dashboard" class="nav-item">Painel Geral</a>
-            <a href="/client/workouts" class="nav-item active">Meus Treinos</a>
-            <a href="/chat" class="nav-item">Chat</a>
-            <a href="/client/profile" class="nav-item">Meu Perfil</a>
-        </nav>
-        <div class="sidebar-footer">
-            <form action="/auth/logout" method="POST" style="margin: 0;">
-                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                <button type="submit" class="btn-logout-sidebar">Sair</button>
-            </form>
-        </div>
-    </aside>
-
+    <%- include('../partials/client-sidebar.ejs', { currentPage: 'workouts' }) %>
     <main class="dashboard-main">
         <section class="section">
             <div class="section-header">
                 <h1>Meus Treinos</h1>
-                <p>Consulte aqui todos os seus planos de treino ativos e passados.</p>
+                <p>Acesse sua rotina diária.</p>
             </div>
-
-            <div class="workouts-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
-                <% if (workouts && workouts.length > 0) { %>
+            
+            <% if (workouts && workouts.length > 0) { %>
+                <div class="workouts-list" style="display: grid; gap: 1.5rem;">
                     <% workouts.forEach(workout => { %>
-                        <div class="info-card">
-                            <h3><%= workout.title %></h3>
-                            <p style="color: var(--c-text-secondary); margin-bottom: 1rem;">
-                                Instrutor: <%= workout.trainer_name %>
-                            </p>
-                            <a href="/workouts/<%= workout.id %>" class="btn btn-primary btn-sm">Ver Treino Completo</a>
+                        <div class="workout-card" style="background: var(--c-bg-card); border: 1px solid var(--c-border); border-radius: var(--radius); padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                <div>
+                                    <h3 style="margin-bottom: 0.5rem; color: var(--c-accent-primary);"><%= workout.title %></h3>
+                                    <p style="font-size: 0.9rem; color: var(--c-text-secondary);">Instrutor: <%= workout.trainer_name %></p>
+                                </div>
+                                <% if (workout.checked_in_today > 0) { %>
+                                    <span class="badge" style="background: var(--c-success); color: #000; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.8rem; font-weight: bold;">✓ Concluído Hoje</span>
+                                <% } %>
+                            </div>
+                            
+                            <% if (workout.description) { %>
+                                <p style="font-size: 0.95rem; line-height: 1.5;"><%= workout.description %></p>
+                            <% } %>
+
+                            <div style="margin-top: auto; display: flex; gap: 1rem; flex-wrap: wrap;">
+                                <a href="/workouts/<%= workout.id %>" class="btn btn-secondary" style="flex: 1;">Ver Detalhes</a>
+                                
+                                <% if (workout.checked_in_today == 0) { %>
+                                    <form action="/client/workouts/checkin/<%= workout.id %>" method="POST" style="flex: 1;">
+                                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                        <button type="submit" class="btn btn-primary" style="width: 100%;">Concluir Treino</button>
+                                    </form>
+                                <% } else { %>
+                                    <button disabled class="btn btn-outline" style="flex: 1; opacity: 0.5; cursor: not-allowed;">Já realizado</button>
+                                <% } %>
+                            </div>
                         </div>
-                    <% }) %>
-                <% } else { %>
-                    <div class="empty-state" style="grid-column: 1/-1; text-align: center; padding: 3rem;">
-                        <p>Você ainda não possui treinos atribuídos.</p>
-                        <a href="/chat" class="btn btn-secondary">Contactar Treinador</a>
-                    </div>
-                <% } %>
-            </div>
+                    <% }); %>
+                </div>
+            <% } else { %>
+                <div class="empty-state" style="text-align: center; padding: 4rem;">
+                    <img src="/images/momentum-fit-icon.png" style="width: 64px; opacity: 0.2; margin-bottom: 1rem;">
+                    <h3>Nenhum treino encontrado</h3>
+                    <p>Seu instrutor ainda não criou uma rotina para você.</p>
+                </div>
+            <% } %>
         </section>
     </main>
 </div>
