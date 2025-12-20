@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { pool } = require('../database/db');
+const notificationService = require('../utils/notificationService');
 
 const requireAdminAuth = (req, res, next) => {
     if (!req.session.user) return res.redirect('/auth/login');
@@ -21,10 +22,8 @@ router.get('/dashboard', async (req, res) => {
             clientCountQuery = "SELECT COUNT(*) FROM users WHERE role = 'client'";
             checkinCountQuery = "SELECT COUNT(*) FROM workout_checkins WHERE created_at >= NOW() - INTERVAL '7 days'";
         } else {
-            // Treinador vê apenas seus clientes atribuídos
             clientCountQuery = "SELECT COUNT(*) FROM client_profiles WHERE assigned_trainer_id = $1";
             clientParams = [userId];
-            // Treinador vê checkins apenas dos treinos que ELE criou ou de seus alunos
             checkinCountQuery = `
                 SELECT COUNT(wc.id) 
                 FROM workout_checkins wc 
@@ -40,7 +39,6 @@ router.get('/dashboard', async (req, res) => {
             pool.query(checkinCountQuery, checkinParams)
         ]);
         
-        // Clientes recentes (global para superadmin, filtrado para trainer)
         let recentClientsQuery = "SELECT id, name, email FROM users WHERE role = 'client' ORDER BY created_at DESC LIMIT 5";
         let recentClientsParams = [];
         if (!isSuper) {
@@ -101,8 +99,6 @@ router.get('/clients/:id', async (req, res) => {
         if (client.rows.length === 0) return res.status(404).render('pages/error', { message: 'Cliente não encontrado.' });
 
         const workouts = await pool.query("SELECT w.*, u.name as trainer_name FROM workouts w JOIN users u ON w.trainer_id = u.id WHERE w.client_id = $1 ORDER BY w.created_at DESC", [req.params.id]);
-        
-        // Apenas Superadmin ou o próprio treinador podem ver a lista completa de treinadores para reatribuição
         const trainers = await pool.query("SELECT id, name FROM users WHERE role IN ('trainer', 'superadmin') AND status = 'active' ORDER BY name");
         
         res.render('pages/client-details', { 
@@ -115,17 +111,21 @@ router.get('/clients/:id', async (req, res) => {
     } catch (err) { res.status(500).render('pages/error', { message: 'Erro nos detalhes.' }); }
 });
 
-// NOVA ROTA: Atribuir Treinador
 router.post('/clients/:id/assign', async (req, res) => {
     try {
         const { trainer_id } = req.body;
-        await pool.query("UPDATE client_profiles SET assigned_trainer_id = $1 WHERE user_id = $2", [trainer_id || null, req.params.id]);
+        const clientId = req.params.id;
         
-        // Opcional: Notificar o treinador e o cliente
-        // const notificationService = require('../utils/notificationService');
-        // await notificationService.notifyClientAssignment(...) 
+        await pool.query("UPDATE client_profiles SET assigned_trainer_id = $1 WHERE user_id = $2", [trainer_id || null, clientId]);
+        
+        // Notificar Treinador
+        if (trainer_id) {
+            const clientRes = await pool.query("SELECT name FROM users WHERE id = $1", [clientId]);
+            const clientName = clientRes.rows[0].name;
+            await notificationService.notifyTrainerAssignment(trainer_id, clientName, clientId);
+        }
 
-        res.redirect(`/admin/clients/${req.params.id}`);
+        res.redirect(`/admin/clients/${clientId}`);
     } catch (err) {
         console.error(err);
         res.status(500).render('pages/error', { message: 'Erro ao atribuir treinador.' });

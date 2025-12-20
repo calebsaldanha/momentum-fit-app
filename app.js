@@ -44,6 +44,16 @@ app.use((req, res, next) => {
     res.locals.csrfToken = req.csrfToken();
     res.locals.isAuthenticated = !!req.session.user;
     res.locals.user = req.session.user || null;
+    // Notificações
+    if (req.session.user) {
+        const notifRes = await pgPool.query('SELECT * FROM notifications WHERE user_id =  AND is_read = false ORDER BY created_at DESC LIMIT 5', [req.session.user.id]);
+        res.locals.notifications = notifRes.rows;
+        const countRes = await pgPool.query('SELECT COUNT(*) FROM notifications WHERE user_id =  AND is_read = false', [req.session.user.id]);
+        res.locals.unreadCount = countRes.rows[0].count;
+    } else {
+        res.locals.notifications = [];
+        res.locals.unreadCount = 0;
+    }
     res.locals.title = 'Momentum Fit';
     next();
 });
@@ -58,6 +68,7 @@ app.use('/chat', require('./routes/chat'));
 app.use('/superadmin', require('./routes/superadmin'));
 app.use('/articles', require('./routes/articles'));
 app.use('/api', require('./routes/api'));     // Rota API (Uploads/Notificações)
+app.use('/notifications', require('./routes/notifications'));
 app.use('/trainer', require('./routes/trainer')); // Rota Trainer (Perfil Pendente)
 
 // Tratamento de Erros
