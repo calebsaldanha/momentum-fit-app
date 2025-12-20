@@ -10,9 +10,14 @@ const requireClientAuth = (req, res, next) => {
 router.use(requireClientAuth);
 
 router.get('/initial-form', async (req, res) => {
-    const check = await pool.query("SELECT 1 FROM client_profiles WHERE user_id = $1", [req.session.user.id]);
-    if (check.rows.length > 0) return res.redirect('/client/dashboard');
-    res.render('pages/initial-form', { title: 'Complete seu Perfil - Momentum Fit' });
+    try {
+        const check = await pool.query("SELECT 1 FROM client_profiles WHERE user_id = $1", [req.session.user.id]);
+        if (check.rows.length > 0) return res.redirect('/client/dashboard');
+        res.render('pages/initial-form', { title: 'Complete seu Perfil - Momentum Fit' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).render('pages/error', { message: 'Erro ao verificar perfil.' });
+    }
 });
 
 router.post('/initial-form', async (req, res) => {
@@ -20,13 +25,14 @@ router.post('/initial-form', async (req, res) => {
     const { age, weight, height, fitness_level, goals, medical_conditions, training_days, equipment } = req.body;
     try {
         await pool.query(
-            `INSERT INTO client_profiles 
+            \`INSERT INTO client_profiles 
             (user_id, age, weight, height, fitness_level, goals, medical_conditions, training_days, equipment, created_at)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW())`,
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW())\`,
             [age, weight, height, fitness_level, goals, medical_conditions, training_days, equipment]
         );
         res.redirect('/client/dashboard');
     } catch (err) {
+        console.error(err);
         res.status(500).render('pages/error', { message: 'Erro ao salvar perfil.' });
     }
 });
@@ -59,14 +65,14 @@ router.get('/dashboard', async (req, res) => {
 
 router.get('/workouts', async (req, res) => {
     try {
-        const query = `
+        const query = \`
             SELECT w.*, u.name as trainer_name,
             (SELECT COUNT(*) FROM workout_checkins wc WHERE wc.workout_id = w.id AND wc.created_at::date = CURRENT_DATE) as checked_in_today
             FROM workouts w 
             LEFT JOIN users u ON w.trainer_id = u.id 
             WHERE w.client_id = $1 
             ORDER BY w.created_at DESC
-        `;
+        \`;
         const workoutsRes = await pool.query(query, [req.session.user.id]);
         res.render('pages/client-workouts', { title: 'Meus Treinos - Momentum Fit', workouts: workoutsRes.rows });
     } catch (err) {
@@ -102,15 +108,36 @@ router.get('/profile', async (req, res) => {
 router.post('/profile', async (req, res) => {
     const { name, age, weight, height, fitness_level, goals, medical_conditions, training_days, equipment } = req.body;
     const userId = req.session.user.id;
+    
+    const client = await pool.connect(); // Cliente para transação
+    
     try {
-        await pool.query("UPDATE users SET name = $1 WHERE id = $2", [name, userId]);
-        await pool.query(
-            `UPDATE client_profiles SET age=$1, weight=$2, height=$3, fitness_level=$4, goals=$5, medical_conditions=$6, training_days=$7, equipment=$8 WHERE user_id=$9`, 
+        await client.query('BEGIN'); // Inicia transação
+
+        // 1. Atualiza Tabela Users
+        await client.query("UPDATE users SET name = $1 WHERE id = $2", [name, userId]);
+        
+        // 2. Atualiza Tabela Client Profiles
+        await client.query(
+            \`UPDATE client_profiles SET age=$1, weight=$2, height=$3, fitness_level=$4, goals=$5, medical_conditions=$6, training_days=$7, equipment=$8 WHERE user_id=$9\`, 
             [age, weight, height, fitness_level, goals, medical_conditions, training_days, equipment, userId]
         );
+
+        await client.query('COMMIT'); // Confirma alterações
+
+        // Atualiza sessão
         req.session.user.name = name;
-        res.redirect('/client/profile');
-    } catch (err) { res.status(500).render('pages/error', { message: 'Erro ao atualizar perfil.' }); }
+        req.session.save(() => {
+            res.redirect('/client/profile');
+        });
+
+    } catch (err) { 
+        await client.query('ROLLBACK'); // Desfaz tudo se der erro
+        console.error("Erro na transação de perfil:", err);
+        res.status(500).render('pages/error', { message: 'Erro ao atualizar perfil.' }); 
+    } finally {
+        client.release(); // Libera conexão
+    }
 });
 
 module.exports = router;
