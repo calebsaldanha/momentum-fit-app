@@ -3,72 +3,208 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= title %></title>
+    <title>Login | Momentum Fit</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <link rel="stylesheet" href="/css/styles.css">
+    
     <style>
-        body {
-            background: url('/images/auth-bg.png') no-repeat center center fixed;
-            background-size: cover;
-            height: 100vh;
+        .auth-body {
+            background: linear-gradient(135deg, var(--c-dark-bg) 0%, #000000 100%);
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-family: 'Inter', sans-serif;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
         }
-        .auth-card {
-            background: rgba(18, 18, 18, 0.95);
-            padding: 2.5rem;
-            border-radius: 12px;
+
+        /* Elementos de fundo decorativos */
+        .auth-body::before, .auth-body::after {
+            content: '';
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.15;
+            z-index: 0;
+        }
+        .auth-body::before { background: var(--c-gold); top: -20%; left: -20%; }
+        .auth-body::after { background: #3b82f6; bottom: -20%; right: -20%; }
+
+        .auth-container {
             width: 100%;
-            max-width: 400px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-            border: 1px solid rgba(212, 175, 55, 0.1);
+            max-width: 460px;
+            position: relative;
+            z-index: 1;
         }
-        .auth-header { text-align: center; margin-bottom: 2rem; }
-        .form-group { margin-bottom: 1.5rem; }
-        .form-group label { display: block; margin-bottom: 0.5rem; color: #ccc; font-size: 0.9rem; }
-        .form-group input { 
-            width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #333; 
-            background: #000; color: #fff; 
+
+        .auth-box {
+            background: rgba(18, 18, 18, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 3rem 2.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
-        .btn-primary { 
-            width: 100%; padding: 12px; background: #d4af37; border: none; 
-            border-radius: 6px; color: #000; font-weight: bold; cursor: pointer; 
-            transition: 0.3s;
+
+        .auth-header { text-align: center; margin-bottom: 2.5rem; }
+        
+        /* Reutilizando a classe do logo e animação */
+        .logo-img { height: 60px; width: auto; margin-bottom: 1rem; }
+        .logo-spin { animation: spin 20s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        .auth-header h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 0.75rem;
+            background: linear-gradient(to right, #fff, var(--c-gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
-        .btn-primary:hover { background: #b5952f; }
-        .error-msg { color: #ff4444; text-align: center; margin-bottom: 1rem; font-size: 0.9rem; }
-        .auth-footer { text-align: center; margin-top: 1.5rem; font-size: 0.9rem; color: #888; }
-        .auth-footer a { color: #d4af37; text-decoration: none; }
+        
+        .auth-header p { color: var(--c-text-secondary); font-size: 1.1rem; }
+
+        .auth-form .form-group { margin-bottom: 1.5rem; }
+        
+        .input-wrapper {
+            position: relative;
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+        .input-wrapper:focus-within {
+            border-color: var(--c-gold);
+            box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .input-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--c-text-secondary);
+            font-size: 1.2rem;
+            transition: color 0.3s ease;
+        }
+        .input-wrapper:focus-within .input-icon { color: var(--c-gold); }
+
+        .form-input {
+            width: 100%;
+            padding: 16px 16px 16px 50px;
+            background: transparent;
+            border: none;
+            color: var(--c-text-primary);
+            font-size: 1rem;
+            font-family: 'Montserrat', sans-serif;
+            outline: none;
+        }
+        .form-input::placeholder { color: rgba(255, 255, 255, 0.4); }
+
+        .btn-auth {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--c-gold), #b5952f);
+            border: none;
+            border-radius: 12px;
+            color: #000;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px -10px rgba(212, 175, 55, 0.5);
+        }
+        .btn-auth:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px -12px rgba(212, 175, 55, 0.7);
+        }
+
+        .auth-footer {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--c-text-secondary);
+        }
+        .link-gold {
+            color: var(--c-gold);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .link-gold:hover { color: #fff; text-decoration: underline; }
+        
+        .alert {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+        .alert-danger { background: rgba(220, 53, 69, 0.2); color: #ff6b6b; border: 1px solid rgba(220, 53, 69, 0.3); }
     </style>
 </head>
-<body>
-    <div class="auth-card">
-        <div class="auth-header">
-            <img src="/images/momentum-fit-logo-completo.png" alt="Momentum Fit" style="max-width: 180px; height: auto;">
-            <p>Faça login para continuar</p>
-        </div>
-
-        <% if (locals.error) { %>
-            <div class="error-msg"><%= error %></div>
-        <% } %>
-
-        <form action="/auth/login" method="POST">
-            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-            <div class="form-group">
-                <label>E-mail</label>
-                <input type="email" name="email" required placeholder="seu@email.com">
+<body class="auth-body">
+    <div class="auth-container">
+        <div class="auth-box js-scroll fade-in">
+            <div class="auth-header">
+                <a href="/" class="logo-link" style="justify-content: center;">
+                    <img src="/images/logo-3d.png" alt="Momentum Fit" class="logo-img logo-spin">
+                </a>
+                <h1>Bem-vindo de volta</h1>
+                <p>Acesse sua conta para continuar</p>
             </div>
-            <div class="form-group">
-                <label>Senha</label>
-                <input type="password" name="password" required placeholder="********">
-            </div>
-            <button type="submit" class="btn btn-primary">Entrar</button>
-        </form>
 
-        <div class="auth-footer">
-            <p>Não tem conta? <a href="/auth/register">Cadastre-se</a></p>
+            <% if (locals.error) { %>
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle" style="margin-right: 8px;"></i>
+                    <%= error %>
+                </div>
+            <% } %>
+
+            <form action="/auth/login" method="POST" class="auth-form">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                
+                <div class="form-group">
+                    <div class="input-wrapper">
+                        <i class="fas fa-envelope input-icon"></i>
+                        <input type="email" name="email" class="form-input" placeholder="Seu e-mail" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock input-icon"></i>
+                        <input type="password" name="password" class="form-input" placeholder="Sua senha" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-auth">
+                    Entrar na Plataforma <i class="fas fa-arrow-right" style="margin-left: 10px;"></i>
+                </button>
+            </form>
+
+            <div class="auth-footer">
+                <p>Ainda não tem uma conta? <a href="/auth/register" class="link-gold">Cadastre-se aqui</a></p>
+            </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const fadeElems = document.querySelectorAll('.fade-in');
+            setTimeout(() => {
+                fadeElems.forEach(el => el.style.opacity = 1);
+            }, 100);
+        });
+    </script>
 </body>
 </html>

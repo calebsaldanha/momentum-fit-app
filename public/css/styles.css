@@ -290,3 +290,21 @@ img {
         margin-left: 0 !important;
     }
 }
+
+/* --- CORREÇÃO DEFINITIVA DA LOGO DO HEADER --- */
+/* Força a imagem a ser redonda e ter um tamanho controlado */
+.header-logo-img {
+    height: 50px !important;      /* Altura fixa para não ficar gigante */
+    width: 50px !important;       /* Largura igual a altura para ser um círculo perfeito */
+    border-radius: 50% !important; /* Faz a imagem ficar redonda */
+    object-fit: cover;            /* Garante que a imagem preencha o círculo sem distorcer */
+    border: 2px solid var(--c-gold); /* Opcional: adiciona uma borda dourada fina */
+}
+
+/* Ajuste fino no link do logo para alinhar o texto */
+.logo-link {
+    display: flex;
+    align-items: center;
+    gap: 12px; /* Espaço entre a logo redonda e o texto */
+    text-decoration: none;
+}
