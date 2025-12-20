@@ -3,23 +3,150 @@
     <%- include('../partials/admin-sidebar.ejs') %>
     <main class="dashboard-main">
         <div class="section">
-            <div class="section-header"><h1>Novo Treino</h1><p>Desenvolva um plano personalizado.</p></div>
-            <form id="createWorkoutForm" class="dashboard-form">
+            <div class="section-header">
+                <h1>Novo Treino</h1>
+                <p>Desenvolva um plano personalizado.</p>
+            </div>
+            
+            <form id="createWorkoutForm" class="dashboard-form" style="max-width: 800px;">
                 <div class="form-group">
-                    <label>Cliente *</label>
-                    <select name="client_id" required>
+                    <label for="client_id">Cliente *</label>
+                    <select name="client_id" id="client_id" required>
                         <option value="">Selecione um cliente</option>
                         <% clients.forEach(client => { %>
                             <option value="<%= client.id %>" <%= selectedClientId == client.id ? 'selected' : '' %>><%= client.name %></option>
                         <% }); %>
                     </select>
                 </div>
-                <div class="form-group"><label>Título *</label><input type="text" name="title" required></div>
+                
+                <div class="form-group">
+                    <label for="title">Título do Treino *</label>
+                    <input type="text" id="title" name="title" required placeholder="Ex: Hipertrofia A - Peito e Tríceps">
+                </div>
+                
+                <div class="form-group">
+                    <label for="description">Descrição / Foco (Opcional)</label>
+                    <textarea id="description" name="description" rows="2" placeholder="Instruções gerais para este treino..."></textarea>
+                </div>
+
+                <h3 style="margin: 2rem 0 1rem; color: var(--c-text-primary);">Exercícios</h3>
                 <div id="exercisesContainer"></div>
-                <button type="button" class="btn btn-outline" id="addExerciseBtn">+ Adicionar Exercício</button>
-                <div class="form-actions"><button type="submit" class="btn btn-primary">Salvar Treino</button></div>
+                
+                <button type="button" class="btn btn-outline" id="addExerciseBtn" style="width: 100%; border-style: dashed; margin-top: 1rem;">
+                    + Adicionar Exercício
+                </button>
+                
+                <div class="form-actions" style="margin-top: 2rem; display: flex; justify-content: flex-end;">
+                    <button type="submit" class="btn btn-primary">Salvar Treino</button>
+                </div>
             </form>
         </div>
     </main>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('exercisesContainer');
+    const addBtn = document.getElementById('addExerciseBtn');
+    
+    // Função para adicionar campos de exercício
+    function addExercise() {
+        const count = container.children.length + 1;
+        const exerciseHTML = \`
+            <div class="exercise-item" style="background: var(--c-bg-card); border: 1px solid var(--c-border); padding: 1.5rem; border-radius: var(--radius); margin-bottom: 1.5rem; position: relative;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h4 style="color: var(--c-accent-primary); margin: 0;">Exercício \${count}</h4>
+                    <button type="button" class="btn btn-sm btn-outline remove-exercise" style="color: var(--c-error); border-color: var(--c-error);">Remover</button>
+                </div>
+                
+                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label>Nome do Exercício *</label>
+                        <input type="text" class="exercise-name" required placeholder="Ex: Supino Reto">
+                    </div>
+                    <div class="form-group">
+                        <label>Séries x Repetições *</label>
+                        <input type="text" class="exercise-sets" required placeholder="Ex: 4x12">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Observações (Carga, Técnica, etc)</label>
+                    <textarea class="exercise-description" rows="2"></textarea>
+                </div>
+            </div>
+        \`;
+        container.insertAdjacentHTML('beforeend', exerciseHTML);
+    }
+
+    // Event Listeners
+    addBtn.addEventListener('click', addExercise);
+
+    // Adicionar o primeiro exercício automaticamente
+    addExercise();
+
+    // Event delegation para remover exercícios
+    container.addEventListener('click', (e) => {
+        if (e.target.classList.contains('remove-exercise')) {
+            e.target.closest('.exercise-item').remove();
+            // Renumerar títulos (opcional, mas bom para UX)
+            document.querySelectorAll('.exercise-item h4').forEach((h4, index) => {
+                h4.textContent = 'Exercício ' + (index + 1);
+            });
+        }
+    });
+
+    // Submissão do Formulário
+    document.getElementById('createWorkoutForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const exercises = [];
+        document.querySelectorAll('.exercise-item').forEach(item => {
+            const name = item.querySelector('.exercise-name').value;
+            const sets = item.querySelector('.exercise-sets').value;
+            if (name && sets) {
+                exercises.push({
+                    name,
+                    sets,
+                    description: item.querySelector('.exercise-description').value
+                });
+            }
+        });
+
+        if (exercises.length === 0) {
+            alert('Adicione pelo menos um exercício.');
+            return;
+        }
+
+        const formData = {
+            client_id: document.getElementById('client_id').value,
+            title: document.getElementById('title').value,
+            description: document.getElementById('description').value,
+            exercises: exercises
+        };
+
+        try {
+            const response = await fetch('/workouts/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'CSRF-Token': '<%= csrfToken %>' // Importante: Token CSRF
+                },
+                body: JSON.stringify(formData)
+            });
+
+            const result = await response.json();
+            
+            if (result.success) {
+                window.location.href = '/admin/clients/' + result.clientId;
+            } else {
+                alert('Erro: ' + result.message);
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Ocorreu um erro ao salvar o treino.');
+        }
+    });
+});
+</script>
 <%- include('../partials/footer.ejs') %>
