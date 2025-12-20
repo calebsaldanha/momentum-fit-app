@@ -270,3 +270,23 @@ img {
     max-width: 100%;
     height: auto;
 }
+
+/* Ajuste de Segurança para Logo e Menu */
+.header-logo-img {
+    height: 45px !important; /* Força o tamanho correto */
+    width: auto !important;
+    max-width: 100%;
+}
+
+/* Mobile Menu Ajustes Finos */
+@media (max-width: 992px) {
+    .nav-menu {
+        padding-top: 100px; /* Espaço para não ficar em cima do header */
+        gap: 2rem;
+        align-items: center; /* Centraliza itens no mobile */
+    }
+    .user-actions {
+        flex-direction: column;
+        margin-left: 0 !important;
+    }
+}

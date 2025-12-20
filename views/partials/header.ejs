@@ -3,129 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= title %> | Momentum Fit</title>
-    <link rel="stylesheet" href="/css/styles.css">
-    <link rel="stylesheet" href="/css/dashboard.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <% if (locals.csrfToken) { %>
-        <meta name="csrf-token" content="<%= csrfToken %>">
-    <% } %>
-    <style>
-        /* Estilos do Sino de Notificação */
-        .notification-wrapper { position: relative; cursor: pointer; margin-right: 15px; }
-        .notification-icon { font-size: 1.2rem; color: var(--c-text-secondary); transition: color 0.3s; }
-        .notification-icon:hover { color: var(--c-accent-primary); }
-        .notification-badge {
-            position: absolute; top: -5px; right: -5px;
-            background: var(--c-error); color: white;
-            font-size: 10px; padding: 2px 5px; border-radius: 50%;
-            font-weight: bold;
-        }
-        .notification-dropdown {
-            display: none; position: absolute; top: 100%; right: 0;
-            width: 300px; background: var(--c-bg-card);
-            border: 1px solid var(--c-border); border-radius: var(--radius);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 1000;
-        }
-        .notification-dropdown.active { display: block; }
-        .notif-header { padding: 10px; border-bottom: 1px solid var(--c-border); display: flex; justify-content: space-between; align-items: center; }
-        .notif-header h4 { margin: 0; font-size: 14px; color: var(--c-text-primary); }
-        .notif-mark-all { font-size: 12px; color: var(--c-accent-primary); cursor: pointer; text-decoration: underline; }
-        .notif-list { max-height: 300px; overflow-y: auto; }
-        .notif-item { padding: 10px; border-bottom: 1px solid var(--c-border); display: block; text-decoration: none; transition: background 0.2s; }
-        .notif-item:hover { background: rgba(255,255,255,0.05); }
-        .notif-title { font-size: 13px; font-weight: bold; color: var(--c-text-primary); display: block; margin-bottom: 2px; }
-        .notif-msg { font-size: 12px; color: var(--c-text-secondary); display: block; }
-        .notif-empty { padding: 20px; text-align: center; font-size: 13px; color: var(--c-text-secondary); }
-    </style>
-</head>
-<body class="<%= locals.bodyClass || '' %>">
-
-<header class="main-header">
-    <div class="container header-content">
-        <a href="/" class="logo">
-            <img src="/images/momentum-fit-logo-completo.png" alt="Momentum Fit" style="height: 40px; width: auto;">
-        </a>
-        
-        <nav class="main-nav">
-            <% if (locals.user) { %>
-                <div class="notification-wrapper" id="notifWrapper">
-                    <span class="notification-icon">���</span>
-                    <% if (locals.unreadCount > 0) { %>
-                        <span class="notification-badge" id="notifBadge"><%= unreadCount %></span>
-                    <% } %>
-                    
-                    <div class="notification-dropdown" id="notifDropdown">
-                        <div class="notif-header">
-                            <h4>Notificações</h4>
-                            <span class="notif-mark-all" onclick="markAllRead()">Marcar lidas</span>
-                        </div>
-                        <div class="notif-list">
-                            <% if (locals.notifications && notifications.length > 0) { %>
-                                <% notifications.forEach(n => { %>
-                                    <a href="<%= n.link || '#' %>" class="notif-item" onclick="markRead(<%= n.id %>)">
-                                        <span class="notif-title"><%= n.title %></span>
-                                        <span class="notif-msg"><%= n.message %></span>
-                                    </a>
-                                <% }); %>
-                            <% } else { %>
-                                <div class="notif-empty">Nenhuma notificação nova</div>
-                            <% } %>
-                        </div>
-                    </div>
-                </div>
-
-                <span class="user-greeting">Olá, <strong><%= user.name %></strong></span>
-                <form action="/auth/logout" method="POST" style="display: inline;">
-                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                    <button type="submit" class="btn btn-outline btn-sm">Sair</button>
-                </form>
-            <% } else { %>
-                <a href="/auth/login" class="nav-link">Login</a>
-                <a href="/auth/register" class="btn btn-primary btn-sm">Começar Agora</a>
-            <% } %>
-        </nav>
-    </div>
-</header>
-
-<script>
-    // Lógica do Dropdown de Notificações
-    const notifWrapper = document.getElementById('notifWrapper');
-    const notifDropdown = document.getElementById('notifDropdown');
+    <title><%= typeof title !== 'undefined' ? title : 'Momentum Fit' %></title>
     
-    if (notifWrapper) {
-        notifWrapper.addEventListener('click', (e) => {
-            if (!e.target.closest('.notif-mark-all') && !e.target.closest('.notif-item')) {
-                notifDropdown.classList.toggle('active');
-            }
-        });
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css?v=<%= Date.now() %>">
+    
+    <link rel="icon" type="image/png" href="/images/logo-3d.png">
 
-        // Fechar ao clicar fora
-        document.addEventListener('click', (e) => {
-            if (!notifWrapper.contains(e.target)) {
-                notifDropdown.classList.remove('active');
-            }
-        });
-    }
+    <% if (typeof bodyClass !== 'undefined' && bodyClass.includes('dashboard-body')) { %>
+        <link rel="stylesheet" href="/css/dashboard.css?v=<%= Date.now() %>">
+    <% } %>
+</head>
+<body class="<%= typeof bodyClass !== 'undefined' ? bodyClass : '' %>">
+    
+    <% if (typeof bodyClass === 'undefined' || !bodyClass.includes('auth-body')) { %>
+        <header class="header">
+            <div class="container">
+                <nav class="nav-container">
+                    
+                    <a href="/" class="logo-link">
+                        <img src="/images/logo-3d.png" alt="Momentum Fit" class="header-logo-img">
+                        <span style="font-weight: 800; font-size: 1.2rem; color: #fff; letter-spacing: -1px;">MOMENTUM</span>
+                    </a>
 
-    async function markRead(id) {
-        // Envia requisição em background, não espera retorno para ser ágil
-        const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-        await fetch('/notifications/mark-read/' + id, { 
-            method: 'POST',
-            headers: { 'CSRF-Token': csrf }
-        });
-    }
+                    <div class="hamburger" id="hamburgerBtn">
+                        <span class="bar"></span>
+                        <span class="bar"></span>
+                        <span class="bar"></span>
+                    </div>
 
-    async function markAllRead() {
-        const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-        const res = await fetch('/notifications/mark-all-read', { 
-            method: 'POST',
-            headers: { 'CSRF-Token': csrf }
-        });
-        if(res.ok) {
-            document.getElementById('notifBadge').style.display = 'none';
-            document.querySelector('.notif-list').innerHTML = '<div class="notif-empty">Nenhuma notificação nova</div>';
-        }
-    }
-</script>
+                    <ul class="nav-menu" id="navMenu">
+                        <li><a href="/" class="nav-link">Início</a></li>
+                        <li><a href="/about" class="nav-link">Sobre</a></li>
+                        <li><a href="/articles" class="nav-link">Artigos</a></li>
+
+                        <% if (isAuthenticated) { %>
+                            <% if (user.role === 'client') { %>
+                                <li><a href="/client/dashboard" class="nav-link">Painel</a></li>
+                                <li><a href="/client/workouts" class="nav-link">Treinos</a></li>
+                            <% } %>
+                            
+                            <% if (user.role === 'superadmin') { %>
+                                <li><a href="/superadmin/dashboard" class="nav-link">Super Admin</a></li>
+                            <% } %>
+                            
+                            <% if (user.role === 'trainer' || user.role === 'superadmin') { %>
+                                <li><a href="/admin/dashboard" class="nav-link">Admin</a></li>
+                            <% } %>
+                            
+                            <li><a href="/chat" class="nav-link">Chat</a></li>
+
+                            <li class="user-actions" style="display: flex; align-items: center; gap: 15px; margin-left: 10px;">
+                                <div class="user-badge">Olá, <%= user.name.split(' ')[0] %></div>
+                                <form action="/auth/logout" method="POST" style="margin: 0;">
+                                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                    <button type="submit" class="btn btn-secondary btn-sm">Sair</button>
+                                </form>
+                            </li>
+                        <% } else { %>
+                            <li style="margin-left: auto;"><a href="/auth/login" class="nav-link">Entrar</a></li>
+                            <li><a href="/auth/register" class="btn btn-primary btn-sm">Começar</a></li>
+                        <% } %>
+                    </ul>
+
+                </nav>
+            </div>
+        </header>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const hamburger = document.getElementById('hamburgerBtn');
+                const navMenu = document.getElementById('navMenu');
+
+                if (hamburger && navMenu) {
+                    hamburger.addEventListener('click', () => {
+                        navMenu.classList.toggle('active');
+                        
+                        // Animação do ícone
+                        const bars = hamburger.querySelectorAll('.bar');
+                        if (navMenu.classList.contains('active')) {
+                            bars[0].style.transform = 'rotate(-45deg) translate(-5px, 6px)';
+                            bars[1].style.opacity = '0';
+                            bars[2].style.transform = 'rotate(45deg) translate(-5px, -6px)';
+                        } else {
+                            bars[0].style.transform = 'none';
+                            bars[1].style.opacity = '1';
+                            bars[2].style.transform = 'none';
+                        }
+                    });
+                }
+            });
+        </script>
+        
+        <div style="height: var(--header-height);"></div>
+    <% } %>
