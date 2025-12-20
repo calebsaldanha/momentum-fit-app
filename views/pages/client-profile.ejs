@@ -5,32 +5,60 @@
         <section class="section">
             <div class="section-header">
                 <h1>Meu Perfil</h1>
-                <p>Gerencie suas informações pessoais e objetivos fitness.</p>
+                <p>Gerencie suas informações pessoais e métricas.</p>
             </div>
             <form method="POST" action="/client/profile" class="dashboard-form" style="max-width: 800px;">
                 <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                
                 <div class="form-group">
                     <label>Nome Completo</label>
                     <input type="text" name="name" value="<%= profile.name %>" required>
                 </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
                     <div class="form-group">
                         <label>Idade</label>
                         <input type="number" name="age" value="<%= profile.age %>">
                     </div>
                     <div class="form-group">
-                        <label>Nível de Experiência</label>
-                        <select name="fitness_level">
-                            <option value="beginner" <%= profile.fitness_level === 'beginner' ? 'selected' : '' %>>Iniciante</option>
-                            <option value="intermediate" <%= profile.fitness_level === 'intermediate' ? 'selected' : '' %>>Intermediário</option>
-                            <option value="advanced" <%= profile.fitness_level === 'advanced' ? 'selected' : '' %>>Avançado</option>
-                        </select>
+                        <label>Peso (kg)</label>
+                        <input type="number" step="0.1" name="weight" value="<%= profile.weight %>">
+                    </div>
+                    <div class="form-group">
+                        <label>Altura (m)</label>
+                        <input type="number" step="0.01" name="height" value="<%= profile.height %>">
                     </div>
                 </div>
+
+                <div class="form-group">
+                    <label>Nível de Experiência</label>
+                    <select name="fitness_level">
+                        <option value="beginner" <%= profile.fitness_level === 'beginner' ? 'selected' : '' %>>Iniciante</option>
+                        <option value="intermediate" <%= profile.fitness_level === 'intermediate' ? 'selected' : '' %>>Intermediário</option>
+                        <option value="advanced" <%= profile.fitness_level === 'advanced' ? 'selected' : '' %>>Avançado</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Dias de Treino (Semanais)</label>
+                    <input type="number" name="training_days" value="<%= profile.training_days || 3 %>" min="1" max="7">
+                </div>
+
+                <div class="form-group">
+                    <label>Equipamentos Disponíveis</label>
+                    <textarea name="equipment" rows="2" placeholder="Ex: Halteres, Academia completa, Peso do corpo..."><%= profile.equipment %></textarea>
+                </div>
+
                 <div class="form-group">
                     <label>Objetivos</label>
                     <textarea name="goals" rows="3"><%= profile.goals %></textarea>
                 </div>
+
+                <div class="form-group">
+                    <label>Condições Médicas / Lesões</label>
+                    <textarea name="medical_conditions" rows="2"><%= profile.medical_conditions %></textarea>
+                </div>
+
                 <button type="submit" class="btn btn-primary">Salvar Alterações</button>
             </form>
         </section>
