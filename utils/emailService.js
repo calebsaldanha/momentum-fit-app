@@ -36,7 +36,7 @@ const getHtmlTemplate = (title, message, actionLink = '', actionText = 'Acessar 
     <body>
         <div class="container">
             <div class="header">
-                <img src="cid:${logoCid}" alt="Momentum Fit">
+                <img src="cid:${logoCid}" alt="Momentum Fit" width="150" height="auto" style="max-width: 150px; height: auto;">
             </div>
             <div class="content">
                 <h1 class="h1">${title}</h1>

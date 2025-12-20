@@ -241,3 +241,32 @@ tr:hover td { background: rgba(255,255,255,0.02); color: var(--c-text-primary); 
 .exercise-sets { background: var(--c-accent-primary); color: black; padding: 0.2rem 0.6rem; border-radius: 4px; font-weight: 700; font-size: 0.85rem; }
 .exercise-desc { color: var(--c-text-secondary); font-size: 0.9rem; }
 
+
+/* --- CORREÇÃO DE IMAGENS GIGANTES --- */
+
+/* Força a logo do cabeçalho a respeitar a altura */
+.main-header .logo img {
+    height: 40px !important;
+    width: auto !important;
+    max-width: 200px; /* Previne que estoure em mobile */
+    object-fit: contain;
+}
+
+/* Força a logo nas telas de Login/Cadastro a ter um tamanho controlado */
+.auth-box .logo-img,
+.auth-header img {
+    height: auto !important;
+    width: auto !important;
+    max-width: 180px !important; /* Tamanho bom para login */
+    max-height: 80px !important;
+    margin-bottom: 1rem;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Previne que imagens gerais estourem containers */
+img {
+    max-width: 100%;
+    height: auto;
+}

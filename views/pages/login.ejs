@@ -1,35 +1,74 @@
-<%- include('../partials/header.ejs', { bodyClass: 'auth-body' }) %>
-
-<main class="auth-main">
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        body {
+            background: url('/images/auth-bg.png') no-repeat center center fixed;
+            background-size: cover;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Inter', sans-serif;
+        }
+        .auth-card {
+            background: rgba(18, 18, 18, 0.95);
+            padding: 2.5rem;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            border: 1px solid rgba(212, 175, 55, 0.1);
+        }
+        .auth-header { text-align: center; margin-bottom: 2rem; }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; color: #ccc; font-size: 0.9rem; }
+        .form-group input { 
+            width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #333; 
+            background: #000; color: #fff; 
+        }
+        .btn-primary { 
+            width: 100%; padding: 12px; background: #d4af37; border: none; 
+            border-radius: 6px; color: #000; font-weight: bold; cursor: pointer; 
+            transition: 0.3s;
+        }
+        .btn-primary:hover { background: #b5952f; }
+        .error-msg { color: #ff4444; text-align: center; margin-bottom: 1rem; font-size: 0.9rem; }
+        .auth-footer { text-align: center; margin-top: 1.5rem; font-size: 0.9rem; color: #888; }
+        .auth-footer a { color: #d4af37; text-decoration: none; }
+    </style>
+</head>
+<body>
     <div class="auth-card">
         <div class="auth-header">
-            <h2>Bem-vindo de volta!</h2>
-            <p>Acesse sua conta para continuar sua jornada.</p>
+            <img src="/images/momentum-fit-logo-completo.png" alt="Momentum Fit" style="max-width: 180px; height: auto;">
+            <p>Faça login para continuar</p>
         </div>
 
-        <% if (typeof error !== 'undefined' && error) { %>
-            <div class="alert alert-error" style="background: #fee2e2; color: #ef4444; padding: 10px; border-radius: 6px; margin-bottom: 15px; font-size: 0.9rem;">
-                <%= error %>
-            </div>
+        <% if (locals.error) { %>
+            <div class="error-msg"><%= error %></div>
         <% } %>
 
-        <form class="auth-form" method="POST" action="/auth/login">
+        <form action="/auth/login" method="POST">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
             <div class="form-group">
-                <label for="email">E-mail</label>
-                <input type="email" id="email" name="email" required placeholder="seu@email.com">
+                <label>E-mail</label>
+                <input type="email" name="email" required placeholder="seu@email.com">
             </div>
             <div class="form-group">
-                <label for="password">Senha</label>
-                <input type="password" id="password" name="password" required placeholder="********">
+                <label>Senha</label>
+                <input type="password" name="password" required placeholder="********">
             </div>
-            <button type="submit" class="btn btn-primary" style="width: 100%;">Entrar</button>
+            <button type="submit" class="btn btn-primary">Entrar</button>
         </form>
 
-        <div style="text-align: center; margin-top: 1.5rem;">
-            <p style="font-size: 0.9rem;">Não tem uma conta? <a href="/auth/register" style="color: var(--c-accent-primary); font-weight: 600;">Cadastre-se</a></p>
+        <div class="auth-footer">
+            <p>Não tem conta? <a href="/auth/register">Cadastre-se</a></p>
         </div>
     </div>
-</main>
-
-<%- include('../partials/footer.ejs') %>
+</body>
+</html>
