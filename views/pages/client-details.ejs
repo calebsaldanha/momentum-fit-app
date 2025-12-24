@@ -5,106 +5,131 @@
 
     <main class="dashboard-main">
         <div class="container">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-                <div>
-                    <a href="/admin/clients" style="color: #888; font-size: 0.9rem;">&larr; Voltar</a>
-                    <h1 style="margin-bottom: 0;"><%= clientProfile.name %></h1>
-                    <span class="user-badge"><%= clientProfile.email %></span>
+            <div style="margin-bottom: 2rem;">
+                <a href="/admin/clients" style="color: #888; font-size: 0.9rem;">&larr; Voltar para Lista</a>
+                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 10px;">
+                    <div>
+                        <h1 style="margin-bottom: 5px;"><%= clientProfile.name %></h1>
+                        <span class="user-badge" style="font-size: 1rem;"><%= clientProfile.email %></span>
+                        <% if (clientProfile.status === 'pending_approval') { %>
+                             <span style="background: #f59e0b; color: black; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; margin-left: 10px;">AGUARDANDO APROVAÇÃO</span>
+                        <% } %>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end;">
+                        <% if (clientProfile.status === 'pending_approval' || clientProfile.status === 'rejected') { %>
+                            <form action="/admin/clients/<%= clientProfile.user_id %>/status" method="POST" style="margin: 0;">
+                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                <input type="hidden" name="action" value="approve">
+                                <button type="submit" class="btn btn-primary btn-sm">Aprovar Cliente</button>
+                            </form>
+                        <% } %>
+
+                        <% if (clientProfile.status === 'active') { %>
+                            <form action="/admin/clients/<%= clientProfile.user_id %>/status" method="POST" style="margin: 0;">
+                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                <input type="hidden" name="action" value="suspend">
+                                <button type="submit" class="btn btn-secondary btn-sm" style="border-color: var(--c-error); color: var(--c-error);">Suspender</button>
+                            </form>
+                        <% } %>
+                        
+                        <form action="/admin/clients/<%= clientProfile.user_id %>/delete" method="POST" onsubmit="return confirm('Tem certeza? Isso apagará tudo deste cliente.');" style="margin: 0;">
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                            <button type="submit" class="btn btn-secondary btn-sm">Excluir</button>
+                        </form>
+                    </div>
                 </div>
-                
-                <form action="/admin/clients/<%= clientProfile.user_id %>/assign" method="POST" style="display: flex; gap: 10px;">
+            </div>
+
+            <div style="background: var(--c-bg-card); padding: 20px; border-radius: 12px; border: 1px solid var(--c-border); margin-bottom: 30px; display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                    <h4 style="margin: 0;">Treinador Responsável</h4>
+                    <p style="margin: 0; color: #888; font-size: 0.9rem;">Ao atribuir, o cliente é automaticamente ativado.</p>
+                </div>
+                <form action="/admin/clients/<%= clientProfile.user_id %>/assign" method="POST" style="display: flex; gap: 10px; margin: 0;">
                     <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                     <select name="trainer_id" style="padding: 10px; border-radius: 8px; background: #222; color: white; border: 1px solid #444;">
-                        <option value="">-- Selecione Treinador --</option>
+                        <option value="">-- Selecione --</option>
                         <% allTrainers.forEach(t => { %>
                             <option value="<%= t.id %>" <%= clientProfile.assigned_trainer_id === t.id ? 'selected' : '' %>>
                                 <%= t.name %>
                             </option>
                         <% }) %>
                     </select>
-                    <button type="submit" class="btn btn-primary btn-sm">Atribuir</button>
+                    <button type="submit" class="btn btn-primary btn-sm">Salvar</button>
                 </form>
             </div>
 
+            <h3 style="border-bottom: 1px solid var(--c-border); padding-bottom: 10px; margin-bottom: 20px;">Ficha de Anamnese</h3>
             <div class="client-info-grid">
                 
                 <div class="info-card">
-                    <h4>Perfil Geral</h4>
-                    <p><strong>Idade:</strong> <%= clientProfile.age %> | <strong>Sexo (Nasc):</strong> <%= clientProfile.sex_assigned_at_birth %></p>
+                    <h4>Dados Pessoais</h4>
+                    <p><strong>Idade:</strong> <%= clientProfile.age %></p>
+                    <p><strong>Sexo (Nasc):</strong> <%= clientProfile.sex_assigned_at_birth %></p>
                     <p><strong>Gênero:</strong> <%= clientProfile.gender_identity %></p>
-                    <p><strong>Contato:</strong> <%= clientProfile.phone %></p>
-                    <p><strong>Profissão/Rotina:</strong> <%= clientProfile.availability %></p>
+                    <p><strong>Telefone:</strong> <%= clientProfile.phone %></p>
                     <% if (clientProfile.hormonal_treatment) { %>
-                        <div style="background: rgba(239, 68, 68, 0.1); padding: 10px; border-radius: 6px; margin-top: 10px; border: 1px solid var(--c-error);">
-                            <strong>⚠ Tratamento Hormonal:</strong><br>
-                            <%= clientProfile.hormonal_details %>
+                        <div style="margin-top: 10px; color: #f59e0b;">
+                            <strong>Tratamento Hormonal:</strong> <%= clientProfile.hormonal_details %>
                         </div>
                     <% } %>
                 </div>
 
                 <div class="info-card">
-                    <h4>Objetivos</h4>
-                    <p><strong>Principal:</strong> <%= clientProfile.main_goal %></p>
-                    <p><strong>Secundários:</strong> <%= clientProfile.secondary_goals %></p>
-                    <p><strong>Evento Foco:</strong> <%= clientProfile.specific_event || 'Nenhum' %></p>
-                    <p><strong>Desafios:</strong> <%= clientProfile.challenges %></p>
-                </div>
-
-                <div class="info-card">
-                    <h4>Saúde e Restrições</h4>
+                    <h4>Corpo & Medidas</h4>
+                    <p><strong>Peso:</strong> <%= clientProfile.weight %>kg</p>
+                    <p><strong>Altura:</strong> <%= clientProfile.height %>m</p>
+                    <p><strong>IMC:</strong> <%= imc %></p>
+                    <p><strong>Gordura:</strong> <%= clientProfile.body_fat %>%</p>
+                    <hr style="border-color: #333;">
+                    <p><strong>Medidas:</strong></p>
                     <ul style="padding-left: 20px; font-size: 0.9rem; color: #ccc;">
-                        <li><strong>Condições:</strong> <%= clientProfile.medical_conditions || 'Nenhuma' %></li>
-                        <li><strong>Lesões:</strong> <%= clientProfile.injuries || 'Nenhuma' %></li>
-                        <li><strong>Cirurgias:</strong> <%= clientProfile.surgeries || 'Nenhuma' %></li>
-                        <li><strong>Alergias:</strong> <%= clientProfile.allergies || 'Nenhuma' %></li>
-                        <li><strong>Medicamentos:</strong> <%= clientProfile.medications || 'Nenhum' %></li>
+                        <li>Cintura: <%= clientProfile.measure_waist %></li>
+                        <li>Quadril: <%= clientProfile.measure_hip %></li>
+                        <li>Braço: <%= clientProfile.measure_arm %></li>
+                        <li>Perna: <%= clientProfile.measure_leg %></li>
                     </ul>
                 </div>
 
                 <div class="info-card">
-                    <h4>Preferências de Treino</h4>
+                    <h4>Saúde</h4>
+                    <p><strong>Condições:</strong> <%= clientProfile.medical_conditions || '-' %></p>
+                    <p><strong>Medicamentos:</strong> <%= clientProfile.medications || '-' %></p>
+                    <p><strong>Cirurgias:</strong> <%= clientProfile.surgeries || '-' %></p>
+                    <p><strong>Lesões:</strong> <%= clientProfile.injuries || '-' %></p>
+                    <p><strong>Alergias:</strong> <%= clientProfile.allergies || '-' %></p>
+                </div>
+
+                <div class="info-card">
+                    <h4>Estilo de Vida & Objetivos</h4>
+                    <p><strong>Objetivo Principal:</strong> <%= clientProfile.main_goal %></p>
+                    <p><strong>Secundários:</strong> <%= clientProfile.secondary_goals %></p>
+                    <p><strong>Evento:</strong> <%= clientProfile.specific_event %></p>
+                    <hr style="border-color: #333;">
                     <p><strong>Nível:</strong> <%= clientProfile.fitness_level %></p>
-                    <p><strong>Local:</strong> <%= clientProfile.workout_preference %></p>
-                    <p><strong>Gosta de:</strong> <%= clientProfile.liked_activities %></p>
-                    <p><strong>Evita:</strong> <%= clientProfile.disliked_activities %></p>
                     <p><strong>Histórico:</strong> <%= clientProfile.past_activity %></p>
+                    <p><strong>Gosta:</strong> <%= clientProfile.liked_activities %></p>
+                    <p><strong>Não Gosta:</strong> <%= clientProfile.disliked_activities %></p>
+                    <p><strong>Local:</strong> <%= clientProfile.workout_preference %></p>
                 </div>
 
-                <div class="info-card">
-                    <h4>Dieta e Sono</h4>
-                    <p><strong>Sono:</strong> <%= clientProfile.sleep_hours %></p>
+                 <div class="info-card">
+                    <h4>Rotina</h4>
+                    <p><strong>Disponibilidade:</strong> <%= clientProfile.availability %></p>
+                    <p><strong>Desafios:</strong> <%= clientProfile.challenges %></p>
                     <p><strong>Dieta:</strong> <%= clientProfile.diet_description %></p>
+                    <p><strong>Sono:</strong> <%= clientProfile.sleep_hours %></p>
                 </div>
-
-                <div class="info-card">
-                    <h4>Medidas Atuais</h4>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                        <div>
-                            <p><strong>Peso:</strong> <%= clientProfile.weight %>kg</p>
-                            <p><strong>Altura:</strong> <%= clientProfile.height %>m</p>
-                        </div>
-                        <div>
-                            <p><strong>Gordura:</strong> <%= clientProfile.body_fat %>%</p>
-                        </div>
-                    </div>
-                    <hr style="border-color: #333; margin: 10px 0;">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px; font-size: 0.9rem;">
-                        <span>Cintura: <%= clientProfile.measure_waist %>cm</span>
-                        <span>Quadril: <%= clientProfile.measure_hip %>cm</span>
-                        <span>Braço: <%= clientProfile.measure_arm %>cm</span>
-                        <span>Perna: <%= clientProfile.measure_leg %>cm</span>
-                    </div>
-                </div>
-
             </div>
 
-            <h2 style="margin-top: 3rem;">Histórico de Treinos</h2>
+            <h3 style="margin-top: 3rem; border-bottom: 1px solid var(--c-border); padding-bottom: 10px;">Treinos Atribuídos</h3>
             <div class="table-container">
                 <table>
                     <thead>
                         <tr>
                             <th>Título</th>
-                            <th>Data Criação</th>
+                            <th>Data</th>
                             <th>Ações</th>
                         </tr>
                     </thead>
@@ -121,7 +146,7 @@
                                 </tr>
                             <% }) %>
                         <% } else { %>
-                            <tr><td colspan="3" style="text-align:center;">Nenhum treino atribuído ainda.</td></tr>
+                            <tr><td colspan="3" style="text-align:center;">Nenhum treino.</td></tr>
                         <% } %>
                     </tbody>
                 </table>

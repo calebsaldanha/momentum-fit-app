@@ -1,37 +1,24 @@
-<%- include('../partials/header', { title: 'Avaliação Inicial', bodyClass: 'auth-body' }) %>
+<%- include('../partials/header', { title: title, bodyClass: 'auth-body' }) %>
 
 <div class="container" style="padding: 4rem 1rem; max-width: 800px;">
     <div class="auth-card" style="max-width: 100%; text-align: left;">
-        <h2 style="text-align: center; color: var(--c-accent-primary); margin-bottom: 2rem;">Avaliação Inicial</h2>
-        <p style="text-align: center; margin-bottom: 2rem;">Preencha com atenção para montarmos o melhor plano para você.</p>
-
-        <% if (error) { %>
-            <div class="alert alert-danger"><%= error %></div>
-        <% } %>
+        <h2 style="text-align: center; color: var(--c-accent-primary); margin-bottom: 2rem;"><%= title %></h2>
+        
+        <% if (error) { %> <div class="alert alert-danger"><%= error %></div> <% } %>
 
         <form action="/client/initial-form" method="POST">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
 
             <h4 style="color: var(--c-text-primary); border-bottom: 1px solid var(--c-border); padding-bottom: 0.5rem; margin-top: 2rem;">Dados Pessoais</h4>
             
-            <div class="form-group">
-                <label>Nome Completo</label>
-                <input type="text" value="<%= user.name %>" readonly style="opacity: 0.7; cursor: not-allowed;">
-            </div>
-
-            <div class="form-group">
-                <label>E-mail</label>
-                <input type="email" value="<%= user.email %>" readonly style="opacity: 0.7; cursor: not-allowed;">
-            </div>
-
             <div class="row" style="display: flex; gap: 1rem; flex-wrap: wrap;">
                 <div class="form-group" style="flex: 1;">
                     <label>Idade</label>
-                    <input type="number" name="age" required>
+                    <input type="number" name="age" value="<%= profile ? profile.age : '' %>" required>
                 </div>
                 <div class="form-group" style="flex: 1;">
                     <label>Telefone / WhatsApp</label>
-                    <input type="text" name="phone" required placeholder="(00) 00000-0000">
+                    <input type="text" name="phone" value="<%= profile ? profile.phone : '' %>" required>
                 </div>
             </div>
 
@@ -39,18 +26,17 @@
                 <div class="form-group" style="flex: 1;">
                     <label>Identidade de Gênero</label>
                     <select name="gender_identity">
-                        <option value="masculino">Masculino</option>
-                        <option value="feminino">Feminino</option>
-                        <option value="nao_binario">Não-binário</option>
-                        <option value="outro">Outro</option>
-                        <option value="prefiro_nao_dizer">Prefiro não dizer</option>
+                        <option value="masculino" <%= profile && profile.gender_identity === 'masculino' ? 'selected' : '' %>>Masculino</option>
+                        <option value="feminino" <%= profile && profile.gender_identity === 'feminino' ? 'selected' : '' %>>Feminino</option>
+                        <option value="nao_binario" <%= profile && profile.gender_identity === 'nao_binario' ? 'selected' : '' %>>Não-binário</option>
+                        <option value="outro" <%= profile && profile.gender_identity === 'outro' ? 'selected' : '' %>>Outro</option>
                     </select>
                 </div>
                 <div class="form-group" style="flex: 1;">
                     <label>Sexo Atribuído no Nascimento</label>
                     <select name="sex_assigned_at_birth">
-                        <option value="masculino">Masculino</option>
-                        <option value="feminino">Feminino</option>
+                        <option value="masculino" <%= profile && profile.sex_assigned_at_birth === 'masculino' ? 'selected' : '' %>>Masculino</option>
+                        <option value="feminino" <%= profile && profile.sex_assigned_at_birth === 'feminino' ? 'selected' : '' %>>Feminino</option>
                     </select>
                 </div>
             </div>
@@ -58,156 +44,94 @@
             <div class="form-group">
                 <label>Está em transição ou tratamento hormonal?</label>
                 <select name="hormonal_treatment" id="hormonalDetailsToggle">
-                    <option value="false">Não</option>
-                    <option value="true">Sim</option>
+                    <option value="false" <%= profile && !profile.hormonal_treatment ? 'selected' : '' %>>Não</option>
+                    <option value="true" <%= profile && profile.hormonal_treatment ? 'selected' : '' %>>Sim</option>
                 </select>
             </div>
-            <div class="form-group" id="hormonalDetailsBox" style="display: none;">
-                <label>Comente sobre o processo (tempo, medicamentos, etc)</label>
-                <textarea name="hormonal_details" rows="2"></textarea>
+            <div class="form-group" id="hormonalDetailsBox" style="display: <%= profile && profile.hormonal_treatment ? 'block' : 'none' %>;">
+                <label>Comente sobre o processo</label>
+                <textarea name="hormonal_details" rows="2"><%= profile ? profile.hormonal_details : '' %></textarea>
             </div>
 
-            <h4 style="color: var(--c-text-primary); border-bottom: 1px solid var(--c-border); padding-bottom: 0.5rem; margin-top: 2rem;">Objetivos</h4>
-
+            <h4 style="margin-top: 2rem; border-bottom: 1px solid var(--c-border); padding-bottom: 0.5rem;">Objetivos</h4>
             <div class="form-group">
                 <label>Objetivo Principal</label>
-                <textarea name="main_goal" rows="2" required placeholder="Ex: Emagrecer 5kg, ganhar massa muscular..."></textarea>
+                <textarea name="main_goal" rows="2" required><%= profile ? profile.main_goal : '' %></textarea>
             </div>
-
             <div class="form-group">
                 <label>Objetivos Secundários</label>
-                <textarea name="secondary_goals" rows="2" placeholder="Ex: Melhorar sono, diminuir estresse..."></textarea>
+                <textarea name="secondary_goals" rows="2"><%= profile ? profile.secondary_goals : '' %></textarea>
+            </div>
+            <div class="form-group">
+                <label>Data ou Evento Específico?</label>
+                <input type="text" name="specific_event" value="<%= profile ? profile.specific_event : '' %>">
             </div>
 
+            <h4 style="margin-top: 2rem; border-bottom: 1px solid var(--c-border); padding-bottom: 0.5rem;">Saúde & Histórico</h4>
             <div class="form-group">
-                <label>Data ou Evento Específico (Deadline)?</label>
-                <input type="text" name="specific_event" placeholder="Ex: Casamento em dezembro, Verão...">
+                <label>Condições Médicas</label>
+                <textarea name="medical_conditions" rows="2"><%= profile ? profile.medical_conditions : '' %></textarea>
+            </div>
+            <div class="form-group">
+                <label>Medicamentos</label>
+                <textarea name="medications" rows="2"><%= profile ? profile.medications : '' %></textarea>
+            </div>
+            <div class="form-group">
+                <label>Cirurgias</label>
+                <textarea name="surgeries" rows="2"><%= profile ? profile.surgeries : '' %></textarea>
+            </div>
+            <div class="form-group">
+                <label>Lesões</label>
+                <textarea name="injuries" rows="2"><%= profile ? profile.injuries : '' %></textarea>
+            </div>
+            <div class="form-group">
+                <label>Alergias</label>
+                <textarea name="allergies" rows="2"><%= profile ? profile.allergies : '' %></textarea>
             </div>
 
-            <h4 style="color: var(--c-text-primary); border-bottom: 1px solid var(--c-border); padding-bottom: 0.5rem; margin-top: 2rem;">Saúde & Histórico</h4>
-
+            <h4 style="margin-top: 2rem; border-bottom: 1px solid var(--c-border); padding-bottom: 0.5rem;">Estilo de Vida</h4>
             <div class="form-group">
-                <label>Condições Médicas Relevantes</label>
-                <textarea name="medical_conditions" rows="2" placeholder="Diabetes, Hipertensão, Labirintite..."></textarea>
-            </div>
-
-            <div class="form-group">
-                <label>Medicamentos em uso</label>
-                <textarea name="medications" rows="2"></textarea>
-            </div>
-
-            <div class="form-group">
-                <label>Cirurgias Realizadas</label>
-                <textarea name="surgeries" rows="2"></textarea>
-            </div>
-
-            <div class="form-group">
-                <label>Lesões Passadas ou Atuais</label>
-                <textarea name="injuries" rows="2" placeholder="Joelho, Ombro, Coluna..."></textarea>
-            </div>
-
-            <div class="form-group">
-                <label>Alergias ou Restrições Alimentares</label>
-                <textarea name="allergies" rows="2"></textarea>
-            </div>
-
-            <h4 style="color: var(--c-text-primary); border-bottom: 1px solid var(--c-border); padding-bottom: 0.5rem; margin-top: 2rem;">Estilo de Vida</h4>
-
-            <div class="form-group">
-                <label>Nível de Atividade Física Atual</label>
+                <label>Nível de Atividade Física</label>
                 <select name="fitness_level">
-                    <option value="sedentario">Sedentário (Não pratico nada)</option>
-                    <option value="iniciante">Iniciante (1-2x semana)</option>
-                    <option value="intermediario">Intermediário (3-4x semana)</option>
-                    <option value="avancado">Avançado (5x+ semana)</option>
+                    <option value="sedentario" <%= profile && profile.fitness_level === 'sedentario' ? 'selected' : '' %>>Sedentário</option>
+                    <option value="iniciante" <%= profile && profile.fitness_level === 'iniciante' ? 'selected' : '' %>>Iniciante</option>
+                    <option value="intermediario" <%= profile && profile.fitness_level === 'intermediario' ? 'selected' : '' %>>Intermediário</option>
+                    <option value="avancado" <%= profile && profile.fitness_level === 'avancado' ? 'selected' : '' %>>Avançado</option>
                 </select>
             </div>
-
-            <div class="form-group">
-                <label>Experiência com Atividades Físicas (O que já praticou?)</label>
-                <textarea name="past_activity" rows="2"></textarea>
-            </div>
-
-            <div class="form-group">
-                <label>Atividades que MAIS gosta</label>
-                <textarea name="liked_activities" rows="2" placeholder="Musculação, Corrida, Yoga..."></textarea>
-            </div>
-
-            <div class="form-group">
-                <label>Atividades que NÃO gosta / Evita</label>
-                <textarea name="disliked_activities" rows="2"></textarea>
-            </div>
-
+            <div class="form-group"><label>Experiência Anterior</label><textarea name="past_activity" rows="2"><%= profile ? profile.past_activity : '' %></textarea></div>
+            <div class="form-group"><label>Gosta de fazer</label><textarea name="liked_activities" rows="2"><%= profile ? profile.liked_activities : '' %></textarea></div>
+            <div class="form-group"><label>Não gosta / Evita</label><textarea name="disliked_activities" rows="2"><%= profile ? profile.disliked_activities : '' %></textarea></div>
             <div class="form-group">
                 <label>Preferência de Treino</label>
                 <select name="workout_preference">
-                    <option value="academia">Academia</option>
-                    <option value="casa">Em Casa</option>
-                    <option value="hibrido">Híbrido / Ambos</option>
+                    <option value="academia" <%= profile && profile.workout_preference === 'academia' ? 'selected' : '' %>>Academia</option>
+                    <option value="casa" <%= profile && profile.workout_preference === 'casa' ? 'selected' : '' %>>Em Casa</option>
+                    <option value="hibrido" <%= profile && profile.workout_preference === 'hibrido' ? 'selected' : '' %>>Híbrido</option>
                 </select>
             </div>
+            <div class="form-group"><label>Disponibilidade</label><textarea name="availability" rows="2"><%= profile ? profile.availability : '' %></textarea></div>
+            <div class="form-group"><label>Desafios</label><textarea name="challenges" rows="2"><%= profile ? profile.challenges : '' %></textarea></div>
+            <div class="form-group"><label>Alimentação</label><textarea name="diet_description" rows="3"><%= profile ? profile.diet_description : '' %></textarea></div>
+            <div class="form-group"><label>Sono (horas)</label><input type="text" name="sleep_hours" value="<%= profile ? profile.sleep_hours : '' %>"></div>
 
-            <div class="form-group">
-                <label>Disponibilidade Semanal (Dias e Horários)</label>
-                <textarea name="availability" rows="2" placeholder="Seg-Sex às 18h, Sáb pela manhã..."></textarea>
-            </div>
-
-            <div class="form-group">
-                <label>Maiores Desafios</label>
-                <textarea name="challenges" rows="2" placeholder="Falta de tempo, preguiça, ansiedade..."></textarea>
-            </div>
-
-            <div class="form-group">
-                <label>Alimentação Atual (Descreva brevemente)</label>
-                <textarea name="diet_description" rows="3"></textarea>
-            </div>
-
-            <div class="form-group">
-                <label>Horas de sono por noite (Média)</label>
-                <input type="text" name="sleep_hours" placeholder="Ex: 6-7 horas">
-            </div>
-
-            <h4 style="color: var(--c-text-primary); border-bottom: 1px solid var(--c-border); padding-bottom: 0.5rem; margin-top: 2rem;">Medidas Corporais</h4>
-
+            <h4 style="margin-top: 2rem; border-bottom: 1px solid var(--c-border); padding-bottom: 0.5rem;">Medidas Corporais</h4>
             <div class="row" style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                <div class="form-group" style="flex: 1;">
-                    <label>Peso (kg)</label>
-                    <input type="number" step="0.1" name="weight" required>
-                </div>
-                <div class="form-group" style="flex: 1;">
-                    <label>Altura (m)</label>
-                    <input type="number" step="0.01" name="height" placeholder="Ex: 1.75" required>
-                </div>
+                <div class="form-group" style="flex: 1;"><label>Peso (kg)</label><input type="number" step="0.1" name="weight" value="<%= profile ? profile.weight : '' %>" required></div>
+                <div class="form-group" style="flex: 1;"><label>Altura (m) - Ex: 1.75</label><input type="number" step="0.01" name="height" value="<%= profile ? profile.height : '' %>" required></div>
             </div>
-
             <div class="row" style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                <div class="form-group" style="flex: 1;">
-                    <label>Cintura (cm)</label>
-                    <input type="number" step="0.1" name="measure_waist">
-                </div>
-                <div class="form-group" style="flex: 1;">
-                    <label>Quadril (cm)</label>
-                    <input type="number" step="0.1" name="measure_hip">
-                </div>
+                <div class="form-group" style="flex: 1;"><label>Cintura (cm)</label><input type="number" step="0.1" name="measure_waist" value="<%= profile ? profile.measure_waist : '' %>"></div>
+                <div class="form-group" style="flex: 1;"><label>Quadril (cm)</label><input type="number" step="0.1" name="measure_hip" value="<%= profile ? profile.measure_hip : '' %>"></div>
             </div>
-
             <div class="row" style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                <div class="form-group" style="flex: 1;">
-                    <label>Braço (cm)</label>
-                    <input type="number" step="0.1" name="measure_arm" placeholder="Relaxado">
-                </div>
-                <div class="form-group" style="flex: 1;">
-                    <label>Perna/Coxa (cm)</label>
-                    <input type="number" step="0.1" name="measure_leg">
-                </div>
+                <div class="form-group" style="flex: 1;"><label>Braço (cm)</label><input type="number" step="0.1" name="measure_arm" value="<%= profile ? profile.measure_arm : '' %>"></div>
+                <div class="form-group" style="flex: 1;"><label>Perna (cm)</label><input type="number" step="0.1" name="measure_leg" value="<%= profile ? profile.measure_leg : '' %>"></div>
             </div>
+            <div class="form-group"><label>Percentual de Gordura (%)</label><input type="number" step="0.1" name="body_fat" value="<%= profile ? profile.body_fat : '' %>"></div>
 
-            <div class="form-group">
-                <label>Percentual de Gordura (%) - Opcional</label>
-                <input type="number" step="0.1" name="body_fat">
-            </div>
-
-            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Enviar Avaliação</button>
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Salvar Perfil</button>
+            <a href="/client/profile" class="btn btn-secondary" style="width: 100%; margin-top: 0.5rem; display: block; text-align: center;">Cancelar</a>
         </form>
     </div>
 </div>
@@ -215,12 +139,8 @@
 <script>
     document.getElementById('hormonalDetailsToggle').addEventListener('change', function() {
         const box = document.getElementById('hormonalDetailsBox');
-        if (this.value === 'true') {
-            box.style.display = 'block';
-        } else {
-            box.style.display = 'none';
-        }
+        if (this.value === 'true') box.style.display = 'block';
+        else box.style.display = 'none';
     });
 </script>
-
 <%- include('../partials/footer') %>

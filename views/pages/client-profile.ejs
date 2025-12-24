@@ -5,15 +5,15 @@
 
     <main class="dashboard-main">
         <div class="container">
-            <h1>Meu Perfil</h1>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h1>Meu Perfil</h1>
+                <a href="/client/profile/edit" class="btn btn-secondary btn-sm">Editar Perfil</a>
+            </div>
 
             <% if (user.status === 'pending_approval') { %>
-                <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid #f59e0b; padding: 20px; border-radius: 12px; margin-bottom: 30px; display: flex; align-items: center; gap: 15px;">
-                    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-                    <div>
-                        <h4 style="color: #f59e0b; margin: 0;">Perfil em Análise</h4>
-                        <p style="margin: 0; color: #ccc;">Seus dados foram enviados. Aguarde a aprovação do seu treinador para acessar os treinos e o chat.</p>
-                    </div>
+                <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid #f59e0b; padding: 20px; border-radius: 12px; margin-bottom: 30px;">
+                    <h4 style="color: #f59e0b; margin: 0 0 10px 0;">[Perfil em Análise]</h4>
+                    <p style="margin: 0; color: #ccc;">Seus dados foram enviados. Aguarde a aprovação para acessar os treinos.</p>
                 </div>
             <% } %>
 
@@ -24,42 +24,61 @@
             <% if (!profile.id) { %>
                 <div class="alert alert-warning">Perfil incompleto. <a href="/client/initial-form">Preencher agora</a></div>
             <% } else { %>
-
                 <div class="client-info-grid">
-                    <div class="info-card">
-                        <h4>Dados Pessoais</h4>
-                        <p><strong>Nome:</strong> <%= user.name %></p>
-                        <p><strong>Email:</strong> <%= user.email %></p>
-                        <p><strong>Idade:</strong> <%= profile.age %> anos</p>
-                        <p><strong>Telefone:</strong> <%= profile.phone %></p>
+                    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                        <div class="info-card">
+                            <h4>Dados Pessoais</h4>
+                            <p><strong>Nome:</strong> <%= user.name %></p>
+                            <p><strong>Idade:</strong> <%= profile.age %></p>
+                            <p><strong>Telefone:</strong> <%= profile.phone %></p>
+                            <p><strong>Gênero:</strong> <%= profile.gender_identity %></p>
+                            <p><strong>Sexo Nasc.:</strong> <%= profile.sex_assigned_at_birth %></p>
+                        </div>
+                        
+                        <div class="info-card">
+                            <h4>Corpo & Saúde</h4>
+                            <div style="display: flex; gap: 20px; align-items: center; margin-bottom: 15px;">
+                                <div>
+                                    <span style="display: block; font-size: 0.8rem; color: #888;">IMC</span>
+                                    <strong style="font-size: 1.5rem; color: var(--c-accent-primary);"><%= imc %></strong>
+                                </div>
+                                <div>
+                                    <p style="margin: 0;"><strong>Peso:</strong> <%= profile.weight %>kg</p>
+                                    <p style="margin: 0;"><strong>Altura:</strong> <%= profile.height %>m</p>
+                                </div>
+                            </div>
+                            <hr style="border-color: #333;">
+                            <p style="margin-top: 10px;"><strong>Condições:</strong> <%= profile.medical_conditions || '-' %></p>
+                            <p><strong>Lesões:</strong> <%= profile.injuries || '-' %></p>
+                            <p><strong>Medicamentos:</strong> <%= profile.medications || '-' %></p>
+                            <p><strong>Alergias:</strong> <%= profile.allergies || '-' %></p>
+                        </div>
                     </div>
 
-                    <div class="info-card">
-                        <h4>Composição Corporal</h4>
-                        <p><strong>Peso:</strong> <%= profile.weight %> kg</p>
-                        <p><strong>Altura:</strong> <%= profile.height %> m</p>
-                        
-                        <div style="display: flex; align-items: center; gap: 10px; margin: 10px 0;">
-                            <div style="background: #222; padding: 10px 20px; border-radius: 8px; border: 1px solid var(--c-accent-primary);">
-                                <span style="font-size: 0.8rem; color: #888; display: block;">IMC</span>
-                                <strong style="font-size: 1.5rem; color: var(--c-accent-primary);"><%= imc || '--' %></strong>
-                            </div>
-                            <div style="font-size: 0.8rem; color: #666; max-width: 150px;">
-                                Índice de Massa Corporal
-                            </div>
+                    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                        <div class="info-card">
+                            <h4>Objetivos & Estilo de Vida</h4>
+                            <p><strong>Principal:</strong> <%= profile.main_goal %></p>
+                            <p><strong>Secundário:</strong> <%= profile.secondary_goals || '-' %></p>
+                            <p><strong>Deadline:</strong> <%= profile.specific_event || '-' %></p>
+                            <hr style="border-color: #333;">
+                            <p><strong>Nível:</strong> <%= profile.fitness_level %></p>
+                            <p><strong>Preferência:</strong> <%= profile.workout_preference %></p>
+                            <p><strong>Gosta:</strong> <%= profile.liked_activities || '-' %></p>
+                            <p><strong>Não Gosta:</strong> <%= profile.disliked_activities || '-' %></p>
                         </div>
 
-                        <p><strong>Gordura:</strong> <%= profile.body_fat ? profile.body_fat + '%' : '-' %></p>
-                    </div>
-
-                    <div class="info-card" style="grid-column: 1 / -1;">
-                        <h4>Objetivos</h4>
-                        <p><strong>Principal:</strong> <%= profile.main_goal %></p>
-                        <p><strong>Secundários:</strong> <%= profile.secondary_goals || '-' %></p>
-                        <p><strong>Deadline:</strong> <%= profile.specific_event || 'Nenhum' %></p>
+                        <div class="info-card">
+                            <h4>Rotina</h4>
+                            <p><strong>Disponibilidade:</strong> <%= profile.availability || '-' %></p>
+                            <p><strong>Desafios:</strong> <%= profile.challenges || '-' %></p>
+                            <p><strong>Dieta:</strong> <%= profile.diet_description || '-' %></p>
+                            <p><strong>Sono:</strong> <%= profile.sleep_hours || '-' %></p>
+                        </div>
                     </div>
                 </div>
-            <% } %>
+
+                <% } %>
         </div>
     </main>
 </div>
