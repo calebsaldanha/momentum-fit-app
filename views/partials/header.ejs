@@ -3,10 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
     <title><%= typeof title !== 'undefined' ? title : 'Momentum Fit' %></title>
+    
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/styles.css?v=<%= Date.now() %>">
     <link rel="icon" type="image/png" href="/images/logo-3d.png">
+
     <% if (typeof bodyClass !== 'undefined' && bodyClass.includes('dashboard-body')) { %>
         <link rel="stylesheet" href="/css/dashboard.css?v=<%= Date.now() %>">
     <% } %>
@@ -17,13 +20,16 @@
         <header class="header">
             <div class="container">
                 <nav class="nav-container">
+                    
                     <a href="/" class="logo-link">
                         <img src="/images/logo-3d.png" alt="Momentum Fit" class="header-logo-img">
                         <span style="font-weight: 800; font-size: 1.2rem; color: #fff; letter-spacing: -1px;">MOMENTUM</span>
                     </a>
 
                     <div class="hamburger" id="hamburgerBtn">
-                        <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+                        <span class="bar"></span>
+                        <span class="bar"></span>
+                        <span class="bar"></span>
                     </div>
 
                     <ul class="nav-menu" id="navMenu">
@@ -41,24 +47,24 @@
 
                             <li class="notif-wrapper" style="position: relative;">
                                 <div class="notif-icon" onclick="toggleNotif(event)">
-                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
                                         <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
                                     </svg>
                                     <% if (typeof unreadCount !== 'undefined' && unreadCount > 0) { %>
-                                        <span class="notif-badge"><%= unreadCount %></span>
+                                        <span class="notif-badge" id="notifBadge"><%= unreadCount %></span>
                                     <% } %>
                                 </div>
                                 
                                 <div class="notif-dropdown" id="notifDropdown">
                                     <div class="notif-header">
                                         <span>Notificações</span>
-                                        <button onclick="markAllRead()" class="btn-text-sm">Limpar</button>
+                                        <button onclick="markAllRead()" class="btn-text-sm">Limpar Tudo</button>
                                     </div>
                                     <div class="notif-list">
                                         <% if (typeof notifications !== 'undefined' && notifications.length > 0) { %>
                                             <% notifications.forEach(n => { %>
-                                                <a href="<%= n.link || '#' %>" class="notif-item">
+                                                <a href="<%= n.link || '#' %>" class="notif-item" onclick="markOneRead(event, '<%= n.id %>', '<%= n.link || '#' %>')">
                                                     <div class="notif-dot <%= n.type %>"></div>
                                                     <div>
                                                         <div class="notif-title"><%= n.title %></div>
@@ -85,12 +91,12 @@
                             <li><a href="/auth/register" class="btn btn-primary btn-sm">Começar</a></li>
                         <% } %>
                     </ul>
+
                 </nav>
             </div>
         </header>
 
         <script>
-            // Lógica do Menu Mobile e Notificações
             document.addEventListener('DOMContentLoaded', () => {
                 const hamburger = document.getElementById('hamburgerBtn');
                 const navMenu = document.getElementById('navMenu');
@@ -99,39 +105,91 @@
                     hamburger.addEventListener('click', () => {
                         navMenu.classList.toggle('active');
                         hamburger.classList.toggle('active');
+                        
+                        // Animação ícone hamburger
+                        const bars = hamburger.querySelectorAll('.bar');
+                        if (navMenu.classList.contains('active')) {
+                            bars[0].style.transform = 'rotate(-45deg) translate(-5px, 6px)';
+                            bars[1].style.opacity = '0';
+                            bars[2].style.transform = 'rotate(45deg) translate(-5px, -6px)';
+                        } else {
+                            bars[0].style.transform = 'none';
+                            bars[1].style.opacity = '1';
+                            bars[2].style.transform = 'none';
+                        }
                     });
                 }
 
-                // Fechar dropdown ao clicar fora
+                // Fechar dropdown de notificação ao clicar fora
                 document.addEventListener('click', (e) => {
                     const dropdown = document.getElementById('notifDropdown');
                     const icon = document.querySelector('.notif-icon');
-                    if (dropdown && !dropdown.contains(e.target) && !icon.contains(e.target)) {
+                    if (dropdown && icon && !dropdown.contains(e.target) && !icon.contains(e.target)) {
                         dropdown.classList.remove('active');
                     }
                 });
-
-                // Toast Messages do Servidor
-                <% if (typeof error !== 'undefined' && error) { %>
-                    showNotification('<%= error %>', 'error');
-                <% } %>
-                <% if (typeof success !== 'undefined' && success) { %>
-                    showNotification('<%= success %>', 'success');
-                <% } %>
             });
 
+            // Toggle Dropdown
             function toggleNotif(e) {
                 e.preventDefault();
+                e.stopPropagation();
                 document.getElementById('notifDropdown').classList.toggle('active');
             }
 
+            // Marcar TODAS como lidas
             function markAllRead() {
+                const csrf = document.querySelector('meta[name="csrf-token"]').content;
                 fetch('/notifications/mark-all-read', { 
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'CSRF-Token': csrf
+                    }
                 }).then(() => {
                     window.location.reload();
-                });
+                }).catch(err => console.error(err));
+            }
+
+            // Marcar UMA como lida (Ao clicar)
+            async function markOneRead(e, id, link) {
+                // Impede navegação imediata se tiver link
+                if (link && link !== '#') e.preventDefault();
+                
+                const csrf = document.querySelector('meta[name="csrf-token"]').content;
+
+                try {
+                    // Atualiza UI instantaneamente (Optimistic UI)
+                    const badge = document.getElementById('notifBadge');
+                    if (badge) {
+                        let count = parseInt(badge.innerText);
+                        if (count > 0) {
+                            count--;
+                            if (count === 0) {
+                                badge.style.display = 'none';
+                            } else {
+                                badge.innerText = count;
+                            }
+                        }
+                    }
+
+                    // Envia requisição para o backend
+                    await fetch('/notifications/mark-read/' + id, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'CSRF-Token': csrf
+                        }
+                    });
+
+                } catch (err) {
+                    console.error('Erro ao marcar notificação:', err);
+                }
+
+                // Redireciona manualmente após o processamento
+                if (link && link !== '#') {
+                    window.location.href = link;
+                }
             }
         </script>
         
