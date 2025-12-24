@@ -12,7 +12,7 @@ const pool = new Pool({
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
   max: 4,
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 5000,
+  connectionTimeoutMillis: 30000, // Timeout de 30s
 });
 
 const initDb = async () => {
@@ -29,10 +29,12 @@ const initDb = async () => {
         password TEXT NOT NULL,
         role TEXT DEFAULT 'client' CHECK (role IN ('client', 'trainer', 'superadmin')),
         status TEXT DEFAULT 'active' NOT NULL CHECK (status IN ('pending', 'pending_approval', 'active', 'rejected')),
+        reset_password_token TEXT,
+        reset_password_expires TIMESTAMP,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       );
     `);
-
+    
     // Tabela CLIENT_PROFILES
     await client.query(`
       CREATE TABLE IF NOT EXISTS client_profiles (
@@ -143,7 +145,7 @@ const initDb = async () => {
       WITH (OIDS=FALSE);
     `);
 
-    // PK para Session se não existir
+    // PK para Session
     await client.query(`
       DO $$
       BEGIN
@@ -154,9 +156,9 @@ const initDb = async () => {
       $$;
     `);
     
-    console.log('✅ DB Init: Tabelas verificadas.');
+    console.log('✅ DB Init: Conectado e tabelas verificadas.');
   } catch (err) {
-    console.error('❌ DB Init Error:', err);
+    console.error('❌ DB Init Error (Timeout ou Conexão):', err);
   } finally {
     if (client) client.release();
   }
