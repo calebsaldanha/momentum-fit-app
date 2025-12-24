@@ -16,8 +16,13 @@ router.get('/', async (req, res) => {
         let query;
         let params = [];
 
-        // CLIENTE: Só vê o treinador atribuído
-        if (role === 'client') {
+        // 1. SUPER ADMIN: Vê TODOS os usuários (exceto ele mesmo)
+        if (role === 'superadmin') {
+            query = "SELECT id, name, role FROM users WHERE id != $1 ORDER BY name ASC";
+            params = [id];
+        } 
+        // 2. CLIENTE: Só vê o treinador atribuído
+        else if (role === 'client') {
             if (status !== 'active') return res.render('pages/chat', { title: 'Chat', chatUsers: [] }); // Pendente não vê ninguém
             
             query = `
@@ -26,9 +31,9 @@ router.get('/', async (req, res) => {
                 JOIN client_profiles cp ON u.id = cp.assigned_trainer_id 
                 WHERE cp.user_id = $1`;
             params = [id];
-        
-        } else {
-            // TREINADOR: Vê seus alunos
+        } 
+        // 3. TREINADOR: Vê apenas seus alunos atribuídos
+        else {
             query = `
                 SELECT u.id, u.name 
                 FROM users u 
@@ -38,7 +43,16 @@ router.get('/', async (req, res) => {
         }
         
         const result = await pool.query(query, params);
-        res.render('pages/chat', { title: 'Chat - Momentum Fit', chatUsers: result.rows });
+        
+        // Adiciona identificação visual simples do tipo de usuário no nome (Opcional, ajuda o admin)
+        const users = result.rows.map(u => {
+            if (role === 'superadmin' && u.role) {
+                return { ...u, name: `${u.name} (${u.role === 'trainer' ? 'Personal' : 'Aluno'})` };
+            }
+            return u;
+        });
+
+        res.render('pages/chat', { title: 'Chat - Momentum Fit', chatUsers: users });
     } catch (err) { console.error(err); res.status(500).render('pages/error', { message: "Erro chat." }); }
 });
 
@@ -51,7 +65,6 @@ router.get('/messages/:contactId', async (req, res) => {
 });
 
 router.post('/send', requireAuth, upload.single('file'), async (req, res) => {
-    // ... Envio mantido igual
     try {
         const { id: sender_id, name: senderName } = req.session.user;
         const { receiver_id, content } = req.body;
