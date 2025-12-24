@@ -16,14 +16,19 @@ router.get('/', async (req, res) => {
         let query;
         let params = [];
 
-        // 1. SUPER ADMIN: Vê TODOS os usuários (exceto ele mesmo)
+        // 1. SUPER ADMIN: Vê TODOS os usuários (exceto ele mesmo) para suporte
         if (role === 'superadmin') {
             query = "SELECT id, name, role FROM users WHERE id != $1 ORDER BY name ASC";
             params = [id];
         } 
         // 2. CLIENTE: Só vê o treinador atribuído
         else if (role === 'client') {
-            if (status !== 'active') return res.render('pages/chat', { title: 'Chat', chatUsers: [] }); // Pendente não vê ninguém
+            if (status !== 'active') return res.render('pages/chat', { 
+                title: 'Chat', 
+                chatUsers: [],
+                user: req.session.user,
+                currentPage: 'chat'
+            });
             
             query = `
                 SELECT u.id, u.name 
@@ -44,7 +49,7 @@ router.get('/', async (req, res) => {
         
         const result = await pool.query(query, params);
         
-        // Adiciona identificação visual simples do tipo de usuário no nome (Opcional, ajuda o admin)
+        // Adiciona sufixo para diferenciar no chat do admin
         const users = result.rows.map(u => {
             if (role === 'superadmin' && u.role) {
                 return { ...u, name: `${u.name} (${u.role === 'trainer' ? 'Personal' : 'Aluno'})` };
@@ -52,7 +57,13 @@ router.get('/', async (req, res) => {
             return u;
         });
 
-        res.render('pages/chat', { title: 'Chat - Momentum Fit', chatUsers: users });
+        res.render('pages/chat', { 
+            title: 'Chat - Momentum Fit', 
+            chatUsers: users,
+            user: req.session.user,  // Necessário para o Header/Sidebar
+            currentPage: 'chat'      // Necessário para marcar o menu Ativo
+        });
+
     } catch (err) { console.error(err); res.status(500).render('pages/error', { message: "Erro chat." }); }
 });
 
