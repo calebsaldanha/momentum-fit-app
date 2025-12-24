@@ -1,12 +1,19 @@
 <aside class="dashboard-sidebar">
     <nav class="sidebar-nav">
-        <a href="/client/dashboard" class="nav-item <%= currentPage === 'client-dashboard' ? 'active' : '' %>">Painel Geral</a>
-        <a href="/client/workouts" class="nav-item <%= currentPage === 'client-workouts' ? 'active' : '' %>">Meus Treinos</a>
-        <a href="/chat" class="nav-item <%= currentPage === 'chat' ? 'active' : '' %>">Mensagens</a>
+        <% if (user.status === 'active') { %>
+            <a href="/client/dashboard" class="nav-item <%= currentPage === 'client-dashboard' ? 'active' : '' %>">Painel Geral</a>
+            <a href="/client/workouts" class="nav-item <%= currentPage === 'client-workouts' ? 'active' : '' %>">Meus Treinos</a>
+            <a href="/chat" class="nav-item <%= currentPage === 'chat' ? 'active' : '' %>">Mensagens</a>
+        <% } else { %>
+            <div style="padding: 10px; font-size: 0.85rem; color: #666; text-transform: uppercase; font-weight: 700; letter-spacing: 1px;">Acesso Restrito</div>
+            <a href="#" class="nav-item" style="opacity: 0.5; cursor: not-allowed;">Painel Geral í´’</a>
+            <a href="#" class="nav-item" style="opacity: 0.5; cursor: not-allowed;">Meus Treinos í´’</a>
+            <a href="#" class="nav-item" style="opacity: 0.5; cursor: not-allowed;">Mensagens í´’</a>
+        <% } %>
         <a href="/client/profile" class="nav-item <%= currentPage === 'client-profile' ? 'active' : '' %>">Meu Perfil</a>
     </nav>
     <div class="sidebar-footer">
-        <form action="/auth/logout" method="POST" style="margin: 0;">
+         <form action="/auth/logout" method="POST" style="margin: 0;">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
             <button type="submit" class="btn-logout-sidebar">Sair</button>
         </form>
