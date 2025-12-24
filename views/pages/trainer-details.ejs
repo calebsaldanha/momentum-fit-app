@@ -1,0 +1,82 @@
+<%- include('../partials/header.ejs', { title: 'Detalhes do Personal', bodyClass: 'dashboard-body' }) %>
+
+<div class="dashboard-container">
+    <%- include('../partials/superadmin-sidebar.ejs') %>
+
+    <main class="dashboard-main">
+        <div class="container">
+            <div style="margin-bottom: 2rem;">
+                <a href="/superadmin/manage" style="color: #888; font-size: 0.9rem;">&larr; Voltar para Lista</a>
+                
+                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 10px;">
+                    <div>
+                        <h1 style="margin-bottom: 5px;"><%= trainer.name %></h1>
+                        <span class="user-badge" style="font-size: 1rem;"><%= trainer.email %></span>
+                        <% if (trainer.status === 'pending_approval') { %>
+                             <span style="background: #f59e0b; color: black; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; margin-left: 10px;">AGUARDANDO APROVAÇÃO</span>
+                        <% } else if (trainer.status === 'rejected') { %>
+                             <span style="background: var(--c-error); color: white; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; margin-left: 10px;">SUSPENSO</span>
+                        <% } %>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <% if (trainer.status === 'pending_approval' || trainer.status === 'rejected') { %>
+                            <form action="/superadmin/users/<%= trainer.id %>/status" method="POST" style="margin: 0;">
+                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                <input type="hidden" name="action" value="approve">
+                                <input type="hidden" name="role" value="trainer">
+                                <button type="submit" class="btn btn-primary btn-sm">Aprovar Cadastro</button>
+                            </form>
+                        <% } %>
+
+                        <% if (trainer.status === 'active') { %>
+                            <form action="/superadmin/users/<%= trainer.id %>/status" method="POST" style="margin: 0;">
+                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                <input type="hidden" name="action" value="suspend">
+                                <button type="submit" class="btn btn-secondary btn-sm" style="border-color: #f59e0b; color: #f59e0b;">Suspender</button>
+                            </form>
+                        <% } %>
+                        
+                        <form action="/superadmin/users/<%= trainer.id %>/delete" method="POST" onsubmit="return confirm('Tem certeza? Isso removerá o treinador e desvinculará seus alunos.');" style="margin: 0;">
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                            <button type="submit" class="btn btn-secondary btn-sm" style="color: var(--c-error); border-color: var(--c-error);">Excluir</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="client-info-grid">
+                <div class="info-card">
+                    <h4>Informações da Conta</h4>
+                    <p><strong>Nome:</strong> <%= trainer.name %></p>
+                    <p><strong>Email:</strong> <%= trainer.email %></p>
+                    <p><strong>Status Atual:</strong> 
+                        <% if(trainer.status === 'active') { %> <span style="color:var(--c-success)">Ativo</span> 
+                        <% } else if(trainer.status === 'pending_approval') { %> <span style="color:#f59e0b">Pendente</span>
+                        <% } else { %> <span style="color:var(--c-error)">Inativo</span> <% } %>
+                    </p>
+                    <p><strong>Data de Cadastro:</strong> <%= new Date(trainer.created_at).toLocaleDateString('pt-BR') %></p>
+                </div>
+
+                <div class="info-card">
+                    <h4>Alunos Vinculados (<%= clients.length %>)</h4>
+                    <% if (clients.length > 0) { %>
+                        <ul style="padding-left: 20px; color: #ccc; margin-top: 10px;">
+                            <% clients.forEach(c => { %>
+                                <li style="margin-bottom: 5px;">
+                                    <strong><%= c.name %></strong> 
+                                    <span style="color:#666; font-size:0.85rem;">(<%= c.email %>)</span>
+                                    <a href="/admin/clients/<%= c.id %>" style="color: var(--c-accent-primary); font-size: 0.8rem; margin-left: 5px; text-decoration: none;">Ver</a>
+                                </li>
+                            <% }) %>
+                        </ul>
+                    <% } else { %>
+                        <p style="color: #888; font-style: italic;">Nenhum aluno atribuído a este personal.</p>
+                    <% } %>
+                </div>
+            </div>
+
+        </div>
+    </main>
+</div>
+<%- include('../partials/footer.ejs') %>
