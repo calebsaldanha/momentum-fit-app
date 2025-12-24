@@ -1,27 +1,7 @@
-<%- include("../partials/header.ejs", { title, bodyClass: "dashboard-body" }) %>
+<%- include('../partials/header.ejs', { title, bodyClass: 'dashboard-body' }) %>
 
 <div class="dashboard-container">
-    <aside class="dashboard-sidebar">
-        <nav class="sidebar-nav">
-            <% if (user.role === 'superadmin') { %>
-                <a href="/superadmin/dashboard" class="nav-item" style="color: var(--c-accent-dark); background: #eaff0040; border-left-color: var(--c-accent-primary);"><span></span> Painel Super Admin</a>
-                <div style="height: 1px; background: #e2e8f0; margin: 0.5rem 1rem;"></div>
-            <% } %>
-            <a href="/admin/dashboard" class="nav-item active"><span></span> Painel Geral</a>
-            <a href="/admin/clients" class="nav-item"><span></span> Clientes</a>
-            <a href="/workouts/create" class="nav-item"><span></span> Criar Treino</a>
-            <% if (user.role === 'superadmin') { %>
-                <a href="/articles/create" class="nav-item"><span></span> Criar Artigo</a>
-            <% } %>
-            <a href="/chat" class="nav-item"><span></span> Chat</a>
-        </nav>
-        <div class="sidebar-footer">
-            <form action="/auth/logout" method="POST" style="margin: 0;">
-                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                <button type="submit" class="btn-logout-sidebar">Sair</button>
-            </form>
-        </div>
-    </aside>
+    <%- include('../partials/admin-sidebar.ejs') %>
 
     <main class="dashboard-main">
         <div class="section">
@@ -29,6 +9,7 @@
                 <h1>Painel do Treinador</h1>
                 <p>Visão geral do seu impacto e progresso dos alunos.</p>
             </div>
+            
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-icon"><img src="/images/logo-3d.png" alt="Icon"></div>
@@ -44,6 +25,7 @@
                 </div>
             </div>
         </div>
+
         <div class="section">
             <div class="section-header">
                 <h2>Alunos Recentes</h2>
@@ -59,9 +41,11 @@
                     <% }); %>
                 </div>
             <% } else { %>
-                <div class="empty-state" style="padding: 2rem; text-align: center; color: var(--c-text-secondary);"><p>Nenhum aluno cadastrado recentemente.</p></div>
+                <div class="empty-state" style="padding: 2rem; text-align: center; color: var(--c-text-secondary);">
+                    <p>Nenhum aluno atribuído recentemente.</p>
+                </div>
             <% } %>
         </div>
     </main>
 </div>
-<%- include("../partials/footer.ejs") %>
+<%- include('../partials/footer.ejs') %>
