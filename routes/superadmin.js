@@ -9,7 +9,6 @@ const requireSuperAdminAuth = (req, res, next) => {
 };
 router.use(requireSuperAdminAuth);
 
-// Dashboard
 router.get('/dashboard', async (req, res) => {
     try {
         const stats = {
@@ -22,7 +21,6 @@ router.get('/dashboard', async (req, res) => {
     } catch (err) { res.render('pages/error', { message: 'Erro dash.' }); }
 });
 
-// Lista Geral
 router.get('/manage', async (req, res) => {
     try {
         const trainers = await pool.query("SELECT * FROM users WHERE role = 'trainer' ORDER BY created_at DESC");
@@ -31,14 +29,14 @@ router.get('/manage', async (req, res) => {
     } catch (err) { res.render('pages/error', { message: 'Erro manage.' }); }
 });
 
-// Detalhes do Treinador (ESSENCIAL)
+// Detalhes do Treinador (ROTA QUE FALTAVA OU ESTAVA INCOMPLETA)
 router.get('/trainers/:id', async (req, res) => {
     try {
         const result = await pool.query("SELECT * FROM users WHERE id = $1 AND role = 'trainer'", [req.params.id]);
         if (result.rows.length === 0) return res.status(404).render('pages/error', { message: 'Treinador não encontrado' });
         
-        // Busca alunos vinculados para exibir na tela de detalhes
-        const clientsRes = await pool.query("SELECT id, name, email FROM users u JOIN client_profiles cp ON u.id=cp.user_id WHERE cp.assigned_trainer_id=$1", [req.params.id]);
+        // Alunos vinculados
+        const clientsRes = await pool.query("SELECT u.name, u.email FROM users u JOIN client_profiles cp ON u.id=cp.user_id WHERE cp.assigned_trainer_id=$1", [req.params.id]);
 
         res.render('pages/trainer-details', { 
             title: 'Detalhes Treinador', 
@@ -49,7 +47,7 @@ router.get('/trainers/:id', async (req, res) => {
     } catch (err) { res.render('pages/error', { message: 'Erro detalhes.' }); }
 });
 
-// Ações de Status
+// Ações Genéricas (Status e Delete)
 router.post('/users/:id/status', async (req, res) => {
     try {
         const { action, role } = req.body;
@@ -60,23 +58,20 @@ router.post('/users/:id/status', async (req, res) => {
             await notificationService.notifyTrainerApproval(req.params.id);
         }
         
-        // Redireciona de volta para a página de onde veio (se for detalhes do trainer, volta pra lá)
+        // Redireciona de volta para onde estava
         const referer = req.get('Referer');
-        if (referer && referer.includes('/trainers/')) {
-            res.redirect(referer);
-        } else {
-            res.redirect('/superadmin/manage');
-        }
+        if (referer && referer.includes('/trainers/')) res.redirect(referer);
+        else res.redirect('/superadmin/manage');
     } catch(e) { res.render('pages/error', { message: 'Erro status.' }); }
 });
 
-// Ações de Delete
 router.post('/users/:id/delete', async (req, res) => {
     try {
         const id = req.params.id;
-        await pool.query("UPDATE client_profiles SET assigned_trainer_id = NULL WHERE assigned_trainer_id = $1", [id]); // Desvincula alunos
         await pool.query("DELETE FROM messages WHERE sender_id = $1 OR receiver_id = $1", [id]);
+        await pool.query("UPDATE client_profiles SET assigned_trainer_id = NULL WHERE assigned_trainer_id = $1", [id]);
         await pool.query("DELETE FROM workouts WHERE trainer_id = $1", [id]);
+        await pool.query("DELETE FROM client_profiles WHERE user_id = $1", [id]); // Caso seja cliente
         await pool.query("DELETE FROM users WHERE id = $1", [id]);
         res.redirect('/superadmin/manage');
     } catch(e) { res.render('pages/error', { message: 'Erro delete.' }); }

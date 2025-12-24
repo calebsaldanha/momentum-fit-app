@@ -16,6 +16,8 @@
                              <span style="background: #f59e0b; color: black; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; margin-left: 10px;">AGUARDANDO APROVAÇÃO</span>
                         <% } else if (trainer.status === 'rejected') { %>
                              <span style="background: var(--c-error); color: white; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; margin-left: 10px;">SUSPENSO</span>
+                        <% } else { %>
+                             <span style="background: var(--c-success); color: black; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; margin-left: 10px;">ATIVO</span>
                         <% } %>
                     </div>
 
@@ -50,11 +52,6 @@
                     <h4>Informações da Conta</h4>
                     <p><strong>Nome:</strong> <%= trainer.name %></p>
                     <p><strong>Email:</strong> <%= trainer.email %></p>
-                    <p><strong>Status Atual:</strong> 
-                        <% if(trainer.status === 'active') { %> <span style="color:var(--c-success)">Ativo</span> 
-                        <% } else if(trainer.status === 'pending_approval') { %> <span style="color:#f59e0b">Pendente</span>
-                        <% } else { %> <span style="color:var(--c-error)">Inativo</span> <% } %>
-                    </p>
                     <p><strong>Data de Cadastro:</strong> <%= new Date(trainer.created_at).toLocaleDateString('pt-BR') %></p>
                 </div>
 
@@ -66,7 +63,6 @@
                                 <li style="margin-bottom: 5px;">
                                     <strong><%= c.name %></strong> 
                                     <span style="color:#666; font-size:0.85rem;">(<%= c.email %>)</span>
-                                    <a href="/admin/clients/<%= c.id %>" style="color: var(--c-accent-primary); font-size: 0.8rem; margin-left: 5px; text-decoration: none;">Ver</a>
                                 </li>
                             <% }) %>
                         </ul>

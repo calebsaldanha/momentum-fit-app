@@ -1,6 +1,6 @@
 <%- include('../partials/header.ejs', { title, bodyClass: 'dashboard-body' }) %>
 <div class="dashboard-container">
-    <%- include('../partials/superadmin-sidebar.ejs', { currentPage: 'super-manage' }) %>
+    <%- include('../partials/superadmin-sidebar.ejs', { currentPage: 'superadmin-manage' }) %>
     <main class="dashboard-main">
         
         <div class="section">
@@ -18,22 +18,9 @@
                                 <% } else if (user.status === 'active') { %> <span style="color:var(--c-success);">[Ativo]</span>
                                 <% } else { %> <span style="color:var(--c-error);">[Inativo]</span> <% } %>
                             </td>
-                            <td style="text-align: right; display: flex; justify-content: flex-end; gap: 5px;">
-                                <% if (user.status === 'pending_approval' || user.status === 'rejected') { %>
-                                    <form action="/superadmin/users/<%= user.id %>/status" method="POST" style="margin:0;">
-                                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                        <input type="hidden" name="action" value="approve">
-                                        <input type="hidden" name="role" value="trainer">
-                                        <button type="submit" class="btn btn-primary btn-sm">Aprovar</button>
-                                    </form>
-                                <% } %>
-                                <% if (user.status === 'active') { %>
-                                    <form action="/superadmin/users/<%= user.id %>/status" method="POST" style="margin:0;">
-                                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                        <input type="hidden" name="action" value="suspend">
-                                        <button type="submit" class="btn btn-secondary btn-sm" style="color: #f59e0b; border-color: #f59e0b;">Suspender</button>
-                                    </form>
-                                <% } %>
+                            <td style="text-align: right; display: flex; justify-content: flex-end; gap: 10px;">
+                                <a href="/superadmin/trainers/<%= user.id %>" class="btn btn-secondary btn-sm" style="background: var(--c-accent-primary); color: black; border: none;">Detalhes</a>
+                                
                                 <form action="/superadmin/users/<%= user.id %>/delete" method="POST" onsubmit="return confirm('Excluir este personal?');" style="margin:0;">
                                     <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                                     <button type="submit" class="btn btn-secondary btn-sm" style="color: var(--c-error); border-color: var(--c-error);">Excluir</button>
@@ -41,6 +28,7 @@
                             </td>
                         </tr>
                         <% }); %>
+                        <% if (trainers.length === 0) { %> <tr><td colspan="4" style="text-align: center;">Nenhum treinador.</td></tr> <% } %>
                     </tbody>
                 </table>
             </div>
@@ -61,25 +49,9 @@
                                 <% } else if (user.status === 'active') { %> <span style="color:var(--c-success);">[Ativo]</span>
                                 <% } else { %> <span style="color:var(--c-error);">[Inativo]</span> <% } %>
                             </td>
-                            <td style="text-align: right; display: flex; justify-content: flex-end; gap: 5px;">
+                            <td style="text-align: right; display: flex; justify-content: flex-end; gap: 10px;">
                                 <a href="/admin/clients/<%= user.id %>" class="btn btn-secondary btn-sm" style="background: var(--c-accent-primary); color: black; border: none;">Detalhes</a>
                                 
-                                <% if (user.status === 'pending_approval' || user.status === 'rejected') { %>
-                                    <form action="/superadmin/users/<%= user.id %>/status" method="POST" style="margin:0;">
-                                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                        <input type="hidden" name="action" value="approve">
-                                        <input type="hidden" name="role" value="client">
-                                        <button type="submit" class="btn btn-primary btn-sm">Aprovar</button>
-                                    </form>
-                                <% } %>
-                                <% if (user.status === 'active') { %>
-                                    <form action="/superadmin/users/<%= user.id %>/status" method="POST" style="margin:0;">
-                                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                        <input type="hidden" name="action" value="suspend">
-                                        <button type="submit" class="btn btn-secondary btn-sm" style="color: #f59e0b; border-color: #f59e0b;">Suspender</button>
-                                    </form>
-                                <% } %>
-
                                 <form action="/superadmin/users/<%= user.id %>/delete" method="POST" onsubmit="return confirm('Excluir este cliente?');" style="margin:0;">
                                     <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                                     <button type="submit" class="btn btn-secondary btn-sm" style="color: var(--c-error); border-color: var(--c-error);">Excluir</button>
@@ -87,6 +59,7 @@
                             </td>
                         </tr>
                         <% }); %>
+                        <% if (clients.length === 0) { %> <tr><td colspan="4" style="text-align: center;">Nenhum cliente.</td></tr> <% } %>
                     </tbody>
                 </table>
             </div>
