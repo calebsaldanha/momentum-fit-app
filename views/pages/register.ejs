@@ -1,50 +1,80 @@
-<%- include('../partials/header.ejs', { bodyClass: 'auth-body' }) %>
-
-<main class="auth-main">
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro - Momentum Fit</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        .auth-body { 
+            background: url('/images/auth-bg.png') no-repeat center center/cover; 
+            min-height: 100vh; display: flex; align-items: center; justify-content: center; position: relative;
+        }
+        .auth-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.7); }
+        .auth-card { 
+            position: relative; z-index: 2; background: rgba(20, 20, 20, 0.95); 
+            padding: 3rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); 
+            width: 100%; max-width: 450px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+        .form-group { margin-bottom: 1.5rem; text-align: left; }
+        .form-group label { display: block; font-size: 0.85rem; color: #ccc; margin-bottom: 5px; }
+        .form-group input, .form-group select { 
+            width: 100%; padding: 12px; background: #0a0a0a; border: 1px solid #333; 
+            color: #fff; border-radius: 6px; outline: none; transition: 0.3s;
+        }
+        .form-group input:focus, .form-group select:focus { border-color: var(--c-accent-primary); }
+    </style>
+</head>
+<body class="auth-body">
+    <div class="auth-overlay"></div>
     <div class="auth-card">
-        <div class="auth-header">
-            <h2>Crie sua conta</h2>
-            <p>Comece sua jornada de transformação conosco.</p>
-        </div>
-
-        <% if (typeof error !== 'undefined' && error) { %>
-            <div class="alert alert-error" style="background: #fee2e2; color: #ef4444; padding: 10px; border-radius: 6px; margin-bottom: 15px; font-size: 0.9rem;">
+        <a href="/" style="text-decoration: none;">
+            <h2 style="font-weight: 800; color: #fff; margin-bottom: 2rem; font-size: 1.8rem;">MOMENTUM <span style="color: var(--c-accent-primary);">FIT</span></h2>
+        </a>
+        
+        <% if (error) { %>
+            <div style="background: rgba(239, 68, 68, 0.2); color: #fca5a5; padding: 10px; border-radius: 6px; margin-bottom: 1rem; font-size: 0.9rem;">
                 <%= error %>
             </div>
         <% } %>
 
-        <form class="auth-form" method="POST" action="/auth/register">
+        <form action="/auth/register" method="POST">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            
             <div class="form-group">
-                <label for="name">Seu nome</label>
-                <input type="text" id="name" name="name" required placeholder="Como devemos te chamar?">
+                <label>Nome Completo</label>
+                <input type="text" name="name" required placeholder="Seu nome">
             </div>
+
             <div class="form-group">
-                <label for="email">E-mail</label>
-                <input type="email" id="email" name="email" required placeholder="seu@email.com">
+                <label>Email</label>
+                <input type="email" name="email" required placeholder="seu@email.com">
             </div>
+
             <div class="form-group">
-                <label for="password">Senha (mínimo 6 caracteres)</label>
-                <input type="password" id="password" name="password" required minlength="6" placeholder="********">
-            </div>
-            <div class="form-group">
-                <label for="confirmPassword">Confirmar senha</label>
-                <input type="password" id="confirmPassword" name="confirmPassword" required placeholder="********">
-            </div>
-            <div class="form-group">
-                <label for="userType">Tipo de conta</label>
-                <select id="userType" name="userType" class="form-control">
-                    <option value="client" selected>Sou cliente</option>
-                    <option value="trainer">Sou personal trainer</option>
+                <label>Tipo de Conta</label>
+                <select name="userType">
+                    <option value="client">Aluno</option> <option value="trainer">Personal Trainer</option>
                 </select>
             </div>
-            <button type="submit" class="btn btn-primary" style="width: 100%;">Criar conta</button>
+
+            <div class="form-group">
+                <label>Senha</label>
+                <input type="password" name="password" required placeholder="Mínimo 6 caracteres">
+            </div>
+
+            <div class="form-group">
+                <label>Confirmar Senha</label>
+                <input type="password" name="confirmPassword" required placeholder="Repita a senha">
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; font-weight: 700;">CRIAR CONTA</button>
         </form>
 
-        <div style="text-align: center; margin-top: 1.5rem;">
-            <p style="font-size: 0.9rem;">Já tem uma conta? <a href="/auth/login" style="color: var(--c-accent-primary); font-weight: 600;">Faça login</a></p>
-        </div>
+        <p style="margin-top: 2rem; font-size: 0.9rem; color: #888;">
+            Já tem uma conta? <a href="/auth/login" style="color: var(--c-accent-primary);">Fazer Login</a>
+        </p>
     </div>
-</main>
-
-<%- include('../partials/footer.ejs') %>
+</body>
+</html>

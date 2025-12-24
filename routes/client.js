@@ -18,6 +18,11 @@ router.get('/dashboard', async (req, res) => {
         
         if (profileRes.rows.length === 0) return res.redirect('/client/initial-form');
 
+        // Se estiver pendente, manda pro perfil, não pro painel
+        if (req.session.user.status === 'pending_approval') {
+            return res.redirect('/client/profile');
+        }
+
         const profile = profileRes.rows[0];
         let imc = 0;
         if (profile.weight && profile.height) {
@@ -41,29 +46,28 @@ router.get('/dashboard', async (req, res) => {
     } catch (err) { res.status(500).render('pages/error', { message: 'Erro ao carregar dashboard.' }); }
 });
 
-// Form Inicial (ROTA CORRIGIDA)
+// Form Inicial (Exibir)
 router.get('/initial-form', async (req, res) => {
     try {
-        // Verifica se já existe perfil para não sobrescrever acidentalmente (opcional)
         const check = await pool.query("SELECT 1 FROM client_profiles WHERE user_id = $1", [req.session.user.id]);
         if (check.rows.length > 0) return res.redirect('/client/profile'); 
         
         res.render('pages/initial-form', { 
             title: 'Avaliação Inicial', 
             user: req.session.user,
-            error: null, // Garantir que a variável exista
-            profile: null, // Garantir que a variável exista
+            error: null,
+            profile: null,
             csrfToken: res.locals.csrfToken
         });
     } catch (err) {
-        console.error("Erro rota initial-form:", err);
-        res.status(500).render('pages/error', { message: 'Erro ao carregar formulário.' });
+        res.status(500).render('pages/error', { message: 'Erro ao verificar perfil.' });
     }
 });
 
 // Form Inicial (Processar)
 router.post('/initial-form', async (req, res) => {
     const userId = req.session.user.id;
+    // Captura todos os campos
     const { 
         age, phone, gender_identity, sex_assigned_at_birth, 
         weight, height, fitness_level, 
@@ -112,52 +116,92 @@ router.post('/initial-form', async (req, res) => {
         ];
 
         await pool.query(query, values);
+        await notificationService.notifyNewClient(req.session.user.name, userId).catch(e => console.error("Erro notif:", e));
 
-        // Notificação (catch para não quebrar fluxo)
-        notificationService.notifyNewClient(req.session.user.name, userId).catch(e => console.error("Erro notif:", e));
-
-        res.redirect('/client/dashboard');
+        // REDIRECIONA PARA O PERFIL EM VEZ DO DASHBOARD
+        res.redirect('/client/profile');
     } catch (err) {
-        console.error("Erro POST initial-form:", err);
+        console.error("Erro form inicial:", err);
         res.render('pages/initial-form', { 
             title: 'Avaliação Inicial', 
             user: req.session.user, 
-            error: 'Erro ao salvar. Verifique os dados.', 
+            error: 'Erro ao salvar dados.', 
             profile: req.body, 
             csrfToken: req.csrfToken() 
         });
     }
 });
 
-// Perfil
+// Perfil (Visualizar)
 router.get('/profile', async (req, res) => {
     try {
         const result = await pool.query("SELECT u.name, u.email, cp.* FROM users u JOIN client_profiles cp ON u.id = cp.user_id WHERE u.id = $1", [req.session.user.id]);
         const profile = result.rows[0] || {};
+        
         let imc = 0;
         if (profile.weight && profile.height) {
             imc = (parseFloat(profile.weight) / (parseFloat(profile.height) * parseFloat(profile.height))).toFixed(1);
         }
-        res.render('pages/client-profile', { title: 'Meu Perfil', profile, imc, user: req.session.user, success: req.query.success });
+
+        res.render('pages/client-profile', { 
+            title: 'Meu Perfil', 
+            profile, 
+            imc, 
+            user: req.session.user, 
+            success: req.query.success,
+            currentPage: 'profile' 
+        });
     } catch (err) { res.status(500).render('pages/error', { message: 'Erro perfil.' }); }
 });
 
+// Perfil (Atualizar Completo)
 router.post('/profile', async (req, res) => {
-    // ... manter lógica de update ...
-    const { name, age, weight, height, phone } = req.body;
+    const userId = req.session.user.id;
+    const { 
+        name, phone, weight, height, age, fitness_level, 
+        main_goal, secondary_goals, medical_conditions, medications,
+        injuries, allergies, sleep_hours, diet_description
+    } = req.body;
+
     try {
-        await pool.query("UPDATE users SET name = $1 WHERE id = $2", [name, req.session.user.id]);
-        await pool.query("UPDATE client_profiles SET age=$1, weight=$2, height=$3, phone=$4, updated_at=NOW() WHERE user_id=$5", 
-            [age, weight, height, phone, req.session.user.id]);
+        // Atualiza Nome
+        await pool.query("UPDATE users SET name = $1 WHERE id = $2", [name, userId]);
+        
+        // Atualiza Perfil (Campos principais que o aluno pode editar)
+        const query = `
+            UPDATE client_profiles SET 
+                phone=$1, weight=$2, height=$3, age=$4, fitness_level=$5,
+                main_goal=$6, secondary_goals=$7, medical_conditions=$8, medications=$9,
+                injuries=$10, allergies=$11, sleep_hours=$12, diet_description=$13,
+                updated_at=NOW()
+            WHERE user_id=$14
+        `;
+        
+        const values = [
+            phone, parseFloat(weight)||0, parseFloat(height)||0, parseInt(age)||0, fitness_level,
+            main_goal, secondary_goals, medical_conditions, medications,
+            injuries, allergies, sleep_hours, diet_description,
+            userId
+        ];
+
+        await pool.query(query, values);
         req.session.user.name = name;
-        res.redirect('/client/profile?success=Atualizado');
-    } catch (err) { res.status(500).render('pages/error', { message: 'Erro update.' }); }
+        
+        res.redirect('/client/profile?success=Dados atualizados com sucesso.');
+    } catch (err) { 
+        console.error(err);
+        res.status(500).render('pages/error', { message: 'Erro ao atualizar perfil.' }); 
+    }
 });
 
+// Workouts
 router.get('/workouts', async (req, res) => {
+    // Se pendente, não vê treinos
+    if (req.session.user.status === 'pending_approval') return res.redirect('/client/profile');
+
     try {
         const workoutsRes = await pool.query("SELECT w.*, u.name as trainer_name FROM workouts w LEFT JOIN users u ON w.trainer_id = u.id WHERE w.client_id = $1 ORDER BY w.created_at DESC", [req.session.user.id]);
-        res.render('pages/client-workouts', { title: 'Meus Treinos', workouts: workoutsRes.rows, user: req.session.user });
+        res.render('pages/client-workouts', { title: 'Meus Treinos', workouts: workoutsRes.rows, user: req.session.user, currentPage: 'workouts' });
     } catch(e) { res.render('pages/error', { message: 'Erro treinos.' }); }
 });
 
