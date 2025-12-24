@@ -1,67 +1,52 @@
-<%- include('../partials/header.ejs', { title: 'Meu Perfil - Momentum Fit', bodyClass: 'dashboard-body' }) %>
+<%- include('../partials/header', { bodyClass: 'dashboard-body' }) %>
+
 <div class="dashboard-container">
-    <%- include('../partials/client-sidebar.ejs', { currentPage: 'profile' }) %>
+    <%- include('../partials/client-sidebar') %>
+
     <main class="dashboard-main">
-        <section class="section">
-            <div class="section-header">
-                <h1>Meu Perfil</h1>
-                <p>Gerencie suas informações pessoais e métricas.</p>
-            </div>
-            <form method="POST" action="/client/profile" class="dashboard-form" style="max-width: 800px;">
-                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                
-                <div class="form-group">
-                    <label>Nome Completo</label>
-                    <input type="text" name="name" value="<%= profile.name %>" required>
-                </div>
+        <div class="container">
+            <h1>Meu Perfil</h1>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
-                    <div class="form-group">
-                        <label>Idade</label>
-                        <input type="number" name="age" value="<%= profile.age %>">
+            <% if (!profile.id) { %>
+                <div class="alert alert-warning">Perfil incompleto. <a href="/client/initial-form">Preencher agora</a></div>
+            <% } else { %>
+
+                <div class="client-info-grid">
+                    <div class="info-card">
+                        <h4>Dados Pessoais</h4>
+                        <p><strong>Nome:</strong> <%= user.name %></p>
+                        <p><strong>Email:</strong> <%= user.email %></p>
+                        <p><strong>Idade:</strong> <%= profile.age %> anos</p>
+                        <p><strong>Telefone:</strong> <%= profile.phone %></p>
+                        <p><strong>Gênero:</strong> <%= profile.gender_identity %></p>
                     </div>
-                    <div class="form-group">
-                        <label>Peso (kg)</label>
-                        <input type="number" step="0.1" name="weight" value="<%= profile.weight %>">
+
+                    <div class="info-card">
+                        <h4>Composição Corporal</h4>
+                        <p><strong>Peso:</strong> <%= profile.weight %> kg</p>
+                        <p><strong>Altura:</strong> <%= profile.height %> m</p>
+                        <p><strong>IMC:</strong> <%= (profile.weight / (profile.height * profile.height)).toFixed(1) %></p>
+                        <p><strong>Gordura:</strong> <%= profile.body_fat ? profile.body_fat + '%' : '-' %></p>
+                        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #333;">
+                            <small style="color: #888;">Medidas:</small><br>
+                            <span>Cintura: <%= profile.measure_waist || '-' %> | Quadril: <%= profile.measure_hip || '-' %></span><br>
+                            <span>Braço: <%= profile.measure_arm || '-' %> | Perna: <%= profile.measure_leg || '-' %></span>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>Altura (m)</label>
-                        <input type="number" step="0.01" name="height" value="<%= profile.height %>">
+
+                    <div class="info-card" style="grid-column: 1 / -1;">
+                        <h4>Objetivos e Histórico</h4>
+                        <p><strong>Objetivo Principal:</strong> <%= profile.main_goal %></p>
+                        <p><strong>Secundários:</strong> <%= profile.secondary_goals || '-' %></p>
+                        <p><strong>Deadline/Evento:</strong> <%= profile.specific_event || 'Nenhum' %></p>
+                        <hr style="border-color: #333; margin: 10px 0;">
+                        <p><strong>Condições Médicas:</strong> <%= profile.medical_conditions || 'Nenhuma' %></p>
+                        <p><strong>Lesões:</strong> <%= profile.injuries || 'Nenhuma' %></p>
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label>Nível de Experiência</label>
-                    <select name="fitness_level">
-                        <option value="beginner" <%= profile.fitness_level === 'beginner' ? 'selected' : '' %>>Iniciante</option>
-                        <option value="intermediate" <%= profile.fitness_level === 'intermediate' ? 'selected' : '' %>>Intermediário</option>
-                        <option value="advanced" <%= profile.fitness_level === 'advanced' ? 'selected' : '' %>>Avançado</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Dias de Treino (Semanais)</label>
-                    <input type="number" name="training_days" value="<%= profile.training_days || 3 %>" min="1" max="7">
-                </div>
-
-                <div class="form-group">
-                    <label>Equipamentos Disponíveis</label>
-                    <textarea name="equipment" rows="2" placeholder="Ex: Halteres, Academia completa, Peso do corpo..."><%= profile.equipment %></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label>Objetivos</label>
-                    <textarea name="goals" rows="3"><%= profile.goals %></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label>Condições Médicas / Lesões</label>
-                    <textarea name="medical_conditions" rows="2"><%= profile.medical_conditions %></textarea>
-                </div>
-
-                <button type="submit" class="btn btn-primary">Salvar Alterações</button>
-            </form>
-        </section>
+            <% } %>
+        </div>
     </main>
 </div>
-<%- include('../partials/footer.ejs') %>
+<%- include('../partials/footer') %>
