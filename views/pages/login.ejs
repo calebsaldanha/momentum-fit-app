@@ -1,165 +1,38 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | Momentum Fit</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="/css/styles.css">
-    <link rel="icon" type="image/png" href="/images/logo-3d.png">
-    
-    <style>
-        .auth-body {
-            background: linear-gradient(135deg, var(--c-bg-darkest) 0%, #000000 100%);
-            min-height: 100vh;
-            display: flex; align-items: center; justify-content: center;
-            padding: 2rem; position: relative; overflow: hidden;
-            font-family: 'Montserrat', sans-serif;
-        }
-        .auth-body::before, .auth-body::after {
-            content: ''; position: absolute; width: 600px; height: 600px;
-            border-radius: 50%; filter: blur(100px); opacity: 0.15; z-index: 0;
-        }
-        .auth-body::before { background: var(--c-accent-primary); top: -20%; left: -20%; }
-        .auth-body::after { background: #3b82f6; bottom: -20%; right: -20%; }
+<%- include('../partials/header.ejs', { bodyClass: 'auth-body' }) %>
 
-        .auth-container { width: 100%; max-width: 500px; position: relative; z-index: 1; }
-        
-        .auth-box {
-            background: rgba(18, 18, 18, 0.8);
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.08);
-            padding: 3rem 2.5rem;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        }
+<main class="auth-main">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h2>Acesse sua Conta</h2>
+            <p>Bem-vindo de volta! Insira seus dados para continuar.</p>
+        </div>
 
-        .auth-header { text-align: center; margin-bottom: 2.5rem; }
-        .logo-img { height: 60px; width: auto; margin-bottom: 1rem; }
-        
-        .auth-header h1 {
-            font-size: 2rem; font-weight: 800; margin-bottom: 0.75rem;
-            color: #fff;
-        }
-        .auth-header p { color: var(--c-text-secondary); font-size: 1rem; }
+        <% if (typeof error !== 'undefined' && error) { %>
+            <div class="alert alert-error" style="background: #fee2e2; color: #ef4444; padding: 10px; border-radius: 6px; margin-bottom: 15px; font-size: 0.9rem;">
+                <%= error %>
+            </div>
+        <% } %>
 
-        .form-group { margin-bottom: 1.5rem; }
-        
-        .input-wrapper {
-            position: relative;
-            background: rgba(255, 255, 255, 0.03);
-            border: 2px solid rgba(255, 255, 255, 0.08);
-            border-radius: 12px; transition: all 0.3s ease;
-        }
-        .input-wrapper:focus-within {
-            border-color: var(--c-accent-primary);
-            box-shadow: 0 0 0 4px rgba(190, 242, 2, 0.1);
-            background: rgba(255, 255, 255, 0.05);
-        }
-        
-        .input-icon {
-            position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
-            color: var(--c-text-secondary); font-size: 1.2rem; transition: color 0.3s ease;
-        }
-        .input-wrapper:focus-within .input-icon { color: var(--c-accent-primary); }
-
-        .form-input {
-            width: 100%; padding: 16px 16px 16px 50px;
-            background: transparent; border: none;
-            color: white; font-size: 1rem; outline: none;
-            font-family: 'Montserrat', sans-serif;
-        }
-        .form-input::placeholder { color: rgba(255, 255, 255, 0.4); }
-
-        .btn-auth {
-            width: 100%; padding: 16px;
-            background: linear-gradient(135deg, var(--c-accent-primary), #a3cf02);
-            border: none; border-radius: 12px;
-            color: #000; font-weight: 700; font-size: 1.1rem;
-            cursor: pointer; transition: all 0.3s ease;
-            box-shadow: 0 10px 20px -10px rgba(190, 242, 2, 0.3);
-            text-transform: uppercase; letter-spacing: 1px;
-        }
-        .btn-auth:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 15px 30px -12px rgba(190, 242, 2, 0.5);
-        }
-
-        .auth-footer {
-            text-align: center; margin-top: 2rem; padding-top: 1.5rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.08); color: var(--c-text-secondary);
-        }
-        .link-accent { color: var(--c-accent-primary); text-decoration: none; font-weight: 600; transition: 0.3s; }
-        .link-accent:hover { color: #fff; text-decoration: underline; }
-        
-        .alert {
-            padding: 12px; border-radius: 8px; margin-bottom: 1.5rem;
-            font-size: 0.9rem; text-align: center;
-            background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.3); color: #fca5a5;
-        }
-    </style>
-</head>
-<body class="auth-body">
-    <div class="auth-container">
-        <div class="auth-box fade-in">
-            <div class="auth-header">
-                <a href="/">
-                    <img src="/images/logo-3d.png" alt="Momentum Fit" class="logo-img">
-                </a>
-                <h1>Bem-vindo de volta</h1>
-                <p>Acesse sua conta para continuar</p>
+        <form class="auth-form" method="POST" action="/auth/login">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            
+            <div class="form-group">
+                <label for="email">E-mail</label>
+                <input type="email" id="email" name="email" required placeholder="seu@email.com">
             </div>
 
-            <% if (locals.error) { %>
-                <div class="alert">
-                    <i class="fas fa-exclamation-circle"></i> <%= error %>
-                </div>
-            <% } %>
-
-            <form action="/auth/login" method="POST" class="auth-form">
-                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                
-                <div class="form-group">
-                    <label style="margin-left: 5px; margin-bottom: 8px; display: block; font-size: 0.9rem;">E-mail</label>
-                    <div class="input-wrapper">
-                        <i class="fas fa-envelope input-icon"></i>
-                        <input type="email" name="email" class="form-input" placeholder="seu@email.com" required>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label style="margin-left: 5px; margin-bottom: 8px; display: block; font-size: 0.9rem;">Senha</label>
-                    <div class="input-wrapper">
-                        <i class="fas fa-lock input-icon"></i>
-                        <input type="password" name="password" class="form-input" placeholder="********" required>
-                    </div>
-                </div>
-
-                <button type="submit" class="btn-auth">
-                    Entrar <i class="fas fa-arrow-right" style="margin-left: 10px;"></i>
-                </button>
-            </form>
-
-            <div class="auth-footer">
-                <p>Ainda não tem conta? <a href="/auth/register" class="link-accent">Criar conta</a></p>
+            <div class="form-group">
+                <label for="password">Senha</label>
+                <input type="password" id="password" name="password" required placeholder="********">
             </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Entrar</button>
+        </form>
+
+        <div style="text-align: center; margin-top: 1.5rem;">
+            <p style="font-size: 0.9rem;">Ainda não tem conta? <a href="/auth/register" style="color: var(--c-accent-primary); font-weight: 600;">Cadastre-se</a></p>
         </div>
     </div>
+</main>
 
-    <script>
-        // Animação de entrada suave
-        document.addEventListener('DOMContentLoaded', () => {
-            const box = document.querySelector('.auth-box');
-            box.style.opacity = '0';
-            box.style.transform = 'translateY(20px)';
-            box.style.transition = 'all 0.6s ease';
-            
-            setTimeout(() => {
-                box.style.opacity = '1';
-                box.style.transform = 'translateY(0)';
-            }, 100);
-        });
-    </script>
-</body>
-</html>
+<%- include('../partials/footer.ejs') %>
