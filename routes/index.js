@@ -1,28 +1,20 @@
 const express = require('express');
 const router = express.Router();
 
-// Função auxiliar para redirecionamento (mesma lógica do auth, simplificada)
-const handleRedirect = (user, res) => {
-    if (user.role === 'client') return res.redirect('/client/dashboard');
-    if (user.role === 'superadmin') return res.redirect('/superadmin/dashboard');
-    if (user.role === 'trainer') return res.redirect(user.status === 'active' ? '/admin/dashboard' : '/trainer/profile');
-    return res.redirect('/'); // Fallback
-};
-
+// Rota da Página Inicial (Landing Page)
 router.get('/', (req, res) => {
-    // Se o usuário já estiver logado, redireciona para o dashboard apropriado
-    if (req.session.user) {
-        return handleRedirect(req.session.user, res);
-    }
-
+    // Renderiza a página inicial passando o usuário (se existir) para o header se adaptar
+    // Não força mais o redirecionamento
     res.render('pages/index', {
-        title: 'Início - Momentum Fit'
+        title: 'Início - Momentum Fit',
+        user: req.session.user || null
     });
 });
 
 router.get('/about', (req, res) => {
     res.render('pages/about', {
-        title: 'Sobre - Momentum Fit'
+        title: 'Sobre - Momentum Fit',
+        user: req.session.user || null
     });
 });
 

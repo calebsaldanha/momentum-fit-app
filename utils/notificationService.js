@@ -30,12 +30,20 @@ async function createNotification(userId, title, message, type = 'info', link = 
 }
 
 const notificationService = {
-    // 1. ADMIN: Novo Cliente Cadastrado
+    // 1. ADMIN: Novo Cliente Cadastrado (Aguardando Avaliação)
     async notifyNewClient(clientName, clientId) {
         const admins = await getSuperAdmins();
         for (const admin of admins) {
             await createNotification(admin.id, 'Novo Cliente', `${clientName} aguarda avaliação.`, 'warning', `/admin/clients/${clientId}`);
-            // Opcional: Email para admin
+            
+            emailService.sendEmail(
+                admin.email, 
+                'Novo Cliente Aguardando', 
+                'Novo Cadastro', 
+                `O cliente ${clientName} preencheu a ficha de anamnese e aguarda aprovação/atribuição.`, 
+                `/admin/clients/${clientId}`, 
+                'Avaliar Cliente'
+            );
         }
     },
 
@@ -44,7 +52,15 @@ const notificationService = {
         const admins = await getSuperAdmins();
         for (const admin of admins) {
             await createNotification(admin.id, 'Novo Personal', `${trainerName} solicitou cadastro.`, 'warning', '/superadmin/manage');
-            emailService.sendEmail(admin.email, 'Novo Personal Pendente', 'Ação Necessária', `${trainerName} se cadastrou como personal.`, '/superadmin/manage', 'Gerenciar');
+            
+            emailService.sendEmail(
+                admin.email, 
+                'Novo Personal Pendente', 
+                'Ação Necessária', 
+                `${trainerName} se cadastrou como personal e aguarda aprovação.`, 
+                '/superadmin/manage', 
+                'Gerenciar'
+            );
         }
     },
 
@@ -55,7 +71,6 @@ const notificationService = {
         const receiver = res.rows[0];
         
         await createNotification(receiverId, 'Nova Mensagem', `${senderName} enviou uma mensagem.`, 'info', '/chat');
-        // Email opcional para mensagem não lida poderia ser implementado aqui
     },
 
     // 4. PERSONAL: Novo Cliente Atribuído
@@ -65,7 +80,15 @@ const notificationService = {
         const trainer = res.rows[0];
 
         await createNotification(trainerId, 'Novo Aluno', `Você é o responsável por ${clientName}.`, 'info', `/admin/clients/${clientId}`);
-        emailService.sendEmail(trainer.email, 'Novo Aluno Atribuído', 'Você tem um novo aluno!', `O aluno ${clientName} foi vinculado a você.`, `/admin/clients/${clientId}`, 'Ver Aluno');
+        
+        emailService.sendEmail(
+            trainer.email, 
+            'Novo Aluno Atribuído', 
+            'Você tem um novo aluno!', 
+            `O aluno ${clientName} foi vinculado a você.`, 
+            `/admin/clients/${clientId}`, 
+            'Ver Aluno'
+        );
     },
 
     // 5. CLIENTE: Aprovação de Cadastro
@@ -75,7 +98,15 @@ const notificationService = {
         const client = res.rows[0];
 
         await createNotification(clientId, 'Cadastro Aprovado!', `Bem-vindo! Seu treinador é ${trainerName}.`, 'success', '/client/dashboard');
-        emailService.sendEmail(client.email, 'Bem-vindo à Momentum Fit', 'Cadastro Aprovado!', `Seu perfil foi aprovado e seu treinador é ${trainerName}. Acesse para ver seus treinos.`, '/client/dashboard', 'Acessar Plataforma');
+        
+        emailService.sendEmail(
+            client.email, 
+            'Bem-vindo à Momentum Fit', 
+            'Cadastro Aprovado!', 
+            `Seu perfil foi aprovado e seu treinador é ${trainerName}. Acesse para ver seus treinos.`, 
+            '/client/dashboard', 
+            'Acessar Plataforma'
+        );
     },
 
     // 6. CLIENTE: Treino Criado (Todo novo treino)
@@ -85,7 +116,15 @@ const notificationService = {
         const client = res.rows[0];
 
         await createNotification(clientId, 'Novo Treino', `Treino "${workoutTitle}" disponível.`, 'success', `/workouts/${workoutId}`);
-        emailService.sendEmail(client.email, 'Hora de Treinar!', 'Novo Treino', `Seu treinador criou o treino "${workoutTitle}".`, `/workouts/${workoutId}`, 'Ver Treino');
+        
+        emailService.sendEmail(
+            client.email, 
+            'Hora de Treinar!', 
+            'Novo Treino', 
+            `Seu treinador criou o treino "${workoutTitle}".`, 
+            `/workouts/${workoutId}`, 
+            'Ver Treino'
+        );
     },
 
     // 7. PERSONAL/CLIENTE: Novos Artigos
@@ -110,7 +149,15 @@ const notificationService = {
         const trainer = res.rows[0];
         
         await createNotification(trainerId, 'Conta Aprovada', 'Você já pode acessar o painel.', 'success', '/admin/dashboard');
-        emailService.sendEmail(trainer.email, 'Conta Aprovada', 'Bem-vindo!', 'Sua conta de personal foi aprovada.', '/admin/dashboard', 'Acessar Painel');
+        
+        emailService.sendEmail(
+            trainer.email, 
+            'Conta Aprovada', 
+            'Bem-vindo!', 
+            'Sua conta de personal foi aprovada.', 
+            '/admin/dashboard', 
+            'Acessar Painel'
+        );
     }
 };
 

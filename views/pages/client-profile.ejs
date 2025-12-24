@@ -1,85 +1,34 @@
-<%- include('../partials/header', { bodyClass: 'dashboard-body' }) %>
-
+<%- include('../partials/header.ejs', { title: 'Meu Perfil', bodyClass: 'dashboard-body' }) %>
 <div class="dashboard-container">
-    <%- include('../partials/client-sidebar') %>
-
+    <%- include('../partials/client-sidebar.ejs', { currentPage: 'profile' }) %>
     <main class="dashboard-main">
-        <div class="container">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <section class="section">
+            <div class="section-header">
                 <h1>Meu Perfil</h1>
-                <a href="/client/profile/edit" class="btn btn-secondary btn-sm">Editar Perfil</a>
+                <% if (typeof success !== 'undefined' && success) { %>
+                    <div style="background: #d1fae5; color: #065f46; padding: 10px; border-radius: 6px; margin-top: 10px;"><%= success %></div>
+                <% } %>
             </div>
 
-            <% if (user.status === 'pending_approval') { %>
-                <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid #f59e0b; padding: 20px; border-radius: 12px; margin-bottom: 30px;">
-                    <h4 style="color: #f59e0b; margin: 0 0 10px 0;">[Perfil em Análise]</h4>
-                    <p style="margin: 0; color: #ccc;">Seus dados foram enviados. Aguarde a aprovação para acessar os treinos.</p>
+            <div style="background: #222; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid var(--c-accent-primary); display: inline-block;">
+                <h3 style="margin: 0; font-size: 0.9rem; color: #ccc;">IMC Calculado</h3>
+                <div style="display: flex; align-items: baseline; gap: 5px;">
+                    <span style="font-size: 2rem; font-weight: 800; color: white;"><%= typeof imc !== 'undefined' ? imc : '--' %></span>
+                    <span style="color: #666;">kg/m²</span>
                 </div>
-            <% } %>
+            </div>
 
-            <% if (success) { %>
-                <div class="alert alert-success" style="margin-bottom: 20px;"><%= success %></div>
-            <% } %>
-
-            <% if (!profile.id) { %>
-                <div class="alert alert-warning">Perfil incompleto. <a href="/client/initial-form">Preencher agora</a></div>
-            <% } else { %>
-                <div class="client-info-grid">
-                    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-                        <div class="info-card">
-                            <h4>Dados Pessoais</h4>
-                            <p><strong>Nome:</strong> <%= user.name %></p>
-                            <p><strong>Idade:</strong> <%= profile.age %></p>
-                            <p><strong>Telefone:</strong> <%= profile.phone %></p>
-                            <p><strong>Gênero:</strong> <%= profile.gender_identity %></p>
-                            <p><strong>Sexo Nasc.:</strong> <%= profile.sex_assigned_at_birth %></p>
-                        </div>
-                        
-                        <div class="info-card">
-                            <h4>Corpo & Saúde</h4>
-                            <div style="display: flex; gap: 20px; align-items: center; margin-bottom: 15px;">
-                                <div>
-                                    <span style="display: block; font-size: 0.8rem; color: #888;">IMC</span>
-                                    <strong style="font-size: 1.5rem; color: var(--c-accent-primary);"><%= imc %></strong>
-                                </div>
-                                <div>
-                                    <p style="margin: 0;"><strong>Peso:</strong> <%= profile.weight %>kg</p>
-                                    <p style="margin: 0;"><strong>Altura:</strong> <%= profile.height %>m</p>
-                                </div>
-                            </div>
-                            <hr style="border-color: #333;">
-                            <p style="margin-top: 10px;"><strong>Condições:</strong> <%= profile.medical_conditions || '-' %></p>
-                            <p><strong>Lesões:</strong> <%= profile.injuries || '-' %></p>
-                            <p><strong>Medicamentos:</strong> <%= profile.medications || '-' %></p>
-                            <p><strong>Alergias:</strong> <%= profile.allergies || '-' %></p>
-                        </div>
-                    </div>
-
-                    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-                        <div class="info-card">
-                            <h4>Objetivos & Estilo de Vida</h4>
-                            <p><strong>Principal:</strong> <%= profile.main_goal %></p>
-                            <p><strong>Secundário:</strong> <%= profile.secondary_goals || '-' %></p>
-                            <p><strong>Deadline:</strong> <%= profile.specific_event || '-' %></p>
-                            <hr style="border-color: #333;">
-                            <p><strong>Nível:</strong> <%= profile.fitness_level %></p>
-                            <p><strong>Preferência:</strong> <%= profile.workout_preference %></p>
-                            <p><strong>Gosta:</strong> <%= profile.liked_activities || '-' %></p>
-                            <p><strong>Não Gosta:</strong> <%= profile.disliked_activities || '-' %></p>
-                        </div>
-
-                        <div class="info-card">
-                            <h4>Rotina</h4>
-                            <p><strong>Disponibilidade:</strong> <%= profile.availability || '-' %></p>
-                            <p><strong>Desafios:</strong> <%= profile.challenges || '-' %></p>
-                            <p><strong>Dieta:</strong> <%= profile.diet_description || '-' %></p>
-                            <p><strong>Sono:</strong> <%= profile.sleep_hours || '-' %></p>
-                        </div>
-                    </div>
+            <form method="POST" action="/client/profile" class="dashboard-form">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <div class="form-group"><label>Nome</label><input type="text" name="name" value="<%= profile.name || user.name %>" required></div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                    <div class="form-group"><label>Idade</label><input type="number" name="age" value="<%= profile.age %>"></div>
+                    <div class="form-group"><label>Peso (kg)</label><input type="number" step="0.1" name="weight" value="<%= profile.weight %>"></div>
+                    <div class="form-group"><label>Altura (m)</label><input type="number" step="0.01" name="height" value="<%= profile.height %>"></div>
                 </div>
-
-                <% } %>
-        </div>
+                <button type="submit" class="btn btn-primary">Salvar</button>
+            </form>
+        </section>
     </main>
 </div>
-<%- include('../partials/footer') %>
+<%- include('../partials/footer.ejs') %>
