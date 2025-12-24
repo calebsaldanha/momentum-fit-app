@@ -1,19 +1,21 @@
-<%- include('../partials/header', { bodyClass: 'dashboard-body' }) %>
-
+<%- include('../partials/header.ejs', { title, bodyClass: 'dashboard-body' }) %>
 <div class="dashboard-container">
-    <%- include('../partials/admin-sidebar') %>
+    <%- include('../partials/admin-sidebar.ejs') %>
     <main class="dashboard-main">
-        <div class="container">
-            <h1>Gerenciar Clientes</h1>
+        <div class="section">
+            <div class="section-header">
+                <h1>Meus Alunos</h1>
+                <p>Gerencie o progresso e os treinos.</p>
+            </div>
+            
             <div class="table-container">
                 <table>
                     <thead>
                         <tr>
                             <th>Nome</th>
                             <th>Status</th>
-                            <th>Treinador</th>
                             <th>Nível</th>
-                            <th>Ações</th>
+                            <th style="text-align: right;">Ações</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -25,23 +27,20 @@
                                         <div style="font-size: 0.8rem; color: #888;"><%= c.email %></div>
                                     </td>
                                     <td>
-                                        <% if (c.status === 'pending_approval') { %>
-                                            <span style="color: #f59e0b; font-weight: bold;">[Pendente]</span>
-                                        <% } else if (c.status === 'active') { %>
-                                            <span style="color: var(--c-success);">[Ativo]</span>
+                                        <% if (c.status === 'active') { %>
+                                            <span style="color: var(--c-success);">Ativo</span>
                                         <% } else { %>
-                                            <span style="color: var(--c-error);">[Inativo]</span>
+                                            <span style="color: #f59e0b;">Pendente</span>
                                         <% } %>
                                     </td>
-                                    <td><%= c.trainer_name || '---' %></td>
-                                    <td><%= c.fitness_level || '---' %></td>
-                                    <td style="display: flex; gap: 10px;">
-                                        <a href="/admin/clients/<%= c.id %>" class="btn btn-secondary btn-sm" style="background: var(--c-accent-primary); color: black; border: none;">Ver Detalhes</a>
+                                    <td><%= c.fitness_level || '-' %></td>
+                                    <td style="text-align: right;">
+                                        <a href="/admin/clients/<%= c.id %>" class="btn btn-secondary btn-sm" style="background: var(--c-accent-primary); color: black; border: none;">Ver Perfil</a>
                                     </td>
                                 </tr>
                             <% }) %>
                         <% } else { %>
-                            <tr><td colspan="5" style="text-align: center;">Nenhum cliente encontrado.</td></tr>
+                            <tr><td colspan="4" style="text-align: center;">Nenhum aluno atribuído.</td></tr>
                         <% } %>
                     </tbody>
                 </table>
@@ -49,4 +48,4 @@
         </div>
     </main>
 </div>
-<%- include('../partials/footer') %>
+<%- include('../partials/footer.ejs') %>

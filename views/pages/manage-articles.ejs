@@ -1,0 +1,51 @@
+<%- include('../partials/header.ejs', { title: 'Gerenciar Blog', bodyClass: 'dashboard-body' }) %>
+<div class="dashboard-container">
+    <%- include('../partials/superadmin-sidebar.ejs') %>
+    
+    <main class="dashboard-main">
+        <div class="container">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <h1>Gerenciar Blog</h1>
+                <a href="/articles/new/create" class="btn btn-primary">
+                    + Novo Artigo
+                </a>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Título</th>
+                            <th>Data</th>
+                            <th style="text-align: right;">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (articles.length > 0) { %>
+                            <% articles.forEach(article => { %>
+                                <tr>
+                                    <td>
+                                        <strong><%= article.title %></strong>
+                                        <p style="font-size: 0.8rem; color: #888; margin: 0;"><%= article.summary %></p>
+                                    </td>
+                                    <td><%= new Date(article.created_at).toLocaleDateString('pt-BR') %></td>
+                                    <td style="text-align: right; display: flex; justify-content: flex-end; gap: 10px;">
+                                        <a href="/articles/<%= article.id %>" class="btn btn-secondary btn-sm" target="_blank">Ver</a>
+                                        
+                                        <form action="/articles/<%= article.id %>/delete" method="POST" onsubmit="return confirm('Excluir este artigo?');" style="margin: 0;">
+                                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                            <button type="submit" class="btn btn-secondary btn-sm" style="color: var(--c-error); border-color: var(--c-error);">Excluir</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr><td colspan="3" style="text-align: center;">Nenhum artigo publicado.</td></tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+<%- include('../partials/footer.ejs') %>

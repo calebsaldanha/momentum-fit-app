@@ -7,7 +7,7 @@ const { put } = require('@vercel/blob');
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } });
 
-// Listar (Público)
+// Rota Pública: Listar Artigos (Blog)
 router.get('/', async (req, res) => {
     try {
         const result = await pool.query("SELECT * FROM articles ORDER BY created_at DESC");
@@ -19,45 +19,41 @@ router.get('/', async (req, res) => {
     } catch (err) { res.render('pages/error', { message: 'Erro artigos.' }); }
 });
 
-// Detalhes (Público)
-router.get('/:id', async (req, res) => {
-    // Verifica se é 'create' (que pode ser confundido com ID se não tratado antes, mas a ordem das rotas importa)
-    if (req.params.id === 'create') return res.redirect('/articles/create'); // Fallback
-
-    try {
-        const result = await pool.query("SELECT * FROM articles WHERE id = $1", [req.params.id]);
-        if (result.rows.length === 0) return res.status(404).render('pages/error', { message: 'Artigo não encontrado.' });
-        res.render('pages/article-details', { title: result.rows[0].title, article: result.rows[0], user: req.session.user || null });
-    } catch (err) { res.render('pages/error', { message: 'Erro artigo.' }); }
-});
-
-// Criar (Auth) - Colocar ANTES da rota /:id no index principal ou garantir ordem
-// Como este arquivo é um router, a ordem aqui é: /, /create, /:id.
-// Se /create for definido abaixo de /:id, o express achará que "create" é um ID.
-// Vamos reordenar.
-
-// -- REORDENANDO --
-
-// Criar (GET)
-router.get('/new/create', async (req, res) => { // Mudando para /new/create para evitar conflito ou garantir que o router principal monte corretamente
-    if (!req.session.user || (req.session.user.role !== 'superadmin' && req.session.user.role !== 'trainer')) {
+// Rota Restrita: Gerenciar Artigos (Super Admin)
+router.get('/manage', async (req, res) => {
+    if (!req.session.user || req.session.user.role !== 'superadmin') {
         return res.redirect('/articles');
     }
     
-    // Sidebar Context: Superadmin -> Manage, Trainer -> Admin
-    const contextPage = req.session.user.role === 'superadmin' ? 'superadmin-manage' : 'admin-dashboard';
+    try {
+        const result = await pool.query("SELECT * FROM articles ORDER BY created_at DESC");
+        res.render('pages/manage-articles', { 
+            title: 'Gerenciar Blog',
+            articles: result.rows,
+            user: req.session.user,
+            currentPage: 'articles-manage', // Identificador para o Sidebar ficar verde
+            csrfToken: res.locals.csrfToken
+        });
+    } catch (err) { res.render('pages/error', { message: 'Erro ao carregar gestão.' }); }
+});
+
+// Criar (GET)
+router.get('/new/create', async (req, res) => {
+    if (!req.session.user || req.session.user.role !== 'superadmin') {
+        return res.redirect('/articles'); // Apenas Super Admin cria agora
+    }
     
     res.render('pages/create-article', { 
         title: 'Novo Artigo', 
         csrfToken: res.locals.csrfToken,
         user: req.session.user,
-        currentPage: contextPage
+        currentPage: 'articles-manage' // Mantém o menu "Gerenciar Blog" ativo
     });
 });
 
 // Criar (POST)
 router.post('/new/create', upload.single('image'), async (req, res) => {
-    if (!req.session.user) return res.redirect('/auth/login');
+    if (!req.session.user || req.session.user.role !== 'superadmin') return res.redirect('/auth/login');
     const { title, summary, content, videoUrl } = req.body;
     let imageUrl = null;
     try {
@@ -71,8 +67,26 @@ router.post('/new/create', upload.single('image'), async (req, res) => {
             [title, summary, content, imageUrl, videoUrl, req.session.user.id]
         );
         await notificationService.notifyNewArticle(title, newArticle.rows[0].id);
-        res.redirect('/articles');
+        res.redirect('/articles/manage'); // Volta para a gestão
     } catch (err) { res.render('pages/error', { message: 'Erro ao criar.' }); }
+});
+
+// Detalhes (Público) - Deve vir por último para não conflitar com /manage
+router.get('/:id', async (req, res) => {
+    try {
+        const result = await pool.query("SELECT * FROM articles WHERE id = $1", [req.params.id]);
+        if (result.rows.length === 0) return res.status(404).render('pages/error', { message: 'Artigo não encontrado.' });
+        res.render('pages/article-details', { title: result.rows[0].title, article: result.rows[0], user: req.session.user || null });
+    } catch (err) { res.render('pages/error', { message: 'Erro artigo.' }); }
+});
+
+// Excluir
+router.post('/:id/delete', async (req, res) => {
+    if (!req.session.user || req.session.user.role !== 'superadmin') return res.status(403).send('Negado');
+    try {
+        await pool.query("DELETE FROM articles WHERE id = $1", [req.params.id]);
+        res.redirect('/articles/manage');
+    } catch (err) { res.render('pages/error', { message: 'Erro ao excluir.' }); }
 });
 
 module.exports = router;

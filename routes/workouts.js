@@ -42,7 +42,7 @@ router.get('/create', async (req, res) => {
             selectedClientId: req.query.client_id || '', 
             csrfToken: res.locals.csrfToken,
             user: req.session.user,           // CRUCIAL para o Header
-            currentPage: 'admin-clients'      // CRUCIAL para o Sidebar (Manter "Meus Alunos" ativo)
+            currentPage: 'create-workout'      // CRUCIAL para o Sidebar (Manter "Meus Alunos" ativo)
         });
     } catch (err) {
         console.error(err);
@@ -110,7 +110,7 @@ router.get('/edit/:id', async (req, res) => {
             exercises: exercisesRes.rows,
             csrfToken: res.locals.csrfToken,
             user: req.session.user,           // CRUCIAL
-            currentPage: 'admin-clients'      // Mantém contexto
+            currentPage: 'create-workout'      // Mantém contexto
         });
     } catch (err) { res.status(500).render('pages/error', { message: 'Erro ao carregar edição.' }); }
 });
@@ -161,7 +161,7 @@ router.get('/:id', async (req, res) => {
             workout: workoutRes.rows[0],
             exercises: exercisesRes.rows,
             user: req.session.user,           // CRUCIAL
-            currentPage: 'admin-clients'
+            currentPage: 'create-workout'
         });
     } catch(e) { res.render('pages/error', { message: 'Erro detalhes.' }); }
 });
