@@ -23,7 +23,7 @@
                 <div class="chat-users">
                     <h3 style="padding: 1rem; border-bottom: 1px solid var(--c-border); margin: 0;">Conversas</h3>
                     <div class="users-list" style="overflow-y: auto; height: 100%;">
-                        <% if (chatUsers && chatUsers.length > 0) { %>
+                        <% if (typeof chatUsers !== 'undefined' && chatUsers.length > 0) { %>
                             <% chatUsers.forEach(chatUser => { %>
                                 <div class="user-item" data-user-id="<%= chatUser.id %>" data-user-name="<%= chatUser.name %>">
                                     <div class="user-avatar"><%= chatUser.name.charAt(0) %></div>
@@ -31,7 +31,7 @@
                                 </div>
                             <% }); %>
                         <% } else { %>
-                            <p style="padding: 1rem; text-align: center;">Nenhum contato disponível.</p>
+                            <p style="padding: 1rem; text-align: center; color: #666;">Nenhum contato disponível.</p>
                         <% } %>
                     </div>
                 </div>
@@ -74,7 +74,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const currentUserId = '<%= user.id %>';
     let activeContactId = null;
-    const csrfToken = '<%= csrfToken %>'; 
+    const csrfToken = '<%= typeof csrfToken !== "undefined" ? csrfToken : "" %>'; 
     const messagesContainer = document.getElementById('messagesContainer');
     const chatForm = document.getElementById('chatForm');
     const messageInput = document.getElementById('messageInput');
