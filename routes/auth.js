@@ -1,57 +1,96 @@
 const express = require('express');
-const bcrypt = require('bcryptjs');
 const router = express.Router();
+const bcrypt = require('bcrypt');
+const crypto = require('crypto');
 const { pool } = require('../database/db');
-const { body, validationResult } = require('express-validator');
-const notificationService = require('../utils/notificationService');
+const { sendPasswordResetEmail } = require('../utils/emailService');
 
-// Função auxiliar centralizada para redirecionamento
-const handleRedirect = (user, res) => {
-    if (user.role === 'client') {
-        return res.redirect('/client/dashboard');
-    }
-    if (user.role === 'superadmin') {
-        return res.redirect('/superadmin/dashboard');
-    }
-    if (user.role === 'trainer') {
-        if (user.status === 'active') {
-            return res.redirect('/admin/dashboard');
-        } else {
-            return res.redirect('/trainer/profile');
-        }
-    }
-    // Fallback
-    return res.redirect('/');
-};
-
+// --- Renderizar Login ---
 router.get('/login', (req, res) => {
-    if (req.session.user) return handleRedirect(req.session.user, res);
-    res.render('pages/login', { error: null, title: 'Login - Momentum Fit' });
+    res.render('pages/login', { 
+        title: 'Login - Momentum Fit', 
+        error: null,
+        csrfToken: res.locals.csrfToken 
+    });
 });
 
+// --- Renderizar Cadastro ---
 router.get('/register', (req, res) => {
-    if (req.session.user) return handleRedirect(req.session.user, res);
-    res.render('pages/register', { error: null, title: 'Cadastro - Momentum Fit' });
+    res.render('pages/register', { 
+        title: 'Cadastro - Momentum Fit', 
+        error: null,
+        csrfToken: res.locals.csrfToken
+    });
 });
 
-router.post('/login', [
-    body('email').isEmail().normalizeEmail(),
-    body('password').notEmpty()
-], async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) return res.render('pages/login', { error: 'Dados inválidos.', title: 'Login' });
+// --- Processar Cadastro ---
+router.post('/register', async (req, res) => {
+    const { name, email, password, confirmPassword, userType } = req.body;
 
-    const { email, password } = req.body;
-    
+    if (password !== confirmPassword) {
+        return res.render('pages/register', { title: 'Cadastro', error: 'Senhas não conferem', csrfToken: req.csrfToken() });
+    }
+
     try {
-        const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-        const user = result.rows[0];
+        // Verificar se usuário existe
+        const userExist = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+        if (userExist.rows.length > 0) {
+            return res.render('pages/register', { title: 'Cadastro', error: 'E-mail já cadastrado', csrfToken: req.csrfToken() });
+        }
 
-        if (!user || !await bcrypt.compare(password, user.password)) {
-            return res.render('pages/login', { error: 'Credenciais inválidas.', title: 'Login' });
+        // Hash da senha
+        const hashedPassword = await bcrypt.hash(password, 10);
+        
+        // Inserir usuário
+        const role = userType === 'trainer' ? 'trainer' : 'client';
+        const status = role === 'trainer' ? 'pending_approval' : 'active';
+        
+        const newUser = await pool.query(
+            'INSERT INTO users (name, email, password, role, status) VALUES ($1, $2, $3, $4, $5) RETURNING id, name, email, role, status',
+            [name, email, hashedPassword, role, status]
+        );
+
+        // Sessão automática
+        req.session.user = newUser.rows[0];
+        
+        // Redirecionamento baseado no role
+        if (role === 'trainer') {
+            res.redirect('/trainer/dashboard');
+        } else {
+            res.redirect('/client/initial-form');
+        }
+
+    } catch (err) {
+        console.error(err);
+        res.render('pages/register', { title: 'Cadastro', error: 'Erro no servidor', csrfToken: req.csrfToken() });
+    }
+});
+
+// --- Processar Login ---
+router.post('/login', async (req, res) => {
+    const { email, password } = req.body;
+
+    try {
+        const userRes = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+        
+        if (userRes.rows.length === 0) {
+            return res.render('pages/login', { title: 'Login', error: 'Credenciais inválidas', csrfToken: req.csrfToken() });
+        }
+
+        const user = userRes.rows[0];
+
+        // Verificar Senha
+        const validPassword = await bcrypt.compare(password, user.password);
+        if (!validPassword) {
+            return res.render('pages/login', { title: 'Login', error: 'Credenciais inválidas', csrfToken: req.csrfToken() });
+        }
+
+        // Verificar Status
+        if (user.status === 'rejected') {
+            return res.render('pages/login', { title: 'Login', error: 'Conta suspensa ou rejeitada.', csrfToken: req.csrfToken() });
         }
         
-        // Configura sessão
+        // Configurar Sessão
         req.session.user = {
             id: user.id,
             name: user.name,
@@ -60,66 +99,165 @@ router.post('/login', [
             status: user.status
         };
 
-        req.session.save(async (err) => {
-            if (err) return res.render('pages/login', { error: 'Erro de sessão.', title: 'Login' });
+        // Redirecionamento
+        if (user.role === 'admin' || user.role === 'superadmin') {
+            res.redirect('/superadmin/dashboard');
+        } else if (user.role === 'trainer') {
+            if (user.status === 'pending_approval') return res.redirect('/trainer/pending');
+            res.redirect('/trainer/dashboard');
+        } else {
+            // Verificar se o cliente preencheu o perfil
+            const profileRes = await pool.query('SELECT 1 FROM client_profiles WHERE user_id = $1', [user.id]);
+            if (profileRes.rows.length === 0) return res.redirect('/client/initial-form');
+            res.redirect('/client/dashboard');
+        }
 
-            // Verificação especial para clientes sem perfil
-            if (user.role === 'client') {
-                const profileCheck = await pool.query('SELECT 1 FROM client_profiles WHERE user_id = $1', [user.id]);
-                if (profileCheck.rows.length === 0) return res.redirect('/client/initial-form');
-            }
+    } catch (err) {
+        console.error(err);
+        res.render('pages/login', { title: 'Login', error: 'Erro interno', csrfToken: req.csrfToken() });
+    }
+});
 
-            return handleRedirect(user, res);
+// --- Logout ---
+router.get('/logout', (req, res) => {
+    req.session.destroy();
+    res.redirect('/auth/login');
+});
+
+// ==========================================
+// SISTEMA DE RECUPERAÇÃO DE SENHA
+// ==========================================
+
+// 1. Tela de Solicitação
+router.get('/forgot-password', (req, res) => {
+    res.render('pages/forgot-password', { 
+        title: 'Recuperar Senha', 
+        error: null, 
+        success: null, 
+        csrfToken: res.locals.csrfToken 
+    });
+});
+
+// 2. Processar Solicitação e Enviar Email
+router.post('/forgot-password', async (req, res) => {
+    const { email } = req.body;
+    try {
+        const userRes = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+        
+        // Por segurança, não informamos se o email existe ou não, apenas damos msg de sucesso
+        if (userRes.rows.length > 0) {
+            const user = userRes.rows[0];
+            
+            // Gerar Token (Hex 32 bytes)
+            const token = crypto.randomBytes(32).toString('hex');
+            // Validade de 1 hora
+            const expires = new Date(Date.now() + 3600000); 
+
+            // Salvar no Banco
+            await pool.query(
+                'UPDATE users SET reset_password_token = $1, reset_password_expires = $2 WHERE id = $3',
+                [token, expires, user.id]
+            );
+
+            // Enviar Email
+            // req.headers.host pega o domínio atual (localhost ou vercel)
+            await sendPasswordResetEmail(user.email, token, req.headers.host);
+        }
+
+        res.render('pages/forgot-password', { 
+            title: 'Recuperar Senha', 
+            error: null, 
+            success: 'Se o e-mail estiver cadastrado, você receberá um link de recuperação em instantes.',
+            csrfToken: req.csrfToken()
         });
 
     } catch (err) {
         console.error(err);
-        res.render('pages/login', { error: 'Erro interno.', title: 'Login' });
+        res.render('pages/forgot-password', { title: 'Erro', error: 'Erro ao processar solicitação.', success: null, csrfToken: req.csrfToken() });
     }
 });
 
-router.post('/register', [
-    body('name').notEmpty().trim(),
-    body('email').isEmail(),
-    body('password').isLength({ min: 6 }),
-    body('userType').isIn(['client', 'trainer'])
-], async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) return res.render('pages/register', { error: errors.array()[0].msg, title: 'Cadastro' });
-
-    const { name, email, password, userType } = req.body;
-    
+// 3. Tela de Redefinição (Link do Email)
+router.get('/reset-password/:token', async (req, res) => {
+    const { token } = req.params;
     try {
-        const hashedPassword = await bcrypt.hash(password, 12);
-        const role = userType === 'trainer' ? 'trainer' : 'client';
-        const status = role === 'trainer' ? 'pending' : 'active';
-        
-        const result = await pool.query(
-            'INSERT INTO users (name, email, password, role, status) VALUES ($1, $2, $3, $4, $5) RETURNING id', 
-            [name, email, hashedPassword, role, status]
+        // Verificar se token existe e não expirou
+        const userRes = await pool.query(
+            'SELECT * FROM users WHERE reset_password_token = $1 AND reset_password_expires > NOW()',
+            [token]
         );
-        const userId = result.rows[0].id;
 
-        // Notificações
-        if (role === 'client') notificationService.notifyNewClient(name, userId).catch(console.error);
-        if (role === 'trainer') notificationService.notifyNewTrainer(name).catch(console.error);
+        if (userRes.rows.length === 0) {
+            return res.render('pages/forgot-password', { 
+                title: 'Erro', 
+                error: 'O link de recuperação é inválido ou expirou.', 
+                success: null, 
+                csrfToken: res.locals.csrfToken 
+            });
+        }
 
-        // Login automático
-        req.session.user = { id: userId, name, email, role, status };
-        
-        req.session.save(() => {
-            if (role === 'client') return res.redirect('/client/initial-form');
-            return res.redirect('/trainer/profile');
+        res.render('pages/reset-password', { 
+            title: 'Nova Senha', 
+            token: token, 
+            error: null, 
+            csrfToken: res.locals.csrfToken 
         });
 
     } catch (err) {
-        if (err.code === '23505') return res.render('pages/register', { error: 'E-mail já cadastrado.', title: 'Cadastro' });
-        res.render('pages/register', { error: 'Erro no servidor.', title: 'Cadastro' });
+        console.error(err);
+        res.redirect('/auth/forgot-password');
     }
 });
 
-router.post('/logout', (req, res) => {
-    req.session.destroy(() => res.redirect('/'));
+// 4. Processar Nova Senha
+router.post('/reset-password/:token', async (req, res) => {
+    const { token } = req.params;
+    const { password, confirmPassword } = req.body;
+
+    if (password !== confirmPassword) {
+        return res.render('pages/reset-password', { 
+            title: 'Nova Senha', 
+            token, 
+            error: 'As senhas não conferem.', 
+            csrfToken: req.csrfToken() 
+        });
+    }
+
+    try {
+        const userRes = await pool.query(
+            'SELECT * FROM users WHERE reset_password_token = $1 AND reset_password_expires > NOW()',
+            [token]
+        );
+
+        if (userRes.rows.length === 0) {
+            return res.render('pages/forgot-password', { 
+                title: 'Erro', 
+                error: 'Token inválido ou expirado.', 
+                success: null,
+                csrfToken: req.csrfToken()
+            });
+        }
+
+        const user = userRes.rows[0];
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Atualizar senha e limpar tokens
+        await pool.query(
+            'UPDATE users SET password = $1, reset_password_token = NULL, reset_password_expires = NULL WHERE id = $2',
+            [hashedPassword, user.id]
+        );
+
+        res.render('pages/login', { 
+            title: 'Login', 
+            error: null, 
+            success: 'Senha alterada com sucesso! Faça login.', // Opcional: passar msg de sucesso pro login
+            csrfToken: req.csrfToken() 
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.render('pages/reset-password', { title: 'Erro', token, error: 'Erro ao redefinir senha.', csrfToken: req.csrfToken() });
+    }
 });
 
 module.exports = router;
