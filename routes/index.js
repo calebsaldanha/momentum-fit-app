@@ -1,10 +1,8 @@
 const express = require('express');
 const router = express.Router();
 
-// Rota da Página Inicial (Landing Page)
 router.get('/', (req, res) => {
-    // Renderiza a página inicial passando o usuário (se existir) para o header se adaptar
-    // Não força mais o redirecionamento
+    // Renderiza a home passando o usuário para o header se adaptar (mostrar "Painel" em vez de "Entrar")
     res.render('pages/index', {
         title: 'Início - Momentum Fit',
         user: req.session.user || null

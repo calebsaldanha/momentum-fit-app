@@ -10,7 +10,6 @@ const requireClientAuth = (req, res, next) => {
 
 router.use(requireClientAuth);
 
-// Dashboard
 router.get('/dashboard', async (req, res) => {
     try {
         const userId = req.session.user.id;
@@ -19,8 +18,8 @@ router.get('/dashboard', async (req, res) => {
         if (profileRes.rows.length === 0) return res.redirect('/client/initial-form');
 
         const profile = profileRes.rows[0];
-
-        // Cálculo do IMC
+        
+        // Cálculo IMC
         let imc = 0;
         if (profile.weight && profile.height) {
             imc = (parseFloat(profile.weight) / (parseFloat(profile.height) * parseFloat(profile.height))).toFixed(1);
@@ -31,40 +30,29 @@ router.get('/dashboard', async (req, res) => {
             [userId]
         );
 
-        const checkinsRes = await pool.query(
-            "SELECT created_at::date as date, COUNT(*) as count FROM workout_checkins WHERE client_id = $1 GROUP BY date ORDER BY date ASC LIMIT 7",
-            [userId]
-        );
-
         res.render('pages/client-dashboard', {
             title: 'Painel Geral',
             workouts: workoutsRes.rows || [],
-            checkins: checkinsRes.rows || [],
+            checkins: [],
             profile: profile,
             imc: imc,
             user: req.session.user,
             currentPage: 'dashboard'
         });
-    } catch (err) { 
-        console.error(err);
-        res.status(500).render('pages/error', { message: 'Erro ao carregar dashboard.' }); 
-    }
+    } catch (err) { res.status(500).render('pages/error', { message: 'Erro ao carregar dashboard.' }); }
 });
 
-// Form Inicial (Exibir)
 router.get('/initial-form', async (req, res) => {
     try {
         const check = await pool.query("SELECT 1 FROM client_profiles WHERE user_id = $1", [req.session.user.id]);
-        if (check.rows.length > 0) return res.redirect('/client/profile'); 
+        if (check.rows.length > 0) return res.redirect('/client/profile');
         res.render('pages/initial-form', { title: 'Avaliação Inicial', user: req.session.user });
-    } catch (err) {
-        res.status(500).render('pages/error', { message: 'Erro ao verificar perfil.' });
-    }
+    } catch (err) { res.status(500).render('pages/error', { message: 'Erro ao verificar.' }); }
 });
 
-// Form Inicial (Processar - Salva TUDO e Notifica)
 router.post('/initial-form', async (req, res) => {
     const userId = req.session.user.id;
+    // Captura campos completos
     const { 
         age, phone, gender_identity, sex_assigned_at_birth, 
         weight, height, fitness_level, 
@@ -99,10 +87,7 @@ router.post('/initial-form', async (req, res) => {
                 $29, $30,
                 NOW(), NOW()
             )
-            ON CONFLICT (user_id) DO UPDATE SET
-                age=EXCLUDED.age, phone=EXCLUDED.phone, weight=EXCLUDED.weight, height=EXCLUDED.height,
-                updated_at=NOW()
-        `;
+            ON CONFLICT (user_id) DO UPDATE SET updated_at = NOW()`;
 
         const values = [
             userId, parseInt(age)||0, phone||'', gender_identity||'', sex_assigned_at_birth||'',
@@ -117,60 +102,48 @@ router.post('/initial-form', async (req, res) => {
 
         await pool.query(query, values);
 
-        // Dispara notificação para ADMIN
+        // Dispara notificação para ADMIN (Superadmin e Treinadores)
         await notificationService.notifyNewClient(req.session.user.name, userId);
 
         res.redirect('/client/dashboard');
     } catch (err) {
-        console.error("Erro form inicial:", err);
+        console.error("Erro form:", err);
         res.status(500).render('pages/error', { message: 'Erro ao salvar perfil.' });
     }
 });
 
-// Perfil (Visualizar)
 router.get('/profile', async (req, res) => {
     try {
         const result = await pool.query("SELECT u.name, u.email, cp.* FROM users u JOIN client_profiles cp ON u.id = cp.user_id WHERE u.id = $1", [req.session.user.id]);
         const profile = result.rows[0] || {};
-
+        
         let imc = 0;
         if (profile.weight && profile.height) {
             imc = (parseFloat(profile.weight) / (parseFloat(profile.height) * parseFloat(profile.height))).toFixed(1);
         }
 
         res.render('pages/client-profile', { 
-            title: 'Meu Perfil', 
-            profile: profile, 
-            imc: imc,
-            user: req.session.user,
-            success: req.query.success ? 'Perfil atualizado!' : null
+            title: 'Meu Perfil', profile, imc, user: req.session.user, success: req.query.success 
         });
     } catch (err) { res.status(500).render('pages/error', { message: 'Erro perfil.' }); }
 });
 
 router.post('/profile', async (req, res) => {
-    // Permite edição básica
-    const { name, age, weight, height, fitness_level, main_goal } = req.body;
+    const { name, age, weight, height, phone } = req.body;
     try {
         await pool.query("UPDATE users SET name = $1 WHERE id = $2", [name, req.session.user.id]);
-        await pool.query(
-            "UPDATE client_profiles SET age=$1, weight=$2, height=$3, fitness_level=$4, main_goal=$5, updated_at=NOW() WHERE user_id=$6", 
-            [age, weight, height, fitness_level, main_goal, req.session.user.id]
-        );
+        await pool.query("UPDATE client_profiles SET age=$1, weight=$2, height=$3, phone=$4, updated_at=NOW() WHERE user_id=$5", 
+            [age, weight, height, phone, req.session.user.id]);
         req.session.user.name = name;
-        res.redirect('/client/profile?success=true');
-    } catch (err) { res.status(500).render('pages/error', { message: 'Erro update.' }); }
+        res.redirect('/client/profile?success=Perfil Atualizado');
+    } catch (err) { res.status(500).render('pages/error', { message: 'Erro atualização.' }); }
 });
 
 router.get('/workouts', async (req, res) => {
     try {
-        const query = `
-            SELECT w.*, u.name as trainer_name
-            FROM workouts w LEFT JOIN users u ON w.trainer_id = u.id 
-            WHERE w.client_id = $1 ORDER BY w.created_at DESC`;
-        const workoutsRes = await pool.query(query, [req.session.user.id]);
+        const workoutsRes = await pool.query("SELECT w.*, u.name as trainer_name FROM workouts w LEFT JOIN users u ON w.trainer_id = u.id WHERE w.client_id = $1 ORDER BY w.created_at DESC", [req.session.user.id]);
         res.render('pages/client-workouts', { title: 'Meus Treinos', workouts: workoutsRes.rows, user: req.session.user });
-    } catch(e) { res.render('pages/error', { message: 'Erro workouts.' }); }
+    } catch(e) { res.render('pages/error', { message: 'Erro treinos.' }); }
 });
 
 module.exports = router;
