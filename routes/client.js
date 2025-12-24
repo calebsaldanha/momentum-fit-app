@@ -10,6 +10,22 @@ const requireClientAuth = (req, res, next) => {
 
 router.use(requireClientAuth);
 
+// Função Auxiliar para IMC Robusto
+function calculateIMC(weight, height) {
+    if (!weight || !height) return '--';
+    
+    // Converte vírgula para ponto e garante número
+    let w = parseFloat(String(weight).replace(',', '.'));
+    let h = parseFloat(String(height).replace(',', '.'));
+
+    if (isNaN(w) || isNaN(h) || w <= 0 || h <= 0) return '--';
+
+    // Correção automática: Se altura > 3, assume que é cm (ex: 175) e converte para metros (1.75)
+    if (h > 3) h = h / 100;
+
+    return (w / (h * h)).toFixed(1);
+}
+
 // Dashboard
 router.get('/dashboard', async (req, res) => {
     try {
@@ -18,22 +34,12 @@ router.get('/dashboard', async (req, res) => {
         
         if (profileRes.rows.length === 0) return res.redirect('/client/initial-form');
 
-        // Se pendente, manda pro perfil
         if (req.session.user.status === 'pending_approval') {
             return res.redirect('/client/profile');
         }
 
         const profile = profileRes.rows[0];
-        
-        // CÁLCULO IMC ROBUSTO
-        let imc = '--';
-        const w = parseFloat(profile.weight);
-        const h = parseFloat(profile.height);
-        
-        if (w > 0 && h > 0) {
-            // Garante 1 casa decimal
-            imc = (w / (h * h)).toFixed(1);
-        }
+        const imc = calculateIMC(profile.weight, profile.height);
 
         const workoutsRes = await pool.query(
             "SELECT w.*, u.name as trainer_name FROM workouts w LEFT JOIN users u ON w.trainer_id = u.id WHERE w.client_id = $1 ORDER BY w.created_at DESC LIMIT 5",
@@ -85,6 +91,9 @@ router.post('/initial-form', async (req, res) => {
     } = req.body;
 
     try {
+        // Sanitização de números (vírgula -> ponto)
+        const cleanFloat = (val) => parseFloat(String(val).replace(',', '.')) || 0;
+
         const query = `
             INSERT INTO client_profiles (
                 user_id, age, phone, gender_identity, sex_assigned_at_birth,
@@ -111,12 +120,12 @@ router.post('/initial-form', async (req, res) => {
 
         const values = [
             userId, parseInt(age)||0, phone||'', gender_identity||'', sex_assigned_at_birth||'',
-            parseFloat(weight)||0, parseFloat(height)||0, fitness_level||'beginner',
+            cleanFloat(weight), cleanFloat(height), fitness_level||'beginner',
             main_goal||'', secondary_goals||'', specific_event||'',
             medical_conditions||'', medications||'', surgeries||'', allergies||'', injuries||'',
             parseInt(training_days)||3, equipment||'', workout_preference||'', availability||'', challenges||'',
             diet_description||'', sleep_hours||'',
-            parseFloat(measure_waist)||0, parseFloat(measure_hip)||0, parseFloat(measure_arm)||0, parseFloat(measure_leg)||0, parseFloat(body_fat)||0,
+            cleanFloat(measure_waist), cleanFloat(measure_hip), cleanFloat(measure_arm), cleanFloat(measure_leg), cleanFloat(body_fat),
             hormonal_treatment === 'true', hormonal_details || ''
         ];
 
@@ -129,7 +138,7 @@ router.post('/initial-form', async (req, res) => {
         res.render('pages/initial-form', { 
             title: 'Avaliação Inicial', 
             user: req.session.user, 
-            error: 'Erro ao salvar dados.', 
+            error: 'Erro ao salvar. Verifique os dados.', 
             profile: req.body, 
             csrfToken: req.csrfToken() 
         });
@@ -142,14 +151,7 @@ router.get('/profile', async (req, res) => {
         const result = await pool.query("SELECT u.name, u.email, cp.* FROM users u JOIN client_profiles cp ON u.id = cp.user_id WHERE u.id = $1", [req.session.user.id]);
         const profile = result.rows[0] || {};
         
-        // CÁLCULO IMC ROBUSTO
-        let imc = '--';
-        const w = parseFloat(profile.weight);
-        const h = parseFloat(profile.height);
-        
-        if (w > 0 && h > 0) {
-            imc = (w / (h * h)).toFixed(1);
-        }
+        const imc = calculateIMC(profile.weight, profile.height);
 
         res.render('pages/client-profile', { 
             title: 'Meu Perfil', 
@@ -162,7 +164,7 @@ router.get('/profile', async (req, res) => {
     } catch (err) { res.status(500).render('pages/error', { message: 'Erro perfil.' }); }
 });
 
-// Perfil (Atualizar)
+// Perfil (Atualizar Completo)
 router.post('/profile', async (req, res) => {
     const userId = req.session.user.id;
     const { 
@@ -172,6 +174,8 @@ router.post('/profile', async (req, res) => {
     } = req.body;
 
     try {
+        const cleanFloat = (val) => parseFloat(String(val).replace(',', '.')) || 0;
+
         await pool.query("UPDATE users SET name = $1 WHERE id = $2", [name, userId]);
         
         const query = `
@@ -184,7 +188,7 @@ router.post('/profile', async (req, res) => {
         `;
         
         const values = [
-            phone, parseFloat(weight)||0, parseFloat(height)||0, parseInt(age)||0, fitness_level,
+            phone, cleanFloat(weight), cleanFloat(height), parseInt(age)||0, fitness_level,
             main_goal, secondary_goals, medical_conditions, medications,
             injuries, allergies, sleep_hours, diet_description,
             userId
