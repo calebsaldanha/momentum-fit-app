@@ -10,7 +10,7 @@
             
             <% if (!clients || clients.length === 0) { %>
                 <div class="alert alert-warning">
-                    Você não tem alunos ativos atribuídos. <a href="/admin/dashboard">Voltar</a>
+                    Você não tem alunos ativos. <a href="/admin/dashboard">Voltar</a>
                 </div>
             <% } else { %>
                 <form id="createWorkoutForm" class="dashboard-form" style="max-width: 800px;">
@@ -23,23 +23,18 @@
                             <% }); %>
                         </select>
                     </div>
-                    
                     <div class="form-group">
                         <label for="title">Título do Treino *</label>
-                        <input type="text" id="title" name="title" required placeholder="Ex: Hipertrofia A - Peito e Tríceps">
+                        <input type="text" id="title" name="title" required placeholder="Ex: Hipertrofia A">
                     </div>
-                    
                     <div class="form-group">
-                        <label for="description">Descrição / Foco (Opcional)</label>
-                        <textarea id="description" name="description" rows="2" placeholder="Instruções gerais para este treino..."></textarea>
+                        <label for="description">Descrição</label>
+                        <textarea id="description" name="description" rows="2"></textarea>
                     </div>
 
                     <h3 style="margin: 2rem 0 1rem; color: var(--c-text-primary);">Exercícios</h3>
                     <div id="exercisesContainer"></div>
-                    
-                    <button type="button" class="btn btn-outline" id="addExerciseBtn" style="width: 100%; border-style: dashed; margin-top: 1rem;">
-                        + Adicionar Exercício
-                    </button>
+                    <button type="button" class="btn btn-outline" id="addExerciseBtn" style="width: 100%; border-style: dashed; margin-top: 1rem;">+ Adicionar Exercício</button>
                     
                     <div class="form-actions" style="margin-top: 2rem; display: flex; justify-content: flex-end;">
                         <button type="submit" class="btn btn-primary">Salvar Treino</button>
@@ -49,81 +44,51 @@
         </div>
     </main>
 </div>
-
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const container = document.getElementById('exercisesContainer');
     const addBtn = document.getElementById('addExerciseBtn');
-    
     if (!container || !addBtn) return;
 
     function addExercise() {
         const count = container.children.length + 1;
-        const exerciseHTML = `
-            <div class="exercise-item" style="background: var(--c-bg-card); border: 1px solid var(--c-border); padding: 1.5rem; border-radius: var(--radius); margin-bottom: 1.5rem; position: relative;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        const html = `
+            <div class="exercise-item" style="background: var(--c-bg-card); border: 1px solid var(--c-border); padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
                     <h4 style="color: var(--c-accent-primary); margin: 0;">Exercício ${count}</h4>
                     <button type="button" class="btn btn-sm btn-outline remove-exercise" style="color: var(--c-error); border-color: var(--c-error);">Remover</button>
                 </div>
-                
-                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                    <div class="form-group">
-                        <label>Nome do Exercício *</label>
-                        <input type="text" class="exercise-name" required placeholder="Ex: Supino Reto">
-                    </div>
-                    <div class="form-group">
-                        <label>Séries x Repetições *</label>
-                        <input type="text" class="exercise-sets" required placeholder="Ex: 4x12">
-                    </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group"><label>Nome *</label><input type="text" class="exercise-name" required></div>
+                    <div class="form-group"><label>Séries x Reps *</label><input type="text" class="exercise-sets" required></div>
                 </div>
-                
-                <div class="form-group">
-                    <label>Observações</label>
-                    <textarea class="exercise-description" rows="1"></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Link de Vídeo (Opcional)</label>
-                    <input type="text" class="exercise-video" placeholder="Youtube/Vimeo URL">
-                </div>
-            </div>
-        `;
-        container.insertAdjacentHTML('beforeend', exerciseHTML);
+                <div class="form-group"><label>Obs</label><textarea class="exercise-description" rows="1"></textarea></div>
+                <div class="form-group"><label>Vídeo URL</label><input type="text" class="exercise-video"></div>
+            </div>`;
+        container.insertAdjacentHTML('beforeend', html);
     }
-
     addBtn.addEventListener('click', addExercise);
-    addExercise(); // Adiciona o primeiro
+    addExercise();
 
     container.addEventListener('click', (e) => {
         if (e.target.classList.contains('remove-exercise')) {
             e.target.closest('.exercise-item').remove();
-            document.querySelectorAll('.exercise-item h4').forEach((h4, index) => {
-                h4.textContent = 'Exercício ' + (index + 1);
-            });
         }
     });
 
     document.getElementById('createWorkoutForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        
         const exercises = [];
         document.querySelectorAll('.exercise-item').forEach(item => {
-            const name = item.querySelector('.exercise-name').value;
-            const sets = item.querySelector('.exercise-sets').value;
-            if (name && sets) {
-                exercises.push({
-                    name,
-                    sets,
-                    reps: sets, // Simplificação se o campo for unificado
-                    description: item.querySelector('.exercise-description').value,
-                    video_url: item.querySelector('.exercise-video').value
-                });
-            }
+            exercises.push({
+                name: item.querySelector('.exercise-name').value,
+                sets: item.querySelector('.exercise-sets').value,
+                description: item.querySelector('.exercise-description').value,
+                video_url: item.querySelector('.exercise-video').value
+            });
         });
 
-        if (exercises.length === 0) {
-            alert('Adicione pelo menos um exercício.');
-            return;
-        }
+        if (exercises.length === 0) return alert('Adicione exercícios.');
 
         const formData = {
             client_id: document.getElementById('client_id').value,
@@ -133,26 +98,15 @@ document.addEventListener('DOMContentLoaded', function() {
         };
 
         try {
-            const response = await fetch('/workouts/create', {
+            const res = await fetch('/workouts/create', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'CSRF-Token': '<%= csrfToken %>'
-                },
+                headers: { 'Content-Type': 'application/json', 'CSRF-Token': '<%= csrfToken %>' },
                 body: JSON.stringify(formData)
             });
-
-            const result = await response.json();
-            
-            if (result.success) {
-                window.location.href = '/admin/clients/' + result.clientId;
-            } else {
-                alert('Erro: ' + result.message);
-            }
-        } catch (err) {
-            console.error(err);
-            alert('Ocorreu um erro ao salvar o treino.');
-        }
+            const json = await res.json();
+            if (json.success) window.location.href = '/admin/clients/' + json.clientId;
+            else alert('Erro: ' + json.message);
+        } catch (err) { alert('Erro na requisição.'); }
     });
 });
 </script>

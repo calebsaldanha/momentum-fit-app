@@ -40,7 +40,9 @@ router.get('/create', async (req, res) => {
             title: 'Novo Treino', 
             clients: clients.rows, 
             selectedClientId: req.query.client_id || '', 
-            csrfToken: res.locals.csrfToken 
+            csrfToken: res.locals.csrfToken,
+            user: req.session.user,           // CRUCIAL para o Header
+            currentPage: 'admin-clients'      // CRUCIAL para o Sidebar (Manter "Meus Alunos" ativo)
         });
     } catch (err) {
         console.error(err);
@@ -57,7 +59,6 @@ router.post('/create', async (req, res) => {
     }
 
     const client = await pool.connect();
-    
     try {
         await client.query('BEGIN');
 
@@ -68,7 +69,7 @@ router.post('/create', async (req, res) => {
         );
         const workoutId = workoutRes.rows[0].id;
 
-        // 2. Inserir Exercícios (Tabela Normalizada)
+        // 2. Inserir Exercícios
         for (let i = 0; i < exercises.length; i++) {
             const ex = exercises[i];
             await client.query(
@@ -78,8 +79,6 @@ router.post('/create', async (req, res) => {
         }
 
         await client.query('COMMIT');
-
-        // 3. Notificar o Cliente
         await notificationService.notifyNewWorkout(title, client_id, workoutId);
 
         res.json({ success: true, clientId: client_id });
@@ -99,19 +98,19 @@ router.get('/edit/:id', async (req, res) => {
         const workoutRes = await pool.query("SELECT * FROM workouts WHERE id = $1", [req.params.id]);
         if (workoutRes.rows.length === 0) return res.status(404).render('pages/error', { message: 'Treino não encontrado.' });
         
-        // Permissão: Apenas dono ou superadmin
         if (req.session.user.role !== 'superadmin' && workoutRes.rows[0].trainer_id !== req.session.user.id) {
             return res.status(403).render('pages/error', { message: 'Você não pode editar este treino.' });
         }
 
-        // Buscar exercícios
         const exercisesRes = await pool.query("SELECT * FROM workout_exercises WHERE workout_id = $1 ORDER BY order_index", [req.params.id]);
 
         res.render('pages/edit-workout', {
             title: 'Editar Treino',
             workout: workoutRes.rows[0],
             exercises: exercisesRes.rows,
-            csrfToken: res.locals.csrfToken
+            csrfToken: res.locals.csrfToken,
+            user: req.session.user,           // CRUCIAL
+            currentPage: 'admin-clients'      // Mantém contexto
         });
     } catch (err) { res.status(500).render('pages/error', { message: 'Erro ao carregar edição.' }); }
 });
@@ -124,11 +123,7 @@ router.post('/edit/:id', async (req, res) => {
 
     try {
         await client.query('BEGIN');
-        
-        // Atualiza cabeçalho
         await client.query("UPDATE workouts SET title = $1, description = $2, updated_at = NOW() WHERE id = $3", [title, description, workoutId]);
-        
-        // Substitui exercícios (limpa e recria)
         await client.query("DELETE FROM workout_exercises WHERE workout_id = $1", [workoutId]);
         
         if (exercises && exercises.length > 0) {
@@ -140,7 +135,6 @@ router.post('/edit/:id', async (req, res) => {
                 );
             }
         }
-
         await client.query('COMMIT');
         
         const wRes = await client.query("SELECT client_id FROM workouts WHERE id = $1", [workoutId]);
@@ -154,11 +148,29 @@ router.post('/edit/:id', async (req, res) => {
     }
 });
 
-// Deletar Treino
+// Detalhes do Treino (View)
+router.get('/:id', async (req, res) => {
+    try {
+        const workoutRes = await pool.query("SELECT * FROM workouts WHERE id = $1", [req.params.id]);
+        if (workoutRes.rows.length === 0) return res.status(404).render('pages/error', { message: 'Não encontrado.' });
+        
+        const exercisesRes = await pool.query("SELECT * FROM workout_exercises WHERE workout_id = $1 ORDER BY order_index", [req.params.id]);
+        
+        res.render('pages/workout-details', {
+            title: workoutRes.rows[0].title,
+            workout: workoutRes.rows[0],
+            exercises: exercisesRes.rows,
+            user: req.session.user,           // CRUCIAL
+            currentPage: 'admin-clients'
+        });
+    } catch(e) { res.render('pages/error', { message: 'Erro detalhes.' }); }
+});
+
 router.post('/delete/:id', async (req, res) => {
     try {
         const workout = await pool.query("SELECT client_id FROM workouts WHERE id = $1", [req.params.id]);
         if (workout.rows.length > 0) {
+            await pool.query("DELETE FROM workout_exercises WHERE workout_id = $1", [req.params.id]);
             await pool.query("DELETE FROM workouts WHERE id = $1", [req.params.id]);
             res.redirect('/admin/clients/' + workout.rows[0].client_id);
         } else {

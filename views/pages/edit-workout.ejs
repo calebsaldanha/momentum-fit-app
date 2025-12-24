@@ -1,101 +1,101 @@
 <%- include('../partials/header.ejs', { title, bodyClass: 'dashboard-body' }) %>
 <div class="dashboard-container">
-    <aside class="dashboard-sidebar">
-        <nav class="sidebar-nav">
-            <a href="/admin/dashboard" class="nav-item">Dashboard</a>
-            <a href="/admin/clients" class="nav-item">Clientes</a>
-            <a href="/chat" class="nav-item">Chat</a>
-        </nav>
-    </aside>
+    <%- include('../partials/admin-sidebar.ejs') %>
     <main class="dashboard-main">
         <div class="section">
-            <div class="section-header">
-                <h1>Editar Treino</h1>
-                <p>Editando treino de: <strong><%= workout.client_name %></strong></p>
-            </div>
+            <div class="section-header"><h1>Editar Treino</h1></div>
             
             <form id="editWorkoutForm" class="dashboard-form" style="max-width: 800px;">
-                <input type="hidden" id="client_id" value="<%= workout.client_id %>">
-                
                 <div class="form-group">
-                    <label for="title">Título do Treino *</label>
-                    <input type="text" id="title" name="title" required value="<%= workout.title %>">
+                    <label>Título</label>
+                    <input type="text" id="title" value="<%= workout.title %>" required>
                 </div>
-                
                 <div class="form-group">
-                    <label for="description">Descrição</label>
-                    <textarea id="description" name="description" rows="3"><%= workout.description %></textarea>
+                    <label>Descrição</label>
+                    <textarea id="description" rows="2"><%= workout.description %></textarea>
                 </div>
-                
+
                 <h3 style="margin: 2rem 0 1rem;">Exercícios</h3>
-                <div id="exercisesContainer"></div>
+                <div id="exercisesContainer">
+                    <% exercises.forEach((ex, index) => { %>
+                        <div class="exercise-item" style="background: var(--c-bg-card); border: 1px solid var(--c-border); padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                                <h4 style="color: var(--c-accent-primary); margin: 0;">Exercício <%= index + 1 %></h4>
+                                <button type="button" class="btn btn-sm btn-outline remove-exercise" style="color: var(--c-error); border-color: var(--c-error);">Remover</button>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                <div class="form-group"><label>Nome</label><input type="text" class="exercise-name" value="<%= ex.name %>" required></div>
+                                <div class="form-group"><label>Séries x Reps</label><input type="text" class="exercise-sets" value="<%= ex.sets %>" required></div>
+                            </div>
+                            <div class="form-group"><label>Obs</label><textarea class="exercise-description" rows="1"><%= ex.notes %></textarea></div>
+                            <div class="form-group"><label>Vídeo URL</label><input type="text" class="exercise-video" value="<%= ex.video_url %>"></div>
+                        </div>
+                    <% }) %>
+                </div>
+                <button type="button" class="btn btn-outline" id="addExerciseBtn" style="width: 100%; border-style: dashed;">+ Adicionar Exercício</button>
                 
-                <button type="button" class="btn btn-outline" id="addExerciseBtn" style="margin-top: 1rem; width: 100%; border-style: dashed;">+ Adicionar Exercício</button>
-                
-                <div class="form-actions" style="margin-top: 2rem; display: flex; justify-content: flex-end; gap: 1rem;">
-                    <a href="/admin/clients/<%= workout.client_id %>" class="btn btn-secondary">Voltar</a>
+                <div class="form-actions" style="margin-top: 2rem; display: flex; justify-content: flex-end;">
                     <button type="submit" class="btn btn-primary">Salvar Alterações</button>
                 </div>
             </form>
         </div>
     </main>
 </div>
-
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const container = document.getElementById('exercisesContainer');
-    const existingExercises = <%- JSON.stringify(workout.exercises || []) %>;
+    // Mesma lógica de JS do create, adaptada se necessário
+    document.addEventListener('DOMContentLoaded', function() {
+        const container = document.getElementById('exercisesContainer');
+        const addBtn = document.getElementById('addExerciseBtn');
+        
+        function addExercise() {
+            const count = container.children.length + 1;
+            const html = `
+                <div class="exercise-item" style="background: var(--c-bg-card); border: 1px solid var(--c-border); padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                        <h4 style="color: var(--c-accent-primary); margin: 0;">Exercício ${count}</h4>
+                        <button type="button" class="btn btn-sm btn-outline remove-exercise" style="color: var(--c-error); border-color: var(--c-error);">Remover</button>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group"><label>Nome *</label><input type="text" class="exercise-name" required></div>
+                        <div class="form-group"><label>Séries x Reps *</label><input type="text" class="exercise-sets" required></div>
+                    </div>
+                    <div class="form-group"><label>Obs</label><textarea class="exercise-description" rows="1"></textarea></div>
+                    <div class="form-group"><label>Vídeo URL</label><input type="text" class="exercise-video"></div>
+                </div>`;
+            container.insertAdjacentHTML('beforeend', html);
+        }
+        addBtn.addEventListener('click', addExercise);
+        container.addEventListener('click', (e) => { if(e.target.classList.contains('remove-exercise')) e.target.closest('.exercise-item').remove(); });
 
-    function addExercise(data = {}) {
-        const count = container.children.length + 1;
-        const exerciseHTML = `
-            <div class="exercise-item" style="border: 1px solid var(--c-border); background: var(--c-bg-card); border-radius: var(--radius); padding: 1.5rem; margin-top: 1.5rem; position: relative;">
-                <h4 style="margin-bottom: 1rem; color: var(--c-accent-primary);">Exercício ${count}</h4>
-                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                    <div class="form-group"><label>Nome *</label><input type="text" class="exercise-name" required value="${data.name || ''}"></div>
-                    <div class="form-group"><label>Séries x Reps *</label><input type="text" class="exercise-sets" required value="${data.sets || ''}"></div>
-                </div>
-                <div class="form-group"><label>Obs</label><textarea class="exercise-description" rows="2">${data.description || data.notes || ''}</textarea></div>
-                <button type="button" class="btn btn-secondary btn-sm remove-exercise" style="border-color: var(--c-error); color: var(--c-error);">Remover</button>
-            </div>`;
-        container.insertAdjacentHTML('beforeend', exerciseHTML);
-    }
-
-    if (existingExercises.length > 0) existingExercises.forEach(ex => addExercise(ex));
-    else addExercise();
-    
-    document.getElementById('addExerciseBtn').addEventListener('click', () => addExercise());
-    container.addEventListener('click', (e) => { if (e.target.classList.contains('remove-exercise')) e.target.closest('.exercise-item').remove(); });
-    
-    document.getElementById('editWorkoutForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const exercises = [];
-        document.querySelectorAll('.exercise-item').forEach(item => {
-            const name = item.querySelector('.exercise-name').value;
-            const sets = item.querySelector('.exercise-sets').value;
-            if (name && sets) exercises.push({ name, sets, description: item.querySelector('.exercise-description').value });
-        });
-
-        const formData = { 
-            client_id: document.getElementById('client_id').value,
-            title: document.getElementById('title').value, 
-            description: document.getElementById('description').value, 
-            exercises 
-        };
-
-        try {
-            const response = await fetch('/workouts/edit/<%= workout.id %>', { 
-                method: 'POST', 
-                headers: { 'Content-Type': 'application/json', 'CSRF-Token': '<%= csrfToken %>' }, 
-                body: JSON.stringify(formData) 
+        document.getElementById('editWorkoutForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const exercises = [];
+            document.querySelectorAll('.exercise-item').forEach(item => {
+                exercises.push({
+                    name: item.querySelector('.exercise-name').value,
+                    sets: item.querySelector('.exercise-sets').value,
+                    description: item.querySelector('.exercise-description').value,
+                    video_url: item.querySelector('.exercise-video').value
+                });
             });
-            const result = await response.json();
-            if (result.success) { 
-                alert('Sucesso!');
-                window.location.href = '/admin/clients/' + result.clientId; 
-            } else throw new Error(result.message);
-        } catch (err) { alert('Erro: ' + err.message); }
+
+            const formData = {
+                title: document.getElementById('title').value,
+                description: document.getElementById('description').value,
+                exercises: exercises
+            };
+
+            try {
+                const res = await fetch(window.location.pathname, { // POST para a mesma URL
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'CSRF-Token': '<%= csrfToken %>' },
+                    body: JSON.stringify(formData)
+                });
+                const json = await res.json();
+                if (json.success) window.location.href = '/admin/clients/' + json.clientId;
+                else alert('Erro: ' + json.message);
+            } catch (err) { alert('Erro.'); }
+        });
     });
-});
 </script>
 <%- include('../partials/footer.ejs') %>

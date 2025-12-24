@@ -1,37 +1,24 @@
 <%- include('../partials/header.ejs', { title, bodyClass: 'dashboard-body' }) %>
 <div class="dashboard-container">
-    <%- include('../partials/superadmin-sidebar.ejs', { currentPage: 'create-article' }) %>
+    <% if (user.role === 'superadmin') { %>
+        <%- include('../partials/superadmin-sidebar.ejs') %>
+    <% } else { %>
+        <%- include('../partials/admin-sidebar.ejs') %>
+    <% } %>
+    
     <main class="dashboard-main">
         <div class="section">
-            <div class="section-header">
-                <h1>Criar Novo Artigo</h1>
-                <p>Compartilhe conhecimento para impulsionar a comunidade Momentum Fit.</p>
-            </div>
-            <form id="createArticleForm" class="dashboard-form">
-                <div class="form-group"><label>Título do Artigo *</label><input type="text" name="title" required></div>
-                <div class="form-group"><label>Categoria *</label><input type="text" name="category" placeholder="Ex: Nutrição, Treino" required></div>
-                <div class="form-group"><label>Conteúdo (HTML Permitido) *</label><textarea name="content" rows="12" required></textarea></div>
-                <div class="form-actions"><button type="submit" class="btn btn-primary">Publicar Artigo</button></div>
+            <div class="section-header"><h1>Publicar Novo Artigo</h1></div>
+            <form action="/articles/new/create" method="POST" enctype="multipart/form-data" class="dashboard-form" style="max-width: 800px;">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <div class="form-group"><label>Título</label><input type="text" name="title" required></div>
+                <div class="form-group"><label>Resumo</label><textarea name="summary" rows="2" required></textarea></div>
+                <div class="form-group"><label>Conteúdo (HTML permitido)</label><textarea name="content" rows="10" required></textarea></div>
+                <div class="form-group"><label>Imagem de Capa</label><input type="file" name="image"></div>
+                <div class="form-group"><label>Vídeo URL (YouTube)</label><input type="text" name="videoUrl"></div>
+                <div class="form-actions"><button type="submit" class="btn btn-primary">Publicar</button></div>
             </form>
         </div>
     </main>
 </div>
-<script>
-document.getElementById('createArticleForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const formData = { title: this.title.value, content: this.content.value, category: this.category.value };
-    try {
-        const response = await fetch('/articles/create', { 
-            method: 'POST', 
-            headers: { 'Content-Type': 'application/json', 'CSRF-Token': '<%= csrfToken %>' }, 
-            body: JSON.stringify(formData) 
-        });
-        const result = await response.json();
-        if (result.success) {
-            alert('Artigo publicado!');
-            window.location.href = '/articles';
-        } else { throw new Error(result.message); }
-    } catch (error) { alert('Erro: ' + error.message); }
-});
-</script>
 <%- include('../partials/footer.ejs') %>
