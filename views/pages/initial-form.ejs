@@ -1,90 +1,104 @@
 <%- include('../partials/header.ejs', { title: 'Avaliação Inicial', bodyClass: 'dashboard-body' }) %>
-<div class="dashboard-container">
-    <div style="width: 100%; max-width: 900px; margin: 0 auto; padding: 2rem;">
+
+<style>
+    .onboarding-container {
+        width: 100%;
+        min-height: calc(100vh - 80px); /* Altura menos header */
+        display: flex;
+        justify-content: center;
+        padding: 2rem 1rem;
+        background: #050505;
+    }
+    .onboarding-content {
+        width: 100%;
+        max-width: 800px;
+    }
+</style>
+
+<div class="onboarding-container">
+    <div class="onboarding-content">
         
-        <div class="section-header">
-            <h1>Avaliação Inicial</h1>
-            <p>Preencha os dados abaixo para que possamos montar seu plano.</p>
+        <div class="section-header" style="text-align: center; margin-bottom: 3rem;">
+            <h1 style="font-size: 2rem; color: var(--c-accent-primary);">Avaliação Inicial</h1>
+            <p style="color: #888;">Vamos configurar seu perfil para obter os melhores resultados.</p>
         </div>
 
         <% if (typeof error !== 'undefined' && error) { %>
-            <div class="alert alert-error"><%= error %></div>
+            <div class="alert alert-error" style="background: rgba(239, 68, 68, 0.2); color: #fca5a5; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                <%= error %>
+            </div>
         <% } %>
 
         <form action="/client/initial-form" method="POST" class="dashboard-form">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
 
-            <div class="section-card">
-                <h3 style="color: var(--c-accent-primary); border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px;">1. Dados Pessoais</h3>
+            <div class="section-card" style="background: #111; padding: 2rem; border-radius: 12px; border: 1px solid #333; margin-bottom: 2rem;">
+                <h3 style="color: #fff; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 20px;">1. Dados Pessoais</h3>
                 
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
                     <div class="form-group">
-                        <label>Idade *</label>
-                        <input type="number" name="age" required value="<%= profile && profile.age %>">
-                        <small style="color: #666; font-size: 0.8rem;">Sua idade atual em anos.</small>
+                        <label style="color:#ccc;">Idade *</label>
+                        <input type="number" name="age" required value="<%= profile && profile.age %>" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white; border-radius:6px;">
+                        <small style="color: #666;">Anos</small>
                     </div>
                     <div class="form-group">
-                        <label>Telefone *</label>
-                        <input type="text" name="phone" required placeholder="(99) 99999-9999" value="<%= profile && profile.phone %>">
-                        <small style="color: #666; font-size: 0.8rem;">Para contato pelo WhatsApp.</small>
+                        <label style="color:#ccc;">Telefone *</label>
+                        <input type="text" name="phone" required placeholder="(99) 99999-9999" value="<%= profile && profile.phone %>" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white; border-radius:6px;">
+                        <small style="color: #666;">WhatsApp</small>
                     </div>
                     <div class="form-group">
-                        <label>Gênero</label>
-                        <select name="gender_identity">
+                        <label style="color:#ccc;">Gênero</label>
+                        <select name="gender_identity" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white; border-radius:6px;">
                             <option value="">Selecione...</option>
                             <option value="M">Masculino</option>
                             <option value="F">Feminino</option>
                             <option value="NB">Não-binário</option>
                             <option value="O">Outro</option>
                         </select>
-                        <small style="color: #666; font-size: 0.8rem;">Como você se identifica.</small>
                     </div>
                 </div>
             </div>
 
-            <div class="section-card">
-                <h3 style="color: var(--c-accent-primary); border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px;">2. Medidas & Corpo</h3>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="section-card" style="background: #111; padding: 2rem; border-radius: 12px; border: 1px solid #333; margin-bottom: 2rem;">
+                <h3 style="color: #fff; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 20px;">2. Medidas & Corpo</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
                     <div class="form-group">
-                        <label>Peso (kg) *</label>
-                        <input type="text" name="weight" required placeholder="Ex: 70.5" value="<%= profile && profile.weight %>">
-                        <small style="color: #666; font-size: 0.8rem;">Use ponto ou vírgula. Ex: 70,5</small>
+                        <label style="color:#ccc;">Peso (kg) *</label>
+                        <input type="text" name="weight" required placeholder="Ex: 70.5" value="<%= profile && profile.weight %>" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white; border-radius:6px;">
+                        <small style="color: #666;">Ponto ou vírgula</small>
                     </div>
                     <div class="form-group">
-                        <label>Altura (m) *</label>
-                        <input type="text" name="height" required placeholder="Ex: 1.75" value="<%= profile && profile.height %>">
-                        <small style="color: #666; font-size: 0.8rem;">Em metros (1.75) ou cm (175).</small>
+                        <label style="color:#ccc;">Altura *</label>
+                        <input type="text" name="height" required placeholder="Ex: 1.75" value="<%= profile && profile.height %>" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white; border-radius:6px;">
+                        <small style="color: #666;">Metros (1.75) ou Cm (175)</small>
                     </div>
                 </div>
             </div>
 
-            <div class="section-card">
-                <h3 style="color: var(--c-accent-primary); border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px;">3. Objetivos & Rotina</h3>
-                <div class="form-group">
-                    <label>Objetivo Principal *</label>
-                    <input type="text" name="main_goal" required placeholder="Ex: Perder peso, Ganhar massa..." value="<%= profile && profile.main_goal %>">
-                    <small style="color: #666; font-size: 0.8rem;">O que você mais deseja alcançar?</small>
+            <div class="section-card" style="background: #111; padding: 2rem; border-radius: 12px; border: 1px solid #333; margin-bottom: 2rem;">
+                <h3 style="color: #fff; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 20px;">3. Objetivos & Rotina</h3>
+                <div class="form-group" style="margin-bottom: 1.5rem;">
+                    <label style="color:#ccc;">Objetivo Principal *</label>
+                    <input type="text" name="main_goal" required placeholder="Ex: Perder peso, Ganhar massa..." value="<%= profile && profile.main_goal %>" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white; border-radius:6px;">
                 </div>
                 
-                <div class="form-group">
-                    <label>Nível de Atividade *</label>
-                    <select name="fitness_level" required>
+                <div class="form-group" style="margin-bottom: 1.5rem;">
+                    <label style="color:#ccc;">Nível de Atividade *</label>
+                    <select name="fitness_level" required style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white; border-radius:6px;">
                         <option value="sedentary">Sedentário (Não treino atualmente)</option>
                         <option value="beginner">Iniciante (Treino 1-2x na semana)</option>
                         <option value="intermediate">Intermediário (Treino regular há 6 meses)</option>
                         <option value="advanced">Avançado (Treino pesado há anos)</option>
                     </select>
-                    <small style="color: #666; font-size: 0.8rem;">Seja sincero para ajustarmos a intensidade.</small>
                 </div>
 
                 <div class="form-group">
-                    <label>Histórico de Saúde</label>
-                    <textarea name="medical_conditions" rows="2" placeholder="Tem alguma doença, lesão antiga ou toma remédio controlado?"><%= profile && profile.medical_conditions %></textarea>
-                    <small style="color: #666; font-size: 0.8rem;">Detalhe qualquer condição que o treinador precise saber.</small>
+                    <label style="color:#ccc;">Histórico de Saúde</label>
+                    <textarea name="medical_conditions" rows="3" placeholder="Tem alguma doença, lesão antiga ou toma remédio controlado?" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white; border-radius:6px;"><%= profile && profile.medical_conditions %></textarea>
                 </div>
             </div>
 
-            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 20px;">ENVIAR AVALIAÇÃO</button>
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 15px; font-weight: 800; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px;">Enviar Avaliação</button>
         </form>
     </div>
 </div>
