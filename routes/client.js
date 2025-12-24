@@ -109,7 +109,8 @@ router.post('/initial-form', async (req, res) => {
 
         await pool.query(query, values);
 
-        res.redirect('/client/dashboard');
+        // Redireciona para o perfil com parâmetro de sucesso
+        res.redirect('/client/profile?submitted=true');
 
     } catch (err) {
         console.error("Erro no form inicial:", err);
@@ -134,7 +135,19 @@ router.get('/profile', async (req, res) => {
     try {
         const result = await pool.query("SELECT * FROM client_profiles WHERE user_id = $1", [req.session.user.id]);
         const profile = result.rows[0] || {};
-        res.render('pages/client-profile', { title: 'Meu Perfil', profile, user: req.session.user, currentPage: 'client-profile' });
+        
+        let successMsg = null;
+        if (req.query.submitted) {
+            successMsg = "Seu perfil foi enviado para análise! Você receberá notificações sobre sua aprovação e novos treinos.";
+        }
+
+        res.render('pages/client-profile', { 
+            title: 'Meu Perfil', 
+            profile, 
+            user: req.session.user, 
+            currentPage: 'client-profile',
+            success: successMsg
+        });
     } catch (err) {
         res.status(500).render('pages/error', { message: 'Erro ao carregar perfil.' });
     }
