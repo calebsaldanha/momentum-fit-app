@@ -25,10 +25,10 @@ router.post('/initial-form', async (req, res) => {
     const { age, weight, height, fitness_level, goals, medical_conditions, training_days, equipment } = req.body;
     try {
         await pool.query(
-            \`INSERT INTO client_profiles 
+            `INSERT INTO client_profiles 
             (user_id, age, weight, height, fitness_level, goals, medical_conditions, training_days, equipment, created_at)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW())\`,
-            [age, weight, height, fitness_level, goals, medical_conditions, training_days, equipment]
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW())`,
+            [userId, age, weight, height, fitness_level, goals, medical_conditions, training_days, equipment]
         );
         res.redirect('/client/dashboard');
     } catch (err) {
@@ -60,22 +60,26 @@ router.get('/dashboard', async (req, res) => {
             profile: profileRes.rows[0] || {},
             user: req.session.user
         });
-    } catch (err) { res.status(500).render('pages/error', { title: 'Erro', message: 'Erro ao carregar dashboard.' }); }
+    } catch (err) { 
+        console.error(err);
+        res.status(500).render('pages/error', { title: 'Erro', message: 'Erro ao carregar dashboard.' }); 
+    }
 });
 
 router.get('/workouts', async (req, res) => {
     try {
-        const query = \`
+        const query = `
             SELECT w.*, u.name as trainer_name,
             (SELECT COUNT(*) FROM workout_checkins wc WHERE wc.workout_id = w.id AND wc.created_at::date = CURRENT_DATE) as checked_in_today
             FROM workouts w 
             LEFT JOIN users u ON w.trainer_id = u.id 
             WHERE w.client_id = $1 
             ORDER BY w.created_at DESC
-        \`;
+        `;
         const workoutsRes = await pool.query(query, [req.session.user.id]);
         res.render('pages/client-workouts', { title: 'Meus Treinos - Momentum Fit', workouts: workoutsRes.rows });
     } catch (err) {
+        console.error(err);
         res.status(500).render('pages/error', { message: 'Erro ao carregar treinos.' });
     }
 });
@@ -109,7 +113,9 @@ router.post('/profile', async (req, res) => {
     const { name, age, weight, height, fitness_level, goals, medical_conditions, training_days, equipment } = req.body;
     const userId = req.session.user.id;
     
-    const client = await pool.connect(); // Cliente para transação
+    // Obtemos um cliente do pool para gerenciar a transação
+    // Nota: A estrutura do db.js exporta pool, então usamos pool.connect()
+    const client = await pool.connect(); 
     
     try {
         await client.query('BEGIN'); // Inicia transação
@@ -119,7 +125,7 @@ router.post('/profile', async (req, res) => {
         
         // 2. Atualiza Tabela Client Profiles
         await client.query(
-            \`UPDATE client_profiles SET age=$1, weight=$2, height=$3, fitness_level=$4, goals=$5, medical_conditions=$6, training_days=$7, equipment=$8 WHERE user_id=$9\`, 
+            `UPDATE client_profiles SET age=$1, weight=$2, height=$3, fitness_level=$4, goals=$5, medical_conditions=$6, training_days=$7, equipment=$8 WHERE user_id=$9`, 
             [age, weight, height, fitness_level, goals, medical_conditions, training_days, equipment, userId]
         );
 
