@@ -10,6 +10,7 @@ const requireClientAuth = (req, res, next) => {
 
 router.use(requireClientAuth);
 
+// Dashboard
 router.get('/dashboard', async (req, res) => {
     try {
         const userId = req.session.user.id;
@@ -18,8 +19,6 @@ router.get('/dashboard', async (req, res) => {
         if (profileRes.rows.length === 0) return res.redirect('/client/initial-form');
 
         const profile = profileRes.rows[0];
-        
-        // Cálculo IMC
         let imc = 0;
         if (profile.weight && profile.height) {
             imc = (parseFloat(profile.weight) / (parseFloat(profile.height) * parseFloat(profile.height))).toFixed(1);
@@ -31,7 +30,7 @@ router.get('/dashboard', async (req, res) => {
         );
 
         res.render('pages/client-dashboard', {
-            title: 'Painel Geral',
+            title: 'Painel do Aluno',
             workouts: workoutsRes.rows || [],
             checkins: [],
             profile: profile,
@@ -42,17 +41,29 @@ router.get('/dashboard', async (req, res) => {
     } catch (err) { res.status(500).render('pages/error', { message: 'Erro ao carregar dashboard.' }); }
 });
 
+// Form Inicial (ROTA CORRIGIDA)
 router.get('/initial-form', async (req, res) => {
     try {
+        // Verifica se já existe perfil para não sobrescrever acidentalmente (opcional)
         const check = await pool.query("SELECT 1 FROM client_profiles WHERE user_id = $1", [req.session.user.id]);
-        if (check.rows.length > 0) return res.redirect('/client/profile');
-        res.render('pages/initial-form', { title: 'Avaliação Inicial', user: req.session.user });
-    } catch (err) { res.status(500).render('pages/error', { message: 'Erro ao verificar.' }); }
+        if (check.rows.length > 0) return res.redirect('/client/profile'); 
+        
+        res.render('pages/initial-form', { 
+            title: 'Avaliação Inicial', 
+            user: req.session.user,
+            error: null, // Garantir que a variável exista
+            profile: null, // Garantir que a variável exista
+            csrfToken: res.locals.csrfToken
+        });
+    } catch (err) {
+        console.error("Erro rota initial-form:", err);
+        res.status(500).render('pages/error', { message: 'Erro ao carregar formulário.' });
+    }
 });
 
+// Form Inicial (Processar)
 router.post('/initial-form', async (req, res) => {
     const userId = req.session.user.id;
-    // Captura campos completos
     const { 
         age, phone, gender_identity, sex_assigned_at_birth, 
         weight, height, fitness_level, 
@@ -102,41 +113,45 @@ router.post('/initial-form', async (req, res) => {
 
         await pool.query(query, values);
 
-        // Dispara notificação para ADMIN (Superadmin e Treinadores)
-        await notificationService.notifyNewClient(req.session.user.name, userId);
+        // Notificação (catch para não quebrar fluxo)
+        notificationService.notifyNewClient(req.session.user.name, userId).catch(e => console.error("Erro notif:", e));
 
         res.redirect('/client/dashboard');
     } catch (err) {
-        console.error("Erro form:", err);
-        res.status(500).render('pages/error', { message: 'Erro ao salvar perfil.' });
+        console.error("Erro POST initial-form:", err);
+        res.render('pages/initial-form', { 
+            title: 'Avaliação Inicial', 
+            user: req.session.user, 
+            error: 'Erro ao salvar. Verifique os dados.', 
+            profile: req.body, 
+            csrfToken: req.csrfToken() 
+        });
     }
 });
 
+// Perfil
 router.get('/profile', async (req, res) => {
     try {
         const result = await pool.query("SELECT u.name, u.email, cp.* FROM users u JOIN client_profiles cp ON u.id = cp.user_id WHERE u.id = $1", [req.session.user.id]);
         const profile = result.rows[0] || {};
-        
         let imc = 0;
         if (profile.weight && profile.height) {
             imc = (parseFloat(profile.weight) / (parseFloat(profile.height) * parseFloat(profile.height))).toFixed(1);
         }
-
-        res.render('pages/client-profile', { 
-            title: 'Meu Perfil', profile, imc, user: req.session.user, success: req.query.success 
-        });
+        res.render('pages/client-profile', { title: 'Meu Perfil', profile, imc, user: req.session.user, success: req.query.success });
     } catch (err) { res.status(500).render('pages/error', { message: 'Erro perfil.' }); }
 });
 
 router.post('/profile', async (req, res) => {
+    // ... manter lógica de update ...
     const { name, age, weight, height, phone } = req.body;
     try {
         await pool.query("UPDATE users SET name = $1 WHERE id = $2", [name, req.session.user.id]);
         await pool.query("UPDATE client_profiles SET age=$1, weight=$2, height=$3, phone=$4, updated_at=NOW() WHERE user_id=$5", 
             [age, weight, height, phone, req.session.user.id]);
         req.session.user.name = name;
-        res.redirect('/client/profile?success=Perfil Atualizado');
-    } catch (err) { res.status(500).render('pages/error', { message: 'Erro atualização.' }); }
+        res.redirect('/client/profile?success=Atualizado');
+    } catch (err) { res.status(500).render('pages/error', { message: 'Erro update.' }); }
 });
 
 router.get('/workouts', async (req, res) => {
