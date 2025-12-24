@@ -3,7 +3,7 @@
 <style>
     .onboarding-container {
         width: 100%;
-        min-height: calc(100vh - 80px); /* Altura menos header */
+        min-height: calc(100vh - 80px);
         display: flex;
         justify-content: center;
         padding: 2rem 1rem;
@@ -11,16 +11,44 @@
     }
     .onboarding-content {
         width: 100%;
-        max-width: 800px;
+        max-width: 900px;
     }
+    .section-card {
+        background: #111; 
+        padding: 2rem; 
+        border-radius: 12px; 
+        border: 1px solid #333; 
+        margin-bottom: 2rem;
+    }
+    .section-title {
+        color: #fff; 
+        border-bottom: 1px solid #333; 
+        padding-bottom: 10px; 
+        margin-bottom: 20px;
+        font-size: 1.2rem;
+    }
+    .form-grid {
+        display: grid; 
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+        gap: 1.5rem;
+    }
+    .form-group label { color: #ccc; font-weight: 500; }
+    .form-group input, .form-group select, .form-group textarea {
+        width: 100%; padding: 10px; background: #222; border: 1px solid #444; 
+        color: white; border-radius: 6px; margin-top: 5px;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+        border-color: var(--c-accent-primary); outline: none;
+    }
+    .help-text { color: #666; font-size: 0.8rem; margin-top: 4px; display: block; }
 </style>
 
 <div class="onboarding-container">
     <div class="onboarding-content">
         
         <div class="section-header" style="text-align: center; margin-bottom: 3rem;">
-            <h1 style="font-size: 2rem; color: var(--c-accent-primary);">Avaliação Inicial</h1>
-            <p style="color: #888;">Vamos configurar seu perfil para obter os melhores resultados.</p>
+            <h1 style="font-size: 2rem; color: var(--c-accent-primary);">Ficha de Anamnese</h1>
+            <p style="color: #888;">Responda com calma. Essas informações são a base do seu planejamento.</p>
         </div>
 
         <% if (typeof error !== 'undefined' && error) { %>
@@ -29,26 +57,23 @@
             </div>
         <% } %>
 
-        <form action="/client/initial-form" method="POST" class="dashboard-form">
+        <form action="/client/initial-form" method="POST">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
 
-            <div class="section-card" style="background: #111; padding: 2rem; border-radius: 12px; border: 1px solid #333; margin-bottom: 2rem;">
-                <h3 style="color: #fff; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 20px;">1. Dados Pessoais</h3>
-                
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+            <div class="section-card">
+                <h3 class="section-title">1. Dados Pessoais</h3>
+                <div class="form-grid">
                     <div class="form-group">
-                        <label style="color:#ccc;">Idade *</label>
-                        <input type="number" name="age" required value="<%= profile && profile.age %>" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white; border-radius:6px;">
-                        <small style="color: #666;">Anos</small>
+                        <label>Idade *</label>
+                        <input type="number" name="age" required value="<%= profile && profile.age %>">
                     </div>
                     <div class="form-group">
-                        <label style="color:#ccc;">Telefone *</label>
-                        <input type="text" name="phone" required placeholder="(99) 99999-9999" value="<%= profile && profile.phone %>" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white; border-radius:6px;">
-                        <small style="color: #666;">WhatsApp</small>
+                        <label>Telefone (WhatsApp) *</label>
+                        <input type="text" name="phone" required placeholder="(XX) XXXXX-XXXX" value="<%= profile && profile.phone %>">
                     </div>
                     <div class="form-group">
-                        <label style="color:#ccc;">Gênero</label>
-                        <select name="gender_identity" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white; border-radius:6px;">
+                        <label>Identidade de Gênero</label>
+                        <select name="gender_identity">
                             <option value="">Selecione...</option>
                             <option value="M">Masculino</option>
                             <option value="F">Feminino</option>
@@ -56,49 +81,168 @@
                             <option value="O">Outro</option>
                         </select>
                     </div>
-                </div>
-            </div>
-
-            <div class="section-card" style="background: #111; padding: 2rem; border-radius: 12px; border: 1px solid #333; margin-bottom: 2rem;">
-                <h3 style="color: #fff; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 20px;">2. Medidas & Corpo</h3>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
                     <div class="form-group">
-                        <label style="color:#ccc;">Peso (kg) *</label>
-                        <input type="text" name="weight" required placeholder="Ex: 70.5" value="<%= profile && profile.weight %>" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white; border-radius:6px;">
-                        <small style="color: #666;">Ponto ou vírgula</small>
+                        <label>Sexo Biológico</label>
+                        <select name="sex_assigned_at_birth">
+                            <option value="">Selecione...</option>
+                            <option value="M">Masculino</option>
+                            <option value="F">Feminino</option>
+                        </select>
+                        <span class="help-text">Importante para cálculos fisiológicos.</span>
                     </div>
-                    <div class="form-group">
-                        <label style="color:#ccc;">Altura *</label>
-                        <input type="text" name="height" required placeholder="Ex: 1.75" value="<%= profile && profile.height %>" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white; border-radius:6px;">
-                        <small style="color: #666;">Metros (1.75) ou Cm (175)</small>
-                    </div>
-                </div>
-            </div>
-
-            <div class="section-card" style="background: #111; padding: 2rem; border-radius: 12px; border: 1px solid #333; margin-bottom: 2rem;">
-                <h3 style="color: #fff; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 20px;">3. Objetivos & Rotina</h3>
-                <div class="form-group" style="margin-bottom: 1.5rem;">
-                    <label style="color:#ccc;">Objetivo Principal *</label>
-                    <input type="text" name="main_goal" required placeholder="Ex: Perder peso, Ganhar massa..." value="<%= profile && profile.main_goal %>" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white; border-radius:6px;">
                 </div>
                 
-                <div class="form-group" style="margin-bottom: 1.5rem;">
-                    <label style="color:#ccc;">Nível de Atividade *</label>
-                    <select name="fitness_level" required style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white; border-radius:6px;">
-                        <option value="sedentary">Sedentário (Não treino atualmente)</option>
-                        <option value="beginner">Iniciante (Treino 1-2x na semana)</option>
-                        <option value="intermediate">Intermediário (Treino regular há 6 meses)</option>
-                        <option value="advanced">Avançado (Treino pesado há anos)</option>
+                <div class="form-group" style="margin-top: 15px;">
+                    <label>Faz uso de hormônios? (TRT, Anticoncepcional, etc)</label>
+                    <select name="hormonal_treatment" onchange="document.getElementById('hormonal_details_div').style.display = this.value === 'true' ? 'block' : 'none'">
+                        <option value="false">Não</option>
+                        <option value="true">Sim</option>
                     </select>
                 </div>
-
-                <div class="form-group">
-                    <label style="color:#ccc;">Histórico de Saúde</label>
-                    <textarea name="medical_conditions" rows="3" placeholder="Tem alguma doença, lesão antiga ou toma remédio controlado?" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white; border-radius:6px;"><%= profile && profile.medical_conditions %></textarea>
+                <div class="form-group" id="hormonal_details_div" style="display: none; margin-top: 10px;">
+                    <label>Quais e dosagens?</label>
+                    <input type="text" name="hormonal_details" placeholder="Ex: Testosterona 100mg/sem...">
                 </div>
             </div>
 
-            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 15px; font-weight: 800; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px;">Enviar Avaliação</button>
+            <div class="section-card">
+                <h3 class="section-title">2. Medidas & Corpo</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Peso (kg) *</label>
+                        <input type="text" name="weight" required placeholder="Ex: 70.5" value="<%= profile && profile.weight %>">
+                    </div>
+                    <div class="form-group">
+                        <label>Altura (m) *</label>
+                        <input type="text" name="height" required placeholder="Ex: 1.75" value="<%= profile && profile.height %>">
+                    </div>
+                    <div class="form-group">
+                        <label>Gordura Corporal (%)</label>
+                        <input type="text" name="body_fat" placeholder="Se souber (Opcional)">
+                    </div>
+                </div>
+                
+                <h4 style="color: #888; margin-top: 20px; margin-bottom: 10px; font-size: 0.9rem;">Circunferências (cm) - Opcional mas recomendado</h4>
+                <div class="form-grid">
+                    <div class="form-group"><label>Cintura (Umbigo)</label><input type="text" name="measure_waist"></div>
+                    <div class="form-group"><label>Quadril</label><input type="text" name="measure_hip"></div>
+                    <div class="form-group"><label>Braço (Relaxado)</label><input type="text" name="measure_arm"></div>
+                    <div class="form-group"><label>Perna (Coxa)</label><input type="text" name="measure_leg"></div>
+                </div>
+            </div>
+
+            <div class="section-card">
+                <h3 class="section-title">3. Objetivos</h3>
+                <div class="form-group">
+                    <label>Objetivo Principal *</label>
+                    <input type="text" name="main_goal" required placeholder="Ex: Hipertrofia, Emagrecimento..." value="<%= profile && profile.main_goal %>">
+                </div>
+                <div class="form-group" style="margin-top: 15px;">
+                    <label>Objetivos Secundários</label>
+                    <input type="text" name="secondary_goals" placeholder="Ex: Melhorar postura, correr 5km...">
+                </div>
+                <div class="form-group" style="margin-top: 15px;">
+                    <label>Evento ou Prazo Específico?</label>
+                    <input type="text" name="specific_event" placeholder="Ex: Casamento em 3 meses, Verão...">
+                </div>
+            </div>
+
+            <div class="section-card">
+                <h3 class="section-title">4. Histórico de Saúde</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Condições Médicas</label>
+                        <textarea name="medical_conditions" rows="2" placeholder="Diabetes, Hipertensão, Asma..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Medicamentos de uso contínuo</label>
+                        <textarea name="medications" rows="2" placeholder="Nome e horários"></textarea>
+                    </div>
+                </div>
+                <div class="form-grid" style="margin-top: 15px;">
+                    <div class="form-group">
+                        <label>Lesões ou Dores Articulares</label>
+                        <textarea name="injuries" rows="2" placeholder="Joelhos, Ombros, Lombar..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Cirurgias Prévias</label>
+                        <textarea name="surgeries" rows="2" placeholder="O que e quando"></textarea>
+                    </div>
+                </div>
+                <div class="form-group" style="margin-top: 15px;">
+                    <label>Alergias</label>
+                    <input type="text" name="allergies" placeholder="Alimentos ou medicamentos">
+                </div>
+            </div>
+
+            <div class="section-card">
+                <h3 class="section-title">5. Rotina de Treino</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Nível de Experiência *</label>
+                        <select name="fitness_level" required>
+                            <option value="sedentary">Sedentário (Parado há +3 meses)</option>
+                            <option value="beginner">Iniciante (Treino irregular)</option>
+                            <option value="intermediate">Intermediário (Treino regular)</option>
+                            <option value="advanced">Avançado (Atleta)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Dias Disponíveis p/ Treino</label>
+                        <select name="training_days">
+                            <option value="2">2 dias</option>
+                            <option value="3" selected>3 dias</option>
+                            <option value="4">4 dias</option>
+                            <option value="5">5 dias</option>
+                            <option value="6">6 dias</option>
+                            <option value="7">Todos os dias</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-grid" style="margin-top: 15px;">
+                    <div class="form-group">
+                        <label>Onde vai treinar?</label>
+                        <select name="workout_preference">
+                            <option value="gym">Academia Completa</option>
+                            <option value="home_basic">Em Casa (Pesos livres/Elásticos)</option>
+                            <option value="home_bodyweight">Em Casa (Peso do corpo)</option>
+                            <option value="park">Ao Ar Livre / Parque</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Tempo Disponível por dia</label>
+                        <input type="text" name="availability" placeholder="Ex: 45 min, 1 hora...">
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top: 15px;">
+                    <label>Equipamentos Disponíveis (Se treinar em casa)</label>
+                    <input type="text" name="equipment" placeholder="Halteres, Barra, Banco...">
+                </div>
+            </div>
+
+            <div class="section-card">
+                <h3 class="section-title">6. Estilo de Vida</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Horas de Sono (Média)</label>
+                        <input type="text" name="sleep_hours" placeholder="Ex: 6-7 horas">
+                    </div>
+                    <div class="form-group">
+                        <label>Como é sua dieta hoje?</label>
+                        <textarea name="diet_description" rows="2" placeholder="Come de tudo? Faz restrição? Usa suplementos?"></textarea>
+                    </div>
+                </div>
+                <div class="form-group" style="margin-top: 15px;">
+                    <label>Maiores Dificuldades/Desafios</label>
+                    <textarea name="challenges" rows="2" placeholder="Falta de tempo, ansiedade, doces..."></textarea>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 15px; font-weight: 800; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px;">
+                Finalizar e Enviar
+            </button>
         </form>
     </div>
 </div>
