@@ -1,17 +1,32 @@
 <aside class="dashboard-sidebar">
+    <div style="padding: 20px 20px 0;">
+        <h3 style="font-size: 0.8rem; text-transform: uppercase; color: #666; letter-spacing: 1px;">
+            Painel Personal
+        </h3>
+    </div>
     <nav class="sidebar-nav">
+        <a href="/admin/dashboard" class="nav-item <%= currentPage === 'admin-dashboard' ? 'active' : '' %>">
+            Visão Geral
+        </a>
+        <a href="/admin/clients" class="nav-item <%= currentPage === 'admin-clients' ? 'active' : '' %>">
+            Meus Alunos
+        </a>
+        <a href="/chat" class="nav-item <%= currentPage === 'chat' ? 'active' : '' %>">
+            Mensagens
+        </a>
+        
         <% if (user.role === 'superadmin') { %>
-            <a href="/superadmin/dashboard" class="nav-item" style="color: var(--c-accent-dark); background: rgba(190, 242, 2, 0.1);">Painel Super Admin</a>
-            <div style="height: 1px; background: rgba(255,255,255,0.1); margin: 0.5rem 1rem;"></div>
+            <div style="margin-top: 20px; padding: 0 20px; border-top: 1px solid #333; padding-top: 15px;">
+                <p style="font-size: 0.7rem; color: #f59e0b; margin-bottom: 5px;">SUPER USER</p>
+                <a href="/superadmin/dashboard" class="btn btn-sm btn-outline" style="width: 100%; text-align: center; color: #f59e0b; border-color: #f59e0b;">
+                    Ir para Gestão &rarr;
+                </a>
+            </div>
         <% } %>
-        <a href="/admin/dashboard" class="nav-item <%= currentPage === 'admin-dashboard' ? 'active' : '' %>">Painel Geral</a>
-        <a href="/admin/clients" class="nav-item <%= currentPage === 'admin-clients' ? 'active' : '' %>">Gerenciar Clientes</a>
-        <a href="/workouts/create" class="nav-item <%= currentPage === 'create-workout' ? 'active' : '' %>">Novo Treino</a>
-        <a href="/chat" class="nav-item <%= currentPage === 'chat' ? 'active' : '' %>">Mensagens</a>
     </nav>
     <div class="sidebar-footer">
-        <form action="/auth/logout" method="POST" style="margin: 0;">
-            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+         <form action="/auth/logout" method="POST" style="margin: 0;">
+            <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
             <button type="submit" class="btn-logout-sidebar">Sair</button>
         </form>
     </div>

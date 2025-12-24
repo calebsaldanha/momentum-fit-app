@@ -1,14 +1,30 @@
 <aside class="dashboard-sidebar">
+    <div style="padding: 20px 20px 0;">
+        <h3 style="font-size: 0.8rem; text-transform: uppercase; color: var(--c-accent-primary); letter-spacing: 1px;">
+            Gestão Global
+        </h3>
+    </div>
     <nav class="sidebar-nav">
-        <a href="/superadmin/dashboard" class="nav-item <%= currentPage === 'super-dashboard' ? 'active' : '' %>">Aprovação de Personais</a>
-        <a href="/superadmin/manage" class="nav-item <%= currentPage === 'super-manage' ? 'active' : '' %>">Gerenciar Usuários</a>
-        <a href="/articles/create" class="nav-item <%= currentPage === 'create-article' ? 'active' : '' %>">Criar Artigo</a>
-        <div style="height: 1px; background: rgba(255,255,255,0.1); margin: 0.5rem 1rem;"></div>
-        <a href="/admin/dashboard" class="nav-item">Painel Admin</a>
+        <a href="/superadmin/dashboard" class="nav-item <%= currentPage === 'superadmin-dashboard' ? 'active' : '' %>">
+            Dashboard Geral
+        </a>
+        <a href="/superadmin/manage" class="nav-item <%= currentPage === 'superadmin-manage' ? 'active' : '' %>">
+            Gerenciar Usuários
+        </a>
+        <a href="/articles/create" class="nav-item">
+            Gerenciar Blog
+        </a>
+
+        <div style="margin-top: 20px; padding: 0 20px; border-top: 1px solid #333; padding-top: 15px;">
+            <p style="font-size: 0.7rem; color: #ccc; margin-bottom: 5px;">MODO PERSONAL</p>
+            <a href="/admin/dashboard" class="btn btn-sm btn-outline" style="width: 100%; text-align: center; color: #fff;">
+                Ver Meus Alunos &rarr;
+            </a>
+        </div>
     </nav>
     <div class="sidebar-footer">
-        <form action="/auth/logout" method="POST" style="margin: 0;">
-            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+         <form action="/auth/logout" method="POST" style="margin: 0;">
+            <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
             <button type="submit" class="btn-logout-sidebar">Sair</button>
         </form>
     </div>

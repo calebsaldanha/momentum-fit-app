@@ -1,43 +1,45 @@
-<%- include('../partials/header.ejs', { title, bodyClass: 'dashboard-body' }) %>
+<%- include('../partials/header', { title: 'Gestão Global', bodyClass: 'dashboard-body' }) %>
+
 <div class="dashboard-container">
-    <%- include('../partials/superadmin-sidebar.ejs', { currentPage: 'super-dashboard' }) %>
+    <%- include('../partials/superadmin-sidebar', { currentPage: 'superadmin-dashboard' }) %>
+
     <main class="dashboard-main">
-        <div class="section">
-            <div class="section-header">
-                <h1>Aprovação de Personais</h1>
-                <p>Personais aguardando liberação na plataforma.</p>
-            </div>
-            <% if (trainers && trainers.length > 0) { %>
-                <div class="table-container">
-                    <table>
-                        <thead><tr><th>Nome</th><th>Email</th><th>Cadastro</th><th style="text-align: right;">Ações</th></tr></thead>
-                        <tbody>
-                            <% trainers.forEach(trainer => { %>
-                            <tr>
-                                <td><%= trainer.name %></td>
-                                <td><%= trainer.email %></td>
-                                <td><%= new Date(trainer.created_at).toLocaleDateString('pt-BR') %></td>
-                                <td style="text-align: right;">
-                                    <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
-                                        <form action="/superadmin/trainers/approve/<%= trainer.id %>" method="POST">
-                                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                            <button type="submit" class="btn btn-primary btn-sm">Aprovar</button>
-                                        </form>
-                                        <form action="/superadmin/trainers/reject/<%= trainer.id %>" method="POST">
-                                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                            <button type="submit" class="btn btn-secondary btn-sm">Rejeitar</button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                            <% }); %>
-                        </tbody>
-                    </table>
+        <div class="container">
+            <h1 style="margin-bottom: 2rem;">Visão Global (Super Admin)</h1>
+
+            <% if (stats.pendingTrainers > 0) { %>
+                <div class="alert alert-warning" style="border-left: 4px solid #f59e0b; display: flex; justify-content: space-between; align-items: center;">
+                    <span><strong><%= stats.pendingTrainers %></strong> personal(is) aguardando aprovação.</span>
+                    <a href="/superadmin/manage" class="btn btn-sm btn-primary">Ver</a>
                 </div>
-            <% } else { %>
-                <div class="empty-state"><p>Nenhum personal pendente.</p></div>
             <% } %>
+            
+            <% if (stats.pendingClients > 0) { %>
+                <div class="alert alert-warning" style="border-left: 4px solid #f59e0b; display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                    <span><strong><%= stats.pendingClients %></strong> cliente(s) aguardando aprovação.</span>
+                    <a href="/superadmin/manage" class="btn btn-sm btn-primary">Ver</a>
+                </div>
+            <% } %>
+
+            <div class="stats-grid" style="margin-top: 2rem;">
+                <div class="stat-card">
+                    <h3>Total Clientes</h3>
+                    <div class="number"><%= stats.clients %></div>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Personais</h3>
+                    <div class="number"><%= stats.trainers %></div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 3rem;">
+                <h3>Acesso Rápido</h3>
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <a href="/superadmin/manage" class="btn btn-secondary">Gerenciar Todos Usuários</a>
+                    <a href="/articles/create" class="btn btn-secondary">Publicar Artigo</a>
+                </div>
+            </div>
         </div>
     </main>
 </div>
-<%- include('../partials/footer.ejs') %>
+<%- include('../partials/footer') %>
