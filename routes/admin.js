@@ -11,7 +11,6 @@ const requireAdminAuth = (req, res, next) => {
     return res.status(403).render('pages/error', { message: 'Acesso negado.' });
 };
 
-// Middleware para ações críticas (apenas Superadmin)
 const requireSuperAdmin = (req, res, next) => {
     if (req.session.user && req.session.user.role === 'superadmin') return next();
     return res.status(403).render('pages/error', { message: 'Permissão exclusiva de Super Admin.' });
@@ -19,12 +18,11 @@ const requireSuperAdmin = (req, res, next) => {
 
 router.use(requireAdminAuth);
 
-// Dashboard Operacional (Treinador/SuperAdmin)
+// Dashboard
 router.get('/dashboard', async (req, res) => {
     try {
         const userId = req.session.user.id;
         
-        // Dados do PRÓPRIO usuário (seja ele trainer ou superadmin atuando como trainer)
         const clientCount = await pool.query("SELECT COUNT(*) FROM client_profiles WHERE assigned_trainer_id = $1", [userId]);
         const workoutCount = await pool.query("SELECT COUNT(*) FROM workouts WHERE trainer_id = $1", [userId]);
         
@@ -46,19 +44,14 @@ router.get('/dashboard', async (req, res) => {
             recentClients: recentClients.rows,
             currentPage: 'admin-dashboard' 
         });
-    } catch (err) { 
-        console.error(err);
-        res.status(500).render('pages/error', { message: 'Erro ao carregar dashboard.' }); 
-    }
+    } catch (err) { console.error(err); res.status(500).render('pages/error', { message: 'Erro ao carregar dashboard.' }); }
 });
 
-// Listar MEUS Alunos
+// Listar Alunos
 router.get('/clients', async (req, res) => {
     try {
         const userId = req.session.user.id;
-        const isSuper = req.session.user.role === 'superadmin';
         
-        // Filtra apenas os alunos atribuídos a este usuário
         let query = `
             SELECT u.id, u.name, u.email, u.status, cp.fitness_level, t.name as trainer_name 
             FROM users u 
@@ -68,9 +61,6 @@ router.get('/clients', async (req, res) => {
             ORDER BY u.name ASC
         `;
         
-        // Se for Super Admin, ele pode ver todos se quiser, mas nesta rota operacional
-        // focamos nos dele. Para ver todos, ele usa o /superadmin/manage.
-        
         const result = await pool.query(query, [userId]);
         
         res.render('pages/admin-clients', { 
@@ -78,7 +68,7 @@ router.get('/clients', async (req, res) => {
             clients: result.rows, 
             currentPage: 'admin-clients' 
         });
-    } catch (err) { res.status(500).render('pages/error', { message: 'Erro ao listar clientes.' }); }
+    } catch (err) { res.status(500).render('pages/error', { message: 'Erro ao listar alunos.' }); }
 });
 
 // Detalhes do Aluno
@@ -88,19 +78,24 @@ router.get('/clients/:id', async (req, res) => {
         const isSuper = req.session.user.role === 'superadmin';
 
         const client = await pool.query("SELECT u.*, cp.* FROM users u LEFT JOIN client_profiles cp ON u.id = cp.user_id WHERE u.id = $1", [req.params.id]);
-        if (client.rows.length === 0) return res.status(404).render('pages/error', { message: 'Cliente não encontrado.' });
+        if (client.rows.length === 0) return res.status(404).render('pages/error', { message: 'Aluno não encontrado.' });
 
-        // Verificação de segurança: Só vê se for SEU aluno, a menos que seja Super Admin (que pode ver tudo)
         if (!isSuper && client.rows[0].assigned_trainer_id !== userId) {
-            return res.status(403).render('pages/error', { message: 'Você não tem permissão para ver este aluno.' });
+            return res.status(403).render('pages/error', { message: 'Acesso restrito.' });
         }
 
         const workouts = await pool.query("SELECT * FROM workouts WHERE client_id = $1 ORDER BY created_at DESC", [req.params.id]);
         const trainers = await pool.query("SELECT id, name FROM users WHERE role IN ('trainer', 'superadmin') AND status = 'active'");
         
-        let imc = 0.0;
         const p = client.rows[0];
-        if (p.weight && p.height) imc = (p.weight / (p.height * p.height)).toFixed(1);
+        
+        // CÁLCULO IMC ROBUSTO (Admin)
+        let imc = '--';
+        const w = parseFloat(p.weight);
+        const h = parseFloat(p.height);
+        if (w > 0 && h > 0) {
+            imc = (w / (h * h)).toFixed(1);
+        }
 
         res.render('pages/client-details', { 
             title: 'Detalhes do Aluno', 
@@ -114,9 +109,7 @@ router.get('/clients/:id', async (req, res) => {
     } catch (err) { console.error(err); res.status(500).render('pages/error', { message: 'Erro detalhes.' }); }
 });
 
-// --- ROTAS POST (RESTAURADAS) ---
-
-// Alterar Status do Cliente
+// Ações POST (Status, Assign, Delete)
 router.post('/clients/:id/status', requireSuperAdmin, async (req, res) => {
     const { action } = req.body;
     const clientId = req.params.id;
@@ -134,17 +127,15 @@ router.post('/clients/:id/status', requireSuperAdmin, async (req, res) => {
              await notificationService.notifyClientApproval(clientId, trainerName);
         }
         res.redirect('/admin/clients/' + clientId);
-    } catch (err) { res.status(500).render('pages/error', { message: 'Erro ao alterar status.' }); }
+    } catch (err) { res.status(500).render('pages/error', { message: 'Erro status.' }); }
 });
 
-// Atribuir Treinador
 router.post('/clients/:id/assign', requireSuperAdmin, async (req, res) => {
     try {
         const { trainer_id } = req.body;
         const clientId = req.params.id;
         
         await pool.query("UPDATE client_profiles SET assigned_trainer_id = $1 WHERE user_id = $2", [trainer_id, clientId]);
-        // Ao atribuir, ativa automaticamente
         await pool.query("UPDATE users SET status = 'active' WHERE id = $1", [clientId]);
         
         const trainerRes = await pool.query("SELECT name FROM users WHERE id = $1", [trainer_id]);
@@ -157,10 +148,9 @@ router.post('/clients/:id/assign', requireSuperAdmin, async (req, res) => {
             await notificationService.notifyTrainerAssignment(trainer_id, clientRes.rows[0].name, clientId);
         }
         res.redirect(`/admin/clients/${clientId}`);
-    } catch (err) { res.status(500).render('pages/error', { message: 'Erro ao atribuir.' }); }
+    } catch (err) { res.status(500).render('pages/error', { message: 'Erro atribuir.' }); }
 });
 
-// Excluir Cliente
 router.post('/clients/:id/delete', requireSuperAdmin, async (req, res) => {
     try {
         const id = req.params.id;
@@ -170,7 +160,7 @@ router.post('/clients/:id/delete', requireSuperAdmin, async (req, res) => {
         await pool.query("DELETE FROM client_profiles WHERE user_id = $1", [id]);
         await pool.query("DELETE FROM users WHERE id = $1", [id]);
         res.redirect('/admin/clients');
-    } catch (err) { res.status(500).render('pages/error', { message: 'Erro ao excluir.' }); }
+    } catch (err) { res.status(500).render('pages/error', { message: 'Erro excluir.' }); }
 });
 
 module.exports = router;

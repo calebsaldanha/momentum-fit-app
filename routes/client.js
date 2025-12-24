@@ -18,15 +18,21 @@ router.get('/dashboard', async (req, res) => {
         
         if (profileRes.rows.length === 0) return res.redirect('/client/initial-form');
 
-        // Se estiver pendente, manda pro perfil, não pro painel
+        // Se pendente, manda pro perfil
         if (req.session.user.status === 'pending_approval') {
             return res.redirect('/client/profile');
         }
 
         const profile = profileRes.rows[0];
-        let imc = 0;
-        if (profile.weight && profile.height) {
-            imc = (parseFloat(profile.weight) / (parseFloat(profile.height) * parseFloat(profile.height))).toFixed(1);
+        
+        // CÁLCULO IMC ROBUSTO
+        let imc = '--';
+        const w = parseFloat(profile.weight);
+        const h = parseFloat(profile.height);
+        
+        if (w > 0 && h > 0) {
+            // Garante 1 casa decimal
+            imc = (w / (h * h)).toFixed(1);
         }
 
         const workoutsRes = await pool.query(
@@ -67,7 +73,6 @@ router.get('/initial-form', async (req, res) => {
 // Form Inicial (Processar)
 router.post('/initial-form', async (req, res) => {
     const userId = req.session.user.id;
-    // Captura todos os campos
     const { 
         age, phone, gender_identity, sex_assigned_at_birth, 
         weight, height, fitness_level, 
@@ -118,7 +123,6 @@ router.post('/initial-form', async (req, res) => {
         await pool.query(query, values);
         await notificationService.notifyNewClient(req.session.user.name, userId).catch(e => console.error("Erro notif:", e));
 
-        // REDIRECIONA PARA O PERFIL EM VEZ DO DASHBOARD
         res.redirect('/client/profile');
     } catch (err) {
         console.error("Erro form inicial:", err);
@@ -138,9 +142,13 @@ router.get('/profile', async (req, res) => {
         const result = await pool.query("SELECT u.name, u.email, cp.* FROM users u JOIN client_profiles cp ON u.id = cp.user_id WHERE u.id = $1", [req.session.user.id]);
         const profile = result.rows[0] || {};
         
-        let imc = 0;
-        if (profile.weight && profile.height) {
-            imc = (parseFloat(profile.weight) / (parseFloat(profile.height) * parseFloat(profile.height))).toFixed(1);
+        // CÁLCULO IMC ROBUSTO
+        let imc = '--';
+        const w = parseFloat(profile.weight);
+        const h = parseFloat(profile.height);
+        
+        if (w > 0 && h > 0) {
+            imc = (w / (h * h)).toFixed(1);
         }
 
         res.render('pages/client-profile', { 
@@ -154,7 +162,7 @@ router.get('/profile', async (req, res) => {
     } catch (err) { res.status(500).render('pages/error', { message: 'Erro perfil.' }); }
 });
 
-// Perfil (Atualizar Completo)
+// Perfil (Atualizar)
 router.post('/profile', async (req, res) => {
     const userId = req.session.user.id;
     const { 
@@ -164,10 +172,8 @@ router.post('/profile', async (req, res) => {
     } = req.body;
 
     try {
-        // Atualiza Nome
         await pool.query("UPDATE users SET name = $1 WHERE id = $2", [name, userId]);
         
-        // Atualiza Perfil (Campos principais que o aluno pode editar)
         const query = `
             UPDATE client_profiles SET 
                 phone=$1, weight=$2, height=$3, age=$4, fitness_level=$5,
@@ -196,7 +202,6 @@ router.post('/profile', async (req, res) => {
 
 // Workouts
 router.get('/workouts', async (req, res) => {
-    // Se pendente, não vê treinos
     if (req.session.user.status === 'pending_approval') return res.redirect('/client/profile');
 
     try {
