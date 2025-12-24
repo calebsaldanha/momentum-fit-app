@@ -1,11 +1,25 @@
 const { pool } = require('../database/db');
 const emailService = require('./emailService');
 
-async function getAdmins() {
-    const res = await pool.query("SELECT id, email, name FROM users WHERE role = 'superadmin' OR (role = 'trainer' AND status = 'active')");
+// Auxiliar: Busca todos os Admins (Superadmin)
+async function getSuperAdmins() {
+    const res = await pool.query("SELECT id, email, name FROM users WHERE role = 'superadmin'");
     return res.rows;
 }
 
+// Auxiliar: Busca Treinadores Ativos
+async function getActiveTrainers() {
+    const res = await pool.query("SELECT id, email, name FROM users WHERE role = 'trainer' AND status = 'active'");
+    return res.rows;
+}
+
+// Auxiliar: Busca Clientes Ativos
+async function getActiveClients() {
+    const res = await pool.query("SELECT id, email, name FROM users WHERE role = 'client' AND status = 'active'");
+    return res.rows;
+}
+
+// Cria notificação no banco
 async function createNotification(userId, title, message, type = 'info', link = null) {
     try {
         await pool.query(
@@ -16,64 +30,87 @@ async function createNotification(userId, title, message, type = 'info', link = 
 }
 
 const notificationService = {
-    // 1. Novo Cliente (Para Admins)
+    // 1. ADMIN: Novo Cliente Cadastrado
     async notifyNewClient(clientName, clientId) {
-        const admins = await getAdmins();
+        const admins = await getSuperAdmins();
         for (const admin of admins) {
-            await createNotification(admin.id, 'Novo Cliente Aguardando', `O cliente ${clientName} preencheu a avaliação e aguarda aprovação.`, 'warning', `/admin/clients/${clientId}`);
-            emailService.sendEmail(admin.email, 'Novo Cliente Aguardando Avaliação', 'Ação Necessária', `O cliente ${clientName} completou o cadastro. Acesse para aprovar e definir o treinador.`, `/admin/clients/${clientId}`, 'Avaliar Cliente');
+            await createNotification(admin.id, 'Novo Cliente', `${clientName} aguarda avaliação.`, 'warning', `/admin/clients/${clientId}`);
+            // Opcional: Email para admin
         }
     },
 
-    // 2. Cliente Aprovado (Para Cliente)
+    // 2. ADMIN: Novo Personal Cadastrado
+    async notifyNewTrainer(trainerName) {
+        const admins = await getSuperAdmins();
+        for (const admin of admins) {
+            await createNotification(admin.id, 'Novo Personal', `${trainerName} solicitou cadastro.`, 'warning', '/superadmin/manage');
+            emailService.sendEmail(admin.email, 'Novo Personal Pendente', 'Ação Necessária', `${trainerName} se cadastrou como personal.`, '/superadmin/manage', 'Gerenciar');
+        }
+    },
+
+    // 3. ADMIN/PERSONAL/CLIENTE: Nova Mensagem
+    async notifyNewMessage(senderName, receiverId) {
+        const res = await pool.query("SELECT email, name FROM users WHERE id = $1", [receiverId]);
+        if (res.rows.length === 0) return;
+        const receiver = res.rows[0];
+        
+        await createNotification(receiverId, 'Nova Mensagem', `${senderName} enviou uma mensagem.`, 'info', '/chat');
+        // Email opcional para mensagem não lida poderia ser implementado aqui
+    },
+
+    // 4. PERSONAL: Novo Cliente Atribuído
+    async notifyTrainerAssignment(trainerId, clientName, clientId) {
+        const res = await pool.query("SELECT email, name FROM users WHERE id = $1", [trainerId]);
+        if (res.rows.length === 0) return;
+        const trainer = res.rows[0];
+
+        await createNotification(trainerId, 'Novo Aluno', `Você é o responsável por ${clientName}.`, 'info', `/admin/clients/${clientId}`);
+        emailService.sendEmail(trainer.email, 'Novo Aluno Atribuído', 'Você tem um novo aluno!', `O aluno ${clientName} foi vinculado a você.`, `/admin/clients/${clientId}`, 'Ver Aluno');
+    },
+
+    // 5. CLIENTE: Aprovação de Cadastro
     async notifyClientApproval(clientId, trainerName) {
         const res = await pool.query("SELECT email, name FROM users WHERE id = $1", [clientId]);
         if (res.rows.length === 0) return;
         const client = res.rows[0];
 
-        await createNotification(clientId, 'Cadastro Aprovado!', `Seu perfil foi aprovado! Seu treinador é ${trainerName}.`, 'success', '/client/dashboard');
-        emailService.sendEmail(client.email, 'Bem-vindo à Momentum Fit', 'Cadastro Aprovado!', `Olá ${client.name}, seu perfil foi avaliado e aprovado! Seu treinador responsável será ${trainerName}. Acesse a plataforma para ver seus treinos e entrar em contato.`, '/client/dashboard', 'Acessar Plataforma');
+        await createNotification(clientId, 'Cadastro Aprovado!', `Bem-vindo! Seu treinador é ${trainerName}.`, 'success', '/client/dashboard');
+        emailService.sendEmail(client.email, 'Bem-vindo à Momentum Fit', 'Cadastro Aprovado!', `Seu perfil foi aprovado e seu treinador é ${trainerName}. Acesse para ver seus treinos.`, '/client/dashboard', 'Acessar Plataforma');
     },
 
-    // 3. Novo Treino
+    // 6. CLIENTE: Treino Criado (Todo novo treino)
     async notifyNewWorkout(workoutTitle, clientId, workoutId) {
         const res = await pool.query("SELECT email, name FROM users WHERE id = $1", [clientId]);
         if (res.rows.length === 0) return;
         const client = res.rows[0];
-        await createNotification(clientId, 'Novo Treino Disponível', `Seu treino "${workoutTitle}" está pronto.`, 'success', `/workouts/${workoutId}`);
-        emailService.sendEmail(client.email, 'Hora de Treinar!', 'Novo Treino Disponível', `Seu treinador adicionou o treino "${workoutTitle}".`, `/workouts/${workoutId}`, 'Ver Treino');
+
+        await createNotification(clientId, 'Novo Treino', `Treino "${workoutTitle}" disponível.`, 'success', `/workouts/${workoutId}`);
+        emailService.sendEmail(client.email, 'Hora de Treinar!', 'Novo Treino', `Seu treinador criou o treino "${workoutTitle}".`, `/workouts/${workoutId}`, 'Ver Treino');
     },
 
-    // 4. Atribuição (Para Treinador)
-    async notifyTrainerAssignment(trainerId, clientName, clientId) {
-        const res = await pool.query("SELECT email, name FROM users WHERE id = $1", [trainerId]);
-        if (res.rows.length === 0) return;
-        const trainer = res.rows[0];
-        await createNotification(trainerId, 'Novo Aluno Atribuído', `Você é o responsável por ${clientName}.`, 'info', `/admin/clients/${clientId}`);
-        emailService.sendEmail(trainer.email, 'Novo Aluno', 'Você tem um novo aluno!', `O aluno ${clientName} foi vinculado a você. Crie o primeiro treino dele.`, `/admin/clients/${clientId}`, 'Ver Aluno');
-    },
-
-    // 5. Nova Mensagem
-    async notifyNewMessage(senderName, receiverId) {
-        const res = await pool.query("SELECT email, name FROM users WHERE id = $1", [receiverId]);
-        if (res.rows.length === 0) return;
-        await createNotification(receiverId, 'Nova Mensagem', `${senderName} enviou uma mensagem.`, 'info', '/chat');
-    },
-
-    // 6. Novo Artigo
+    // 7. PERSONAL/CLIENTE: Novos Artigos
     async notifyNewArticle(articleTitle, articleId) {
-        const users = await pool.query("SELECT id FROM users WHERE status = 'active'");
-        for (const u of users.rows) {
-            await createNotification(u.id, 'Novo Artigo', `Leia: ${articleTitle}`, 'info', `/articles/${articleId}`);
+        // Notificar Clientes
+        const clients = await getActiveClients();
+        for (const c of clients) {
+            await createNotification(c.id, 'Novo Artigo', `Leia: ${articleTitle}`, 'info', `/articles/${articleId}`);
+        }
+        
+        // Notificar Personais
+        const trainers = await getActiveTrainers();
+        for (const t of trainers) {
+            await createNotification(t.id, 'Novo Artigo', `Novo conteúdo publicado: ${articleTitle}`, 'info', `/articles/${articleId}`);
         }
     },
     
-    // 7. Novo Treinador (Para SuperAdmin)
-    async notifyNewTrainer(trainerName) {
-        const admins = await pool.query("SELECT id, email FROM users WHERE role = 'superadmin'");
-        for (const admin of admins.rows) {
-            await createNotification(admin.id, 'Novo Treinador', `${trainerName} solicitou cadastro.`, 'warning', '/superadmin/manage');
-        }
+    // 8. PERSONAL: Conta Aprovada
+    async notifyTrainerApproval(trainerId) {
+        const res = await pool.query("SELECT email, name FROM users WHERE id = $1", [trainerId]);
+        if (res.rows.length === 0) return;
+        const trainer = res.rows[0];
+        
+        await createNotification(trainerId, 'Conta Aprovada', 'Você já pode acessar o painel.', 'success', '/admin/dashboard');
+        emailService.sendEmail(trainer.email, 'Conta Aprovada', 'Bem-vindo!', 'Sua conta de personal foi aprovada.', '/admin/dashboard', 'Acessar Painel');
     }
 };
 

@@ -35,7 +35,7 @@
                                 </form>
                             <% } %>
                             
-                            <form action="/admin/clients/<%= clientProfile.user_id %>/delete" method="POST" onsubmit="return confirm('Tem certeza? Isso apagará tudo deste cliente.');" style="margin: 0;">
+                            <form action="/admin/clients/<%= clientProfile.user_id %>/delete" method="POST" onsubmit="return confirm('Tem certeza?');" style="margin: 0;">
                                 <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                                 <button type="submit" class="btn btn-secondary btn-sm">Excluir</button>
                             </form>
@@ -73,42 +73,80 @@
                 <% } %>
             </div>
 
-            <h3 style="border-bottom: 1px solid var(--c-border); padding-bottom: 10px; margin-bottom: 20px;">Ficha do Aluno</h3>
+            <h3 style="border-bottom: 1px solid var(--c-border); padding-bottom: 10px; margin-bottom: 20px;">Ficha Completa do Aluno</h3>
+            
             <div class="client-info-grid">
-                
                 <div class="info-card">
-                    <h4>Dados Pessoais</h4>
-                    <p><strong>Idade:</strong> <%= clientProfile.age %></p>
-                    <p><strong>Sexo:</strong> <%= clientProfile.sex_assigned_at_birth %></p>
-                    <p><strong>Gênero:</strong> <%= clientProfile.gender_identity %></p>
+                    <h4 style="color: var(--c-accent-primary);">1. Dados Pessoais</h4>
+                    <p><strong>Nome Completo:</strong> <%= clientProfile.name %></p>
+                    <p><strong>Idade:</strong> <%= clientProfile.age %> anos</p>
                     <p><strong>Telefone:</strong> <%= clientProfile.phone %></p>
+                    <p><strong>Gênero:</strong> <%= clientProfile.gender_identity %></p>
+                    <p><strong>Sexo Atribuído:</strong> <%= clientProfile.sex_assigned_at_birth %></p>
+                    <% if (clientProfile.hormonal_treatment) { %>
+                        <div style="margin-top: 10px; padding: 10px; background: rgba(245, 158, 11, 0.1); border-radius: 6px;">
+                            <strong>⚡ Tratamento Hormonal:</strong><br>
+                            <%= clientProfile.hormonal_details %>
+                        </div>
+                    <% } %>
                 </div>
 
                 <div class="info-card">
-                    <h4>Corpo & Medidas</h4>
-                    <p><strong>Peso:</strong> <%= clientProfile.weight %>kg</p>
-                    <p><strong>Altura:</strong> <%= clientProfile.height %>m</p>
-                    <p><strong>IMC:</strong> <%= imc %></p>
+                    <h4 style="color: var(--c-accent-primary);">2. Medidas & Corpo</h4>
+                    <div style="display: flex; gap: 20px;">
+                        <div>
+                            <p><strong>Peso:</strong> <%= clientProfile.weight %> kg</p>
+                            <p><strong>Altura:</strong> <%= clientProfile.height %> m</p>
+                        </div>
+                        <div style="background: #222; padding: 5px 15px; border-radius: 8px;">
+                            <span style="font-size:0.8rem; color:#888;">IMC</span><br>
+                            <strong style="font-size:1.2rem;"><%= imc %></strong>
+                        </div>
+                    </div>
+                    <p><strong>% Gordura:</strong> <%= clientProfile.body_fat ? clientProfile.body_fat + '%' : '-' %></p>
                     <hr style="border-color: #333;">
-                    <ul style="padding-left: 20px; font-size: 0.9rem; color: #ccc;">
-                        <li>Cintura: <%= clientProfile.measure_waist %></li>
-                        <li>Quadril: <%= clientProfile.measure_hip %></li>
-                        <li>Braço: <%= clientProfile.measure_arm %></li>
+                    <p><strong>Circunferências:</strong></p>
+                    <ul style="padding-left: 20px; color: #ccc; font-size: 0.95rem;">
+                        <li>Cintura: <%= clientProfile.measure_waist || '-' %> cm</li>
+                        <li>Quadril: <%= clientProfile.measure_hip || '-' %> cm</li>
+                        <li>Braço: <%= clientProfile.measure_arm || '-' %> cm</li>
+                        <li>Perna: <%= clientProfile.measure_leg || '-' %> cm</li>
                     </ul>
                 </div>
 
                 <div class="info-card">
-                    <h4>Objetivos</h4>
+                    <h4 style="color: var(--c-accent-primary);">3. Objetivos</h4>
                     <p><strong>Principal:</strong> <%= clientProfile.main_goal %></p>
-                    <p><strong>Secundários:</strong> <%= clientProfile.secondary_goals %></p>
-                    <p><strong>Deadline:</strong> <%= clientProfile.specific_event %></p>
+                    <p><strong>Secundários:</strong> <%= clientProfile.secondary_goals || '-' %></p>
+                    <p><strong>Evento/Prazo:</strong> <%= clientProfile.specific_event || 'Não' %></p>
+                    <p><strong>Desafios:</strong> <%= clientProfile.challenges || '-' %></p>
                 </div>
 
-                 <div class="info-card">
-                    <h4>Saúde & Restrições</h4>
-                    <p><strong>Condições:</strong> <%= clientProfile.medical_conditions || 'Nenhuma' %></p>
-                    <p><strong>Lesões:</strong> <%= clientProfile.injuries || 'Nenhuma' %></p>
+                <div class="info-card">
+                    <h4 style="color: var(--c-accent-primary);">4. Histórico de Saúde</h4>
+                    <p><strong>Condições Médicas:</strong> <%= clientProfile.medical_conditions || 'Nenhuma' %></p>
                     <p><strong>Medicamentos:</strong> <%= clientProfile.medications || 'Nenhum' %></p>
+                    <p><strong>Cirurgias:</strong> <%= clientProfile.surgeries || 'Nenhuma' %></p>
+                    <p><strong>Lesões:</strong> <%= clientProfile.injuries || 'Nenhuma' %></p>
+                    <p><strong>Alergias:</strong> <%= clientProfile.allergies || 'Nenhuma' %></p>
+                </div>
+
+                <div class="info-card" style="grid-column: 1 / -1;">
+                    <h4 style="color: var(--c-accent-primary);">5. Estilo de Vida & Preferências</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div>
+                            <p><strong>Nível de Atividade:</strong> <%= clientProfile.fitness_level %></p>
+                            <p><strong>Histórico:</strong> <%= clientProfile.past_activity || '-' %></p>
+                            <p><strong>Preferência de Local:</strong> <%= clientProfile.workout_preference %></p>
+                            <p><strong>Disponibilidade:</strong> <%= clientProfile.availability %></p>
+                        </div>
+                        <div>
+                            <p><strong>Gosta de:</strong> <%= clientProfile.liked_activities || '-' %></p>
+                            <p><strong>Evita:</strong> <%= clientProfile.disliked_activities || '-' %></p>
+                            <p><strong>Sono (Média):</strong> <%= clientProfile.sleep_hours || '-' %></p>
+                            <p><strong>Dieta Atual:</strong> <%= clientProfile.diet_description || '-' %></p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
