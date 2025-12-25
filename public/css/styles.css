@@ -768,3 +768,24 @@ img {
     .user-info { display: none; }
     .chat-messages-area { height: calc(100% - 70px); }
 }
+
+/* --- CORREÇÃO DE EMERGÊNCIA DA LOGO --- */
+/* Esta regra sobrescreve qualquer estilo anterior que esteja forçando a logo a ser redonda */
+img.header-logo-img, 
+.header-logo img {
+    width: auto !important;        /* Permite largura natural */
+    height: 45px !important;       /* Altura fixa do header */
+    max-width: 200px !important;   /* Limite horizontal */
+    border-radius: 0 !important;   /* Remove arredondamento */
+    object-fit: contain !important;/* Garante que a imagem inteira apareça */
+    border: none !important;       /* Remove bordas */
+    aspect-ratio: auto !important; /* Reseta proporção forçada */
+}
+
+/* Garante o alinhamento vertical no container */
+.header-logo, .header-logo a {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    text-decoration: none;
+}
