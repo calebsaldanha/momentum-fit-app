@@ -17,7 +17,8 @@
         <div class="notif-list">
             <% if (locals.notifications && locals.notifications.length > 0) { %>
                 <% notifications.forEach(n => { %>
-                    <div class="notif-item <%= n.is_read ? 'read' : 'unread' %>" onclick="clickNotification('<%= n.id %>', '<%= n.link %>', this)">
+                    <div class="notif-item <%= n.is_read ? 'read' : 'unread' %>" 
+                         onclick="window.location.href='/notifications/go/<%= n.id %>'">
                         <div class="notif-title"><%= n.title %></div>
                         <div class="notif-msg"><%= n.message %></div>
                         <div class="notif-time"><%= new Date(n.created_at).toLocaleDateString('pt-BR') %></div>
@@ -32,7 +33,7 @@
 </div>
 
 <script>
-    // --- Lógica Corrigida de Persistência ---
+    // --- Lógica Simplificada ---
 
     window.toggleNotifications = function(e) {
         if(e) { e.preventDefault(); e.stopPropagation(); }
@@ -43,58 +44,23 @@
     window.markAllRead = async function(e) {
         if(e) { e.preventDefault(); e.stopPropagation(); }
         
-        // 1. Visual (Imediato)
+        // Remove badge visualmente
         const badge = document.querySelector('.notif-badge');
         if(badge) badge.remove();
         
+        // Marca itens como lidos visualmente
         document.querySelectorAll('.notif-item.unread').forEach(el => {
             el.classList.remove('unread');
             el.classList.add('read');
         });
 
-        // 2. Servidor
+        // Requisita ao servidor
         try {
             await fetch('/notifications/mark-all-read', { 
                 method: 'POST', 
                 headers: { 'Content-Type': 'application/json' } 
             });
         } catch(err) { console.error('Erro backend:', err); }
-    };
-
-    window.clickNotification = async function(id, link, element) {
-        // 1. Atualização Visual Otimista
-        if (element && element.classList.contains('unread')) {
-            element.classList.remove('unread');
-            element.classList.add('read');
-
-            const badge = document.querySelector('.notif-badge');
-            if (badge) {
-                let currentCount = parseInt(badge.innerText);
-                if (!isNaN(currentCount)) {
-                    let newCount = currentCount - 1;
-                    if (newCount <= 0) {
-                        badge.remove();
-                    } else {
-                        badge.innerText = newCount > 9 ? '9+' : newCount;
-                    }
-                }
-            }
-        }
-
-        // 2. Aguarda o servidor confirmar antes de sair da página
-        try {
-            await fetch(`/notifications/mark-read/${id}`, { 
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
-            });
-        } catch(e) { 
-            console.error("Erro ao sincronizar leitura:", e); 
-        }
-
-        // 3. Redirecionamento seguro
-        if (link && link !== 'null' && link !== '') {
-            window.location.href = link;
-        }
     };
 
     // Fechar dropdown ao clicar fora
