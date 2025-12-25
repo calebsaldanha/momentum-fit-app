@@ -789,3 +789,62 @@ img.header-logo-img,
     height: 100%;
     text-decoration: none;
 }
+
+/* --- FIX HEADER & LOGO --- */
+
+/* Garante que o header tenha as propriedades corretas caso algo sobrescreva */
+.header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between;
+    height: 80px; /* Altura fixa */
+    background: rgba(5, 5, 5, 0.95); /* Fundo escuro quase sólido */
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    width: 100%;
+    z-index: 1000;
+    padding: 0 20px;
+}
+
+/* Container de navegação para alinhar logo e ações */
+.nav-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Correção da Logo Retangular */
+img.header-logo-img {
+    height: 45px !important;       /* Altura controlada */
+    width: auto !important;        /* Largura natural */
+    max-width: 250px !important;   /* Limite seguro */
+    border-radius: 0 !important;   /* Remove qualquer arredondamento forçado */
+    object-fit: contain !important;/* Garante a imagem inteira */
+    border: none !important;
+    aspect-ratio: auto !important;
+    background: transparent !important;
+    margin: 0 !important;
+}
+
+/* Ações do usuário (Direita) */
+.user-actions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+/* Ajuste para mobile */
+@media (max-width: 768px) {
+    .header {
+        padding: 0 15px;
+        height: 70px;
+    }
+    img.header-logo-img {
+        height: 35px !important;
+    }
+}

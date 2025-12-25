@@ -9,31 +9,33 @@
     <meta name="csrf-token" content="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
 </head>
 <body>
-    <header class="main-header">
-        <div class="header-logo">
-            <a href="/">
-                <img src="/images/momentum-fit-logo-completo.png" alt="Momentum Fit" class="header-logo-img">
-            </a>
-        </div>
-        
-        <div class="user-actions">
-            <% if (user) { %>
-                <%- include("notification-bell.ejs") %>
-                
-                <div class="user-profile">
-                    <div class="user-avatar-sm">
-                        <%= user.name.charAt(0).toUpperCase() %>
+    <header class="header">
+        <div class="nav-container container">
+            <div class="header-logo">
+                <a href="/" class="logo-link">
+                    <img src="/images/momentum-fit-logo-completo.png" alt="Momentum Fit" class="header-logo-img">
+                </a>
+            </div>
+            
+            <div class="user-actions">
+                <% if (user) { %>
+                    <%- include("notification-bell.ejs") %>
+                    
+                    <div class="user-profile">
+                        <div class="user-avatar-sm">
+                            <%= user.name.charAt(0).toUpperCase() %>
+                        </div>
+                        <span class="user-name"><%= user.name %></span>
                     </div>
-                    <span class="user-name"><%= user.name %></span>
-                </div>
-                
-                <form action="/auth/logout" method="POST" style="margin: 0;">
-                    <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
-                    <button type="submit" class="logout-btn">Sair</button>
-                </form>
-            <% } else { %>
-                <a href="/auth/login" class="btn-login">Entrar</a>
-            <% } %>
+                    
+                    <form action="/auth/logout" method="POST" style="margin: 0;">
+                        <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+                        <button type="submit" class="logout-btn">Sair</button>
+                    </form>
+                <% } else { %>
+                    <a href="/auth/login" class="btn-login">Entrar</a>
+                <% } %>
+            </div>
         </div>
     </header>
     <script src="/js/main.js"></script>
