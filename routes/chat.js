@@ -16,13 +16,10 @@ router.get('/', async (req, res) => {
         let query;
         let params = [];
 
-        // Lógica de contatos do chat
         if (role === 'superadmin') {
-            // Super Admin vê TODOS (exceto ele mesmo)
             query = "SELECT id, name, role FROM users WHERE id != $1 ORDER BY name ASC";
             params = [id];
         } else if (role === 'client') {
-            // Cliente vê apenas seu treinador
             if (status !== 'active') {
                 return res.render('pages/chat', { 
                     title: 'Chat', 
@@ -38,7 +35,6 @@ router.get('/', async (req, res) => {
                 WHERE cp.user_id = $1`;
             params = [id];
         } else {
-            // Personal vê apenas seus alunos
             query = `
                 SELECT u.id, u.name 
                 FROM users u 
@@ -49,7 +45,6 @@ router.get('/', async (req, res) => {
         
         const result = await pool.query(query, params);
         
-        // Formata lista para Super Admin saber quem é quem
         const users = result.rows.map(u => {
             if (role === 'superadmin' && u.role) {
                 const roleName = u.role === 'trainer' ? 'Personal' : (u.role === 'client' ? 'Aluno' : 'Admin');
@@ -58,7 +53,6 @@ router.get('/', async (req, res) => {
             return u;
         });
 
-        // IMPORTANTE: Passamos 'currentPage: chat' para o menu saber que deve destacar "Mensagens"
         res.render('pages/chat', { 
             title: 'Chat - Momentum Fit', 
             chatUsers: users,
@@ -102,11 +96,12 @@ router.post('/send', requireAuth, upload.single('file'), async (req, res) => {
         
         const result = await pool.query(
             'INSERT INTO messages (sender_id, receiver_id, content, message_type) VALUES ($1, $2, $3, $4) RETURNING *', 
-        }
             [sender_id, receiver_id, messageContent, messageType]
         );
         
+        // Notificação de Mensagem
         notificationService.notifyNewMessage(senderName, receiver_id).catch(e => console.error(e));
+        
         res.status(201).json(result.rows[0]);
     } catch (err) { res.status(500).json({ error: "Erro envio." }); }
 });

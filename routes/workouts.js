@@ -21,10 +21,8 @@ router.get('/create', async (req, res) => {
         let params = [];
 
         if (userRole === 'superadmin') {
-            // Superadmin vê todos os clientes ativos
             query = "SELECT id, name FROM users WHERE role = 'client' AND status = 'active' ORDER BY name";
         } else {
-            // Personal vê APENAS seus alunos atribuídos
             query = `
                 SELECT u.id, u.name 
                 FROM users u 
@@ -41,8 +39,8 @@ router.get('/create', async (req, res) => {
             clients: clients.rows, 
             selectedClientId: req.query.client_id || '', 
             csrfToken: res.locals.csrfToken,
-            user: req.session.user,           // CRUCIAL para o Header
-            currentPage: 'create-workout'      // CRUCIAL para o Sidebar (Manter "Meus Alunos" ativo)
+            user: req.session.user,
+            currentPage: 'create-workout'
         });
     } catch (err) {
         console.error(err);
@@ -79,6 +77,8 @@ router.post('/create', async (req, res) => {
         }
 
         await client.query('COMMIT');
+        
+        // Notificação Corrigida
         await notificationService.notifyNewWorkout(title, client_id, workoutId, req.session.user.name);
 
         res.json({ success: true, clientId: client_id });
@@ -109,8 +109,8 @@ router.get('/edit/:id', async (req, res) => {
             workout: workoutRes.rows[0],
             exercises: exercisesRes.rows,
             csrfToken: res.locals.csrfToken,
-            user: req.session.user,           // CRUCIAL
-            currentPage: 'create-workout'      // Mantém contexto
+            user: req.session.user,
+            currentPage: 'create-workout'
         });
     } catch (err) { res.status(500).render('pages/error', { message: 'Erro ao carregar edição.' }); }
 });
@@ -124,8 +124,6 @@ router.post('/edit/:id', async (req, res) => {
     try {
         await client.query('BEGIN');
         await client.query("UPDATE workouts SET title = $1, description = $2, updated_at = NOW() WHERE id = $3", [title, description, workoutId]);
-        // Notificação de Edição
-        await notificationService.notifyWorkoutUpdate(title || 'Treino', req.body.client_id || req.params.client_id, req.session.user.name);
         await client.query("DELETE FROM workout_exercises WHERE workout_id = $1", [workoutId]);
         
         if (exercises && exercises.length > 0) {
@@ -140,6 +138,10 @@ router.post('/edit/:id', async (req, res) => {
         await client.query('COMMIT');
         
         const wRes = await client.query("SELECT client_id FROM workouts WHERE id = $1", [workoutId]);
+        
+        // Notificação de Edição
+        await notificationService.notifyWorkoutUpdate(title, wRes.rows[0].client_id, req.session.user.name);
+        
         res.json({ success: true, clientId: wRes.rows[0].client_id });
 
     } catch (err) {
@@ -162,7 +164,7 @@ router.get('/:id', async (req, res) => {
             title: workoutRes.rows[0].title,
             workout: workoutRes.rows[0],
             exercises: exercisesRes.rows,
-            user: req.session.user,           // CRUCIAL
+            user: req.session.user,
             currentPage: 'create-workout'
         });
     } catch(e) { res.render('pages/error', { message: 'Erro detalhes.' }); }
