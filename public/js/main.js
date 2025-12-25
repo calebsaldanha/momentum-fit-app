@@ -98,3 +98,60 @@ async function clickNotification(id, link) {
         if (link && link !== 'null') window.location.href = link;
     }
 }
+
+/* --- Corre√ß√£o Notifica√ß√µes (Global Scope) --- */
+window.toggleNotifications = function(e) {
+    console.log('Ì¥î Clique no sino detetado!');
+    if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    
+    const dropdown = document.getElementById('notifDropdown');
+    if (!dropdown) {
+        console.error('‚ùå Elemento dropdown n√£o encontrado!');
+        return;
+    }
+    
+    // Toggle da classe active
+    const isActive = dropdown.classList.toggle('active');
+    console.log('Estado do dropdown:', isActive ? 'Aberto' : 'Fechado');
+};
+
+window.markAllRead = async function() {
+    console.log('Ì∑π Marcando todas como lidas...');
+    try {
+        await fetch('/notifications/mark-all-read', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+        const badge = document.querySelector('.notif-badge');
+        if(badge) badge.remove();
+        document.querySelectorAll('.notif-item.unread').forEach(el => {
+            el.classList.remove('unread');
+            el.classList.add('read');
+        });
+    } catch(e) { console.error('Erro ao marcar lidas:', e); }
+};
+
+window.clickNotification = async function(id, link) {
+    console.log('Ì¥ó Clicou na notifica√ß√£o:', id);
+    try {
+        await fetch(`/notifications/mark-read/${id}`, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+        if (link && link !== 'null' && link !== '') window.location.href = link;
+    } catch(e) { 
+        console.error(e);
+        if (link && link !== 'null' && link !== '') window.location.href = link;
+    }
+};
+
+// Fechar ao clicar fora (Evento Global)
+document.addEventListener('click', (e) => {
+    const dropdown = document.getElementById('notifDropdown');
+    const btn = document.getElementById('notifBtn');
+    
+    // Se o dropdown est√° aberto E o clique N√ÉO foi no dropdown NEM no bot√£o
+    if (dropdown && dropdown.classList.contains('active')) {
+        if (!dropdown.contains(e.target) && (!btn || !btn.contains(e.target))) {
+            console.log('Ì∫™ Fechando dropdown (clique fora)');
+            dropdown.classList.remove('active');
+        }
+    }
+});

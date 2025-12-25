@@ -524,3 +524,35 @@ img {
 .notification-wrapper { margin-right: 15px; z-index: 1001; }
 .notif-dropdown { z-index: 2000; border: 1px solid #ddd; }
 .notif-item.unread { background-color: #f0f9ff; font-weight: 600; }
+
+/* --- Fix Notificações --- */
+.notification-wrapper {
+    position: relative !important;
+    z-index: 9999 !important;
+    overflow: visible !important;
+}
+
+.notif-dropdown {
+    display: none;
+    position: absolute;
+    top: 130%; /* Um pouco mais para baixo para não sobrepor o botão */
+    right: 0;
+    width: 320px;
+    background: white;
+    border: 1px solid #ccc;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+    border-radius: 8px;
+    z-index: 10000 !important; /* Muito alto para ficar acima de tudo */
+}
+
+.notif-dropdown.active {
+    display: block !important; /* Força a exibição */
+}
+
+/* Ajuste Mobile */
+@media (max-width: 768px) {
+    .notif-dropdown {
+        width: 280px;
+        right: -50px; /* Ajuste para não sair da tela em mobile */
+    }
+}
