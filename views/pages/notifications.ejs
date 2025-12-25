@@ -1,0 +1,47 @@
+<%- include('../partials/header') %>
+
+<div class="container" style="padding-top: 40px; padding-bottom: 40px;">
+    <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <h2 style="color: #1e293b; margin: 0;">Todas as Notificações</h2>
+        <button onclick="markAllReadPage()" class="btn btn-secondary btn-sm">Marcar todas como lidas</button>
+    </div>
+
+    <div class="notifications-list" style="background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); overflow: hidden;">
+        <% if (notifications && notifications.length > 0) { %>
+            <% notifications.forEach(n => { %>
+                <div class="notif-row <%= n.is_read ? 'read' : 'unread' %>" 
+                     onclick="clickNotificationPage('<%= n.id %>', '<%= n.link %>')"
+                     style="padding: 20px; border-bottom: 1px solid #f1f5f9; cursor: pointer; transition: background 0.2s;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <span style="font-weight: 700; color: #334155;"><%= n.title %></span>
+                        <span style="font-size: 0.85rem; color: #94a3b8;"><%= new Date(n.created_at).toLocaleString('pt-BR') %></span>
+                    </div>
+                    <div style="color: #64748b; font-size: 0.95rem;"><%= n.message %></div>
+                </div>
+            <% }) %>
+        <% } else { %>
+            <div style="padding: 40px; text-align: center; color: #64748b;">Nenhuma notificação encontrada.</div>
+        <% } %>
+    </div>
+</div>
+
+<style>
+    .notif-row.unread { background-color: #f0f9ff; border-left: 4px solid #0ea5e9; }
+    .notif-row:hover { background-color: #f8fafc; }
+</style>
+
+<script>
+    async function markAllReadPage() {
+        if(confirm('Marcar todas como lidas?')) {
+            await fetch('/notifications/mark-all-read', { method: 'POST' });
+            window.location.reload();
+        }
+    }
+    async function clickNotificationPage(id, link) {
+        await fetch('/notifications/mark-read/' + id, { method: 'POST' });
+        if(link && link !== 'null') window.location.href = link;
+        else window.location.reload();
+    }
+</script>
+
+<%- include('../partials/footer') %>
