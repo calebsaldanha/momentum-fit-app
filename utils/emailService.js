@@ -1,5 +1,6 @@
 const nodemailer = require('nodemailer');
 const { generateEmailTemplate } = require('./emailTemplates');
+const path = require('path');
 require('dotenv').config();
 
 const transporter = nodemailer.createTransport({
@@ -13,13 +14,25 @@ const transporter = nodemailer.createTransport({
     tls: { rejectUnauthorized: false }
 });
 
-// Helper para descobrir o HOST correto (Produção vs Local)
 const getHost = () => {
-    // Se tiver definido no .env (ideal para produção)
     if (process.env.APP_URL) return process.env.APP_URL;
     if (process.env.VERCEL_URL) return process.env.VERCEL_URL;
-    // Fallback para desenvolvimento local
     return 'localhost:3000';
+};
+
+// Função auxiliar para obter anexos padrão (Logo)
+const getCommonAttachments = () => {
+    try {
+        return [{
+            filename: 'momentum-fit-logo-completo.png',
+            // Caminho absoluto para a imagem na pasta public
+            path: path.join(process.cwd(), 'public', 'images', 'momentum-fit-logo-completo.png'),
+            cid: 'logo@momentumfit' // ID referenciado no template HTML
+        }];
+    } catch (e) {
+        console.warn("[EmailService] Aviso: Logo não encontrada para anexo.", e.message);
+        return [];
+    }
 };
 
 const sendEmail = async (to, type, role, data, link, linkText) => {
@@ -34,7 +47,8 @@ const sendEmail = async (to, type, role, data, link, linkText) => {
         const info = await transporter.sendMail({
             from: fromAddress,
             to, subject, html,
-            replyTo: fromAddress
+            replyTo: fromAddress,
+            attachments: getCommonAttachments() // Anexa a logo
         });
         console.log(`[EmailService] Enviado para ${to} (ID: ${info.messageId})`);
         return true;
@@ -45,7 +59,6 @@ const sendEmail = async (to, type, role, data, link, linkText) => {
 };
 
 const sendPasswordResetEmail = async (email, resetToken, host) => {
-    // Usamos o template 'custom' para manter o design consistente
     const resetUrl = `https://${host}/auth/reset-password/${resetToken}`;
     const { subject, html } = generateEmailTemplate(
         'custom', 'client',
@@ -62,7 +75,8 @@ const sendPasswordResetEmail = async (email, resetToken, host) => {
             from: `"Momentum Fit" <${fromAddress}>`,
             to: email, 
             subject: 'Recuperação de Senha', 
-            html
+            html,
+            attachments: getCommonAttachments() // Anexa a logo
         });
         return true;
     } catch (error) {

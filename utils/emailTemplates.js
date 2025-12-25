@@ -11,23 +11,18 @@ const styles = {
 };
 
 const getBaseLayout = (preheader, title, content, host) => {
-    // Definição de Protocolo e Host
+    // URL Base para links e imagem de fundo
     const protocol = host.includes('localhost') ? 'http' : 'https';
     const baseUrl = `${protocol}://${host}`;
 
-    // --- IMAGENS DA PLATAFORMA ---
-    // Usamos caminhos absolutos baseados no host da aplicação
-    
-    // Logo Principal
-    const logoUrl = host.includes('localhost') 
-        ? 'https://placehold.co/400x100/121212/BEF202?text=MOMENTUM+FIT' // Fallback local
-        : `${baseUrl}/images/momentum-fit-logo-completo.png`;
-
-    // Imagem de Fundo (Background Geral)
-    // Usamos a 'auth-bg.png' ou 'hero-bg.png' para dar textura
+    // Imagem de Fundo (Background)
+    // Nota: Backgrounds precisam ser URL pública. Se for localhost, usamos um placeholder escuro.
     const bgUrl = host.includes('localhost')
-        ? 'https://placehold.co/800x1000/050505/111111?text=' 
+        ? 'https://placehold.co/800x1000/050505/050505.png' 
         : `${baseUrl}/images/auth-bg.png`;
+
+    // Logo: Usa CID (Content-ID) para carregar do anexo
+    const logoSrc = 'cid:logo@momentumfit';
 
     return `
     <!DOCTYPE html>
@@ -41,14 +36,12 @@ const getBaseLayout = (preheader, title, content, host) => {
             body { margin: 0; padding: 0; background-color: ${styles.bgBody}; -webkit-font-smoothing: antialiased; }
             a { color: ${styles.accent}; text-decoration: none; }
             img { display: block; border: 0; max-width: 100%; height: auto; }
-            
-            /* Background Image Support */
             .bg-image {
                 background-image: url('${bgUrl}');
                 background-size: cover;
                 background-position: center;
                 background-repeat: no-repeat;
-                background-color: ${styles.bgBody}; /* Fallback color */
+                background-color: ${styles.bgBody};
             }
         </style>
     </head>
@@ -59,7 +52,7 @@ const getBaseLayout = (preheader, title, content, host) => {
             &nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;
         </div>
 
-        <table border="0" cellpadding="0" cellspacing="0" width="100%" class="bg-image" style="background-image: url('${bgUrl}'); background-color: ${styles.bgBody}; padding: 60px 0;">
+        <table border="0" cellpadding="0" cellspacing="0" width="100%" class="bg-image" style="padding: 60px 0;">
             <tr>
                 <td align="center">
                     
@@ -68,7 +61,7 @@ const getBaseLayout = (preheader, title, content, host) => {
                         <tr>
                             <td align="center" style="padding: 50px 0 40px 0; border-bottom: 1px solid ${styles.border}; background: linear-gradient(180deg, rgba(30,30,30,0.5) 0%, rgba(18,18,18,0) 100%);">
                                 <a href="${baseUrl}" target="_blank">
-                                    <img src="${logoUrl}" alt="Momentum Fit" width="220" style="font-family: sans-serif; color: #ffffff; font-size: 20px; text-align: center;">
+                                    <img src="${logoSrc}" alt="Momentum Fit" width="220" style="font-family: sans-serif; color: #ffffff; font-size: 20px; text-align: center;">
                                 </a>
                             </td>
                         </tr>
@@ -78,7 +71,6 @@ const getBaseLayout = (preheader, title, content, host) => {
                                 <h1 style="margin: 0 0 30px 0; font-size: 24px; font-weight: 800; color: ${styles.textPrimary}; letter-spacing: -0.5px; text-transform: uppercase; text-align: center;">
                                     ${title}
                                 </h1>
-                                
                                 <div style="font-size: 16px; line-height: 1.8; color: ${styles.textSecondary}; text-align: left;">
                                     ${content}
                                 </div>
@@ -89,8 +81,8 @@ const getBaseLayout = (preheader, title, content, host) => {
                             <td style="background-color: #0A0A0A; padding: 30px; text-align: center; border-top: 1px solid ${styles.border};">
                                 <p style="margin: 0 0 10px 0; font-size: 10px; font-weight: 700; letter-spacing: 2px; color: #555;">MOMENTUM FIT PLATFORM</p>
                                 <p style="margin: 0; font-size: 11px; color: #444;">
-                                    Este é um e-mail automático. Por favor, não responda.<br>
-                                    © ${new Date().getFullYear()} Momentum Fit. Todos os direitos reservados.
+                                    Este é um e-mail automático.<br>
+                                    © ${new Date().getFullYear()} Momentum Fit.
                                 </p>
                             </td>
                         </tr>
@@ -106,7 +98,6 @@ const getBaseLayout = (preheader, title, content, host) => {
     `;
 };
 
-// CTA Button - Estilo "Neon"
 const createButton = (link, text) => `
     <table border="0" cellpadding="0" cellspacing="0" style="margin-top: 40px; margin-bottom: 20px; width: 100%;">
         <tr>
@@ -129,32 +120,23 @@ const highlight = (text) => `<span style="color: ${styles.textPrimary}; font-wei
 const accent = (text) => `<span style="color: ${styles.accent}; font-weight: 700;">${text}</span>`;
 
 const templates = {
-    // ADMIN
+    // Mapeamento dos templates (sem alterações na lógica de texto)
     pendingTrainer: (data) => ({ title: 'Solicitação de Personal', text: `Um novo personal trainer, ${highlight(data.name)} (<a href="mailto:${data.email}" style="color:${styles.accent}">${data.email}</a>), realizou o cadastro.<br>Verifique as credenciais para aprovação.` }),
     pendingClient: (data) => ({ title: 'Novo Cliente', text: `O cliente ${highlight(data.name)} completou o cadastro e aguarda vinculação.` }),
     newMessageAdmin: (data) => ({ title: 'Nova Mensagem', text: `O usuário ${highlight(data.name)} enviou uma mensagem:<br><br><em>"${data.subject}"</em>` }),
-    newWorkoutCreated: (data) => ({ title: 'Novo Treino Criado', text: `O personal ${highlight(data.trainerName)} criou o treino "${accent(data.workoutTitle)}".` }),
-
-    // PERSONAL
     newMessageTrainer: (data) => ({ title: 'Nova Mensagem', text: `Seu aluno ${highlight(data.clientName)} enviou uma mensagem no chat.` }),
     clientAssigned: (data) => ({ title: 'Novo Aluno', text: `Você recebeu um novo aluno! ${highlight(data.clientName)} foi adicionado à sua lista.` }),
-    newArticle: (data) => ({ title: 'Novo Artigo', text: `Um novo artigo foi publicado: ${highlight(data.articleTitle)}.` }),
-
-    // ALUNO
     newMessageClient: (data) => ({ title: 'Mensagem do Personal', text: `${highlight(data.trainerName)} respondeu sua mensagem no chat.` }),
-    registrationApproved: () => ({ title: 'Bem-vindo(a)!', text: `Sua conta na Momentum Fit foi aprovada. Seu personal entrará em contato em breve para iniciar sua jornada.` }),
+    registrationApproved: () => ({ title: 'Bem-vindo(a)!', text: `Sua conta na Momentum Fit foi aprovada. Seu personal entrará em contato em breve.` }),
     newWorkout: (data) => ({ title: 'Novo Treino', text: `Um novo treino foi adicionado à sua rotina: <br><br>${accent(data.workoutTitle)}` }),
+    newWorkoutCreated: (data) => ({ title: 'Novo Treino Criado', text: `O personal ${highlight(data.trainerName)} criou o treino "${accent(data.workoutTitle)}".` }),
     workoutEdited: (data) => ({ title: 'Treino Atualizado', text: `Seu personal fez ajustes no treino ${highlight(data.workoutTitle)}.` }),
-    firstWorkout: (data) => ({ title: 'Primeiro Treino', text: `Seu primeiro treino "${accent(data.workoutTitle)}" já está disponível!` }),
-
-    // GENÉRICO
+    newArticle: (data) => ({ title: 'Novo Artigo', text: `Um novo artigo foi publicado: ${highlight(data.articleTitle)}.` }),
     custom: (data) => ({ title: 'Notificação', text: data.text })
 };
 
 const generateEmailTemplate = (type, role, data, link, linkText, host) => {
     let templateKey = type;
-    
-    // Roteamento inteligente de templates
     if (type === 'newMessage') {
         if (role === 'admin') templateKey = 'newMessageAdmin';
         else if (role === 'trainer') templateKey = 'newMessageTrainer';
@@ -166,8 +148,6 @@ const generateEmailTemplate = (type, role, data, link, linkText, host) => {
 
     let bodyContent = text;
     let fullLink = '#';
-    
-    // Tratamento de Link
     if (link) {
         fullLink = link.startsWith('http') ? link : (host.startsWith('http') ? `${host}${link}` : `https://${host}${link}`);
         bodyContent += createButton(fullLink, linkText || 'Acessar');
