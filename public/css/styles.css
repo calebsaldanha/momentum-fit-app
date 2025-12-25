@@ -556,3 +556,18 @@ img {
         right: -50px; /* Ajuste para não sair da tela em mobile */
     }
 }
+
+/* --- Correção Crítica de Visibilidade do Dropdown --- */
+.nav-menu {
+    overflow: visible !important; /* Permite que o dropdown saia da caixa do menu */
+}
+
+.user-actions {
+    position: relative; /* Garante que o dropdown se posicione em relação a este item */
+}
+
+/* Garante que o dropdown apareça acima de outros elementos do header */
+.notif-dropdown {
+    top: 45px !important; /* Ajuste fino da altura */
+    right: -10px !important;
+}
