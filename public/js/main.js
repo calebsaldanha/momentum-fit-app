@@ -49,3 +49,52 @@ function showNotification(message, type = 'info') {
         });
     }, 4000);
 }
+
+// --- Lógica de Notificações ---
+function toggleNotifications(e) {
+    e.stopPropagation();
+    const dropdown = document.getElementById('notifDropdown');
+    dropdown.classList.toggle('active');
+}
+
+// Fechar ao clicar fora
+document.addEventListener('click', (e) => {
+    const dropdown = document.getElementById('notifDropdown');
+    const btn = document.getElementById('notifBtn');
+    if (dropdown && dropdown.classList.contains('active') && !dropdown.contains(e.target) && !btn.contains(e.target)) {
+        dropdown.classList.remove('active');
+    }
+});
+
+async function markAllRead() {
+    try {
+        await fetch('/notifications/mark-all-read', { 
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        // Remover badge visualmente
+        const badge = document.querySelector('.notif-badge');
+        if(badge) badge.remove();
+        
+        // Mudar items para lidos visualmente
+        document.querySelectorAll('.notif-item.unread').forEach(el => {
+            el.classList.remove('unread');
+            el.classList.add('read');
+        });
+    } catch(e) { console.error(e); }
+}
+
+async function clickNotification(id, link) {
+    try {
+        // Marcar como lida
+        await fetch(`/notifications/mark-read/${id}`, { 
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        // Redirecionar
+        if (link && link !== 'null') window.location.href = link;
+    } catch(e) { 
+        console.error(e);
+        if (link && link !== 'null') window.location.href = link;
+    }
+}

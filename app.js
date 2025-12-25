@@ -74,6 +74,7 @@ app.use(async (req, res, next) => {
 });
 
 // Rotas
+app.use(require('./middleware/notifications'));
 app.use('/', require('./routes/index'));
 app.use('/auth', require('./routes/auth'));
 app.use('/client', require('./routes/client'));

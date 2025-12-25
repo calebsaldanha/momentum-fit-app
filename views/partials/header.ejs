@@ -57,7 +57,7 @@
                             <% } %>
 
                             <li class="user-actions" style="display: flex; align-items: center; gap: 15px; margin-left: 10px;">
-                                <div class="user-badge">Olá, <%= user.name.split(' ')[0] %></div>
+                                <%- include("notification-bell.ejs") %> <div class="user-badge">Olá, <%= user.name.split(' ')[0] %></div>
                                 <form action="/auth/logout" method="POST" style="margin: 0;">
                                     <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
                                     <button type="submit" class="btn btn-secondary btn-sm">Sair</button>

@@ -421,3 +421,101 @@ img {
     from { transform: translateX(100%); opacity: 0; }
     to { transform: translateX(0); opacity: 1; }
 }
+
+/* --- Notificações --- */
+.notification-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.notif-btn {
+    background: none;
+    border: none;
+    color: #fff; /* Ajustar conforme cor do header */
+    cursor: pointer;
+    position: relative;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+}
+
+.notif-badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: #ef4444;
+    color: white;
+    font-size: 0.7rem;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.notif-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: -10px;
+    width: 300px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    z-index: 1000;
+    margin-top: 10px;
+    color: #333;
+    overflow: hidden;
+}
+
+.notif-dropdown.active {
+    display: block;
+}
+
+.notif-header {
+    padding: 10px 15px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+}
+
+.mark-all-btn {
+    background: none;
+    border: none;
+    color: #2563eb;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+.notif-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.notif-item {
+    padding: 12px 15px;
+    border-bottom: 1px solid #f0f0f0;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.notif-item:hover {
+    background: #f8fafc;
+}
+
+.notif-item.unread {
+    background: #eff6ff;
+    border-left: 3px solid #2563eb;
+}
+
+.notif-title { font-weight: 600; font-size: 0.9rem; margin-bottom: 2px; }
+.notif-msg { font-size: 0.85rem; color: #666; }
+.notif-time { font-size: 0.75rem; color: #999; margin-top: 4px; }
+.notif-empty { padding: 20px; text-align: center; color: #888; font-size: 0.9rem; }
+.notif-footer { display: block; text-align: center; padding: 10px; background: #f8f9fa; color: #2563eb; font-size: 0.85rem; text-decoration: none; }
