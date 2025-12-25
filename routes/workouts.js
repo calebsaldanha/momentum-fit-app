@@ -1,3 +1,4 @@
+const notificationService = require('../utils/notificationService');
 const express = require('express');
 const router = express.Router();
 const { pool } = require('../database/db');
@@ -65,6 +66,9 @@ router.post('/create', async (req, res) => {
         // 1. Criar o Treino
         const workoutRes = await client.query(
             "INSERT INTO workouts (client_id, trainer_id, title, description, created_at) VALUES ($1, $2, $3, $4, NOW()) RETURNING id",
+        // Notificação de Novo Treino
+        const newWorkoutId = result.rows[0].id;
+        await notificationService.notifyNewWorkout(title, client_id, newWorkoutId, req.session.user.name);
             [client_id, req.session.user.id, title, description || '']
         );
         const workoutId = workoutRes.rows[0].id;
@@ -124,6 +128,8 @@ router.post('/edit/:id', async (req, res) => {
     try {
         await client.query('BEGIN');
         await client.query("UPDATE workouts SET title = $1, description = $2, updated_at = NOW() WHERE id = $3", [title, description, workoutId]);
+        // Notificação de Edição
+        await notificationService.notifyWorkoutUpdate(title || 'Treino', req.body.client_id || req.params.client_id, req.session.user.name);
         await client.query("DELETE FROM workout_exercises WHERE workout_id = $1", [workoutId]);
         
         if (exercises && exercises.length > 0) {

@@ -1,3 +1,4 @@
+const notificationService = require('../utils/notificationService');
 const express = require('express');
 const router = express.Router();
 const { pool } = require('../database/db');
@@ -102,6 +103,10 @@ router.post('/send', requireAuth, upload.single('file'), async (req, res) => {
         
         const result = await pool.query(
             'INSERT INTO messages (sender_id, receiver_id, content, message_type) VALUES ($1, $2, $3, $4) RETURNING *', 
+        // Notificação de Mensagem
+        if (req.body.receiverId) {
+            await notificationService.notifyNewMessage(req.session.user.name, req.body.receiverId);
+        }
             [sender_id, receiver_id, messageContent, messageType]
         );
         

@@ -24,6 +24,7 @@ async function getActiveClients() {
 
 async function createNotification(userId, title, message, type = 'info', link = null) {
     try {
+        // Evitar duplicatas exatas em curto período (opcional, mas bom pra chat)
         await pool.query(
             "INSERT INTO notifications (user_id, title, message, type, link) VALUES ($1, $2, $3, $4, $5)",
             [userId, title, message, type, link]
@@ -38,8 +39,6 @@ const notificationService = {
             const admins = await getSuperAdmins();
             for (const admin of admins) {
                 await createNotification(admin.id, 'Novo Aluno', `${clientName} aguarda avaliação.`, 'warning', `/admin/clients/${clientId}`);
-                // Email opcional (catch para não travar loop)
-                emailService.sendEmail(admin.email, 'Novo Aluno', 'Cadastro', `${clientName} se cadastrou.`, `/admin/clients/${clientId}`, 'Ver').catch(() => {});
             }
         } catch (e) { console.error(e); }
     },
@@ -54,7 +53,7 @@ const notificationService = {
         } catch (e) { console.error(e); }
     },
 
-    // Nova Mensagem
+    // CHAT: Nova Mensagem (Para todos os perfis)
     async notifyNewMessage(senderName, receiverId) {
         try {
             await createNotification(receiverId, 'Nova Mensagem', `${senderName} enviou uma mensagem.`, 'info', '/chat');
@@ -71,21 +70,42 @@ const notificationService = {
         } catch (e) { console.error(e); }
     },
 
-    // ALUNO: Aprovação
+    // ALUNO: Aprovação de Perfil
     async notifyClientApproval(clientId, trainerName) {
         try {
             await createNotification(clientId, 'Cadastro Aprovado!', `Seu treinador é ${trainerName}.`, 'success', '/client/dashboard');
         } catch (e) { console.error(e); }
     },
 
-    // ALUNO: Novo Treino
-    async notifyNewWorkout(workoutTitle, clientId, workoutId) {
+    // TREINOS: Criação (Notifica Aluno e Admin)
+    async notifyNewWorkout(workoutTitle, clientId, workoutId, trainerName) {
         try {
+            // Notifica Aluno (Primeiro treino ou novo treino)
             await createNotification(clientId, 'Novo Treino', `Treino "${workoutTitle}" disponível.`, 'success', `/workouts/${workoutId}`);
+            
+            // Notifica Admins
+            const admins = await getSuperAdmins();
+            for (const admin of admins) {
+                await createNotification(admin.id, 'Novo Treino Criado', `${trainerName} criou "${workoutTitle}" para o aluno ID ${clientId}.`, 'info', `/admin/clients/${clientId}`);
+            }
         } catch (e) { console.error(e); }
     },
 
-    // ARTIGOS
+    // TREINOS: Modificação (Notifica Aluno e Admin)
+    async notifyWorkoutUpdate(workoutTitle, clientId, trainerName) {
+        try {
+            // Notifica Aluno
+            await createNotification(clientId, 'Treino Atualizado', `Seu treino "${workoutTitle}" foi alterado.`, 'warning', '/client/workouts');
+            
+            // Notifica Admins
+            const admins = await getSuperAdmins();
+            for (const admin of admins) {
+                await createNotification(admin.id, 'Treino Modificado', `${trainerName} editou o treino "${workoutTitle}" do aluno ID ${clientId}.`, 'info', `/admin/clients/${clientId}`);
+            }
+        } catch (e) { console.error(e); }
+    },
+
+    // ARTIGOS (Blog)
     async notifyNewArticle(articleTitle, articleId) {
         try {
             const clients = await getActiveClients();
