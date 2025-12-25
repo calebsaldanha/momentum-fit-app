@@ -1,4 +1,3 @@
-const notificationService = require('../utils/notificationService');
 const express = require('express');
 const router = express.Router();
 const { pool } = require('../database/db');
