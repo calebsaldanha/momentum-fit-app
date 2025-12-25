@@ -55,7 +55,7 @@ router.get('/', async (req, res) => {
         });
 
         res.render('pages/chat', { 
-            title: 'Chat - Momentum Fit', 
+            title: 'Chat', 
             chatUsers: users,
             user: req.session.user,
             currentPage: 'chat',
@@ -83,10 +83,10 @@ router.get('/messages/:contactId', async (req, res) => {
             [userId, contactId]
         );
 
-        // 2. Lógica "Visto no Login/Acesso": Marcar notificações de Chat como lidas
-        // Como o usuário está vendo as mensagens agora, removemos as notificações pendentes de "Nova Mensagem"
+        // 2. Marcar notificações de Chat como lidas automaticamente
+        // Funciona para Aluno e Personal ao abrir a conversa
         await pool.query(
-            "UPDATE notifications SET is_read = true WHERE user_id = $1 AND (link = '/chat' OR title = 'Nova Mensagem')",
+            "UPDATE notifications SET is_read = true WHERE user_id = $1 AND (link = '/chat' OR title LIKE '%Mensagem%')",
             [userId]
         );
 
