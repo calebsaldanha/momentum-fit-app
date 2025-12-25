@@ -10,9 +10,17 @@ const requireAuth = (req, res, next) => { if (!req.session.user) return res.redi
 
 router.use(requireAuth);
 
+// Página Principal do Chat
 router.get('/', async (req, res) => {
     try {
         const { id, role, status } = req.session.user;
+        
+        // --- NOVO: Limpa notificações genéricas de chat ao entrar na página ---
+        await pool.query(
+            "UPDATE notifications SET is_read = true WHERE user_id = $1 AND (link = '/chat' OR title = 'Nova Mensagem')",
+            [id]
+        );
+
         let query;
         let params = [];
 
@@ -22,30 +30,17 @@ router.get('/', async (req, res) => {
         } else if (role === 'client') {
             if (status !== 'active') {
                 return res.render('pages/chat', { 
-                    title: 'Chat', 
-                    chatUsers: [],
-                    user: req.session.user,
-                    currentPage: 'chat',
-                    csrfToken: res.locals.csrfToken
+                    title: 'Chat', chatUsers: [], user: req.session.user, currentPage: 'chat', csrfToken: res.locals.csrfToken
                 }); 
             }
-            query = `
-                SELECT u.id, u.name 
-                FROM users u 
-                JOIN client_profiles cp ON u.id = cp.assigned_trainer_id 
-                WHERE cp.user_id = $1`;
+            query = `SELECT u.id, u.name FROM users u JOIN client_profiles cp ON u.id = cp.assigned_trainer_id WHERE cp.user_id = $1`;
             params = [id];
         } else {
-            query = `
-                SELECT u.id, u.name 
-                FROM users u 
-                JOIN client_profiles cp ON u.id = cp.user_id 
-                WHERE cp.assigned_trainer_id = $1`;
+            query = `SELECT u.id, u.name FROM users u JOIN client_profiles cp ON u.id = cp.user_id WHERE cp.assigned_trainer_id = $1`;
             params = [id];
         }
         
         const result = await pool.query(query, params);
-        
         const users = result.rows.map(u => {
             if (role === 'superadmin' && u.role) {
                 const roleName = u.role === 'trainer' ? 'Personal' : (u.role === 'client' ? 'Aluno' : 'Admin');
@@ -55,9 +50,9 @@ router.get('/', async (req, res) => {
         });
 
         res.render('pages/chat', { 
-            title: 'Chat', 
-            chatUsers: users,
-            user: req.session.user,
+            title: 'Chat - Momentum Fit', 
+            chatUsers: users, 
+            user: req.session.user, 
             currentPage: 'chat',
             csrfToken: res.locals.csrfToken
         });
@@ -68,13 +63,12 @@ router.get('/', async (req, res) => {
     }
 });
 
-// API: Carregar Mensagens e MARCAR NOTIFICAÇÕES COMO LIDAS
+// API Mensagens
 router.get('/messages/:contactId', async (req, res) => {
     try {
         const { id: userId } = req.session.user;
         const contactId = req.params.contactId;
 
-        // 1. Buscar Mensagens
         const result = await pool.query(`
             SELECT id, sender_id, content, message_type, created_at 
             FROM messages 
@@ -83,18 +77,14 @@ router.get('/messages/:contactId', async (req, res) => {
             [userId, contactId]
         );
 
-        // 2. Marcar notificações de Chat como lidas automaticamente
-        // Funciona para Aluno e Personal ao abrir a conversa
+        // --- NOVO: Reforço na limpeza de notificações ao carregar mensagens ---
         await pool.query(
-            "UPDATE notifications SET is_read = true WHERE user_id = $1 AND (link = '/chat' OR title LIKE '%Mensagem%')",
+            "UPDATE notifications SET is_read = true WHERE user_id = $1 AND (link = '/chat' OR title = 'Nova Mensagem')",
             [userId]
         );
 
         res.json(result.rows);
-    } catch (err) { 
-        console.error("Erro ao carregar msg:", err);
-        res.status(500).json({ error: "Erro mensagens" }); 
-    }
+    } catch (err) { res.status(500).json({ error: "Erro mensagens" }); }
 });
 
 router.post('/send', requireAuth, upload.single('file'), async (req, res) => {
@@ -116,14 +106,9 @@ router.post('/send', requireAuth, upload.single('file'), async (req, res) => {
             [sender_id, receiver_id, messageContent, messageType]
         );
         
-        // Notificação de Nova Mensagem
         notificationService.notifyNewMessage(senderName, receiver_id).catch(e => console.error(e));
-        
         res.status(201).json(result.rows[0]);
-    } catch (err) { 
-        console.error(err);
-        res.status(500).json({ error: "Erro envio." }); 
-    }
+    } catch (err) { res.status(500).json({ error: "Erro envio." }); }
 });
 
 module.exports = router;

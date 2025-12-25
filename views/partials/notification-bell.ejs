@@ -17,24 +17,21 @@
         <div class="notif-list">
             <% if (locals.notifications && locals.notifications.length > 0) { %>
                 <% notifications.forEach(n => { %>
-                    <div class="notif-item <%= n.is_read ? 'read' : 'unread' %>" 
-                         onclick="window.location.href='/notifications/go/<%= n.id %>'">
+                    <div class="notif-item unread" onclick="window.location.href='/notifications/go/<%= n.id %>'">
                         <div class="notif-title"><%= n.title %></div>
                         <div class="notif-msg"><%= n.message %></div>
                         <div class="notif-time"><%= new Date(n.created_at).toLocaleDateString('pt-BR') %></div>
                     </div>
                 <% }) %>
             <% } else { %>
-                <div class="notif-empty">Nenhuma notificação recente.</div>
+                <div class="notif-empty">Nenhuma notificação nova.</div>
             <% } %>
         </div>
-        <a href="/notifications" class="notif-footer">Ver todas</a>
+        <a href="/notifications" class="notif-footer">Ver histórico completo</a>
     </div>
 </div>
 
 <script>
-    // --- Lógica Simplificada ---
-
     window.toggleNotifications = function(e) {
         if(e) { e.preventDefault(); e.stopPropagation(); }
         const dropdown = document.getElementById('notifDropdown');
@@ -44,26 +41,21 @@
     window.markAllRead = async function(e) {
         if(e) { e.preventDefault(); e.stopPropagation(); }
         
-        // Remove badge visualmente
-        const badge = document.querySelector('.notif-badge');
-        if(badge) badge.remove();
-        
-        // Marca itens como lidos visualmente
-        document.querySelectorAll('.notif-item.unread').forEach(el => {
-            el.classList.remove('unread');
-            el.classList.add('read');
-        });
-
-        // Requisita ao servidor
         try {
+            // Chama servidor
             await fetch('/notifications/mark-all-read', { 
                 method: 'POST', 
                 headers: { 'Content-Type': 'application/json' } 
             });
-        } catch(err) { console.error('Erro backend:', err); }
+            
+            // Recarrega a página para garantir que o estado (badges e lista) esteja limpo
+            window.location.reload();
+        } catch(err) { 
+            console.error('Erro backend:', err); 
+            window.location.reload(); 
+        }
     };
 
-    // Fechar dropdown ao clicar fora
     document.addEventListener('click', (e) => {
         const dropdown = document.getElementById('notifDropdown');
         const btn = document.getElementById('notifBtn');
