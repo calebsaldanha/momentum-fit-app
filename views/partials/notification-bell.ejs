@@ -32,7 +32,7 @@
 </div>
 
 <script>
-    // --- Lógica de Interface Otimista ---
+    // --- Lógica Corrigida de Persistência ---
 
     window.toggleNotifications = function(e) {
         if(e) { e.preventDefault(); e.stopPropagation(); }
@@ -43,65 +43,57 @@
     window.markAllRead = async function(e) {
         if(e) { e.preventDefault(); e.stopPropagation(); }
         
-        // Remove o badge imediatamente
+        // 1. Visual (Imediato)
         const badge = document.querySelector('.notif-badge');
         if(badge) badge.remove();
         
-        // Marca visualmente todos os itens como lidos
         document.querySelectorAll('.notif-item.unread').forEach(el => {
             el.classList.remove('unread');
             el.classList.add('read');
         });
 
-        // Chama o servidor em background
+        // 2. Servidor
         try {
             await fetch('/notifications/mark-all-read', { 
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' } 
             });
         } catch(err) { console.error('Erro backend:', err); }
     };
 
     window.clickNotification = async function(id, link, element) {
-        // 1. Atualização Visual Imediata (Antes do servidor/redirect)
-        
-        // Se o elemento clicado ainda estiver marcado como não lido
+        // 1. Atualização Visual Otimista
         if (element && element.classList.contains('unread')) {
             element.classList.remove('unread');
             element.classList.add('read');
 
-            // Atualiza o número no ícone (Badge)
             const badge = document.querySelector('.notif-badge');
             if (badge) {
                 let currentCount = parseInt(badge.innerText);
-                // Se for "9+", o parseInt retorna 9. 
-                
                 if (!isNaN(currentCount)) {
                     let newCount = currentCount - 1;
-                    
                     if (newCount <= 0) {
-                        // Se chegar a 0, remove o badge
                         badge.remove();
                     } else {
-                        // Senão, atualiza o texto
                         badge.innerText = newCount > 9 ? '9+' : newCount;
                     }
                 }
             }
         }
 
-        // 2. Chama o servidor para marcar como lida (sem esperar resposta para o UX ser rápido)
-        fetch(`/notifications/mark-read/${id}`, { 
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
-        }).catch(e => console.error(e));
+        // 2. Aguarda o servidor confirmar antes de sair da página
+        try {
+            await fetch(`/notifications/mark-read/${id}`, { 
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+        } catch(e) { 
+            console.error("Erro ao sincronizar leitura:", e); 
+        }
 
-        // 3. Redirecionamento
+        // 3. Redirecionamento seguro
         if (link && link !== 'null' && link !== '') {
             window.location.href = link;
-        } else {
-            // Se não tiver link, não fazemos reload para manter a alteração visual que acabamos de fazer
-            // Apenas se quiser garantir sincronia total: window.location.reload();
         }
     };
 
