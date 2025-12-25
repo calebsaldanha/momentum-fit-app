@@ -17,7 +17,7 @@
         <div class="notif-list">
             <% if (locals.notifications && locals.notifications.length > 0) { %>
                 <% notifications.forEach(n => { %>
-                    <div class="notif-item unread" onclick="window.location.href='/notifications/go/<%= n.id %>'">
+                    <div class="notif-item unread" onclick="handleNotificationClick('<%= n.id %>', '<%= n.link %>')">
                         <div class="notif-title"><%= n.title %></div>
                         <div class="notif-msg"><%= n.message %></div>
                         <div class="notif-time"><%= new Date(n.created_at).toLocaleDateString('pt-BR') %></div>
@@ -27,11 +27,20 @@
                 <div class="notif-empty">Nenhuma notificação nova.</div>
             <% } %>
         </div>
-        <a href="/notifications" class="notif-footer">Ver histórico completo</a>
+        <a href="/notifications" class="notif-footer">Ver histórico</a>
     </div>
 </div>
 
 <script>
+    // Função auxiliar para pegar o token CSRF
+    function getCsrfToken() {
+        const meta = document.querySelector('meta[name="csrf-token"]');
+        if (meta) return meta.getAttribute('content');
+        const input = document.getElementById('global-csrf-token');
+        if (input) return input.value;
+        return '';
+    }
+
     window.toggleNotifications = function(e) {
         if(e) { e.preventDefault(); e.stopPropagation(); }
         const dropdown = document.getElementById('notifDropdown');
@@ -40,22 +49,24 @@
 
     window.markAllRead = async function(e) {
         if(e) { e.preventDefault(); e.stopPropagation(); }
-        
         try {
-            // Chama servidor
             await fetch('/notifications/mark-all-read', { 
                 method: 'POST', 
-                headers: { 'Content-Type': 'application/json' } 
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'CSRF-Token': getCsrfToken() // TOKEN CRÍTICO AQUI
+                } 
             });
-            
-            // Recarrega a página para garantir que o estado (badges e lista) esteja limpo
-            window.location.reload();
-        } catch(err) { 
-            console.error('Erro backend:', err); 
-            window.location.reload(); 
-        }
+            window.location.reload(); // Recarrega para limpar visualmente
+        } catch(err) { console.error(err); window.location.reload(); }
+    };
+    
+    window.handleNotificationClick = async function(id, link) {
+        // Redireciona para a rota intermediária que marca como lida e depois vai para o destino
+        window.location.href = '/notifications/go/' + id;
     };
 
+    // Fecha ao clicar fora
     document.addEventListener('click', (e) => {
         const dropdown = document.getElementById('notifDropdown');
         const btn = document.getElementById('notifBtn');

@@ -10,40 +10,44 @@ const requireClientAuth = (req, res, next) => {
 router.use(requireClientAuth);
 
 router.get('/dashboard', async (req, res) => {
-    // Limpa notificação de boas-vindas/aprovação
-    await pool.query("UPDATE notifications SET is_read = true WHERE user_id = $1 AND link = '/client/dashboard'", [req.session.user.id]);
-    
-    // ... Lógica do Dashboard ...
     try {
+        // Limpa notificação de Dashboard (Boas vindas)
+        await pool.query("UPDATE notifications SET is_read = true WHERE user_id = $1 AND link = '/client/dashboard'", [req.session.user.id]);
+        
         const cpRes = await pool.query("SELECT * FROM client_profiles WHERE user_id = $1", [req.session.user.id]);
+        
+        // Se não tiver perfil, manda criar
         if(cpRes.rows.length === 0) return res.redirect('/client/initial-form');
         
-        // Treinos recentes
         const wRes = await pool.query("SELECT * FROM workouts WHERE client_id = $1 ORDER BY created_at DESC LIMIT 3", [req.session.user.id]);
         
+        // Renderização Segura
         res.render('pages/client-dashboard', {
             title: 'Dashboard',
             user: req.session.user,
-            profile: cpRes.rows[0],
-            recentWorkouts: wRes.rows,
-            currentPage: 'dashboard'
+            profile: cpRes.rows[0] || {}, // Evita crash se null
+            recentWorkouts: wRes.rows || [],
+            currentPage: 'dashboard',
+            csrfToken: res.locals.csrfToken // Passa explicitamente caso precise
         });
-    } catch(e) { console.error(e); res.render('pages/error', { message: 'Erro dash.' }); }
+    } catch(e) { 
+        console.error("Erro Dashboard Aluno:", e); 
+        res.render('pages/error', { message: 'Erro ao carregar dashboard. Tente novamente.' }); 
+    }
 });
 
 router.get('/workouts', async (req, res) => {
     try {
-        // --- NOVO: Limpa notificações genéricas de treinos ao ver a lista ---
         await pool.query("UPDATE notifications SET is_read = true WHERE user_id = $1 AND link = '/client/workouts'", [req.session.user.id]);
-
         const wRes = await pool.query("SELECT * FROM workouts WHERE client_id = $1 ORDER BY created_at DESC", [req.session.user.id]);
         res.render('pages/client-workouts', {
             title: 'Meus Treinos',
             user: req.session.user,
             workouts: wRes.rows,
-            currentPage: 'workouts'
+            currentPage: 'workouts',
+            csrfToken: res.locals.csrfToken
         });
-    } catch(e) { res.render('pages/error', { message: 'Erro treinos.' }); }
+    } catch(e) { res.render('pages/error', { message: 'Erro ao carregar treinos.' }); }
 });
 
 router.get('/initial-form', (req, res) => {
@@ -51,7 +55,6 @@ router.get('/initial-form', (req, res) => {
 });
 
 router.post('/initial-form', async (req, res) => {
-    // ... lógica original de salvar form ...
     const { phone, birthdate, weight, height, goal, restrictions, experience_level } = req.body;
     try {
         await pool.query(
@@ -71,8 +74,9 @@ router.get('/profile', async (req, res) => {
         res.render('pages/client-profile', {
             title: 'Perfil',
             user: req.session.user,
-            profile: pRes.rows[0],
-            currentPage: 'profile'
+            profile: pRes.rows[0] || {},
+            currentPage: 'profile',
+            csrfToken: res.locals.csrfToken
         });
     } catch(e) { res.status(500).send('Erro.'); }
 });

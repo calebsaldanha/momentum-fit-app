@@ -4,85 +4,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= typeof title !== 'undefined' ? title : 'Momentum Fit' %></title>
+    <link rel="stylesheet" href="/css/styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/styles.css?v=<%= Date.now() %>">
-    <link rel="icon" type="image/png" href="/images/logo-3d.png">
-    <% if (typeof bodyClass !== 'undefined' && bodyClass.includes('dashboard-body')) { %>
-        <link rel="stylesheet" href="/css/dashboard.css?v=<%= Date.now() %>">
-    <% } %>
+    <meta name="csrf-token" content="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
 </head>
-<body class="<%= typeof bodyClass !== 'undefined' ? bodyClass : '' %>">
-    
-    <% if (typeof bodyClass === 'undefined' || !bodyClass.includes('auth-body')) { %>
-        <header class="header">
-            <div class="container">
-                <nav class="nav-container">
-                    <a href="/" class="logo-link">
-                        <img src="/images/logo-3d.png" alt="Momentum Fit" class="header-logo-img">
-                        <span style="font-weight: 800; font-size: 1.2rem; color: #fff; letter-spacing: -1px;">MOMENTUM</span>
-                    </a>
-
-                    <div class="hamburger" id="hamburgerBtn">
-                        <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+<body>
+    <header class="main-header">
+        <div class="header-logo">
+            <a href="/">
+                <img src="/images/momentum-fit-logo-completo.png" alt="Momentum Fit" height="40">
+            </a>
+        </div>
+        
+        <div class="user-actions">
+            <% if (user) { %>
+                <%- include("notification-bell.ejs") %>
+                
+                <div class="user-profile">
+                    <div class="user-avatar-sm">
+                        <%= user.name.charAt(0).toUpperCase() %>
                     </div>
-
-                    <ul class="nav-menu" id="navMenu">
-                        <li><a href="/" class="nav-link">Início</a></li>
-                        <li><a href="/articles" class="nav-link">Blog</a></li>
-                        <li><a href="/about" class="nav-link">Sobre</a></li>
-
-                        <% if (typeof user !== 'undefined' && user) { %>
-                            
-                            <% if (user.role === 'superadmin') { %>
-                                <li>
-                                    <a href="/superadmin/dashboard" class="nav-link" style="color: #f59e0b; border: 1px solid #f59e0b; padding: 5px 10px; border-radius: 4px; margin-right: 5px;">
-                                        Super Admin
-                                    </a>
-                                </li>
-                                <li><a href="/admin/dashboard" class="nav-link">Modo Personal</a></li>
-                            
-                            <% } else if (user.role === 'trainer') { %>
-                                <li><a href="/admin/dashboard" class="nav-link">Modo Personal</a></li>
-                            
-                            <% } else { %>
-                                <% if (user.status === 'pending_approval') { %>
-                                    <li><a href="/client/profile" class="nav-link" style="color: #f59e0b;">Meu Perfil (Pendente)</a></li>
-                                <% } else { %>
-                                    <li><a href="/client/dashboard" class="nav-link">Meu Painel</a></li>
-                                <% } %>
-                            <% } %>
-
-                            <% if (user.status === 'active' || user.role === 'superadmin') { %>
-                                <li><a href="/chat" class="nav-link">Chat</a></li>
-                            <% } %>
-
-                            <li class="user-actions" style="display: flex; align-items: center; gap: 15px; margin-left: 10px;">
-                                <%- include("notification-bell.ejs") %> <div class="user-badge">Olá, <%= user.name.split(' ')[0] %></div>
-                                <form action="/auth/logout" method="POST" style="margin: 0;">
-                                    <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
-                                    <button type="submit" class="btn btn-secondary btn-sm">Sair</button>
-                                </form>
-                            </li>
-                        <% } else { %>
-                            <li style="margin-left: auto;"><a href="/auth/login" class="nav-link">Entrar</a></li>
-                            <li><a href="/auth/register" class="btn btn-primary btn-sm">Começar</a></li>
-                        <% } %>
-                    </ul>
-                </nav>
-            </div>
-        </header>
-<script src="/js/main.js"></script>
-        <script>
-            document.addEventListener('DOMContentLoaded', () => {
-                const hamburger = document.getElementById('hamburgerBtn');
-                const navMenu = document.getElementById('navMenu');
-                if (hamburger && navMenu) {
-                    hamburger.addEventListener('click', () => {
-                        navMenu.classList.toggle('active');
-                        hamburger.classList.toggle('active');
-                    });
-                }
-            });
-        </script>
-        <div style="height: var(--header-height);"></div>
-    <% } %>
+                    <span class="user-name"><%= user.name %></span>
+                </div>
+                
+                <form action="/auth/logout" method="POST" style="margin: 0;">
+                    <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+                    <button type="submit" class="logout-btn">Sair</button>
+                </form>
+            <% } else { %>
+                <a href="/auth/login" class="btn-login">Entrar</a>
+            <% } %>
+        </div>
+    </header>
+    <script src="/js/main.js"></script>
+    <input type="hidden" id="global-csrf-token" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
