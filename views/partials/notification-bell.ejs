@@ -17,7 +17,7 @@
         <div class="notif-list">
             <% if (locals.notifications && locals.notifications.length > 0) { %>
                 <% notifications.forEach(n => { %>
-                    <div class="notif-item <%= n.is_read ? 'read' : 'unread' %>" onclick="clickNotification('<%= n.id %>', '<%= n.link %>')">
+                    <div class="notif-item <%= n.is_read ? 'read' : 'unread' %>" onclick="clickNotification('<%= n.id %>', '<%= n.link %>', this)">
                         <div class="notif-title"><%= n.title %></div>
                         <div class="notif-msg"><%= n.message %></div>
                         <div class="notif-time"><%= new Date(n.created_at).toLocaleDateString('pt-BR') %></div>
@@ -32,8 +32,8 @@
 </div>
 
 <script>
-    // Funções globais para garantir funcionamento imediato
-    
+    // --- Lógica de Interface Otimista ---
+
     window.toggleNotifications = function(e) {
         if(e) { e.preventDefault(); e.stopPropagation(); }
         const dropdown = document.getElementById('notifDropdown');
@@ -42,41 +42,66 @@
 
     window.markAllRead = async function(e) {
         if(e) { e.preventDefault(); e.stopPropagation(); }
+        
+        // Remove o badge imediatamente
+        const badge = document.querySelector('.notif-badge');
+        if(badge) badge.remove();
+        
+        // Marca visualmente todos os itens como lidos
+        document.querySelectorAll('.notif-item.unread').forEach(el => {
+            el.classList.remove('unread');
+            el.classList.add('read');
+        });
+
+        // Chama o servidor em background
         try {
             await fetch('/notifications/mark-all-read', { 
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' }
             });
-            
-            // Atualizar UI
-            const badge = document.querySelector('.notif-badge');
-            if(badge) badge.remove();
-            
-            document.querySelectorAll('.notif-item.unread').forEach(el => {
-                el.classList.remove('unread');
-                el.classList.add('read');
-            });
-        } catch(err) { console.error('Erro ao marcar lidas:', err); }
+        } catch(err) { console.error('Erro backend:', err); }
     };
 
-    window.clickNotification = async function(id, link) {
-        try {
-            // Marcar como lida
-            await fetch(`/notifications/mark-read/${id}`, { 
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
-            });
-            
-            // Redirecionar se houver link
-            if (link && link !== 'null' && link !== '') {
-                window.location.href = link;
-            } else {
-                // Se não houver link, apenas atualiza visualmente
-                window.location.reload(); 
+    window.clickNotification = async function(id, link, element) {
+        // 1. Atualização Visual Imediata (Antes do servidor/redirect)
+        
+        // Se o elemento clicado ainda estiver marcado como não lido
+        if (element && element.classList.contains('unread')) {
+            element.classList.remove('unread');
+            element.classList.add('read');
+
+            // Atualiza o número no ícone (Badge)
+            const badge = document.querySelector('.notif-badge');
+            if (badge) {
+                let currentCount = parseInt(badge.innerText);
+                // Se for "9+", o parseInt retorna 9. 
+                
+                if (!isNaN(currentCount)) {
+                    let newCount = currentCount - 1;
+                    
+                    if (newCount <= 0) {
+                        // Se chegar a 0, remove o badge
+                        badge.remove();
+                    } else {
+                        // Senão, atualiza o texto
+                        badge.innerText = newCount > 9 ? '9+' : newCount;
+                    }
+                }
             }
-        } catch(err) { 
-            console.error(err);
-            if (link && link !== 'null' && link !== '') window.location.href = link;
+        }
+
+        // 2. Chama o servidor para marcar como lida (sem esperar resposta para o UX ser rápido)
+        fetch(`/notifications/mark-read/${id}`, { 
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        }).catch(e => console.error(e));
+
+        // 3. Redirecionamento
+        if (link && link !== 'null' && link !== '') {
+            window.location.href = link;
+        } else {
+            // Se não tiver link, não fazemos reload para manter a alteração visual que acabamos de fazer
+            // Apenas se quiser garantir sincronia total: window.location.reload();
         }
     };
 
