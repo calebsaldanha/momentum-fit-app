@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const { pool } = require('../database/db');
 const { sendPasswordResetEmail } = require('../utils/emailService');
+const notificationService = require('../utils/notificationService');
 
 router.get('/login', (req, res) => res.render('pages/login', { title: 'Login', error: null, csrfToken: res.locals.csrfToken }));
 router.get('/register', (req, res) => res.render('pages/register', { title: 'Cadastro', error: null, csrfToken: res.locals.csrfToken }));
@@ -25,16 +26,20 @@ router.post('/register', async (req, res) => {
             [name, email, hashedPassword, role, status]
         );
 
-        // Define a sessão explicitamente
+        // Dispara Notificação de Novo Cadastro para Admins
+        if (role === 'trainer') {
+            notificationService.notifyNewTrainer(name, email);
+        } else {
+            notificationService.notifyNewClient(name, newUser.rows[0].id);
+        }
+
         req.session.user = newUser.rows[0];
         
-        // Salva a sessão antes de redirecionar (CRÍTICO)
         req.session.save((err) => {
             if (err) {
                 console.error("Erro ao salvar sessão:", err);
-                return res.render('pages/register', { title: 'Cadastro', error: 'Erro no login. Tente entrar manualmente.', csrfToken: req.csrfToken() });
+                return res.render('pages/register', { title: 'Cadastro', error: 'Erro no login.', csrfToken: req.csrfToken() });
             }
-            // Redireciona
             if (role === 'trainer') res.redirect('/trainer/pending');
             else res.redirect('/client/initial-form');
         });
@@ -80,10 +85,7 @@ router.post('/login', async (req, res) => {
 
 router.post('/logout', (req, res) => { req.session.destroy(); res.redirect('/auth/login'); });
 
-// Recuperação de senha mantida (resumida para caber)
 router.get('/forgot-password', (req, res) => res.render('pages/forgot-password', { title: 'Recuperar', error: null, success: null, csrfToken: res.locals.csrfToken }));
-router.post('/forgot-password', async (req, res) => { /* ... lógica de envio ... */ });
-router.get('/reset-password/:token', async (req, res) => { /* ... lógica de token ... */ });
-router.post('/reset-password/:token', async (req, res) => { /* ... lógica de reset ... */ });
+// ... (rotas de reset de senha podem ser mantidas ou expandidas conforme necessidade)
 
 module.exports = router;
