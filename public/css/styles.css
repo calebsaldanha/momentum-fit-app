@@ -519,3 +519,8 @@ img {
 .notif-time { font-size: 0.75rem; color: #999; margin-top: 4px; }
 .notif-empty { padding: 20px; text-align: center; color: #888; font-size: 0.9rem; }
 .notif-footer { display: block; text-align: center; padding: 10px; background: #f8f9fa; color: #2563eb; font-size: 0.85rem; text-decoration: none; }
+
+/* Reforço de CSS para Notificações */
+.notification-wrapper { margin-right: 15px; z-index: 1001; }
+.notif-dropdown { z-index: 2000; border: 1px solid #ddd; }
+.notif-item.unread { background-color: #f0f9ff; font-weight: 600; }

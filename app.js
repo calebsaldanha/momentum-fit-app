@@ -58,7 +58,7 @@ app.use(async (req, res, next) => {
     // Evitar query de notificação se não logado para poupar DB
     if (req.session.user) {
         try {
-            const notifRes = await pgPool.query('SELECT * FROM notifications WHERE user_id = $1 AND is_read = false ORDER BY created_at DESC LIMIT 5', [req.session.user.id]);
+            const notifRes = await pgPool.query('SELECT * FROM notifications WHERE user_id = $1 ORDER BY created_at DESC LIMIT 5', [req.session.user.id]);
             res.locals.notifications = notifRes.rows;
             const countRes = await pgPool.query('SELECT COUNT(*) FROM notifications WHERE user_id = $1 AND is_read = false', [req.session.user.id]);
             res.locals.unreadCount = countRes.rows[0].count;
