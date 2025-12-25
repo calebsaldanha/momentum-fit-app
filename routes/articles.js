@@ -38,7 +38,7 @@ router.get('/manage', async (req, res) => {
 });
 
 // Criar (GET)
-router.get('/new/create', async (req, res) => {
+router.get('/create', async (req, res) => {
     if (!req.session.user || req.session.user.role !== 'superadmin') {
         return res.redirect('/articles'); // Apenas Super Admin cria agora
     }
@@ -52,7 +52,7 @@ router.get('/new/create', async (req, res) => {
 });
 
 // Criar (POST)
-router.post('/new/create', upload.single('image'), async (req, res) => {
+router.post('/create', upload.single('image'), async (req, res) => {
     if (!req.session.user || req.session.user.role !== 'superadmin') return res.redirect('/auth/login');
     const { title, summary, content, videoUrl } = req.body;
     let imageUrl = null;
