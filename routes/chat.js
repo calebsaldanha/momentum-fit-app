@@ -25,7 +25,8 @@ router.get('/', async (req, res) => {
                     title: 'Chat', 
                     chatUsers: [],
                     user: req.session.user,
-                    currentPage: 'chat'
+                    currentPage: 'chat',
+                    csrfToken: res.locals.csrfToken
                 }); 
             }
             query = `
@@ -57,7 +58,8 @@ router.get('/', async (req, res) => {
             title: 'Chat - Momentum Fit', 
             chatUsers: users,
             user: req.session.user,
-            currentPage: 'chat' 
+            currentPage: 'chat',
+            csrfToken: res.locals.csrfToken
         });
 
     } catch (err) { 
@@ -66,18 +68,33 @@ router.get('/', async (req, res) => {
     }
 });
 
+// API: Carregar Mensagens e MARCAR NOTIFICAÇÕES COMO LIDAS
 router.get('/messages/:contactId', async (req, res) => {
     try {
         const { id: userId } = req.session.user;
+        const contactId = req.params.contactId;
+
+        // 1. Buscar Mensagens
         const result = await pool.query(`
             SELECT id, sender_id, content, message_type, created_at 
             FROM messages 
             WHERE (sender_id = $1 AND receiver_id = $2) OR (sender_id = $2 AND receiver_id = $1) 
             ORDER BY created_at ASC`, 
-            [userId, req.params.contactId]
+            [userId, contactId]
         );
+
+        // 2. Lógica "Visto no Login/Acesso": Marcar notificações de Chat como lidas
+        // Como o usuário está vendo as mensagens agora, removemos as notificações pendentes de "Nova Mensagem"
+        await pool.query(
+            "UPDATE notifications SET is_read = true WHERE user_id = $1 AND (link = '/chat' OR title = 'Nova Mensagem')",
+            [userId]
+        );
+
         res.json(result.rows);
-    } catch (err) { res.status(500).json({ error: "Erro mensagens" }); }
+    } catch (err) { 
+        console.error("Erro ao carregar msg:", err);
+        res.status(500).json({ error: "Erro mensagens" }); 
+    }
 });
 
 router.post('/send', requireAuth, upload.single('file'), async (req, res) => {
@@ -99,11 +116,14 @@ router.post('/send', requireAuth, upload.single('file'), async (req, res) => {
             [sender_id, receiver_id, messageContent, messageType]
         );
         
-        // Notificação de Mensagem
+        // Notificação de Nova Mensagem
         notificationService.notifyNewMessage(senderName, receiver_id).catch(e => console.error(e));
         
         res.status(201).json(result.rows[0]);
-    } catch (err) { res.status(500).json({ error: "Erro envio." }); }
+    } catch (err) { 
+        console.error(err);
+        res.status(500).json({ error: "Erro envio." }); 
+    }
 });
 
 module.exports = router;
