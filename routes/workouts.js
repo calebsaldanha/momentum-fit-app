@@ -65,9 +65,6 @@ router.post('/create', async (req, res) => {
         // 1. Criar o Treino
         const workoutRes = await client.query(
             "INSERT INTO workouts (client_id, trainer_id, title, description, created_at) VALUES ($1, $2, $3, $4, NOW()) RETURNING id",
-        // Notificação de Novo Treino
-        const newWorkoutId = result.rows[0].id;
-        await notificationService.notifyNewWorkout(title, client_id, newWorkoutId, req.session.user.name);
             [client_id, req.session.user.id, title, description || '']
         );
         const workoutId = workoutRes.rows[0].id;
@@ -82,7 +79,7 @@ router.post('/create', async (req, res) => {
         }
 
         await client.query('COMMIT');
-        await notificationService.notifyNewWorkout(title, client_id, workoutId);
+        await notificationService.notifyNewWorkout(title, client_id, workoutId, req.session.user.name);
 
         res.json({ success: true, clientId: client_id });
 
