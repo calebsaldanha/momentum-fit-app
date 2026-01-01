@@ -1,23 +1,64 @@
 <%- include('../partials/header.ejs', { title, bodyClass: 'dashboard-body' }) %>
+<style>
+    .suggestions-list {
+        position: absolute;
+        background: var(--c-bg-card);
+        border: 1px solid var(--c-border);
+        width: 100%;
+        max-height: 200px;
+        overflow-y: auto;
+        z-index: 1000;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        border-radius: 0 0 var(--radius) var(--radius);
+    }
+    .suggestions-list li {
+        padding: 10px;
+        cursor: pointer;
+        border-bottom: 1px solid var(--c-border);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .suggestions-list li:hover {
+        background: var(--c-bg-main);
+    }
+    .suggestions-list img {
+        width: 30px; height: 30px; border-radius: 4px; object-fit: cover;
+    }
+    .preview-box {
+        margin-top: 10px;
+        padding: 10px;
+        background: var(--c-bg-main);
+        border-radius: var(--radius);
+        display: none;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    .preview-box img {
+        width: 80px; height: 80px; object-fit: cover; border-radius: 6px;
+    }
+    .preview-info { font-size: 0.85rem; color: var(--c-text-secondary); }
+</style>
+
 <div class="dashboard-container">
     <%- include('../partials/admin-sidebar.ejs') %>
     <main class="dashboard-main">
         <div class="section">
             <div class="section-header">
                 <h1>Novo Treino</h1>
-                <p>Desenvolva um plano personalizado.</p>
+                <p>Busque exercícios na biblioteca oficial para incluir fotos e dicas.</p>
             </div>
-            
+           
             <% if (!clients || clients.length === 0) { %>
-                <div class="alert alert-warning">
-                    Você não tem alunos ativos. <a href="/admin/dashboard">Voltar</a>
-                </div>
+                <div class="alert alert-warning">Sem alunos ativos. <a href="/admin/dashboard">Voltar</a></div>
             <% } else { %>
                 <form id="createWorkoutForm" class="dashboard-form" style="max-width: 800px;">
                     <div class="form-group">
                         <label for="client_id">Aluno *</label>
                         <select name="client_id" id="client_id" required>
-                            <option value="">Selecione um aluno</option>
+                            <option value="">Selecione...</option>
                             <% clients.forEach(client => { %>
                                 <option value="<%= client.id %>" <%= typeof selectedClientId !== 'undefined' && selectedClientId == client.id ? 'selected' : '' %>><%= client.name %></option>
                             <% }); %>
@@ -26,23 +67,21 @@
                     
                     <div class="form-group">
                         <label for="title">Título do Treino *</label>
-                        <input type="text" id="title" name="title" required placeholder="Ex: Hipertrofia A - Peito e Tríceps">
+                        <input type="text" id="title" name="title" required placeholder="Ex: Treino A - Superiores">
                     </div>
                     
                     <div class="form-group">
-                        <label for="description">Descrição / Foco (Opcional)</label>
-                        <textarea id="description" name="description" rows="2" placeholder="Instruções gerais para este treino..."></textarea>
+                        <label>Descrição Geral</label>
+                        <textarea id="description" name="description" rows="2"></textarea>
                     </div>
 
                     <h3 style="margin: 2rem 0 1rem; color: var(--c-text-primary);">Exercícios</h3>
                     <div id="exercisesContainer"></div>
                     
-                    <button type="button" class="btn btn-outline" id="addExerciseBtn" style="width: 100%; border-style: dashed; margin-top: 1rem;">
-                        + Adicionar Exercício
-                    </button>
+                    <button type="button" class="btn btn-outline" id="addExerciseBtn" style="width: 100%; border-style: dashed; margin-top: 1rem;">+ Adicionar Exercício</button>
                     
                     <div class="form-actions" style="margin-top: 2rem; display: flex; justify-content: flex-end; gap: 10px;">
-                        <a href="/admin/dashboard" class="btn btn-secondary" style="text-decoration: none;">Cancelar</a>
+                        <a href="/admin/dashboard" class="btn btn-secondary">Cancelar</a>
                         <button type="submit" class="btn btn-primary">Salvar Treino</button>
                     </div>
                 </form>
@@ -60,35 +99,95 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function addExercise() {
         const count = container.children.length + 1;
-        const exerciseHTML = `
-            <div class="exercise-item" style="background: var(--c-bg-card); border: 1px solid var(--c-border); padding: 1.5rem; border-radius: var(--radius); margin-bottom: 1.5rem; position: relative;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <h4 style="color: var(--c-accent-primary); margin: 0;">Exercício ${count}</h4>
+        const html = `
+            <div class="exercise-item" style="background: var(--c-bg-card); border: 1px solid var(--c-border); padding: 1.5rem; border-radius: var(--radius); margin-bottom: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                    <h4 style="color: var(--c-accent-primary); margin:0;">#${count}</h4>
                     <button type="button" class="btn btn-sm btn-outline remove-exercise" style="color: var(--c-error); border-color: var(--c-error);">Remover</button>
                 </div>
                 
-                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                    <div class="form-group">
-                        <label>Nome do Exercício *</label>
-                        <input type="text" class="exercise-name" required placeholder="Ex: Supino Reto">
+                <input type="hidden" class="ex-lib-id">
+                <input type="hidden" class="ex-img-url">
+
+                <div class="form-group" style="position: relative;">
+                    <label>Nome do Exercício (Digite para buscar na biblioteca) *</label>
+                    <input type="text" class="ex-name" required autocomplete="off" placeholder="Ex: Agachamento...">
+                    <ul class="suggestions-list" style="display:none;"></ul>
+                </div>
+
+                <div class="preview-box">
+                    <img src="" class="preview-img">
+                    <div class="preview-info">
+                        <strong>Biblioteca:</strong> <span class="preview-desc"></span>
                     </div>
+                </div>
+
+                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
                     <div class="form-group">
                         <label>Séries x Repetições *</label>
-                        <input type="text" class="exercise-sets" required placeholder="Ex: 4x12">
+                        <input type="text" class="ex-sets" required placeholder="Ex: 4x12">
+                    </div>
+                    <div class="form-group">
+                        <label>Link Vídeo (Opcional)</label>
+                        <input type="text" class="ex-video">
                     </div>
                 </div>
                 
                 <div class="form-group">
-                    <label>Observações</label>
-                    <textarea class="exercise-description" rows="1"></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Link de Vídeo (Opcional)</label>
-                    <input type="text" class="exercise-video" placeholder="Youtube/Vimeo URL">
+                    <label>Observações Extras</label>
+                    <textarea class="ex-notes" rows="1" placeholder="Obs pessoais para este aluno..."></textarea>
                 </div>
             </div>
         `;
-        container.insertAdjacentHTML('beforeend', exerciseHTML);
+        container.insertAdjacentHTML('beforeend', html);
+        setupAutocomplete(container.lastElementChild);
+    }
+
+    function setupAutocomplete(item) {
+        const input = item.querySelector('.ex-name');
+        const list = item.querySelector('.suggestions-list');
+        const libId = item.querySelector('.ex-lib-id');
+        const imgUrl = item.querySelector('.ex-img-url');
+        const previewBox = item.querySelector('.preview-box');
+        const previewImg = item.querySelector('.preview-img');
+        const previewDesc = item.querySelector('.preview-desc');
+
+        input.addEventListener('input', async (e) => {
+            const val = e.target.value;
+            if (val.length < 2) { list.style.display = 'none'; return; }
+            
+            const res = await fetch('/api/exercises/search?q=' + encodeURIComponent(val));
+            const data = await res.json();
+            
+            list.innerHTML = '';
+            if (data.length > 0) {
+                list.style.display = 'block';
+                data.forEach(ex => {
+                    const li = document.createElement('li');
+                    // Mostra miniatura se tiver
+                    const thumb = ex.image_url ? `<img src="${ex.image_url}">` : '';
+                    li.innerHTML = `${thumb} <span>${ex.name}</span>`;
+                    
+                    li.onclick = () => {
+                        input.value = ex.name;
+                        libId.value = ex.id;
+                        imgUrl.value = ex.image_url;
+                        if(ex.image_url) {
+                            previewBox.style.display = 'flex';
+                            previewImg.src = ex.image_url;
+                            previewDesc.textContent = ex.tips || ex.description;
+                        }
+                        list.style.display = 'none';
+                    };
+                    list.appendChild(li);
+                });
+            } else { list.style.display = 'none'; }
+        });
+        
+        // Fechar lista ao clicar fora
+        document.addEventListener('click', (e) => {
+            if (!item.contains(e.target)) list.style.display = 'none';
+        });
     }
 
     addBtn.addEventListener('click', addExercise);
@@ -97,63 +196,43 @@ document.addEventListener('DOMContentLoaded', function() {
     container.addEventListener('click', (e) => {
         if (e.target.classList.contains('remove-exercise')) {
             e.target.closest('.exercise-item').remove();
-            document.querySelectorAll('.exercise-item h4').forEach((h4, index) => {
-                h4.textContent = 'Exercício ' + (index + 1);
-            });
         }
     });
 
     document.getElementById('createWorkoutForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        
         const exercises = [];
         document.querySelectorAll('.exercise-item').forEach(item => {
-            const name = item.querySelector('.exercise-name').value;
-            const sets = item.querySelector('.exercise-sets').value;
-            if (name && sets) {
+            if (item.querySelector('.ex-name').value) {
                 exercises.push({
-                    name,
-                    sets,
-                    reps: sets,
-                    description: item.querySelector('.exercise-description').value,
-                    video_url: item.querySelector('.exercise-video').value
+                    name: item.querySelector('.ex-name').value,
+                    sets: item.querySelector('.ex-sets').value,
+                    reps: item.querySelector('.ex-sets').value,
+                    description: item.querySelector('.ex-notes').value,
+                    video_url: item.querySelector('.ex-video').value,
+                    library_id: item.querySelector('.ex-lib-id').value,
+                    image_url: item.querySelector('.ex-img-url').value
                 });
             }
         });
 
-        if (exercises.length === 0) {
-            alert('Adicione pelo menos um exercício.');
-            return;
-        }
-
-        const formData = {
-            client_id: document.getElementById('client_id').value,
-            title: document.getElementById('title').value,
-            description: document.getElementById('description').value,
-            exercises: exercises
-        };
+        if (exercises.length === 0) return alert('Adicione exercícios.');
 
         try {
-            const response = await fetch('/workouts/create', {
+            const res = await fetch('/workouts/create', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'CSRF-Token': '<%= csrfToken %>'
-                },
-                body: JSON.stringify(formData)
+                headers: { 'Content-Type': 'application/json', 'CSRF-Token': '<%= csrfToken %>' },
+                body: JSON.stringify({
+                    client_id: document.getElementById('client_id').value,
+                    title: document.getElementById('title').value,
+                    description: document.getElementById('description').value,
+                    exercises
+                })
             });
-
-            const result = await response.json();
-            
-            if (result.success) {
-                window.location.href = '/admin/clients/' + result.clientId;
-            } else {
-                alert('Erro: ' + result.message);
-            }
-        } catch (err) {
-            console.error(err);
-            alert('Ocorreu um erro ao salvar o treino.');
-        }
+            const json = await res.json();
+            if (json.success) window.location.href = '/admin/clients/' + json.clientId;
+            else alert('Erro: ' + json.message);
+        } catch (err) { alert('Erro ao salvar.'); }
     });
 });
 </script>

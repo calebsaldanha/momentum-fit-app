@@ -1,68 +1,88 @@
-<%- include('../partials/header.ejs', { title, bodyClass: 'dashboard-body' }) %>
+<%- include('../partials/header.ejs', { title: 'Detalhes do Treino', bodyClass: 'dashboard-body' }) %>
+
 <div class="dashboard-container">
-    <% if (user && user.role === 'client') { %>
-        <%- include('../partials/client-sidebar.ejs') %>
-    <% } else { %>
+    <% if (user.role === 'trainer' || user.role === 'superadmin') { %>
         <%- include('../partials/admin-sidebar.ejs') %>
+    <% } else { %>
+        <%- include('../partials/client-sidebar.ejs') %>
     <% } %>
-    
+
     <main class="dashboard-main">
-        <section class="section">
-            <div class="section-header">
-                <div>
+        <div class="section">
+            <div class="section-header" style="flex-direction: column; align-items: flex-start;">
+                <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
                     <h1><%= workout.title %></h1>
-                    <p>
-                        Instrutor: <%= workout.trainer_name || 'Momentum Fit' %>
-                        <% if (workout.updated_at) { %>
-                            <span style="font-size: 0.8em; opacity: 0.7; margin-left: 10px;">
-                                (Atualizado em: <%= new Date(workout.updated_at).toLocaleDateString() %>)
-                            </span>
-                        <% } %>
-                    </p>
+                    <a href="javascript:history.back()" class="btn btn-outline btn-sm">Voltar</a>
                 </div>
-                <div class="actions" style="display: flex; gap: 10px;">
-                    <a href="javascript:history.back()" class="btn btn-secondary">Voltar</a>
-                    
-                    <% if (user && (user.role === 'trainer' || user.role === 'superadmin')) { %>
-                        <a href="/workouts/edit/<%= workout.id %>" class="btn btn-primary">Editar Treino</a>
-                    <% } %>
-                </div>
+                <% if(workout.description) { %>
+                    <p style="margin-top:0.5rem; opacity:0.8;"><%= workout.description %></p>
+                <% } %>
             </div>
 
-            <% if (workout.description) { %>
-                <div class="workout-description" style="background: var(--c-bg-card); padding: 1.5rem; border-radius: var(--radius); margin-bottom: 2rem; border: 1px solid var(--c-border);">
-                    <h4 style="margin-bottom: 0.5rem; color: var(--c-accent-primary);">Sobre este treino</h4>
-                    <p><%= workout.description %></p>
-                </div>
-            <% } %>
+            <div class="exercises-list">
+                <% exercises.forEach((ex, index) => { %>
+                    <div class="card exercise-card" style="margin-bottom: 2rem; overflow: hidden; border: 1px solid var(--c-border);">
+                        <div class="card-body" style="padding: 1.5rem;">
+                            
+                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--c-border); padding-bottom: 1rem; margin-bottom: 1rem;">
+                                <h3 style="margin:0; color: var(--c-accent-primary); font-size: 1.3rem;"><%= index + 1 %>. <%= ex.name %></h3>
+                                <span class="badge" style="background: var(--c-bg-main); font-size: 1.1rem; padding: 0.5rem 1rem;"><%= ex.sets %></span>
+                            </div>
 
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th style="width: 30%;">Exerc√≠cio</th>
-                            <th style="width: 20%;">S√©ries x Reps</th>
-                            <th>Observa√ß√µes</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% (workout.exercises || []).forEach(ex => { %>
-                            <tr>
-                                <td><strong style="color: var(--c-text-primary);"><%= ex.name %></strong></td>
-                                <td><%= ex.sets %></td>
-                                <td><%= ex.description || '-' %></td>
-                            </tr>
-                        <% }) %>
-                        
-                        <% if (!workout.exercises || workout.exercises.length === 0) { %>
-                            <tr>
-                                <td colspan="3" style="text-align: center; padding: 2rem;">Nenhum exerc√≠cio cadastrado.</td>
-                            </tr>
-                        <% } %>
-                    </tbody>
-                </table>
+                            <div style="display: grid; grid-template-columns: 1fr 300px; gap: 2rem;">
+                                <div>
+                                    <% if (ex.notes) { %>
+                                        <div style="margin-bottom: 1.5rem; background: var(--c-bg-main); padding: 1rem; border-radius: var(--radius);">
+                                            <strong>Ì≥ù Nota do Personal:</strong>
+                                            <p style="margin: 0.5rem 0 0;"><%= ex.notes %></p>
+                                        </div>
+                                    <% } %>
+
+                                    <% if (ex.execution_instructions) { %>
+                                        <div style="margin-bottom: 1rem;">
+                                            <strong style="color: var(--c-text-primary);">Ì¥ß Execu√ß√£o:</strong>
+                                            <p style="font-size: 0.95rem; line-height: 1.6;"><%= ex.execution_instructions %></p>
+                                        </div>
+                                    <% } %>
+                                    
+                                    <% if (ex.tips) { %>
+                                        <div style="margin-bottom: 1rem;">
+                                            <strong style="color: var(--c-text-primary);">Ì≤° Dica Pro:</strong>
+                                            <p style="font-size: 0.95rem; color: var(--c-text-secondary);"><%= ex.tips %></p>
+                                        </div>
+                                    <% } %>
+
+                                    <% if (ex.video_url) { %>
+                                        <a href="<%= ex.video_url %>" target="_blank" class="btn btn-sm btn-outline" style="margin-top: 1rem; display: inline-flex; align-items: center; gap: 5px;">
+                                            ‚ñ∂Ô∏è Assistir V√≠deo Externo
+                                        </a>
+                                    <% } %>
+                                </div>
+
+                                <div>
+                                    <% if (ex.image_url || ex.lib_image) { %>
+                                        <div style="border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-sm);">
+                                            <img src="<%= ex.image_url || ex.lib_image %>" alt="<%= ex.name %>" style="width: 100%; height: auto; object-fit: cover; display: block;">
+                                        </div>
+                                    <% } else { %>
+                                        <div style="height: 200px; background: var(--c-bg-main); display: flex; align-items: center; justify-content: center; color: var(--c-text-secondary); border-radius: var(--radius);">
+                                            Sem imagem
+                                        </div>
+                                    <% } %>
+                                </div>
+                            </div>
+                            
+                            <style>
+                                @media (max-width: 768px) {
+                                    .exercise-card .card-body > div { grid-template-columns: 1fr !important; }
+                                    .exercise-card img { max-height: 250px; width: 100%; object-fit: contain; margin-top: 1rem; }
+                                }
+                            </style>
+                        </div>
+                    </div>
+                <% }); %>
             </div>
-        </section>
+        </div>
     </main>
 </div>
 <%- include('../partials/footer.ejs') %>
