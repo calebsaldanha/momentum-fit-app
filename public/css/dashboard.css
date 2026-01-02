@@ -7,96 +7,68 @@ body.dashboard-body {
     background: radial-gradient(circle at 20% 20%, #1a1a1a 0%, #050505 60%); 
 }
 
-/* --- Layout Grid Principal --- */
+/* --- Layout Principal --- */
 .dashboard-container { 
-    width: 100%; 
-    margin: 0; 
-    display: grid; 
-    grid-template-columns: 260px 1fr; /* Sidebar fixa, Conteúdo flexível */
-    gap: 2rem; 
-    padding: 2rem 24px; 
-    padding-top: 100px; /* Espaço para o Header fixo do site */
-    min-height: 100vh;
+    width: 100%; margin: 0; display: grid; 
+    grid-template-columns: 260px 1fr; gap: 2rem; 
+    padding: 2rem 24px; padding-top: 100px; min-height: 100vh;
 }
 
-/* --- Sidebar (A Caixa Principal) --- */
+/* --- Sidebar (Usando GRID para travar o layout verticalmente) --- */
 .dashboard-sidebar { 
     background: var(--c-dash-surface); 
     border-radius: 16px;
     border: 1px solid rgba(255, 255, 255, 0.05); 
     
-    /* Posição Inteligente */
     align-self: start; 
-    position: sticky; 
-    top: 100px; /* Cola no topo, abaixo do header */
+    position: sticky; top: 100px; 
     
-    /* Altura Dinâmica: Ocupa a altura da tela menos o espaço do topo */
+    /* Altura fixa e calculada */
     height: calc(100vh - 120px); 
     max-height: calc(100vh - 120px);
     
-    /* FLEXBOX MÁGICO: Organiza os filhos em coluna */
-    display: flex; 
-    flex-direction: column;
+    /* MUDANÇA: Usando Grid em vez de Flex para controle total */
+    display: grid;
+    grid-template-rows: auto 1fr auto; /* Header | Nav (rola) | Footer */
     
-    /* Garante que nada saia das bordas arredondadas */
     overflow: hidden; 
-    
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    padding: 0; /* O padding será interno nos filhos */
+    padding: 0;
 }
 
-/* --- 1. Cabeçalho da Sidebar (Fixo) --- */
+/* 1. Header (Tamanho do conteúdo) */
 .sidebar-header { 
     padding: 1.5rem; 
     text-align: center; 
     border-bottom: 1px solid rgba(255,255,255,0.05); 
-    flex-shrink: 0; /* IMPEDE de encolher/amassar */
 }
 
-/* --- 2. Navegação (O Miolo que Rola) --- */
+/* 2. Navegação (Ocupa o espaço do meio e rola) */
 .sidebar-nav { 
-    display: flex; 
-    flex-direction: column; 
-    
-    /* Ocupa TODO o espaço disponível entre o cabeçalho e rodapé */
-    flex-grow: 1; 
-    
-    /* Habilita rolagem APENAS aqui se faltar espaço */
-    overflow-y: auto; 
-    
-    /* Essencial para o Firefox calcular o flex corretamente */
-    min-height: 0; 
-    
+    display: flex; flex-direction: column; 
+    overflow-y: auto; /* Scroll apenas aqui */
     padding: 0.5rem 0;
+    
+    /* Garante que a scrollbar não fique em cima do conteúdo */
+    scrollbar-gutter: stable;
 }
 
-/* Barra de rolagem fina e elegante para o menu */
+/* Scrollbar fina */
 .sidebar-nav::-webkit-scrollbar { width: 4px; }
 .sidebar-nav::-webkit-scrollbar-track { background: transparent; }
 .sidebar-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
 .sidebar-nav { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.15) transparent; }
 
-/* --- 3. Rodapé da Sidebar (Fixo) --- */
+/* 3. Footer (Tamanho do conteúdo, fixo no fundo) */
 .sidebar-footer { 
     padding: 1.5rem; 
     border-top: 1px solid rgba(255,255,255,0.05); 
-    background: var(--c-dash-surface); /* Garante fundo opaco sobre a rolagem */
-    flex-shrink: 0; /* IMPEDE de encolher/amassar */
+    background: var(--c-dash-surface); 
     z-index: 5;
 }
 
-/* --- Estilos Internos (Elementos) --- */
-.user-avatar-large { 
-    width: 64px; height: 64px; 
-    background: rgba(190, 242, 2, 0.05); 
-    border: 1px solid rgba(190, 242, 2, 0.2); 
-    border-radius: 50%; 
-    display: flex; align-items: center; justify-content: center; 
-    margin: 0 auto 0.8rem; 
-    color: var(--c-accent-primary); 
-    font-size: 1.5rem; 
-    box-shadow: 0 0 15px rgba(190, 242, 2, 0.1); 
-}
+/* --- Estilos dos Elementos --- */
+.user-avatar-large { width: 64px; height: 64px; background: rgba(190, 242, 2, 0.05); border: 1px solid rgba(190, 242, 2, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.8rem; color: var(--c-accent-primary); font-size: 1.5rem; box-shadow: 0 0 15px rgba(190, 242, 2, 0.1); }
 .user-name { color: white; font-size: 1.1rem; margin-bottom: 0.2rem; font-weight: 600; }
 .user-role-badge, .user-goal { font-size: 0.7rem; color: #888; background: rgba(255,255,255,0.05); padding: 4px 10px; border-radius: 12px; display: inline-block; text-transform: uppercase; letter-spacing: 0.5px; }
 
@@ -108,7 +80,7 @@ body.dashboard-body {
 .btn-logout-sidebar { width: 100%; background: transparent; border: 1px solid rgba(255,255,255,0.1); color: #888; padding: 10px; border-radius: 8px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 500; font-size: 0.9rem; }
 .btn-logout-sidebar:hover { background: rgba(255, 50, 50, 0.1); color: #ff4444; border-color: rgba(255,50,50,0.3); }
 
-/* --- Conteúdo da Página (Cards e Grid) --- */
+/* --- Conteúdo Geral --- */
 .section { background: var(--c-dash-card); padding: 2.5rem; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.03); margin-bottom: 2rem; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.6); position: relative; }
 .section::before { content: ''; position: absolute; top: 0; left: 2rem; right: 2rem; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent); }
 .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid var(--c-border); flex-wrap: wrap; gap: 1rem; }
@@ -145,10 +117,9 @@ body.dashboard-body {
 #chatForm input { background: #050505; border-color: #333; color: white; }
 #chatForm input:focus { border-color: var(--c-accent-primary); box-shadow: none; }
 
-/* Mobile (Quebra para coluna única) */
 @media (max-width: 992px) {
     .dashboard-container { grid-template-columns: 1fr; padding: 1rem; padding-top: 90px; }
-    .dashboard-sidebar { display: none; } /* Sidebar some no mobile (assumindo que existe um menu hambúrguer) */
+    .dashboard-sidebar { display: none; }
     .chat-layout { grid-template-columns: 1fr; grid-template-rows: 80px 1fr; height: calc(100vh - 120px); }
     .chat-users { border-right: none; border-bottom: 1px solid #222; flex-direction: row; overflow-x: auto; }
 }
