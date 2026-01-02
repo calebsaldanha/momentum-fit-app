@@ -12,9 +12,9 @@
 <div class="dashboard-container">
     
     <% if (user.role === 'client') { %>
-        <%- include('../partials/client-sidebar.ejs') %>
+        <%- include('../partials/client-sidebar.ejs', { currentPage: 'chat' }) %>
     <% } else { %>
-        <%- include('../partials/admin-sidebar.ejs') %>
+        <% if (user.role === 'superadmin') { %> <%- include('../partials/superadmin-sidebar.ejs', { currentPage: 'chat' }) %> <% } else { %> <%- include('../partials/admin-sidebar.ejs', { currentPage: 'chat' }) %> <% } %>
     <% } %>
 
     <main class="dashboard-main">

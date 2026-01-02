@@ -180,3 +180,21 @@ body.dashboard-body {
     border-color: rgba(255, 50, 50, 0.3);
     color: #ff4444;
 }
+/* Sidebar Fixes */
+.sidebar-header { padding: 2rem 1.5rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); margin-bottom: 1rem; }
+.user-avatar-large { width: 70px; height: 70px; background: rgba(190, 242, 2, 0.05); border: 1px solid rgba(190, 242, 2, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; color: var(--c-accent-primary); font-size: 1.8rem; }
+.user-name { color: white; font-size: 1.2rem; margin-bottom: 0.25rem; font-weight: 600; }
+.sidebar-footer { padding: 1.5rem; border-top: 1px solid rgba(255,255,255,0.05); margin-top: auto; }
+.btn-logout-sidebar { width: 100%; background: transparent; border: 1px solid rgba(255,255,255,0.1); color: #888; padding: 12px; border-radius: 8px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.btn-logout-sidebar:hover { background: rgba(255, 50, 50, 0.1); color: #ff4444; border-color: rgba(255,50,50,0.3); }
+
+/* Separadores do Menu Lateral */
+.nav-section-label {
+    padding: 1.5rem 1rem 0.5rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: rgba(255,255,255,0.4);
+    pointer-events: none;
+}
