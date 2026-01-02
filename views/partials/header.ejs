@@ -7,8 +7,7 @@
     
     <link rel="icon" type="image/png" href="/images/momentum-fit-icon.png">
     <link rel="shortcut icon" href="/images/momentum-fit-icon.png">
-    <link rel="apple-touch-icon" href="/images/momentum-fit-icon.png">
-
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -21,15 +20,46 @@
 </head>
 <body>
     <div class="app-container">
-        <% if (typeof messages !== 'undefined' && messages.error) { %>
-            <div class="alert alert-danger global-alert">
-                <%= messages.error %>
-                <button onclick="this.parentElement.remove()">×</button>
+        <header class="main-header">
+            <div class="header-content">
+                <div class="brand">
+                    <a href="/">
+                        <img src="/images/momentum-fit-logo-completo.png" alt="Momentum Fit" class="header-logo">
+                    </a>
+                </div>
+                
+                <div class="user-actions">
+                    <% if (typeof user !== 'undefined') { %>
+                        <div class="user-info">
+                            <span class="greeting">Olá, <strong><%= user.name.split(' ')[0] %></strong></span>
+                            <% if (user.role === 'admin' || user.role === 'superadmin' || user.role === 'trainer') { %>
+                                <span class="badge-role"><%= user.role === 'superadmin' ? 'Admin' : 'Personal' %></span>
+                            <% } %>
+                        </div>
+                        <a href="/auth/logout" class="btn-logout" title="Sair">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </a>
+                    <% } else { %>
+                        <a href="/auth/login" class="btn btn-sm btn-outline">Entrar</a>
+                        <a href="/auth/register" class="btn btn-sm btn-primary">Cadastrar</a>
+                    <% } %>
+                </div>
             </div>
-        <% } %>
-        <% if (typeof messages !== 'undefined' && messages.success) { %>
-            <div class="alert alert-success global-alert">
-                <%= messages.success %>
-                <button onclick="this.parentElement.remove()">×</button>
-            </div>
-        <% } %>
+        </header>
+
+        <div class="flash-messages-container">
+            <% if (typeof messages !== 'undefined' && messages.error) { %>
+                <div class="alert alert-danger global-alert">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span><%= messages.error %></span>
+                    <button onclick="this.parentElement.remove()" class="close-btn">×</button>
+                </div>
+            <% } %>
+            <% if (typeof messages !== 'undefined' && messages.success) { %>
+                <div class="alert alert-success global-alert">
+                    <i class="fas fa-check-circle"></i>
+                    <span><%= messages.success %></span>
+                    <button onclick="this.parentElement.remove()" class="close-btn">×</button>
+                </div>
+            <% } %>
+        </div>
