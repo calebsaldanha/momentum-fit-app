@@ -1,4 +1,4 @@
-<%- include('../partials/header.ejs', { title, bodyClass: 'dashboard-body' }) %>
+<%- include('../partials/header.ejs', { title: 'Gerenciar Usuários', bodyClass: 'dashboard-body' }) %>
 <div class="dashboard-container">
     <%- include('../partials/superadmin-sidebar.ejs', { currentPage: 'superadmin-manage' }) %>
     <main class="dashboard-main">
@@ -18,12 +18,14 @@
                                 <% } else if (user.status === 'active') { %> <span style="color:var(--c-success);">[Ativo]</span>
                                 <% } else { %> <span style="color:var(--c-error);">[Inativo]</span> <% } %>
                             </td>
-                            <td style="text-align: right; display: flex; justify-content: flex-end; gap: 10px;">
-                                <a href="/superadmin/trainers/<%= user.id %>" class="btn btn-secondary btn-sm" style="background: var(--c-accent-primary); color: black; border: none;">Detalhes</a>
-                                <form action="/superadmin/users/<%= user.id %>/delete" method="POST" onsubmit="return confirm('Excluir este personal?');" style="margin:0;">
-                                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                    <button type="submit" class="btn btn-secondary btn-sm" style="color: var(--c-error); border-color: var(--c-error);">Excluir</button>
-                                </form>
+                            <td style="text-align: right;">
+                                <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                                    <a href="/superadmin/trainers/<%= user.id %>" class="btn btn-secondary btn-sm" style="background: var(--c-accent-primary); color: black; border: none;">Detalhes</a>
+                                    <form action="/superadmin/users/<%= user.id %>/delete" method="POST" onsubmit="return confirm('Excluir este personal?');" style="margin:0;">
+                                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                        <button type="submit" class="btn btn-secondary btn-sm" style="color: var(--c-error); border-color: var(--c-error);">Excluir</button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                         <% }); %>
@@ -48,12 +50,14 @@
                                 <% } else if (user.status === 'active') { %> <span style="color:var(--c-success);">[Ativo]</span>
                                 <% } else { %> <span style="color:var(--c-error);">[Inativo]</span> <% } %>
                             </td>
-                            <td style="text-align: right; display: flex; justify-content: flex-end; gap: 10px;">
-                                <a href="/admin/clients/<%= user.id %>" class="btn btn-secondary btn-sm" style="background: var(--c-accent-primary); color: black; border: none;">Detalhes</a>
-                                <form action="/superadmin/users/<%= user.id %>/delete" method="POST" onsubmit="return confirm('Excluir este aluno?');" style="margin:0;">
-                                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                    <button type="submit" class="btn btn-secondary btn-sm" style="color: var(--c-error); border-color: var(--c-error);">Excluir</button>
-                                </form>
+                            <td style="text-align: right;">
+                                <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                                    <a href="/admin/clients/<%= user.id %>" class="btn btn-secondary btn-sm" style="background: var(--c-accent-primary); color: black; border: none;">Detalhes</a>
+                                    <form action="/superadmin/users/<%= user.id %>/delete" method="POST" onsubmit="return confirm('Excluir este aluno?');" style="margin:0;">
+                                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                        <button type="submit" class="btn btn-secondary btn-sm" style="color: var(--c-error); border-color: var(--c-error);">Excluir</button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                         <% }); %>

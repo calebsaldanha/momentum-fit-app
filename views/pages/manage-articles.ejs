@@ -1,60 +1,52 @@
-<%- include('../partials/header') %>
-<div class="main-layout">
-    <%- include('../partials/admin-sidebar') %>
+<%- include('../partials/header', { title: 'Gerenciar Artigos', bodyClass: 'dashboard-body' }) %>
+<div class="dashboard-container">
+    <%- include('../partials/admin-sidebar', { currentPage: 'articles' }) %>
     
-    <main class="content">
-        <div class="page-header">
-            <div>
+    <main class="dashboard-main">
+        <div class="section">
+            <div class="section-header">
                 <h1>Gerenciar Artigos</h1>
-                <p class="subtitle">Crie, edite e remova conteúdo do blog</p>
+                <a href="/articles/create" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus"></i> Novo Artigo
+                </a>
             </div>
-            <a href="/articles/create" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Novo Artigo
-            </a>
-        </div>
 
-        <div class="articles-list-admin">
-            <% if (articles.length === 0) { %>
-                <div class="empty-state">
-                    <i class="fas fa-newspaper"></i>
-                    <p>Nenhum artigo publicado ainda.</p>
-                </div>
-            <% } else { %>
-                <div class="table-responsive">
-                    <table class="data-table">
+            <div class="table-container">
+                <% if (!articles || articles.length === 0) { %>
+                    <div class="empty-state" style="text-align: center; padding: 3rem; color: #888;">
+                        <i class="fas fa-newspaper" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+                        <p>Nenhum artigo publicado ainda.</p>
+                    </div>
+                <% } else { %>
+                    <table>
                         <thead>
                             <tr>
                                 <th>Imagem</th>
                                 <th>Título</th>
                                 <th>Categoria</th>
                                 <th>Data</th>
-                                <th>Ações</th>
+                                <th style="text-align: right;">Ações</th>
                             </tr>
                         </thead>
                         <tbody>
                             <% articles.forEach(article => { %>
                                 <tr>
-                                    <td>
-                                        <div class="article-thumb">
-                                            <% if(article.image_url) { %>
-                                                <img src="<%= article.image_url %>" alt="<%= article.title %>">
-                                            <% } else { %>
-                                                <div class="no-image"><i class="fas fa-image"></i></div>
-                                            <% } %>
-                                        </div>
+                                    <td style="width: 80px;">
+                                        <% if(article.image_url) { %>
+                                            <img src="<%= article.image_url %>" alt="<%= article.title %>" style="width: 60px; height: 40px; object-fit: cover; border-radius: 4px;">
+                                        <% } else { %>
+                                            <div style="width: 60px; height: 40px; background: #333; border-radius: 4px; display: flex; align-items: center; justify-content: center;"><i class="fas fa-image"></i></div>
+                                        <% } %>
                                     </td>
-                                    <td><%= article.title %></td>
+                                    <td><strong><%= article.title %></strong></td>
                                     <td><span class="badge"><%= article.category %></span></td>
                                     <td><%= new Date(article.created_at).toLocaleDateString('pt-BR') %></td>
-                                    <td>
-                                        <div class="actions">
-                                            <a href="/articles/edit/<%= article.id %>" class="btn-icon" title="Editar">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <form action="/articles/delete/<%= article.id %>" method="POST" class="d-inline" onsubmit="return confirm('Tem certeza que deseja excluir este artigo?');">
-                                                <button type="submit" class="btn-icon delete" title="Excluir">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
+                                    <td style="text-align: right;">
+                                        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                                            <a href="/articles/edit/<%= article.id %>" class="btn btn-secondary btn-sm">Editar</a>
+                                            <form action="/articles/delete/<%= article.id %>" method="POST" onsubmit="return confirm('Tem certeza que deseja excluir este artigo?');" style="margin:0;">
+                                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                                <button type="submit" class="btn btn-secondary btn-sm" style="color: var(--c-error); border-color: var(--c-error);">Excluir</button>
                                             </form>
                                         </div>
                                     </td>
@@ -62,8 +54,8 @@
                             <% }) %>
                         </tbody>
                     </table>
-                </div>
-            <% } %>
+                <% } %>
+            </div>
         </div>
     </main>
 </div>

@@ -1,22 +1,48 @@
-<%- include('../partials/header.ejs', { title, bodyClass: 'dashboard-body' }) %>
+<%- include('../partials/header.ejs', { title: 'Editor de Artigo', bodyClass: 'dashboard-body' }) %>
 <div class="dashboard-container">
-    <% if (user.role === 'superadmin') { %>
-        <%- include('../partials/superadmin-sidebar.ejs') %>
-    <% } else { %>
-        <%- include('../partials/admin-sidebar.ejs') %>
-    <% } %>
+    <%- include('../partials/admin-sidebar.ejs', { currentPage: 'articles' }) %>
     
     <main class="dashboard-main">
         <div class="section">
-            <div class="section-header"><h1>Publicar Novo Artigo</h1></div>
-            <form action="/articles/create" method="POST" enctype="multipart/form-data" class="dashboard-form" style="max-width: 800px;">
+            <div class="section-header">
+                <h1><%= typeof article !== 'undefined' ? 'Editar Artigo' : 'Novo Artigo' %></h1>
+                <a href="/articles/manage" class="btn btn-outline btn-sm">Voltar</a>
+            </div>
+            
+            <% const actionUrl = typeof article !== 'undefined' ? '/articles/edit/' + article.id : '/articles/create'; %>
+            
+            <form action="<%= actionUrl %>" method="POST" class="dashboard-form" style="max-width: 800px;">
                 <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                <div class="form-group"><label>Título</label><input type="text" name="title" required></div>
-                <div class="form-group"><label>Resumo</label><textarea name="summary" rows="2" required></textarea></div>
-                <div class="form-group"><label>Conteúdo (HTML permitido)</label><textarea name="content" rows="10" required></textarea></div>
-                <div class="form-group"><label>Imagem de Capa</label><input type="file" name="image"></div>
-                <div class="form-group"><label>Vídeo URL (YouTube)</label><input type="text" name="videoUrl"></div>
-                <div class="form-actions"><button type="submit" class="btn btn-primary">Publicar</button></div>
+                
+                <div class="form-group">
+                    <label>Título</label>
+                    <input type="text" name="title" required value="<%= typeof article !== 'undefined' ? article.title : '' %>">
+                </div>
+                
+                <div class="form-group">
+                    <label>Categoria</label>
+                    <select name="category">
+                        <option value="Treino" <%= typeof article !== 'undefined' && article.category === 'Treino' ? 'selected' : '' %>>Treino</option>
+                        <option value="Nutrição" <%= typeof article !== 'undefined' && article.category === 'Nutrição' ? 'selected' : '' %>>Nutrição</option>
+                        <option value="Saúde" <%= typeof article !== 'undefined' && article.category === 'Saúde' ? 'selected' : '' %>>Saúde</option>
+                        <option value="Lifestyle" <%= typeof article !== 'undefined' && article.category === 'Lifestyle' ? 'selected' : '' %>>Lifestyle</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Imagem de Capa (URL)</label>
+                    <input type="text" name="image_url" placeholder="https://..." value="<%= typeof article !== 'undefined' ? article.image_url : '' %>">
+                </div>
+
+                <div class="form-group">
+                    <label>Conteúdo (HTML Permitido)</label>
+                    <textarea name="content" rows="15" required style="font-family: monospace;"><%= typeof article !== 'undefined' ? article.content : '' %></textarea>
+                    <small style="color: #666;">Dica: Use tags HTML como &lt;p&gt;, &lt;h2&gt;, &lt;strong&gt; para formatar.</small>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Salvar Publicação</button>
+                </div>
             </form>
         </div>
     </main>
