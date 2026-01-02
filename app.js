@@ -10,8 +10,8 @@ const csurf = require('csurf');
 
 const app = express();
 
-// Configurações Essenciais para Vercel
-app.set('trust proxy', 1); // Confia no proxy da Vercel (Crucial para HTTPS no domínio customizado)
+// Configurações Vercel
+app.set('trust proxy', 1);
 app.set('view engine', 'ejs');
 app.set('views', path.join(process.cwd(), 'views'));
 
@@ -20,20 +20,17 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(cookieParser());
 
-// Configuração de Sessão Otimizada
+// Configuração de Sessão
 const isProduction = process.env.NODE_ENV === 'production';
 
-// Options para a store do Postgres
-const pgSessionOptions = {
-    pool: pgPool,
-    tableName: 'session',
-    createTableIfMissing: true,
-    pruneSessionInterval: 60 * 15,
-    errorLog: (err) => console.error('⚠️ Erro na Session Store:', err.message)
-};
-
 app.use(session({
-    store: new pgSession(pgSessionOptions),
+    store: new pgSession({
+        pool: pgPool,
+        tableName: 'session',
+        createTableIfMissing: false, // CRÍTICO: Não tenta criar tabela no boot (evita timeout)
+        pruneSessionInterval: 60 * 15,
+        errorLog: (err) => console.error('⚠️ Erro Session Store:', err.message)
+    }),
     secret: process.env.SESSION_SECRET || 'dev-secret-key',
     resave: false,
     saveUninitialized: false,
@@ -41,8 +38,7 @@ app.use(session({
     cookie: { 
         maxAge: 30 * 24 * 60 * 60 * 1000, 
         secure: isProduction, 
-        // 'lax' é mais seguro e compatível com domínios customizados que 'none' (que exige secure estrito)
-        sameSite: 'lax', 
+        sameSite: 'lax',
         httpOnly: true
     }
 }));
@@ -50,11 +46,12 @@ app.use(session({
 const csrfProtection = csurf({ cookie: true });
 app.use(csrfProtection);
 
-// Middleware Global
+// Middleware Global (Resiliente a falhas de DB)
 app.use((req, res, next) => {
     res.locals.csrfToken = req.csrfToken();
-    res.locals.isAuthenticated = !!req.session.user;
-    res.locals.user = req.session.user || null;
+    // Verifica sessão com segurança
+    res.locals.isAuthenticated = req.session && !!req.session.user;
+    res.locals.user = (req.session && req.session.user) ? req.session.user : null;
     res.locals.title = 'Momentum Fit';
     res.locals.notifications = [];
     res.locals.unreadCount = 0;
@@ -77,31 +74,34 @@ app.use('/api', require('./routes/api'));
 app.use('/trainer', require('./routes/trainer'));
 app.use('/notifications', require('./routes/notifications'));
 
-// Tratamento de Erro Global (Melhorado para diagnóstico)
+// Tratamento de Erro Global
 app.use((err, req, res, next) => {
-    console.error("❌ Erro Global:", err);
+    console.error("❌ Erro Global:", err.message);
     
     if (err.code === 'EBADCSRFTOKEN') {
         return res.status(403).render('pages/error', { title: 'Erro de Segurança', message: 'Sessão expirada. Atualize a página.' });
     }
     
-    const status = err.status || 500;
-    
-    // Se for erro de conexão com banco, mostra msg amigável
-    const msg = (err.message && err.message.includes('timeout')) 
-        ? 'O sistema está iniciando. Por favor, atualize a página em 5 segundos.' 
-        : 'Ocorreu um erro interno.';
+    // Tratamento específico para Timeout do Banco
+    if (err.message && (err.message.includes('timeout') || err.message.includes('Client has already been released'))) {
+        if (req.accepts('html')) {
+             return res.status(503).render('pages/error', { 
+                title: 'Iniciando Sistema', 
+                message: 'O sistema está acordando. Por favor, aguarde 5 segundos e atualize a página.' 
+            });
+        }
+    }
 
+    const status = err.status || 500;
     if (req.accepts('html')) {
-        res.status(status).render('pages/error', { title: 'Erro', message: msg });
+        res.status(status).render('pages/error', { title: 'Erro', message: 'Ocorreu um erro interno.' });
     } else {
-        res.status(status).json({ error: msg });
+        res.status(status).json({ error: 'Erro interno do servidor' });
     }
 });
 
-// Inicializa DB de forma não-bloqueante
-// Isso permite que o servidor suba mesmo se o banco demorar um pouco
-initDb().catch(e => console.error("⚠️ Aviso: Init DB demorou ou falhou:", e.message));
+// Inicializa DB em background (Não bloqueia o servidor de subir)
+initDb().catch(e => console.error("Aviso InitDb:", e.message));
 
 module.exports = app;
 

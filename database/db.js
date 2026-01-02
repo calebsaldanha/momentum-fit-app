@@ -3,35 +3,27 @@ require('dotenv').config();
 
 const connectionString = process.env.POSTGRES_URL || process.env.DATABASE_URL;
 
-if (!connectionString) {
-  console.error("⚠️ AVISO: POSTGRES_URL não definida!");
-}
-
+// Configuração de Pool Otimizada para Vercel
 const pool = new Pool({
   connectionString,
   ssl: connectionString ? { rejectUnauthorized: false } : false,
-  
-  // AUMENTADO PARA 4: Evita que a sessão e o initDb travem um ao outro no boot
-  max: 4, 
-  
-  // Configurações de sobrevivência da conexão (Keep-Alive)
-  connectionTimeoutMillis: 30000, // 30s de tolerância para conectar
-  idleTimeoutMillis: 30000,       // 30s para fechar inativas
+  max: 2, // Limite baixo para evitar sobrecarga no Serverless
+  connectionTimeoutMillis: 10000, // 10s para tentar conectar
+  idleTimeoutMillis: 30000, // 30s para fechar conexão inativa
   keepAlive: true,
 });
 
-// Tratamento de erros silenciosos do pool
 pool.on('error', (err) => {
-  console.error('⚠️ Erro no Pool do Postgres (recuperável):', err.message);
+  console.error('⚠️ Erro no Pool (recuperável):', err.message);
 });
 
 const initDb = async () => {
   let client;
   try {
-    // Tenta conectar sem travar o app se falhar (o app deve tentar de novo na request)
+    // Tenta obter cliente do pool
     client = await pool.connect();
     
-    // Criação de tabelas essenciais
+    // 1. Criar Tabela de Usuários
     await client.query(`
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
@@ -45,9 +37,27 @@ const initDb = async () => {
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       );
     `);
-    console.log('✅ DB Init: Tabelas verificadas.');
+
+    // 2. Criar Tabela de Sessão (Manual) para tirar carga do connect-pg-simple
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS session (
+        sid varchar NOT NULL COLLATE "default",
+        sess json NOT NULL,
+        expire timestamp(6) NOT NULL
+      )
+      WITH (OIDS=FALSE);
+
+      ALTER TABLE session ADD CONSTRAINT session_pkey PRIMARY KEY (sid) NOT DEFERRABLE INITIALLY IMMEDIATE;
+
+      CREATE INDEX IF NOT EXISTS IDX_session_expire ON session (expire);
+    `).catch(e => {
+        // Ignora erro se a constraint já existir (tabela já criada)
+        if (!e.message.includes('already exists')) console.error('Erro tabela session:', e.message);
+    });
+
+    console.log('✅ DB Init: Tabelas users e session verificadas.');
   } catch (err) {
-    console.error('❌ DB Init Falhou (App continuará rodando):', err.message);
+    console.error('❌ Erro no initDb:', err.message);
   } finally {
     if (client) {
       try { client.release(); } catch(e) {}
