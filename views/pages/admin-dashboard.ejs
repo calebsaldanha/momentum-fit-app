@@ -40,7 +40,7 @@
                     <a href="/admin/clients" class="btn btn-sm btn-secondary">Ver Todos</a>
                 </div>
                 
-                <% if (recentClients && recentClients.length > 0) { %>
+                <% if (typeof recentClients !== 'undefined' && recentClients.length > 0) { %>
                     <table class="data-table">
                         <thead>
                             <tr>

@@ -1,14 +1,10 @@
 <% 
-   // Define um padrão seguro para currentPage se não for passado
    const current = typeof currentPage !== 'undefined' ? currentPage : ''; 
 %>
-
 <% if (typeof user !== 'undefined' && user.role === 'superadmin') { %>
     <%- include('./superadmin-sidebar', { currentPage: current }) %>
-
 <% } else if (typeof user !== 'undefined' && user.role === 'client') { %>
     <%- include('./client-sidebar', { currentPage: current }) %>
-
 <% } else { %>
     <%- include('./admin-sidebar', { currentPage: current }) %>
 <% } %>
