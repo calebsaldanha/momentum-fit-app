@@ -505,11 +505,11 @@ const EXERCISE_DATA = {
 
 async function resetAndSeed() {
     if (!process.env.BLOB_READ_WRITE_TOKEN) {
-        console.error("❌ ERRO: BLOB_READ_WRITE_TOKEN não encontrado.");
+        console.error("[ERRO] ERRO: BLOB_READ_WRITE_TOKEN não encontrado.");
         process.exit(1);
     }
 
-    console.log("⏳ Iniciando Reset e Seed da Biblioteca de Exercícios...");
+    console.log("[INFO] Iniciando Reset e Seed da Biblioteca de Exercícios...");
     const client = await pool.connect();
 
     try {
@@ -535,13 +535,13 @@ async function resetAndSeed() {
         `);
 
         // 2. Buscar Arquivos no Blob
-        console.log("⏳ Buscando arquivos na pasta 'assets/' do Blob...");
+        console.log("[INFO] Buscando arquivos na pasta 'assets/' do Blob...");
         const { blobs } = await list({
             prefix: 'assets/',
             limit: 1000,
             token: process.env.BLOB_READ_WRITE_TOKEN
         });
-        console.log(`��� Encontrados ${blobs.length} arquivos no Blob.`);
+        console.log(`[INFO] Encontrados ${blobs.length} arquivos no Blob.`);
 
         // 3. Inserir Dados (COM FALLBACK)
         let count = 0;
@@ -592,18 +592,18 @@ async function resetAndSeed() {
                     blob.url
                 ]);
                 genericCount++;
-                console.log(`⚠️ Genérico criado para: ${decodedFilename}`);
+                console.log(`[AVISO] Genérico criado para: ${decodedFilename}`);
             }
             count++;
         }
 
         await client.query('COMMIT');
-        console.log(`✅ Sucesso Total! ${count} exercícios importados.`);
+        console.log(`[OK] Sucesso Total! ${count} exercícios importados.`);
         console.log(`Detalhes: ${matchedCount} com dados completos | ${genericCount} genéricos (sem descrição).`);
 
     } catch (err) {
         await client.query('ROLLBACK');
-        console.error("❌ Erro fatal:", err);
+        console.error("[ERRO] Erro fatal:", err);
     } finally {
         client.release();
         await pool.end();
