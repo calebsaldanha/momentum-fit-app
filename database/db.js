@@ -1,44 +1,140 @@
-const { Pool } = require('pg');
-require('dotenv').config();
+const sqlite3 = require('sqlite3').verbose();
+const path = require('path');
+const bcrypt = require('bcrypt');
 
-// Tenta pegar a URL de conexão de ambas as variáveis comuns na Vercel
-const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL;
+const dbPath = path.resolve(__dirname, 'database.sqlite');
 
-// LOG DE DEBUG (Não mostra a senha, apenas se a variável existe)
-if (!connectionString) {
-  console.error("❌ ERRO CRÍTICO: Nenhuma string de conexão encontrada (DATABASE_URL ou POSTGRES_URL vazias).");
-  console.error("O sistema tentará conectar em localhost (127.0.0.1), o que falhará na Vercel.");
-} else {
-  console.log("✅ Variável de conexão com banco de dados detectada.");
+const db = new sqlite3.Database(dbPath, (err) => {
+    if (err) {
+        console.error('Erro ao conectar ao banco de dados:', err.message);
+    } else {
+        console.log('Conectado ao banco de dados SQLite.');
+    }
+});
+
+// --- Funções Originais ---
+
+function getUserByEmail(email) {
+    return new Promise((resolve, reject) => {
+        const sql = "SELECT * FROM users WHERE email = ?";
+        db.get(sql, [email], (err, row) => {
+            if (err) reject(err);
+            else resolve(row);
+        });
+    });
 }
 
-const isProduction = process.env.NODE_ENV === 'production';
+function getUserById(id) {
+    return new Promise((resolve, reject) => {
+        const sql = "SELECT * FROM users WHERE id = ?";
+        db.get(sql, [id], (err, row) => {
+            if (err) reject(err);
+            else resolve(row);
+        });
+    });
+}
 
-const pool = new Pool({
-  connectionString: connectionString,
-  ssl: isProduction ? { rejectUnauthorized: false } : false
-});
+function createUser(user) {
+    return new Promise(async (resolve, reject) => {
+        const { name, email, password, role, trainer_id, profile_image, goal, fitness_level, height, weight } = user;
+        let hashedPassword = null;
+        if (password) {
+             hashedPassword = await bcrypt.hash(password, 10);
+        }
 
-pool.on('connect', () => {
-  console.log('✅ Pool de conexão: Cliente conectado com sucesso!');
-});
+        const sql = `INSERT INTO users (name, email, password, role, trainer_id, profile_image, goal, fitness_level, height, weight) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+        
+        db.run(sql, [name, email, hashedPassword, role, trainer_id, profile_image, goal, fitness_level, height, weight], function(err) {
+            if (err) reject(err);
+            else resolve({ id: this.lastID, ...user });
+        });
+    });
+}
 
-pool.on('error', (err) => {
-  console.error('❌ Erro inesperado no cliente inativo do pool:', err);
-  // Não damos exit(-1) aqui para evitar crash loop imediato se for erro transiente
-});
+function updateUser(id, updates) {
+    return new Promise(async (resolve, reject) => {
+        const fields = [];
+        const values = [];
 
-module.exports = {
-  query: (text, params) => pool.query(text, params),
-  pool,
-};
+        for (const key in updates) {
+            if (key === 'password') {
+                const hashedPassword = await bcrypt.hash(updates[key], 10);
+                fields.push(`${key} = ?`);
+                values.push(hashedPassword);
+            } else {
+                fields.push(`${key} = ?`);
+                values.push(updates[key]);
+            }
+        }
+        
+        values.push(id);
+        const sql = `UPDATE users SET ${fields.join(', ')} WHERE id = ?`;
 
-/* --- FUNÇÕES ESPECÍFICAS PARA O PAINEL DO TREINADOR (FILTRADAS POR ID) --- */
+        db.run(sql, values, function(err) {
+            if (err) reject(err);
+            else resolve({ id, ...updates });
+        });
+    });
+}
 
-// Busca apenas alunos vinculados ao treinador logado
+function getWorkoutsByUserId(userId) {
+     return new Promise((resolve, reject) => {
+        const sql = "SELECT * FROM workouts WHERE user_id = ? ORDER BY created_at DESC";
+        db.all(sql, [userId], (err, rows) => {
+            if (err) reject(err);
+            else resolve(rows);
+        });
+    });
+}
+
+function createWorkout(workout) {
+    return new Promise((resolve, reject) => {
+        const { user_id, trainer_id, title, description, exercises } = workout; // exercises is JSON string
+        const sql = "INSERT INTO workouts (user_id, trainer_id, title, description, exercises) VALUES (?, ?, ?, ?, ?)";
+        db.run(sql, [user_id, trainer_id, title, description, exercises], function(err) {
+            if (err) reject(err);
+            else resolve({ id: this.lastID, ...workout });
+        });
+    });
+}
+
+function getAllTrainers() {
+    return new Promise((resolve, reject) => {
+        const sql = "SELECT id, name, email, profile_image FROM users WHERE role = 'trainer' OR role = 'superadmin'";
+        db.all(sql, [], (err, rows) => {
+            if (err) reject(err);
+            else resolve(rows);
+        });
+    });
+}
+
+function getClients() {
+    return new Promise((resolve, reject) => {
+        const sql = "SELECT * FROM users WHERE role = 'client'";
+        db.all(sql, [], (err, rows) => {
+            if (err) reject(err);
+            else resolve(rows);
+        });
+    });
+}
+
+function getUserStats(userId) {
+    return new Promise((resolve, reject) => {
+        // Mock ou implementação simples
+        const stats = {
+            completed_workouts: 0,
+            streak: 0,
+            last_workout: null
+        };
+        // Aqui poderia ter queries reais
+        resolve(stats);
+    });
+}
+
+// --- NOVAS FUNÇÕES (CORRIGIDAS) ---
+
 async function getClientsByTrainer(trainerId) {
     return new Promise((resolve, reject) => {
-        // Pega alunos onde trainer_id bate OU (caso seja superadmin testando) cria lógica específica
         const sql = `
             SELECT id, name, email, profile_image, goal, status, created_at 
             FROM users 
@@ -52,7 +148,6 @@ async function getClientsByTrainer(trainerId) {
     });
 }
 
-// Busca os alunos mais recentes (apenas do treinador) para o Dashboard
 async function getRecentClientsByTrainer(trainerId) {
     return new Promise((resolve, reject) => {
         const sql = `
@@ -69,18 +164,12 @@ async function getRecentClientsByTrainer(trainerId) {
     });
 }
 
-// Estatísticas exclusivas do Treinador (não globais)
 async function getTrainerStats(trainerId) {
     return new Promise((resolve, reject) => {
         const stats = { totalClients: 0, totalWorkouts: 0, weeklyCheckins: 0 };
         
-        // 1. Total de Alunos do Treinador
         const sqlClients = "SELECT COUNT(*) as count FROM users WHERE role = 'client' AND trainer_id = ?";
-        
-        // 2. Total de Treinos criados por este Treinador
         const sqlWorkouts = "SELECT COUNT(*) as count FROM workouts WHERE trainer_id = ?";
-        
-        // 3. Checkins dos alunos DESTE treinador (Join simples)
         const sqlCheckins = `
             SELECT COUNT(*) as count 
             FROM checkins 
@@ -97,16 +186,35 @@ async function getTrainerStats(trainerId) {
                 stats.totalWorkouts = row ? row.count : 0;
 
                 db.get(sqlCheckins, [trainerId], (err, row) => {
-                    if (err) return reject(err);
-                    stats.weeklyCheckins = row ? row.count : 0;
-                    resolve(stats);
+                    // Checkins pode dar erro se a tabela não existir ainda, tratamos com fallback
+                    if (err && err.message.includes('no such table')) {
+                         stats.weeklyCheckins = 0;
+                         resolve(stats);
+                    } else if (err) {
+                        return reject(err);
+                    } else {
+                        stats.weeklyCheckins = row ? row.count : 0;
+                        resolve(stats);
+                    }
                 });
             });
         });
     });
 }
 
-// Exportar as novas funções
-module.exports.getClientsByTrainer = getClientsByTrainer;
-module.exports.getRecentClientsByTrainer = getRecentClientsByTrainer;
-module.exports.getTrainerStats = getTrainerStats;
+module.exports = {
+    db,
+    getUserByEmail,
+    getUserById,
+    createUser,
+    updateUser,
+    getWorkoutsByUserId,
+    createWorkout,
+    getAllTrainers,
+    getClients,
+    getUserStats,
+    // Novas exportações
+    getClientsByTrainer,
+    getRecentClientsByTrainer,
+    getTrainerStats
+};
