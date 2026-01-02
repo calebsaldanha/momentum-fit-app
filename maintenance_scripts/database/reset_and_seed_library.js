@@ -2,7 +2,7 @@ require('dotenv').config();
 const { list } = require('@vercel/blob');
 const { pool } = require('../../database/db');
 
-// Dicionário com chaves ajustadas para bater com o Banco de Dados
+// Dicionário com dados detalhados (Seu dicionário original)
 const EXERCISE_DATA = {
     'Abdominal Bicicleta - Image.png': {
         description: 'Exercício abdominal dinâmico que foca nos músculos oblíquos e reto abdominal.',
@@ -515,7 +515,7 @@ async function resetAndSeed() {
     try {
         await client.query('BEGIN');
 
-        // 1. Apagar e Recriar Tabela (Schema limpo e alinhado)
+        // 1. Apagar e Recriar Tabela
         console.log(" Recriando tabela 'exercise_library'...");
         await client.query("DROP TABLE IF EXISTS exercise_library CASCADE");
         await client.query(`
@@ -524,11 +524,11 @@ async function resetAndSeed() {
                 name VARCHAR(255) NOT NULL,
                 image_url TEXT,
                 video_url TEXT,
-                description TEXT,           -- description no Dicionário
-                execution_instructions TEXT, -- execution_instructions no Dicionário
-                tips TEXT,                  -- tips no Dicionário
-                recommendations TEXT,       -- recommendations no Dicionário
-                target_audience VARCHAR(100), -- target_audience no Dicionário
+                description TEXT,           
+                execution_instructions TEXT, 
+                tips TEXT,                  
+                recommendations TEXT,       
+                target_audience VARCHAR(100), 
                 category VARCHAR(100) DEFAULT 'Geral',
                 created_at TIMESTAMP DEFAULT NOW()
             );
@@ -543,19 +543,30 @@ async function resetAndSeed() {
         });
         console.log(`��� Encontrados ${blobs.length} arquivos no Blob.`);
 
-        // 3. Inserir Dados
+        // 3. Inserir Dados (COM FALLBACK)
         let count = 0;
+        let matchedCount = 0;
+        let genericCount = 0;
+
         for (const blob of blobs) {
-            // Extrai o nome do arquivo, ex: "assets/Exercicio - Image.png" -> "Exercicio - Image.png"
-            const filename = blob.pathname.split('assets/')[1]; 
-            
-            // Busca dados no dicionário usando o nome EXATO do arquivo
-            const info = EXERCISE_DATA[filename];
+            const rawFilename = blob.pathname.split('assets/')[1]; // Ex: "Agachamento%20Livre.png"
+            if(!rawFilename) continue;
+
+            // Decodifica URL (remove %20 etc)
+            const decodedFilename = decodeURIComponent(rawFilename);
+
+            // Busca no dicionário
+            const info = EXERCISE_DATA[decodedFilename] || EXERCISE_DATA[rawFilename];
+
+            // Limpa nome para exibição
+            const displayName = decodedFilename
+                .replace(' - Image', '')
+                .replace('- Image', '')
+                .replace(/\.(png|jpg|jpeg|webp)/i, '')
+                .trim();
 
             if (info) {
-                // Remove sufixos para o nome visível
-                const displayName = filename.replace(' - Image.png', '').replace('.png', '').replace('.jpg', '');
-                
+                // Caso encontrado no dicionário
                 await client.query(`
                     INSERT INTO exercise_library (
                         name, image_url, description, execution_instructions, tips, recommendations, target_audience
@@ -563,18 +574,32 @@ async function resetAndSeed() {
                 `, [
                     displayName,
                     blob.url,
-                    info.description,          // Mapeamento direto
+                    info.description,
                     info.execution_instructions,
                     info.tips,
                     info.recommendations,
                     info.target_audience
                 ]);
-                count++;
+                matchedCount++;
+            } else {
+                // Caso NÃO encontrado (Fallback Genérico)
+                await client.query(`
+                    INSERT INTO exercise_library (
+                        name, image_url, description, execution_instructions, tips, recommendations, target_audience
+                    ) VALUES ($1, $2, 'Descrição em breve...', 'Consulte seu treinador.', 'Mantenha a postura.', 'Execução controlada.', 'Todos')
+                `, [
+                    displayName,
+                    blob.url
+                ]);
+                genericCount++;
+                console.log(`⚠️ Genérico criado para: ${decodedFilename}`);
             }
+            count++;
         }
 
         await client.query('COMMIT');
-        console.log(`✅ Sucesso! Tabela recriada e ${count} exercícios importados com dados completos.`);
+        console.log(`✅ Sucesso Total! ${count} exercícios importados.`);
+        console.log(`Detalhes: ${matchedCount} com dados completos | ${genericCount} genéricos (sem descrição).`);
 
     } catch (err) {
         await client.query('ROLLBACK');
