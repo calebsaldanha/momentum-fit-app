@@ -10,6 +10,9 @@ require('dotenv').config();
 
 const app = express();
 
+// CORREÇÃO: Necessário para cookies seguros funcionarem atrás de proxies (Vercel, Railway, etc)
+app.set('trust proxy', 1);
+
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
@@ -31,13 +34,15 @@ app.use(session({
   saveUninitialized: false,
   cookie: {
     secure: process.env.NODE_ENV === 'production', 
-    maxAge: 30 * 24 * 60 * 60 * 1000 
+    maxAge: 30 * 24 * 60 * 60 * 1000,
+    httpOnly: true,
+    sameSite: 'lax' // Recomendado para evitar problemas de CSRF/Navegação
   }
 }));
 
 app.use(flash());
 
-// Middleware Global (CORREÇÃO AQUI)
+// Middleware Global
 app.use((req, res, next) => {
   res.locals.success_msg = req.flash('success_msg');
   res.locals.error_msg = req.flash('error_msg');
