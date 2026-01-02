@@ -1,22 +1,31 @@
 import { put } from '@vercel/blob';
 import fs from 'fs';
 import path from 'path';
-// CORREÇÃO AQUI: Importação compatível com CommonJS/ESM mistos no Windows
-import globPkg from 'glob';
-const { glob } = globPkg;
 import 'dotenv/config';
 
 // Caminho da sua pasta
 const IMAGES_DIR = 'C:/Users/CalebSaldanha/OneDrive/Área de Trabalho/Images Exerc - Momentum';
 
+// Função para buscar arquivos recursivamente (nativa do Node)
+function getFiles(dir) {
+  try {
+    const files = fs.readdirSync(dir, { recursive: true, withFileTypes: true });
+    return files
+      .filter(file => file.isFile())
+      .map(file => path.join(file.parentPath || file.path, file.name));
+  } catch (err) {
+    console.error("Erro ao ler diretório:", err.message);
+    return [];
+  }
+}
+
 async function uploadImages() {
   console.log(`🔍 Procurando imagens em: "${IMAGES_DIR}"`);
 
-  // Busca os arquivos
-  const files = await glob(`${IMAGES_DIR}/**/*`, { nodir: true });
+  const files = getFiles(IMAGES_DIR);
 
-  if (!files || files.length === 0) {
-    console.log("⚠️ Nenhuma imagem encontrada. Verifique se o caminho está correto.");
+  if (files.length === 0) {
+    console.log("⚠️ Nenhuma imagem encontrada ou caminho incorreto.");
     return;
   }
 
@@ -27,6 +36,7 @@ async function uploadImages() {
     const fileContent = fs.readFileSync(filePath);
 
     try {
+      // Cria a pasta assets/ no blob
       const blobPath = `assets/${filename}`; 
       
       const blob = await put(blobPath, fileContent, {
