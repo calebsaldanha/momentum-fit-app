@@ -4,6 +4,7 @@
     <% if (user.role === 'trainer' || user.role === 'superadmin') { %>
         <%- include('../partials/admin-sidebar.ejs') %>
     <% } else { %>
+        <% if (typeof profile === 'undefined') { var profile = {}; } %>
         <%- include('../partials/client-sidebar.ejs') %>
     <% } %>
 
@@ -20,6 +21,10 @@
             </div>
 
             <div class="exercises-list">
+                <% if (exercises.length === 0) { %>
+                    <div style="padding: 2rem; text-align: center; color: #888;">Nenhum exercício cadastrado neste treino.</div>
+                <% } %>
+
                 <% exercises.forEach((ex, index) => { %>
                     <div class="card exercise-card" style="margin-bottom: 2rem; overflow: hidden; border: 1px solid var(--c-border);">
                         <div class="card-body" style="padding: 1.5rem;">
@@ -29,7 +34,7 @@
                                 <span class="badge" style="background: var(--c-bg-main); font-size: 1.1rem; padding: 0.5rem 1rem;"><%= ex.sets %> x <%= ex.reps %></span>
                             </div>
 
-                            <div style="display: grid; grid-template-columns: 1fr 300px; gap: 2rem;" class="exercise-grid">
+                            <div class="exercise-grid" style="display: grid; grid-template-columns: 1fr 300px; gap: 2rem;">
                                 <div>
                                     <% if (ex.notes) { %>
                                         <div style="margin-bottom: 1.5rem; background: var(--c-bg-main); padding: 1rem; border-radius: var(--radius);">
@@ -67,6 +72,7 @@
                                     <% } else { %>
                                         <div style="height: 200px; background: var(--c-bg-main); display: flex; align-items: center; justify-content: center; color: var(--c-text-secondary); border-radius: var(--radius);">
                                             <i class="fas fa-dumbbell" style="font-size: 3rem; opacity: 0.3;"></i>
+                                            <p style="margin-top: 10px; font-size: 0.8rem;">Sem imagem</p>
                                         </div>
                                     <% } %>
                                 </div>
