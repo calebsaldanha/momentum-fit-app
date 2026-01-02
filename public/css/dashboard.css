@@ -129,3 +129,54 @@ body.dashboard-body {
     .chat-layout { grid-template-columns: 1fr; grid-template-rows: 80px 1fr; height: calc(100vh - 120px); }
     .chat-users { border-right: none; border-bottom: 1px solid #222; flex-direction: row; overflow-x: auto; }
 }
+
+/* --- Sidebar Unificada (Additions) --- */
+.sidebar-header {
+    padding: 2rem 1.5rem;
+    text-align: center;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    margin-bottom: 1rem;
+}
+.user-avatar-large {
+    width: 70px; height: 70px;
+    background: rgba(190, 242, 2, 0.05);
+    border: 1px solid rgba(190, 242, 2, 0.2);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1rem;
+    color: var(--c-accent-primary);
+    font-size: 1.8rem;
+    box-shadow: 0 0 15px rgba(190, 242, 2, 0.1);
+}
+.user-name {
+    color: white; font-size: 1.2rem; margin-bottom: 0.25rem; font-weight: 600;
+}
+.user-role-badge, .user-goal {
+    font-size: 0.75rem; color: #888;
+    background: rgba(255,255,255,0.05);
+    padding: 4px 10px; border-radius: 12px;
+    display: inline-block;
+    text-transform: uppercase; letter-spacing: 0.5px;
+}
+.sidebar-footer {
+    padding: 1.5rem;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    margin-top: auto; /* Empurra para o final */
+}
+.btn-logout-sidebar {
+    width: 100%;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #888;
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    font-weight: 500;
+}
+.btn-logout-sidebar:hover {
+    background: rgba(255, 50, 50, 0.1);
+    border-color: rgba(255, 50, 50, 0.3);
+    color: #ff4444;
+}

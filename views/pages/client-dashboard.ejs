@@ -1,13 +1,6 @@
 <%- include('../partials/header.ejs', { title, bodyClass: 'dashboard-body' }) %>
 <div class="dashboard-container">
-    <aside class="dashboard-sidebar">
-        <nav class="sidebar-nav">
-            <a href="/client/dashboard" class="nav-item active">Painel Geral</a>
-            <a href="/client/workouts" class="nav-item">Meus Treinos</a>
-            <a href="/chat" class="nav-item">Chat</a>
-            <a href="/client/profile" class="nav-item">Meu Perfil</a>
-        </nav>
-    </aside>
+    <%- include('../partials/client-sidebar.ejs', { currentPage: 'dashboard' }) %>
 
     <main class="dashboard-main">
         <section class="section">

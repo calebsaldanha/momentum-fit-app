@@ -1,31 +1,37 @@
 <aside class="dashboard-sidebar">
-    <div style="padding: 20px 20px 0;">
-        <h3 style="font-size: 0.8rem; text-transform: uppercase; color: var(--c-accent-primary); letter-spacing: 1px;">
-            Gestão Global
-        </h3>
+    <div class="sidebar-header">
+        <div class="user-avatar-large">
+            <i class="fas fa-crown"></i>
+        </div>
+        <h3 class="user-name"><%= user.name.split(' ')[0] %></h3>
+        <span class="user-role-badge">Gestão Global</span>
     </div>
+
     <nav class="sidebar-nav">
         <a href="/superadmin/dashboard" class="nav-item <%= currentPage === 'superadmin-dashboard' ? 'active' : '' %>">
-            Dashboard Geral
+            <i class="fas fa-chart-line"></i> <span>Dashboard Geral</span>
         </a>
         <a href="/superadmin/manage" class="nav-item <%= currentPage === 'superadmin-manage' ? 'active' : '' %>">
-            Gerenciar Usuários
+            <i class="fas fa-users-cog"></i> <span>Gerenciar Usuários</span>
         </a>
         <a href="/articles/manage" class="nav-item <%= currentPage === 'articles-manage' ? 'active' : '' %>">
-            Gerenciar Blog
+            <i class="fas fa-newspaper"></i> <span>Gerenciar Blog</span>
         </a>
 
-        <div style="margin-top: 20px; padding: 0 20px; border-top: 1px solid #333; padding-top: 15px;">
-            <p style="font-size: 0.7rem; color: #ccc; margin-bottom: 5px;">MODO PERSONAL</p>
-            <a href="/admin/dashboard" class="btn btn-sm btn-outline" style="width: 100%; text-align: center; color: #fff;">
-                Ver Meus Alunos &rarr;
+        <div style="margin-top: 15px; padding: 10px 24px;">
+            <p style="font-size: 0.65rem; color: #666; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">Acesso Rápido</p>
+            <a href="/admin/dashboard" class="nav-item" style="border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; justify-content: center; padding: 10px;">
+                <span>Modo Treinador &rarr;</span>
             </a>
         </div>
     </nav>
+    
     <div class="sidebar-footer">
          <form action="/auth/logout" method="POST" style="margin: 0;">
             <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
-            <button type="submit" class="btn-logout-sidebar">Sair</button>
+            <button type="submit" class="btn-logout-sidebar">
+                <i class="fas fa-sign-out-alt"></i> <span>Sair</span>
+            </button>
         </form>
     </div>
 </aside>
