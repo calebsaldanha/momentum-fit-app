@@ -48,33 +48,24 @@ app.use(session({
 const csrfProtection = csurf({ cookie: true });
 app.use(csrfProtection);
 
-// Middleware Global
-app.use(async (req, res, next) => {
+// Middleware Global de Variáveis (Leve, sem query de banco duplicada)
+app.use((req, res, next) => {
     res.locals.csrfToken = req.csrfToken();
     res.locals.isAuthenticated = !!req.session.user;
     res.locals.user = req.session.user || null;
     res.locals.title = 'Momentum Fit';
     
-    // Evitar query de notificação se não logado para poupar DB
-    if (req.session.user) {
-        try {
-            const notifRes = await pgPool.query('SELECT * FROM notifications WHERE user_id = $1 ORDER BY created_at DESC LIMIT 5', [req.session.user.id]);
-            res.locals.notifications = notifRes.rows;
-            const countRes = await pgPool.query('SELECT COUNT(*) FROM notifications WHERE user_id = $1 AND is_read = false', [req.session.user.id]);
-            res.locals.unreadCount = countRes.rows[0].count;
-        } catch (e) {
-            res.locals.notifications = [];
-            res.locals.unreadCount = 0;
-        }
-    } else {
-        res.locals.notifications = [];
-        res.locals.unreadCount = 0;
-    }
+    // Inicializa variáveis para evitar erros de undefined nas views
+    res.locals.notifications = [];
+    res.locals.unreadCount = 0;
+    
     next();
 });
 
-// Rotas
+// Middleware de Notificações (Faz a query apenas uma vez aqui)
 app.use(require('./middleware/notifications'));
+
+// Rotas
 app.use('/', require('./routes/index'));
 app.use('/auth', require('./routes/auth'));
 app.use('/client', require('./routes/client'));
