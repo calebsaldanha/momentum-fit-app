@@ -11,38 +11,38 @@ const csurf = require('csurf');
 const app = express();
 
 // Configurações Essenciais para Vercel
-app.set('trust proxy', 1);
+app.set('trust proxy', 1); // Confia no proxy da Vercel (Crucial para HTTPS no domínio customizado)
 app.set('view engine', 'ejs');
-
-// CORREÇÃO CRÍTICA: Usar process.cwd() para garantir que a Vercel encontre as pastas
 app.set('views', path.join(process.cwd(), 'views'));
 
-// Servir estáticos também usando process.cwd() por segurança
 app.use(express.static(path.join(process.cwd(), 'public')));
-
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(cookieParser());
 
-// Configuração de Sessão
+// Configuração de Sessão Otimizada
 const isProduction = process.env.NODE_ENV === 'production';
-const sessionStore = new pgSession({ 
-    pool: pgPool, 
-    tableName: 'session', 
+
+// Options para a store do Postgres
+const pgSessionOptions = {
+    pool: pgPool,
+    tableName: 'session',
     createTableIfMissing: true,
-    pruneSessionInterval: 60 * 15
-});
+    pruneSessionInterval: 60 * 15,
+    errorLog: (err) => console.error('⚠️ Erro na Session Store:', err.message)
+};
 
 app.use(session({
-    store: sessionStore,
+    store: new pgSession(pgSessionOptions),
     secret: process.env.SESSION_SECRET || 'dev-secret-key',
     resave: false,
     saveUninitialized: false,
     proxy: true,
     cookie: { 
         maxAge: 30 * 24 * 60 * 60 * 1000, 
-        secure: isProduction,
-        sameSite: isProduction ? 'none' : 'lax',
+        secure: isProduction, 
+        // 'lax' é mais seguro e compatível com domínios customizados que 'none' (que exige secure estrito)
+        sameSite: 'lax', 
         httpOnly: true
     }
 }));
@@ -77,22 +77,31 @@ app.use('/api', require('./routes/api'));
 app.use('/trainer', require('./routes/trainer'));
 app.use('/notifications', require('./routes/notifications'));
 
-// Tratamento de Erro Global
+// Tratamento de Erro Global (Melhorado para diagnóstico)
 app.use((err, req, res, next) => {
-    console.error("Erro Global:", err);
+    console.error("❌ Erro Global:", err);
+    
     if (err.code === 'EBADCSRFTOKEN') {
         return res.status(403).render('pages/error', { title: 'Erro de Segurança', message: 'Sessão expirada. Atualize a página.' });
     }
+    
     const status = err.status || 500;
+    
+    // Se for erro de conexão com banco, mostra msg amigável
+    const msg = (err.message && err.message.includes('timeout')) 
+        ? 'O sistema está iniciando. Por favor, atualize a página em 5 segundos.' 
+        : 'Ocorreu um erro interno.';
+
     if (req.accepts('html')) {
-        res.status(status).render('pages/error', { title: 'Erro', message: 'Ocorreu um erro interno.' });
+        res.status(status).render('pages/error', { title: 'Erro', message: msg });
     } else {
-        res.status(status).json({ error: 'Erro interno do servidor' });
+        res.status(status).json({ error: msg });
     }
 });
 
-// Inicializa DB
-initDb().catch(e => console.error("Erro ao init DB:", e));
+// Inicializa DB de forma não-bloqueante
+// Isso permite que o servidor suba mesmo se o banco demorar um pouco
+initDb().catch(e => console.error("⚠️ Aviso: Init DB demorou ou falhou:", e.message));
 
 module.exports = app;
 

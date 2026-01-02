@@ -4,75 +4,53 @@ require('dotenv').config();
 const connectionString = process.env.POSTGRES_URL || process.env.DATABASE_URL;
 
 if (!connectionString) {
-  console.error("⚠️ AVISO CRÍTICO: POSTGRES_URL não encontrada nas variáveis de ambiente!");
+  console.error("⚠️ AVISO: POSTGRES_URL não definida!");
 }
 
 const pool = new Pool({
   connectionString,
   ssl: connectionString ? { rejectUnauthorized: false } : false,
   
-  // CORREÇÃO DE DEADLOCK:
-  // Aumentado para 2. Com 1, o 'connect-pg-simple' e o 'initDb'
-  // competem pela mesma conexão no boot, causando timeout.
-  max: 2,
+  // AUMENTADO PARA 4: Evita que a sessão e o initDb travem um ao outro no boot
+  max: 4, 
   
-  // Configurações de sobrevivência da conexão
-  connectionTimeoutMillis: 20000, // 20s de tolerância
-  idleTimeoutMillis: 30000,       // 30s de inatividade
+  // Configurações de sobrevivência da conexão (Keep-Alive)
+  connectionTimeoutMillis: 30000, // 30s de tolerância para conectar
+  idleTimeoutMillis: 30000,       // 30s para fechar inativas
   keepAlive: true,
-  application_name: 'momentum-fit-app'
 });
 
-// Listener de erros para evitar crash do Node
-pool.on('error', (err, client) => {
-  console.error('⚠️ Erro silencioso no pool (recuperável):', err.message);
+// Tratamento de erros silenciosos do pool
+pool.on('error', (err) => {
+  console.error('⚠️ Erro no Pool do Postgres (recuperável):', err.message);
 });
 
-// Função auxiliar de delay
-const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
-const initDb = async (retries = 3) => {
+const initDb = async () => {
   let client;
-  for (let i = 0; i < retries; i++) {
-    try {
-      console.log(`��� Tentativa de conexão ao DB ${i + 1}/${retries}...`);
-      client = await pool.connect();
-      
-      console.log('✅ Conectado. Verificando schema...');
-      await client.query(`
-        CREATE TABLE IF NOT EXISTS users (
-          id SERIAL PRIMARY KEY,
-          name TEXT NOT NULL,
-          email TEXT UNIQUE NOT NULL,
-          password TEXT NOT NULL,
-          role TEXT DEFAULT 'client',
-          status TEXT DEFAULT 'active',
-          reset_password_token TEXT,
-          reset_password_expires TIMESTAMP,
-          created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-        );
-      `);
-      console.log('✅ DB Init: Sucesso.');
-      return; // Sucesso, sai da função
-      
-    } catch (err) {
-      console.error(`⚠️ Falha na tentativa ${i + 1}:`, err.message);
-      if (client) {
-        try { client.release(); } catch(e) {}
-        client = null;
-      }
-      
-      // Se for a última tentativa, lança o erro (ou apenas loga final)
-      if (i === retries - 1) {
-        console.error('❌ Não foi possível conectar ao banco após várias tentativas.');
-      } else {
-        // Espera 2 segundos antes de tentar de novo (ajuda se o banco estiver acordando)
-        await wait(2000);
-      }
-    } finally {
-      if (client) {
-        try { client.release(); } catch(e) {}
-      }
+  try {
+    // Tenta conectar sem travar o app se falhar (o app deve tentar de novo na request)
+    client = await pool.connect();
+    
+    // Criação de tabelas essenciais
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        name TEXT NOT NULL,
+        email TEXT UNIQUE NOT NULL,
+        password TEXT NOT NULL,
+        role TEXT DEFAULT 'client',
+        status TEXT DEFAULT 'active',
+        reset_password_token TEXT,
+        reset_password_expires TIMESTAMP,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+    console.log('✅ DB Init: Tabelas verificadas.');
+  } catch (err) {
+    console.error('❌ DB Init Falhou (App continuará rodando):', err.message);
+  } finally {
+    if (client) {
+      try { client.release(); } catch(e) {}
     }
   }
 };
