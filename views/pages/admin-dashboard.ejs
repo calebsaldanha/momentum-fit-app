@@ -1,51 +1,76 @@
-<%- include('../partials/header.ejs', { title, bodyClass: 'dashboard-body' }) %>
+<%- include('../partials/header.ejs', { title: 'Painel do Treinador', bodyClass: 'dashboard-body' }) %>
 
 <div class="dashboard-container">
     <%- include('../partials/sidebar.ejs', { currentPage: 'dashboard' }) %>
 
     <main class="dashboard-main">
-        <div class="section">
+        <section class="section">
             <div class="section-header">
-                <h1>Painel do Treinador</h1>
-                <p>Visão geral do seu impacto e progresso dos alunos.</p>
+                <h1>Visão Geral</h1>
+                <p style="color: #666;">Bem-vindo ao seu painel de controle, <%= user.name.split(' ')[0] %>.</p>
             </div>
-            
+
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-icon"><img src="/images/logo-3d.png" alt="Icon"></div>
-                    <div class="stat-info"><h3><%= stats.totalClients %></h3><p>Alunos Ativos</p></div>
+                    <div class="stat-icon"><i class="fas fa-users"></i></div>
+                    <div class="stat-info">
+                        <h3><%= stats.totalClients %></h3>
+                        <p>Alunos Ativos</p>
+                    </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon"><img src="/images/logo-3d.png" alt="Icon"></div>
-                    <div class="stat-info"><h3><%= stats.totalWorkouts %></h3><p>Treinos Criados</p></div>
+                    <div class="stat-icon"><i class="fas fa-dumbbell"></i></div>
+                    <div class="stat-info">
+                        <h3><%= stats.totalWorkouts %></h3>
+                        <p>Treinos Criados</p>
+                    </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon"><img src="/images/logo-3d.png" alt="Icon"></div>
-                    <div class="stat-info"><h3><%= stats.weeklyCheckins %></h3><p>Check-ins (Semana)</p></div>
+                    <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                    <div class="stat-info">
+                        <h3><%= stats.weeklyCheckins %></h3>
+                        <p>Check-ins (Semana)</p>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="section">
-            <div class="section-header">
-                <h2>Alunos Recentes</h2>
-                <a href="/admin/clients" class="btn btn-secondary btn-sm">Ver Todos</a>
+            <div class="content-card" style="margin-top: 2rem;">
+                <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3>Alunos Recentes</h3>
+                    <a href="/admin/clients" class="btn btn-sm btn-secondary">Ver Todos</a>
+                </div>
+                
+                <% if (recentClients && recentClients.length > 0) { %>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Email</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% recentClients.forEach(client => { %>
+                                <tr>
+                                    <td>
+                                        <div style="display: flex; align-items: center; gap: 10px;">
+                                            <div class="user-avatar-sm"><%= client.name.charAt(0) %></div>
+                                            <%= client.name %>
+                                        </div>
+                                    </td>
+                                    <td><%= client.email %></td>
+                                    <td>
+                                        <a href="/admin/clients/<%= client.id %>" class="action-btn" title="Ver Detalhes"><i class="fas fa-eye"></i></a>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                <% } else { %>
+                    <p style="color: #666; font-style: italic;">Nenhum aluno cadastrado recentemente.</p>
+                <% } %>
             </div>
-            <% if (recentClients && recentClients.length > 0) { %>
-                <div class="recent-clients-list">
-                    <% recentClients.forEach(client => { %>
-                        <a href="/admin/clients/<%= client.id %>" class="recent-client-item">
-                            <div class="client-info"><strong><%= client.name %></strong><span><%= client.email %></span></div>
-                            <div class="view-details-btn" style="font-size: 0.85rem; font-weight: 600; color: var(--c-accent-primary);">Ver Detalhes →</div>
-                        </a>
-                    <% }); %>
-                </div>
-            <% } else { %>
-                <div class="empty-state" style="padding: 2rem; text-align: center; color: var(--c-text-secondary);">
-                    <p>Nenhum aluno atribuído recentemente.</p>
-                </div>
-            <% } %>
-        </div>
+        </section>
     </main>
 </div>
 <%- include('../partials/footer.ejs') %>
