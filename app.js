@@ -5,41 +5,38 @@ const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const path = require('path');
 const flash = require('connect-flash');
-const db = require('./database/db'); // Importa nosso módulo de banco configurado
+const db = require('./database/db'); // Importa nosso módulo de banco
 require('dotenv').config();
 
 const app = express();
 
-// Configuração da View Engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// Middlewares
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cookieParser());
 
-// Configuração da Sessão (CORREÇÃO AQUI)
-// Agora passamos o 'pool' exportado do db.js, que já tem a configuração de SSL correta
+// Configuração de Sessão Robusta
 app.use(session({
   store: new pgSession({
-    pool: db.pool, // Usa o pool configurado em database/db.js
+    pool: db.pool, // Usa explicitamente o pool do db.js
     tableName: 'session',
-    createTableIfMissing: true
+    createTableIfMissing: true,
+    pruneSessionInterval: 60 * 15 // Limpa sessões expiradas a cada 15min
   }),
   secret: process.env.SESSION_SECRET || 'chave-secreta-padrao',
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: process.env.NODE_ENV === 'production', // Secure true apenas em produção
+    secure: process.env.NODE_ENV === 'production',
     maxAge: 30 * 24 * 60 * 60 * 1000 // 30 dias
   }
 }));
 
 app.use(flash());
 
-// Middleware para disponibilizar mensagens flash e usuário para todas as views
 app.use((req, res, next) => {
   res.locals.success_msg = req.flash('success_msg');
   res.locals.error_msg = req.flash('error_msg');
@@ -48,7 +45,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Rotas
+// Definição de Rotas
 app.use('/', require('./routes/index'));
 app.use('/auth', require('./routes/auth'));
 app.use('/admin', require('./routes/admin'));
@@ -60,7 +57,6 @@ app.use('/superadmin', require('./routes/superadmin'));
 app.use('/chat', require('./routes/chat'));
 app.use('/notifications', require('./routes/notifications'));
 
-// Tratamento de Erro 404
 app.use((req, res) => {
   res.status(404).render('pages/error', {
     message: 'Página não encontrada',
@@ -71,4 +67,6 @@ app.use((req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
+  console.log(`Ambiente: ${process.env.NODE_ENV}`);
+  console.log(`Banco de dados configurado? ${process.env.DATABASE_URL ? 'SIM' : 'NÃO'}`);
 });
