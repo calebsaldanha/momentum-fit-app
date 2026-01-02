@@ -10,6 +10,9 @@ const requireTrainerAuth = (req, res, next) => {
     return res.status(403).render('pages/error', { message: 'Acesso negado.' });
 };
 
+// =========================================================================
+// Rota do Treinador (Create, Edit, Delete)
+// =========================================================================
 const trainerRouter = express.Router();
 trainerRouter.use(requireTrainerAuth);
 
@@ -29,13 +32,13 @@ trainerRouter.get('/create', async (req, res) => {
         
         const clients = await pool.query(query, params);
 
-        // --- CORREÇÃO: Busca a biblioteca de exercícios ---
+        // --- CORREÇÃO IMPORTANTE: Busca a biblioteca de exercícios ---
         const library = await pool.query("SELECT * FROM exercise_library ORDER BY name ASC");
-
+        
         res.render('pages/create-workout', { 
             title: 'Novo Treino', 
             clients: clients.rows, 
-            exerciseLibrary: library.rows, // AGORA ESTÁ SENDO ENVIADO
+            exerciseLibrary: library.rows, // Envia para a View
             selectedClientId: req.query.client_id || '', 
             user: req.session.user, 
             currentPage: 'create-workout' 
@@ -51,7 +54,7 @@ trainerRouter.post('/create', async (req, res) => {
     const { client_id, title, description, exercises } = req.body;
     
     if (!client_id || !title || !exercises) {
-        return res.status(400).json({ success: false, message: 'Dados inválidos.' });
+        return res.status(400).json({ success: false, message: 'Dados inválidos. Preencha todos os campos.' });
     }
     
     const client = await pool.connect();
@@ -65,7 +68,7 @@ trainerRouter.post('/create', async (req, res) => {
         
         for (let i=0; i<exercises.length; i++) {
             const ex = exercises[i];
-            // Salva também a image_url se vier da biblioteca
+            // Salva image_url vinda do front
             await client.query(
                 "INSERT INTO workout_exercises (workout_id, name, sets, reps, notes, order_index, video_url, image_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)", 
                 [wid, ex.name, ex.sets, ex.reps, ex.notes||'', ex.order_index, ex.video_url||null, ex.image_url||null]
@@ -75,7 +78,7 @@ trainerRouter.post('/create', async (req, res) => {
         
         const tRes = await pool.query("SELECT name FROM users WHERE id = $1", [req.session.user.id]);
         const trainerName = tRes.rows[0] ? tRes.rows[0].name : 'Seu Treinador';
-        await notificationService.notifyNewWorkout(client_id, title); // Ajustado assinatura
+        await notificationService.notifyNewWorkout(title, client_id, wid, trainerName);
         
         res.json({ success: true, clientId: client_id });
     } catch (e) { 
@@ -85,7 +88,6 @@ trainerRouter.post('/create', async (req, res) => {
     } finally { client.release(); }
 });
 
-// ... (Resto do arquivo delete/edit mantido igual, apenas garantindo export)
 // 3. Excluir (POST)
 trainerRouter.post('/delete/:id', async (req, res) => {
     try {
@@ -97,7 +99,10 @@ trainerRouter.post('/delete/:id', async (req, res) => {
         await pool.query("DELETE FROM workouts WHERE id = $1", [workoutId]);
 
         res.redirect('/admin/clients/' + w.rows[0].client_id);
-    } catch (err) { res.status(500).render('pages/error', { message: 'Erro ao excluir.' }); }
+    } catch (err) { 
+        console.error(err);
+        res.status(500).render('pages/error', { message: 'Erro ao excluir.' }); 
+    }
 });
 
 // 4. Tela Editar (GET)
@@ -116,7 +121,10 @@ trainerRouter.get('/edit/:id', async (req, res) => {
             user: req.session.user,
             currentPage: 'create-workout'
         });
-    } catch (err) { res.status(500).render('pages/error', { message: 'Erro ao carregar edição.' }); }
+    } catch (err) { 
+        console.error(err);
+        res.status(500).render('pages/error', { message: 'Erro ao carregar edição.' }); 
+    }
 });
 
 // 5. Ação Editar (POST)
@@ -150,7 +158,7 @@ trainerRouter.post('/edit/:id', async (req, res) => {
 
 router.use('/', trainerRouter);
 
-// Rota Pública (Visualizar)
+// Rota Visualizar (Pública/Aluno)
 router.get('/:id', async (req, res) => {
     if (!req.session.user) return res.redirect('/auth/login');
     try {
