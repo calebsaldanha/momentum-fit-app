@@ -3,92 +3,173 @@ const router = express.Router();
 const { pool } = require('../database/db');
 const notificationService = require('../utils/notificationService');
 
-const requireTrainer = (req, res, next) => {
+const requireTrainerAuth = (req, res, next) => {
     if (req.session.user && (req.session.user.role === 'trainer' || req.session.user.role === 'superadmin')) {
         return next();
     }
-    return res.status(403).render('pages/error', { message: 'Acesso Negado' });
+    return res.status(403).render('pages/error', { message: 'Acesso negado.' });
 };
 
-// 1. Criar Treino (GET) - Agora busca a Biblioteca de Exercícios
-router.get('/create', requireTrainer, async (req, res) => {
+const trainerRouter = express.Router();
+trainerRouter.use(requireTrainerAuth);
+
+// 1. Tela de Criar (GET) - CORRIGIDO
+trainerRouter.get('/create', async (req, res) => {
     try {
-        const clients = await pool.query("SELECT id, name FROM users WHERE role = 'client' ORDER BY name ASC");
+        const userId = req.session.user.id;
+        const userRole = req.session.user.role;
+        let query; let params = [];
         
-        // CORREÇÃO: Busca a biblioteca de exercícios para o modal de seleção
+        if (userRole === 'superadmin') {
+            query = "SELECT id, name FROM users WHERE role = 'client' AND status = 'active' ORDER BY name";
+        } else {
+            query = `SELECT u.id, u.name FROM users u JOIN client_profiles cp ON u.id = cp.user_id WHERE cp.assigned_trainer_id = $1 AND u.status = 'active' ORDER BY u.name`;
+            params = [userId];
+        }
+        
+        const clients = await pool.query(query, params);
+
+        // --- CORREÇÃO: Busca a biblioteca de exercícios ---
         const library = await pool.query("SELECT * FROM exercise_library ORDER BY name ASC");
-        
-        res.render('pages/create-workout', {
-            title: 'Novo Treino',
-            clients: clients.rows,
-            exerciseLibrary: library.rows, // Envia a library para a view
-            selectedClientId: req.query.client_id || '',
-            currentPage: 'workouts'
+
+        res.render('pages/create-workout', { 
+            title: 'Novo Treino', 
+            clients: clients.rows, 
+            exerciseLibrary: library.rows, // AGORA ESTÁ SENDO ENVIADO
+            selectedClientId: req.query.client_id || '', 
+            user: req.session.user, 
+            currentPage: 'create-workout' 
         });
-    } catch (err) {
+    } catch (err) { 
         console.error(err);
-        res.status(500).render('pages/error', { message: 'Erro ao carregar formulário.' });
+        res.status(500).render('pages/error', { message: 'Erro ao carregar formulário.' }); 
     }
 });
 
-// 2. Criar Treino (POST) - Agora salva a image_url
-router.post('/create', requireTrainer, async (req, res) => {
+// 2. Ação de Criar (POST)
+trainerRouter.post('/create', async (req, res) => {
     const { client_id, title, description, exercises } = req.body;
+    
+    if (!client_id || !title || !exercises) {
+        return res.status(400).json({ success: false, message: 'Dados inválidos.' });
+    }
+    
+    const client = await pool.connect();
     try {
-        const workoutResult = await pool.query(
-            "INSERT INTO workouts (client_id, trainer_id, title, description, created_at) VALUES ($1, $2, $3, $4, NOW()) RETURNING id",
-            [client_id, req.session.user.id, title, description]
+        await client.query('BEGIN');
+        const wRes = await client.query(
+            "INSERT INTO workouts (client_id, trainer_id, title, description, created_at) VALUES ($1, $2, $3, $4, NOW()) RETURNING id", 
+            [client_id, req.session.user.id, title, description||'']
         );
-        const workoutId = workoutResult.rows[0].id;
+        const wid = wRes.rows[0].id;
+        
+        for (let i=0; i<exercises.length; i++) {
+            const ex = exercises[i];
+            // Salva também a image_url se vier da biblioteca
+            await client.query(
+                "INSERT INTO workout_exercises (workout_id, name, sets, reps, notes, order_index, video_url, image_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)", 
+                [wid, ex.name, ex.sets, ex.reps, ex.notes||'', ex.order_index, ex.video_url||null, ex.image_url||null]
+            );
+        }
+        await client.query('COMMIT');
+        
+        const tRes = await pool.query("SELECT name FROM users WHERE id = $1", [req.session.user.id]);
+        const trainerName = tRes.rows[0] ? tRes.rows[0].name : 'Seu Treinador';
+        await notificationService.notifyNewWorkout(client_id, title); // Ajustado assinatura
+        
+        res.json({ success: true, clientId: client_id });
+    } catch (e) { 
+        console.error(e);
+        await client.query('ROLLBACK'); 
+        res.status(500).json({ success: false, message: 'Erro ao salvar treino.' }); 
+    } finally { client.release(); }
+});
 
+// ... (Resto do arquivo delete/edit mantido igual, apenas garantindo export)
+// 3. Excluir (POST)
+trainerRouter.post('/delete/:id', async (req, res) => {
+    try {
+        const workoutId = req.params.id;
+        const w = await pool.query("SELECT client_id FROM workouts WHERE id = $1", [workoutId]);
+        if (w.rows.length === 0) return res.status(404).render('pages/error', { message: 'Treino não encontrado' });
+        
+        await pool.query("DELETE FROM workout_exercises WHERE workout_id = $1", [workoutId]);
+        await pool.query("DELETE FROM workouts WHERE id = $1", [workoutId]);
+
+        res.redirect('/admin/clients/' + w.rows[0].client_id);
+    } catch (err) { res.status(500).render('pages/error', { message: 'Erro ao excluir.' }); }
+});
+
+// 4. Tela Editar (GET)
+trainerRouter.get('/edit/:id', async (req, res) => {
+    try {
+        const workoutId = req.params.id;
+        const wRes = await pool.query("SELECT * FROM workouts WHERE id = $1", [workoutId]);
+        if (wRes.rows.length === 0) return res.status(404).render('pages/error', { message: 'Não encontrado.' });
+        
+        const exRes = await pool.query("SELECT * FROM workout_exercises WHERE workout_id = $1 ORDER BY order_index", [workoutId]);
+        
+        res.render('pages/edit-workout', {
+            title: 'Editar Treino',
+            workout: wRes.rows[0],
+            exercises: exRes.rows,
+            user: req.session.user,
+            currentPage: 'create-workout'
+        });
+    } catch (err) { res.status(500).render('pages/error', { message: 'Erro ao carregar edição.' }); }
+});
+
+// 5. Ação Editar (POST)
+trainerRouter.post('/edit/:id', async (req, res) => {
+    const workoutId = req.params.id;
+    const { title, description, exercises } = req.body;
+    
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+        await client.query("UPDATE workouts SET title = $1, description = $2 WHERE id = $3", [title, description, workoutId]);
+        await client.query("DELETE FROM workout_exercises WHERE workout_id = $1", [workoutId]);
+        
         if (exercises && exercises.length > 0) {
-            for (const ex of exercises) {
-                // CORREÇÃO: Salva image_url
-                await pool.query(
-                    "INSERT INTO workout_exercises (workout_id, name, sets, reps, notes, video_url, image_url, order_index) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
-                    [workoutId, ex.name, ex.sets, ex.reps, ex.notes, ex.video_url, ex.image_url, ex.order_index]
+            for (let i=0; i<exercises.length; i++) {
+                const ex = exercises[i];
+                await client.query(
+                    "INSERT INTO workout_exercises (workout_id, name, sets, reps, notes, order_index, video_url, image_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)", 
+                    [workoutId, ex.name, ex.sets, ex.reps, ex.notes||'', i, ex.video_url||null, ex.image_url||null]
                 );
             }
         }
-
-        await notificationService.notifyNewWorkout(client_id, title);
-        res.json({ success: true, clientId: client_id });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ success: false, message: 'Erro ao salvar treino.' });
-    }
+        await client.query('COMMIT');
+        const w = await pool.query("SELECT client_id FROM workouts WHERE id = $1", [workoutId]);
+        res.json({ success: true, clientId: w.rows[0].client_id });
+    } catch(e) {
+        await client.query('ROLLBACK');
+        res.status(500).json({ success: false, message: e.message });
+    } finally { client.release(); }
 });
 
-// 3. Detalhes (Sem alterações na lógica, apenas garante que image_url venha do banco)
+router.use('/', trainerRouter);
+
+// Rota Pública (Visualizar)
 router.get('/:id', async (req, res) => {
+    if (!req.session.user) return res.redirect('/auth/login');
     try {
-        const workoutRes = await pool.query("SELECT * FROM workouts WHERE id = $1", [req.params.id]);
-        if (workoutRes.rows.length === 0) return res.status(404).render('pages/error', { message: 'Treino não encontrado' });
+        const workoutId = req.params.id;
+        if (workoutId === 'create') return res.redirect('/workouts/create');
 
-        const exercisesRes = await pool.query("SELECT * FROM workout_exercises WHERE workout_id = $1 ORDER BY order_index ASC", [req.params.id]);
-
+        const workoutRes = await pool.query("SELECT * FROM workouts WHERE id = $1", [workoutId]);
+        if (workoutRes.rows.length === 0) return res.status(404).render('pages/error', { message: 'Treino não encontrado.' });
+        
+        const exercisesRes = await pool.query("SELECT * FROM workout_exercises WHERE workout_id = $1 ORDER BY order_index", [workoutId]);
+        
         res.render('pages/workout-details', {
             title: workoutRes.rows[0].title,
             workout: workoutRes.rows[0],
             exercises: exercisesRes.rows,
+            user: req.session.user,
             currentPage: 'workouts'
         });
-    } catch (err) {
-        console.error(err);
-        res.status(500).render('pages/error', { message: 'Erro ao carregar treino.' });
-    }
-});
-
-router.post('/delete/:id', requireTrainer, async (req, res) => {
-    try {
-        const workoutRes = await pool.query("SELECT client_id FROM workouts WHERE id = $1", [req.params.id]);
-        const clientId = workoutRes.rows[0]?.client_id;
-        await pool.query("DELETE FROM workout_exercises WHERE workout_id = $1", [req.params.id]);
-        await pool.query("DELETE FROM workouts WHERE id = $1", [req.params.id]);
-        
-        if (clientId) res.redirect(`/admin/clients/${clientId}`);
-        else res.redirect('/admin/clients');
-    } catch (err) { console.error(err); res.status(500).render('pages/error', { message: 'Erro ao excluir.' }); }
+    } catch(e) { res.status(404).render('pages/error', { message: 'Treino não encontrado.' }); }
 });
 
 module.exports = router;
