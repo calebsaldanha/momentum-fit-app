@@ -26,10 +26,10 @@
                             
                             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--c-border); padding-bottom: 1rem; margin-bottom: 1rem;">
                                 <h3 style="margin:0; color: var(--c-accent-primary); font-size: 1.3rem;"><%= index + 1 %>. <%= ex.name %></h3>
-                                <span class="badge" style="background: var(--c-bg-main); font-size: 1.1rem; padding: 0.5rem 1rem;"><%= ex.sets %></span>
+                                <span class="badge" style="background: var(--c-bg-main); font-size: 1.1rem; padding: 0.5rem 1rem;"><%= ex.sets %> x <%= ex.reps %></span>
                             </div>
 
-                            <div style="display: grid; grid-template-columns: 1fr 300px; gap: 2rem;">
+                            <div style="display: grid; grid-template-columns: 1fr 300px; gap: 2rem;" class="exercise-grid">
                                 <div>
                                     <% if (ex.notes) { %>
                                         <div style="margin-bottom: 1.5rem; background: var(--c-bg-main); padding: 1rem; border-radius: var(--radius);">
@@ -40,7 +40,7 @@
 
                                     <% if (ex.execution_instructions) { %>
                                         <div style="margin-bottom: 1rem;">
-                                            <strong style="color: var(--c-text-primary);">Ì¥ß Execu√ß√£o:</strong>
+                                            <strong style="color: var(--c-text-primary);">Ì≥ç Execu√ß√£o:</strong>
                                             <p style="font-size: 0.95rem; line-height: 1.6;"><%= ex.execution_instructions %></p>
                                         </div>
                                     <% } %>
@@ -60,13 +60,13 @@
                                 </div>
 
                                 <div>
-                                    <% if (ex.image_url || ex.lib_image) { %>
+                                    <% if (ex.image_url) { %>
                                         <div style="border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-sm);">
-                                            <img src="<%= ex.image_url || ex.lib_image %>" alt="<%= ex.name %>" style="width: 100%; height: auto; object-fit: cover; display: block;">
+                                            <img src="<%= ex.image_url %>" alt="<%= ex.name %>" style="width: 100%; height: auto; object-fit: cover; display: block;">
                                         </div>
                                     <% } else { %>
                                         <div style="height: 200px; background: var(--c-bg-main); display: flex; align-items: center; justify-content: center; color: var(--c-text-secondary); border-radius: var(--radius);">
-                                            Sem imagem
+                                            <i class="fas fa-dumbbell" style="font-size: 3rem; opacity: 0.3;"></i>
                                         </div>
                                     <% } %>
                                 </div>
@@ -74,8 +74,8 @@
                             
                             <style>
                                 @media (max-width: 768px) {
-                                    .exercise-card .card-body > div { grid-template-columns: 1fr !important; }
-                                    .exercise-card img { max-height: 250px; width: 100%; object-fit: contain; margin-top: 1rem; }
+                                    .exercise-grid { grid-template-columns: 1fr !important; }
+                                    .exercise-grid img { max-height: 250px; width: 100%; object-fit: contain; margin-top: 1rem; }
                                 }
                             </style>
                         </div>

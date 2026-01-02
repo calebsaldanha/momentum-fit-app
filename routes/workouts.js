@@ -31,8 +31,6 @@ trainerRouter.get('/create', async (req, res) => {
         }
         
         const clients = await pool.query(query, params);
-        
-        // Busca a biblioteca para passar para o front-end (Modal de Seleção)
         const library = await pool.query("SELECT * FROM exercise_library ORDER BY name ASC");
 
         res.render('pages/create-workout', { 
@@ -54,7 +52,7 @@ trainerRouter.post('/create', async (req, res) => {
     const { client_id, title, description, exercises } = req.body;
     
     if (!client_id || !title || !exercises) {
-        return res.status(400).json({ success: false, message: 'Dados inválidos. Preencha todos os campos.' });
+        return res.status(400).json({ success: false, message: 'Dados inválidos.' });
     }
     
     const client = await pool.connect();
@@ -68,7 +66,6 @@ trainerRouter.post('/create', async (req, res) => {
         
         for (let i=0; i<exercises.length; i++) {
             const ex = exercises[i];
-            // CORREÇÃO: Adicionado image_url no INSERT
             await client.query(
                 "INSERT INTO workout_exercises (workout_id, name, sets, reps, notes, order_index, video_url, image_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)", 
                 [wid, ex.name, ex.sets, ex.reps, ex.notes||'', ex.order_index, ex.video_url||null, ex.image_url||null]
@@ -82,7 +79,7 @@ trainerRouter.post('/create', async (req, res) => {
         
         res.json({ success: true, clientId: client_id });
     } catch (e) { 
-        console.error(e);
+        console.error("Erro ao criar treino:", e);
         await client.query('ROLLBACK'); 
         res.status(500).json({ success: false, message: 'Erro ao salvar treino.' }); 
     } finally { client.release(); }
@@ -141,7 +138,6 @@ trainerRouter.post('/edit/:id', async (req, res) => {
         if (exercises && exercises.length > 0) {
             for (let i=0; i<exercises.length; i++) {
                 const ex = exercises[i];
-                // CORREÇÃO: Adicionado image_url no INSERT
                 await client.query(
                     "INSERT INTO workout_exercises (workout_id, name, sets, reps, notes, order_index, video_url, image_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)", 
                     [workoutId, ex.name, ex.sets, ex.reps, ex.notes||'', i, ex.video_url||null, ex.image_url||null]
@@ -149,7 +145,6 @@ trainerRouter.post('/edit/:id', async (req, res) => {
             }
         }
         await client.query('COMMIT');
-        
         const w = await pool.query("SELECT client_id FROM workouts WHERE id = $1", [workoutId]);
         res.json({ success: true, clientId: w.rows[0].client_id });
     } catch(e) {
@@ -162,7 +157,7 @@ trainerRouter.post('/edit/:id', async (req, res) => {
 router.use('/', trainerRouter);
 
 // =========================================================================
-// Rota Visualizar (Aluno/Público) - CORREÇÃO CRÍTICA AQUI
+// Rota Visualizar (Aluno/Público)
 // =========================================================================
 router.get('/:id', async (req, res) => {
     if (!req.session.user) return res.redirect('/auth/login');
@@ -173,11 +168,11 @@ router.get('/:id', async (req, res) => {
         const workoutRes = await pool.query("SELECT * FROM workouts WHERE id = $1", [workoutId]);
         if (workoutRes.rows.length === 0) return res.status(404).render('pages/error', { message: 'Treino não encontrado.' });
         
-        // CORREÇÃO: JOIN com a Library para pegar imagens e detalhes
-        // COALESCE: Se o treino tiver imagem salva, usa ela. Se não, pega da biblioteca.
+        // CORREÇÃO: Busca colunas explícitas para evitar conflitos e erros de coluna inexistente
+        // Usa COALESCE para pegar a imagem: 1º do treino específico, 2º da biblioteca
         const exercisesQuery = `
             SELECT 
-                we.*,
+                we.id, we.workout_id, we.name, we.sets, we.reps, we.notes, we.order_index, we.video_url,
                 COALESCE(we.image_url, el.image_url) as image_url,
                 COALESCE(el.description, we.notes) as description_lib,
                 el.execution_instructions,
@@ -199,8 +194,8 @@ router.get('/:id', async (req, res) => {
             currentPage: 'workouts'
         });
     } catch(e) { 
-        console.error("Erro ao carregar detalhes do treino:", e);
-        res.status(500).render('pages/error', { message: 'Erro ao carregar o treino.' }); 
+        console.error("ERRO CRÍTICO ao carregar treino:", e); // Isso vai aparecer no seu terminal se der erro
+        res.status(500).render('pages/error', { message: 'Erro ao carregar detalhes do treino.' }); 
     }
 });
 
