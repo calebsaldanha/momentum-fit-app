@@ -5,47 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= typeof title !== 'undefined' ? title : 'Momentum Fit' %></title>
     <link rel="stylesheet" href="/css/styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <meta name="csrf-token" content="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <header class="header">
-        <div class="nav-container container">
-            
-            <div class="header-logo">
-                <a href="/" class="logo-link">
-                    <img src="/images/momentum-fit-logo-completo.png" alt="Momentum Fit" class="header-logo-img">
-                </a>
-            </div>
+    <header class="site-header">
+        <div class="container header-container">
+            <a href="/" class="logo">
+                <img src="/images/momentum-fit-icon.png" alt="Momentum Fit" class="logo-img">
+                <span class="logo-text">Momentum Fit</span>
+            </a>
 
-            <nav class="nav-menu">
-                <a href="/" class="nav-link <%= typeof currentPage !== 'undefined' && currentPage === 'home' ? 'active' : '' %>">Início</a>
-                <a href="/about" class="nav-link <%= typeof currentPage !== 'undefined' && currentPage === 'about' ? 'active' : '' %>">Sobre</a>
-                <a href="/articles" class="nav-link <%= typeof currentPage !== 'undefined' && currentPage === 'articles' ? 'active' : '' %>">Artigos</a>
-            </nav>
-            
-            <div class="user-actions">
-                <% if (user) { %>
-                    <%- include("notification-bell.ejs") %>
-                    
-                    <div class="user-profile">
-                        <div class="user-avatar-sm">
-                            <%= user.name.charAt(0).toUpperCase() %>
+            <button class="mobile-menu-btn" aria-label="Abrir menu">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <nav class="main-nav">
+                <ul class="nav-list">
+                    <li><a href="/" class="nav-link">Início</a></li>
+                    <li><a href="/#features" class="nav-link">Funcionalidades</a></li>
+                    <li><a href="/articles" class="nav-link">Artigos</a></li>
+                    <li><a href="/#about" class="nav-link">Sobre</a></li>
+                </ul>
+
+                <div class="header-actions">
+                    <% if (typeof user !== 'undefined' && user) { %>
+                        <div class="user-menu">
+                            <span class="user-name">Olá, <strong><%= user.name.split(' ')[0] %></strong></span>
+                            <% if (user.role === 'client') { %>
+                                <a href="/client/dashboard" class="btn btn-sm btn-primary">Painel</a>
+                            <% } else if (user.role === 'trainer') { %>
+                                <a href="/admin/dashboard" class="btn btn-sm btn-primary">Painel</a>
+                            <% } else if (user.role === 'superadmin') { %>
+                                <a href="/superadmin/dashboard" class="btn btn-sm btn-primary">Admin</a>
+                            <% } %>
+                            <form action="/auth/logout" method="POST" style="display:inline;">
+                                <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+                                <button type="submit" class="btn btn-sm btn-outline">Sair</button>
+                            </form>
                         </div>
-                        <span class="user-name"><%= user.name.split(' ')[0] %></span>
-                    </div>
-                    
-                    <form action="/auth/logout" method="POST" style="margin: 0;">
-                        <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
-                        <button type="submit" class="logout-btn">Sair</button>
-                    </form>
-                <% } else { %>
-                    <a href="/auth/login" class="nav-link">Login</a>
-                    <a href="/auth/register" class="btn-register">Cadastro</a>
-                <% } %>
-            </div>
-
+                    <% } else { %>
+                        <a href="/auth/login" class="nav-link">Entrar</a>
+                        <a href="/auth/register" class="btn btn-sm btn-primary">Começar Agora</a>
+                    <% } %>
+                </div>
+            </nav>
         </div>
     </header>
-    <script src="/js/main.js"></script>
-    <input type="hidden" id="global-csrf-token" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+    <div class="header-spacer"></div>

@@ -155,3 +155,23 @@ document.addEventListener('click', (e) => {
         }
     }
 });
+
+// Script do Menu Mobile
+document.addEventListener('DOMContentLoaded', () => {
+    const mobileBtn = document.querySelector('.mobile-menu-btn');
+    const nav = document.querySelector('.main-nav');
+
+    if (mobileBtn && nav) {
+        mobileBtn.addEventListener('click', () => {
+            nav.classList.toggle('active');
+            const icon = mobileBtn.querySelector('i');
+            if (nav.classList.contains('active')) {
+                icon.classList.remove('fa-bars');
+                icon.classList.add('fa-times');
+            } else {
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            }
+        });
+    }
+});
