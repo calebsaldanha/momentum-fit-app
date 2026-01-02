@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const path = require('path');
 const flash = require('connect-flash');
-const db = require('./database/db'); // Importa nosso módulo de banco
+const db = require('./database/db'); 
 require('dotenv').config();
 
 const app = express();
@@ -18,34 +18,39 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cookieParser());
 
-// Configuração de Sessão Robusta
+// Configuração de Sessão
 app.use(session({
   store: new pgSession({
-    pool: db.pool, // Usa explicitamente o pool do db.js
+    pool: db.pool,
     tableName: 'session',
     createTableIfMissing: true,
-    pruneSessionInterval: 60 * 15 // Limpa sessões expiradas a cada 15min
+    pruneSessionInterval: 60 * 15
   }),
   secret: process.env.SESSION_SECRET || 'chave-secreta-padrao',
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: process.env.NODE_ENV === 'production',
-    maxAge: 30 * 24 * 60 * 60 * 1000 // 30 dias
+    secure: process.env.NODE_ENV === 'production', 
+    maxAge: 30 * 24 * 60 * 60 * 1000 
   }
 }));
 
 app.use(flash());
 
+// Middleware Global (CORREÇÃO AQUI)
 app.use((req, res, next) => {
   res.locals.success_msg = req.flash('success_msg');
   res.locals.error_msg = req.flash('error_msg');
   res.locals.error = req.flash('error');
+  
+  // Define 'user' e 'isAuthenticated' para todas as views
   res.locals.user = req.session.user || null;
+  res.locals.isAuthenticated = !!req.session.user; 
+  
   next();
 });
 
-// Definição de Rotas
+// Rotas
 app.use('/', require('./routes/index'));
 app.use('/auth', require('./routes/auth'));
 app.use('/admin', require('./routes/admin'));
@@ -67,6 +72,4 @@ app.use((req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
-  console.log(`Ambiente: ${process.env.NODE_ENV}`);
-  console.log(`Banco de dados configurado? ${process.env.DATABASE_URL ? 'SIM' : 'NÃO'}`);
 });
