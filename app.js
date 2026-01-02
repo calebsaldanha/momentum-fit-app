@@ -13,11 +13,13 @@ const app = express();
 // Configurações Essenciais para Vercel
 app.set('trust proxy', 1);
 app.set('view engine', 'ejs');
-// path.join é CRUCIAL para a Vercel encontrar a pasta views
-app.set('views', path.join(__dirname, 'views'));
 
-// Servir estáticos com caminho absoluto
-app.use(express.static(path.join(__dirname, 'public')));
+// CORREÇÃO CRÍTICA: Usar process.cwd() para garantir que a Vercel encontre as pastas
+app.set('views', path.join(process.cwd(), 'views'));
+
+// Servir estáticos também usando process.cwd() por segurança
+app.use(express.static(path.join(process.cwd(), 'public')));
+
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(cookieParser());
@@ -39,7 +41,7 @@ app.use(session({
     proxy: true,
     cookie: { 
         maxAge: 30 * 24 * 60 * 60 * 1000, 
-        secure: isProduction, // HTTPS obrigatório em prod
+        secure: isProduction,
         sameSite: isProduction ? 'none' : 'lax',
         httpOnly: true
     }
@@ -48,21 +50,18 @@ app.use(session({
 const csrfProtection = csurf({ cookie: true });
 app.use(csrfProtection);
 
-// Middleware Global de Variáveis (Leve, sem query de banco duplicada)
+// Middleware Global
 app.use((req, res, next) => {
     res.locals.csrfToken = req.csrfToken();
     res.locals.isAuthenticated = !!req.session.user;
     res.locals.user = req.session.user || null;
     res.locals.title = 'Momentum Fit';
-    
-    // Inicializa variáveis para evitar erros de undefined nas views
     res.locals.notifications = [];
     res.locals.unreadCount = 0;
-    
     next();
 });
 
-// Middleware de Notificações (Faz a query apenas uma vez aqui)
+// Middleware de Notificações
 app.use(require('./middleware/notifications'));
 
 // Rotas
@@ -85,7 +84,6 @@ app.use((err, req, res, next) => {
         return res.status(403).render('pages/error', { title: 'Erro de Segurança', message: 'Sessão expirada. Atualize a página.' });
     }
     const status = err.status || 500;
-    // Renderiza página de erro se possível, senão JSON
     if (req.accepts('html')) {
         res.status(status).render('pages/error', { title: 'Erro', message: 'Ocorreu um erro interno.' });
     } else {
@@ -93,7 +91,7 @@ app.use((err, req, res, next) => {
     }
 });
 
-// Inicializa DB sem travar o servidor (Serverless)
+// Inicializa DB
 initDb().catch(e => console.error("Erro ao init DB:", e));
 
 module.exports = app;
