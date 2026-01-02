@@ -1,9 +1,10 @@
 {
   "version": 2,
   "rewrites": [
-    {
-      "source": "/((?!api/|css/|js/|images/|favicon.ico|robots.txt|manifest.json).*)",
-      "destination": "/api/index.js"
-    }
+    { "source": "/css/(.*)", "destination": "/public/css/$1" },
+    { "source": "/js/(.*)", "destination": "/public/js/$1" },
+    { "source": "/images/(.*)", "destination": "/public/images/$1" },
+    { "source": "/favicon.ico", "destination": "/public/favicon.ico" },
+    { "source": "/(.*)", "destination": "/api/index.js" }
   ]
 }
