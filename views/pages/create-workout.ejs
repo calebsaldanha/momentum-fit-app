@@ -43,12 +43,15 @@
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                         <h3 style="margin: 0; color: var(--c-accent-primary);">Exercícios</h3>
                         <button type="button" id="addExerciseBtn" class="btn btn-secondary btn-sm">
-                            <i class="fas fa-plus"></i> Adicionar
+                            <i class="fas fa-plus"></i> + Adicionar Manualmente
                         </button>
                     </div>
                     
-                    <div id="exercisesList">
-                        </div>
+                    <div id="exercisesList"></div>
+                    
+                    <button type="button" onclick="openLibraryModal()" class="btn btn-outline" style="width: 100%; padding: 15px; margin-top: 15px; border-style: dashed; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                        <i class="fas fa-images"></i> Selecionar da Biblioteca (Com Fotos)
+                    </button>
                 </div>
 
                 <div class="form-actions" style="margin-top: 30px;">
@@ -61,146 +64,166 @@
     </main>
 </div>
 
-<template id="exerciseTemplate">
-    <div class="exercise-card" style="background: var(--c-bg-card); border: 1px solid var(--c-border); padding: 20px; border-radius: 8px; margin-bottom: 15px; position: relative;">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
-            <span class="exercise-number" style="background: var(--c-accent-primary); color: #000; padding: 2px 8px; border-radius: 4px; font-weight: bold;">#1</span>
-            <button type="button" class="remove-exercise" style="background: none; border: none; color: var(--c-error); cursor: pointer;">
-                <i class="fas fa-trash"></i> Remover
-            </button>
+<div id="libraryModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; padding: 20px; overflow-y: auto;">
+    <div style="max-width: 900px; margin: 0 auto; background: #111; border-radius: 12px; padding: 20px; position: relative; border: 1px solid #333;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+            <h2 style="margin: 0;">Biblioteca de Exercícios</h2>
+            <button onclick="document.getElementById('libraryModal').style.display='none'" style="background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer;">&times;</button>
         </div>
         
-        <div class="form-group">
-            <label>Nome do Exercício</label>
-            <input type="text" class="ex-name" required placeholder="Ex: Supino Reto">
-        </div>
+        <input type="text" id="searchLibrary" placeholder="Buscar exercício..." style="width: 100%; padding: 12px; background: #222; border: 1px solid #444; color: white; border-radius: 6px; margin-bottom: 20px;">
         
-        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
-            <div class="form-group">
-                <label>Séries</label>
-                <input type="text" class="ex-sets" required placeholder="Ex: 4">
+        <div id="libraryGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px;">
             </div>
-            <div class="form-group">
-                <label>Repetições</label>
-                <input type="text" class="ex-reps" required placeholder="Ex: 10-12">
-            </div>
-            <div class="form-group">
-                <label>Descanso (s)</label>
-                <input type="text" class="ex-rest" placeholder="Ex: 60">
-            </div>
-        </div>
+    </div>
+</div>
 
-        <div class="form-group" style="margin-top: 10px;">
-            <label>Observações / Técnica</label>
-            <input type="text" class="ex-notes" placeholder="Detalhes de execução...">
+<template id="exerciseTemplate">
+    <div class="exercise-card" style="background: var(--c-bg-card); border: 1px solid var(--c-border); padding: 20px; border-radius: 8px; margin-bottom: 15px; position: relative; display: grid; grid-template-columns: 100px 1fr; gap: 20px;">
+        <div class="ex-image-preview" style="width: 100px; height: 100px; background: #000; border-radius: 6px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+            <i class="fas fa-dumbbell" style="color: #444; font-size: 1.5rem;"></i>
         </div>
-        <div class="form-group">
-            <label>Link de Vídeo (Opcional)</label>
-            <input type="url" class="ex-video" placeholder="https://youtube.com/...">
+        <input type="hidden" class="ex-image-url">
+
+        <div style="width: 100%;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                <span class="exercise-number" style="background: var(--c-accent-primary); color: #000; padding: 2px 8px; border-radius: 4px; font-weight: bold;">#1</span>
+                <button type="button" class="remove-exercise" style="background: none; border: none; color: var(--c-error); cursor: pointer;">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+            
+            <div class="form-group">
+                <input type="text" class="ex-name" required placeholder="Nome do Exercício" style="font-weight: bold; font-size: 1.1rem;">
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 10px;">
+                <input type="text" class="ex-sets" required placeholder="Séries (Ex: 4)">
+                <input type="text" class="ex-reps" required placeholder="Reps (Ex: 12)">
+                <input type="text" class="ex-rest" placeholder="Descanso (s)">
+            </div>
+            <input type="text" class="ex-notes" placeholder="Observações..." style="margin-top: 10px;">
+            <input type="url" class="ex-video" placeholder="Link Vídeo (YouTube)" style="margin-top: 10px;">
         </div>
     </div>
 </template>
 
 <script>
-document.addEventListener('DOMContentLoaded', () => {
+    // Carrega a library do backend (Injetado pelo EJS)
+    const libraryData = <%- JSON.stringify(typeof exerciseLibrary !== 'undefined' ? exerciseLibrary : []) %>;
+    
     const exercisesList = document.getElementById('exercisesList');
-    const addBtn = document.getElementById('addExerciseBtn');
-    const form = document.getElementById('createWorkoutForm');
     const template = document.getElementById('exerciseTemplate');
+    const libraryModal = document.getElementById('libraryModal');
+    const libraryGrid = document.getElementById('libraryGrid');
 
-    // Função para adicionar exercício
-    addBtn.addEventListener('click', () => {
+    function addExercise(data = null) {
         const clone = template.content.cloneNode(true);
         const index = exercisesList.children.length + 1;
         
         clone.querySelector('.exercise-number').textContent = '#' + index;
         
-        // Botão remover
+        if(data) {
+            clone.querySelector('.ex-name').value = data.name;
+            clone.querySelector('.ex-video').value = data.video_url || '';
+            if(data.image_url) {
+                clone.querySelector('.ex-image-url').value = data.image_url;
+                clone.querySelector('.ex-image-preview').innerHTML = `<img src="${data.image_url}" style="width:100%; height:100%; object-fit:cover;">`;
+            }
+        }
+
         clone.querySelector('.remove-exercise').addEventListener('click', (e) => {
             e.target.closest('.exercise-card').remove();
             updateNumbers();
         });
 
         exercisesList.appendChild(clone);
-    });
+    }
 
-    // Atualiza numeração ao remover
     function updateNumbers() {
         Array.from(exercisesList.children).forEach((card, idx) => {
             card.querySelector('.exercise-number').textContent = '#' + (idx + 1);
         });
     }
 
-    // Adiciona um exercício inicial por padrão
-    addBtn.click();
+    document.getElementById('addExerciseBtn').addEventListener('click', () => addExercise());
+
+    // --- Lógica do Modal da Biblioteca ---
+    function openLibraryModal() {
+        renderLibrary(libraryData);
+        libraryModal.style.display = 'block';
+    }
+
+    function renderLibrary(items) {
+        libraryGrid.innerHTML = '';
+        items.forEach(item => {
+            const div = document.createElement('div');
+            div.style.cssText = "background: #222; border-radius: 8px; overflow: hidden; cursor: pointer; border: 1px solid #444; transition: 0.2s;";
+            div.onmouseover = () => div.style.borderColor = 'var(--c-accent-primary)';
+            div.onmouseout = () => div.style.borderColor = '#444';
+            div.onclick = () => {
+                addExercise(item);
+                libraryModal.style.display = 'none';
+                window.scrollTo(0, document.body.scrollHeight);
+            };
+
+            const imgHtml = item.image_url 
+                ? `<img src="${item.image_url}" style="width: 100%; height: 120px; object-fit: cover;">`
+                : `<div style="width: 100%; height: 120px; display: flex; align-items: center; justify-content: center; background: #000;"><i class="fas fa-dumbbell"></i></div>`;
+
+            div.innerHTML = `
+                ${imgHtml}
+                <div style="padding: 10px; font-size: 0.9rem; font-weight: 600; text-align: center;">${item.name}</div>
+            `;
+            libraryGrid.appendChild(div);
+        });
+    }
+
+    document.getElementById('searchLibrary').addEventListener('input', (e) => {
+        const term = e.target.value.toLowerCase();
+        const filtered = libraryData.filter(x => x.name.toLowerCase().includes(term));
+        renderLibrary(filtered);
+    });
 
     // Envio do formulário
-    form.addEventListener('submit', async (e) => {
+    document.getElementById('createWorkoutForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        
-        const submitBtn = form.querySelector('button[type="submit"]');
-        const originalText = submitBtn.innerHTML;
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+        const btn = e.target.querySelector('button[type="submit"]');
+        btn.disabled = true;
+        btn.innerHTML = 'Salvando...';
 
         try {
-            // Coletar dados dos exercícios
-            const exerciseCards = document.querySelectorAll('.exercise-card');
-            const exercises = Array.from(exerciseCards).map((card, index) => ({
+            const exercises = Array.from(document.querySelectorAll('.exercise-card')).map((card, index) => ({
                 name: card.querySelector('.ex-name').value,
                 sets: card.querySelector('.ex-sets').value,
                 reps: card.querySelector('.ex-reps').value,
                 notes: card.querySelector('.ex-notes').value + (card.querySelector('.ex-rest').value ? ` | Descanso: ${card.querySelector('.ex-rest').value}s` : ''),
                 video_url: card.querySelector('.ex-video').value,
+                image_url: card.querySelector('.ex-image-url').value, // Envia a imagem
                 order_index: index
             }));
 
-            if (exercises.length === 0) {
-                alert('Adicione pelo menos um exercício.');
-                throw new Error('Sem exercícios');
-            }
-            
-            const clientId = document.getElementById('client_id').value;
-            if(!clientId) {
-                alert('Selecione um aluno.');
-                throw new Error('Sem aluno');
-            }
+            if (exercises.length === 0) throw new Error('Adicione exercícios.');
 
-            const payload = {
-                client_id: clientId,
-                title: document.getElementById('title').value,
-                description: document.getElementById('description').value,
-                exercises: exercises
-            };
-
-            const response = await fetch('/workouts/create', {
+            const res = await fetch('/workouts/create', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'CSRF-Token': '<%= csrfToken %>' // Token CSRF injetado
-                },
-                body: JSON.stringify(payload)
+                headers: { 'Content-Type': 'application/json', 'CSRF-Token': '<%= csrfToken %>' },
+                body: JSON.stringify({
+                    client_id: document.getElementById('client_id').value,
+                    title: document.getElementById('title').value,
+                    description: document.getElementById('description').value,
+                    exercises
+                })
             });
 
-            const result = await response.json();
-
-            if (result.success) {
-                window.location.href = `/admin/clients/${result.clientId}`;
-            } else {
-                alert('Erro ao salvar: ' + (result.message || 'Erro desconhecido'));
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = originalText;
-            }
-        } catch (error) {
-            console.error(error);
-            if(error.message !== 'Sem exercícios' && error.message !== 'Sem aluno') {
-                alert('Erro de conexão ao salvar treino.');
-            }
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = originalText;
+            const json = await res.json();
+            if(json.success) window.location.href = `/admin/clients/${json.clientId}`;
+            else alert(json.message);
+        } catch (err) {
+            alert('Erro: ' + err.message);
+            btn.disabled = false;
+            btn.innerHTML = 'Salvar Treino';
         }
     });
-});
 </script>
-
 <%- include('../partials/footer.ejs') %>
