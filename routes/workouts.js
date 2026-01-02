@@ -168,8 +168,13 @@ router.get('/:id', async (req, res) => {
         const workoutRes = await pool.query("SELECT * FROM workouts WHERE id = $1", [workoutId]);
         if (workoutRes.rows.length === 0) return res.status(404).render('pages/error', { message: 'Treino não encontrado.' });
         
-        // CORREÇÃO: Busca colunas explícitas para evitar conflitos e erros de coluna inexistente
-        // Usa COALESCE para pegar a imagem: 1º do treino específico, 2º da biblioteca
+        // CORREÇÃO: Busca perfil se for cliente (para a Sidebar não quebrar)
+        let profile = {};
+        if (req.session.user.role === 'client') {
+            const profileRes = await pool.query("SELECT * FROM client_profiles WHERE user_id = $1", [req.session.user.id]);
+            profile = profileRes.rows[0] || {};
+        }
+
         const exercisesQuery = `
             SELECT 
                 we.id, we.workout_id, we.name, we.sets, we.reps, we.notes, we.order_index, we.video_url,
@@ -191,10 +196,11 @@ router.get('/:id', async (req, res) => {
             workout: workoutRes.rows[0],
             exercises: exercisesRes.rows,
             user: req.session.user,
+            profile: profile, // Passa o perfil para a view
             currentPage: 'workouts'
         });
     } catch(e) { 
-        console.error("ERRO CRÍTICO ao carregar treino:", e); // Isso vai aparecer no seu terminal se der erro
+        console.error("ERRO CRÍTICO ao carregar treino:", e); 
         res.status(500).render('pages/error', { message: 'Erro ao carregar detalhes do treino.' }); 
     }
 });

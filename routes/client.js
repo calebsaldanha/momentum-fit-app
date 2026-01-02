@@ -24,7 +24,6 @@ router.get('/dashboard', async (req, res) => {
             [req.session.user.id]
         );
         
-        // Busca último check-in
         const checkinRes = await pool.query("SELECT * FROM checkins WHERE user_id = $1 ORDER BY date DESC LIMIT 1", [req.session.user.id]);
         const lastCheckin = checkinRes.rows[0];
 
@@ -79,7 +78,6 @@ router.post('/profile', async (req, res) => {
             [req.session.user.id, phone, age, weight, height, main_goal]
         );
         
-        // Atualiza tabela checkins se houver peso novo
         if(weight) {
              await pool.query("INSERT INTO checkins (user_id, weight) VALUES ($1, $2)", [req.session.user.id, weight]);
         }
@@ -93,16 +91,24 @@ router.post('/profile', async (req, res) => {
     }
 });
 
-// Treinos
+// CORREÇÃO: Busca treinos E perfil (para a Sidebar)
 router.get('/workouts', async (req, res) => {
     try {
+        const profileRes = await pool.query("SELECT * FROM client_profiles WHERE user_id = $1", [req.session.user.id]);
+        const profile = profileRes.rows[0] || {};
+
         const workouts = await pool.query("SELECT * FROM workouts WHERE client_id = $1 ORDER BY created_at DESC", [req.session.user.id]);
+        
         res.render('pages/client-workouts', {
             title: 'Meus Treinos',
             workouts: workouts.rows,
+            profile: profile, // NECESSÁRIO para a sidebar não quebrar
             currentPage: 'workouts'
         });
-    } catch (err) { res.status(500).render('pages/error', { message: 'Erro.' }); }
+    } catch (err) { 
+        console.error(err);
+        res.status(500).render('pages/error', { message: 'Erro ao listar treinos.' }); 
+    }
 });
 
 // Formulário Inicial
