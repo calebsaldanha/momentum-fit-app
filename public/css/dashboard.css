@@ -198,3 +198,46 @@ body.dashboard-body {
     color: rgba(255,255,255,0.4);
     pointer-events: none;
 }
+
+/* Cards de Conteúdo (Estilo Unificado) */
+.content-card {
+    background: #111;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+}
+
+/* Tabela de Dados */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+.data-table th {
+    text-align: left;
+    padding: 1rem;
+    color: #888;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.data-table td {
+    padding: 1rem;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    color: white;
+}
+.data-table tr:last-child td { border-bottom: none; }
+.user-avatar-sm {
+    width: 32px; height: 32px;
+    background: rgba(190, 242, 2, 0.1);
+    color: var(--c-accent-primary);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.8rem; font-weight: bold;
+}
+.action-btn {
+    color: #aaa; transition: 0.2s;
+    padding: 6px; border-radius: 4px;
+}
+.action-btn:hover { color: white; background: rgba(255,255,255,0.1); }
