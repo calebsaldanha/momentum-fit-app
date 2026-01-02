@@ -21,10 +21,16 @@
                 <div class="brand">
                     <a href="/">
                         <%# Tenta usar a imagem, se falhar mostra texto %>
-                        <img src="/images/momentum-fit-logo-completo.png" alt="Momentum Fit" class="header-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+                        <img src="/images/momentum-fit-logo-completo.png" alt="Momentum Fit" class="header-logo-img" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
                         <span style="display:none; font-weight:bold; font-size:1.5rem; color:#2563eb;">Momentum Fit</span>
                     </a>
                 </div>
+                
+                <nav class="nav-menu">
+                    <a href="/" class="nav-link">Início</a>
+                    <a href="/about" class="nav-link">Sobre</a>
+                    <a href="/articles" class="nav-link">Artigos</a>
+                </nav>
                 
                 <div class="user-actions">
                     <% if (typeof user !== 'undefined' && user) { %>
@@ -42,6 +48,12 @@
                         <a href="/auth/login" class="btn btn-sm btn-outline">Entrar</a>
                         <a href="/auth/register" class="btn btn-sm btn-primary">Cadastrar</a>
                     <% } %>
+                    
+                    <div class="hamburger">
+                        <span class="bar"></span>
+                        <span class="bar"></span>
+                        <span class="bar"></span>
+                    </div>
                 </div>
             </div>
         </header>
