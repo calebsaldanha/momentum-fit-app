@@ -4,8 +4,10 @@
             <i class="fas fa-user"></i>
         </div>
         <h3 class="user-name"><%= user.name.split(' ')[0] %></h3>
-        <% if (typeof profile !== 'undefined' && profile.main_goal) { %>
+        <% if (typeof profile !== 'undefined' && profile && profile.main_goal) { %>
             <span class="user-goal"><%= profile.main_goal %></span>
+        <% } else { %>
+            <span class="user-goal">Aluno</span>
         <% } %>
     </div>
     
@@ -19,5 +21,5 @@
         <a href="/client/profile" class="sidebar-link <%= typeof currentPage !== 'undefined' && currentPage === 'profile' ? 'active' : '' %>">
             <i class="fas fa-user-cog"></i> <span>Meu Perfil</span>
         </a>
-        </nav>
+    </nav>
 </aside>

@@ -1,39 +1,25 @@
 <aside class="dashboard-sidebar">
-    <div style="padding: 20px 20px 0;">
-        <h3 style="font-size: 0.8rem; text-transform: uppercase; color: #666; letter-spacing: 1px;">
-            Modo Personal
-        </h3>
+    <div class="sidebar-header">
+        <div class="user-avatar-large">
+            <i class="fas fa-user-shield"></i>
+        </div>
+        <h3 class="user-name"><%= user.name.split(' ')[0] %></h3>
+        <span class="user-role-badge">
+            <%= user.role === 'superadmin' ? 'Super Admin' : 'Treinador' %>
+        </span>
     </div>
+    
     <nav class="sidebar-nav">
-        <a href="/admin/dashboard" class="nav-item <%= currentPage === 'admin-dashboard' ? 'active' : '' %>">
-            Visão Geral
+        <a href="/admin/dashboard" class="sidebar-link <%= typeof currentPage !== 'undefined' && currentPage === 'dashboard' ? 'active' : '' %>">
+            <i class="fas fa-tachometer-alt"></i> <span>Dashboard</span>
         </a>
-        
-        <a href="/admin/clients" class="nav-item <%= currentPage === 'admin-clients' ? 'active' : '' %>">
-            Alunos
+        <a href="/admin/clients" class="sidebar-link <%= typeof currentPage !== 'undefined' && currentPage === 'clients' ? 'active' : '' %>">
+            <i class="fas fa-users"></i> <span>Alunos</span>
         </a>
-        
-        <a href="/workouts/create" class="nav-item <%= currentPage === 'create-workout' ? 'active' : '' %>">
-            Criar Treino
-        </a>
-
-        <a href="/chat" class="nav-item <%= currentPage === 'chat' ? 'active' : '' %>">
-            Mensagens
-        </a>
-        
         <% if (user.role === 'superadmin') { %>
-            <div style="margin-top: 20px; padding: 0 20px; border-top: 1px solid #333; padding-top: 15px;">
-                <p style="font-size: 0.7rem; color: #f59e0b; margin-bottom: 5px;">SUPER USER</p>
-                <a href="/superadmin/dashboard" class="btn btn-sm btn-outline" style="width: 100%; text-align: center; color: #f59e0b; border-color: #f59e0b;">
-                    Ir para Gestão &rarr;
-                </a>
-            </div>
+            <a href="/admin/trainers" class="sidebar-link <%= typeof currentPage !== 'undefined' && currentPage === 'trainers' ? 'active' : '' %>">
+                <i class="fas fa-user-tie"></i> <span>Treinadores</span>
+            </a>
         <% } %>
-    </nav>
-    <div class="sidebar-footer">
-         <form action="/auth/logout" method="POST" style="margin: 0;">
-            <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
-            <button type="submit" class="btn-logout-sidebar">Sair</button>
-        </form>
-    </div>
+        </nav>
 </aside>
