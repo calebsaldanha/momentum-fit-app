@@ -11,13 +11,12 @@ const requireTrainerAuth = (req, res, next) => {
 };
 
 // =========================================================================
-// Rota do Treinador (Create, Edit, Delete)
-// IMPORTANTE: Definir estas rotas ANTES da rota genérica /:id
+// Rota do Treinador (Create, Edit, Delete) - PRECISA VIR PRIMEIRO
 // =========================================================================
 const trainerRouter = express.Router();
 trainerRouter.use(requireTrainerAuth);
 
-// 1. Criar Treino (GET)
+// 1. Tela de Criar (GET)
 trainerRouter.get('/create', async (req, res) => {
     try {
         const userId = req.session.user.id;
@@ -36,7 +35,6 @@ trainerRouter.get('/create', async (req, res) => {
             title: 'Novo Treino', 
             clients: clients.rows, 
             selectedClientId: req.query.client_id || '', 
-            csrfToken: res.locals.csrfToken, 
             user: req.session.user, 
             currentPage: 'create-workout' 
         });
@@ -46,10 +44,14 @@ trainerRouter.get('/create', async (req, res) => {
     }
 });
 
-// 2. Criar Treino (POST)
+// 2. Ação de Criar (POST)
 trainerRouter.post('/create', async (req, res) => {
     const { client_id, title, description, exercises } = req.body;
-    if (!client_id || !title || !exercises) return res.status(400).json({ success: false, message: 'Dados inválidos' });
+    
+    // Validação básica
+    if (!client_id || !title || !exercises) {
+        return res.status(400).json({ success: false, message: 'Dados inválidos. Preencha todos os campos.' });
+    }
     
     const client = await pool.connect();
     try {
@@ -63,13 +65,13 @@ trainerRouter.post('/create', async (req, res) => {
         for (let i=0; i<exercises.length; i++) {
             const ex = exercises[i];
             await client.query(
-                "INSERT INTO workout_exercises (workout_id, name, sets, reps, notes, order_index, video_url, image_url, library_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)", 
-                [wid, ex.name, ex.sets, ex.reps, ex.description||'', i, ex.video_url||null, ex.image_url||null, ex.library_id||null]
+                "INSERT INTO workout_exercises (workout_id, name, sets, reps, notes, order_index, video_url) VALUES ($1, $2, $3, $4, $5, $6, $7)", 
+                [wid, ex.name, ex.sets, ex.reps, ex.notes||'', ex.order_index, ex.video_url||null]
             );
         }
         await client.query('COMMIT');
         
-        // Notificar (busca nome do treinador para a notificação)
+        // Notificar
         const tRes = await pool.query("SELECT name FROM users WHERE id = $1", [req.session.user.id]);
         const trainerName = tRes.rows[0] ? tRes.rows[0].name : 'Seu Treinador';
         await notificationService.notifyNewWorkout(title, client_id, wid, trainerName);
@@ -78,30 +80,19 @@ trainerRouter.post('/create', async (req, res) => {
     } catch (e) { 
         console.error(e);
         await client.query('ROLLBACK'); 
-        res.status(500).json({ success: false, message: 'Erro ao salvar treino.' }); 
+        res.status(500).json({ success: false, message: 'Erro ao salvar treino no banco de dados.' }); 
     } finally { client.release(); }
 });
 
-// 3. Excluir Treino (POST)
+// 3. Excluir (POST)
 trainerRouter.post('/delete/:id', async (req, res) => {
     try {
         const workoutId = req.params.id;
-        // Verifica dono do treino para redirecionar corretamente
         const w = await pool.query("SELECT client_id FROM workouts WHERE id = $1", [workoutId]);
         if (w.rows.length === 0) return res.status(404).render('pages/error', { message: 'Treino não encontrado' });
         
-        const client = await pool.connect();
-        try {
-            await client.query('BEGIN');
-            await client.query("DELETE FROM workout_exercises WHERE workout_id = $1", [workoutId]);
-            await client.query("DELETE FROM workouts WHERE id = $1", [workoutId]);
-            await client.query('COMMIT');
-        } catch(e) {
-            await client.query('ROLLBACK');
-            throw e;
-        } finally {
-            client.release();
-        }
+        await pool.query("DELETE FROM workout_exercises WHERE workout_id = $1", [workoutId]);
+        await pool.query("DELETE FROM workouts WHERE id = $1", [workoutId]);
 
         res.redirect('/admin/clients/' + w.rows[0].client_id);
     } catch (err) { 
@@ -110,7 +101,7 @@ trainerRouter.post('/delete/:id', async (req, res) => {
     }
 });
 
-// 4. Editar Treino (GET)
+// 4. Tela Editar (GET)
 trainerRouter.get('/edit/:id', async (req, res) => {
     try {
         const workoutId = req.params.id;
@@ -123,7 +114,6 @@ trainerRouter.get('/edit/:id', async (req, res) => {
             title: 'Editar Treino',
             workout: wRes.rows[0],
             exercises: exRes.rows,
-            csrfToken: res.locals.csrfToken,
             user: req.session.user,
             currentPage: 'create-workout'
         });
@@ -133,7 +123,7 @@ trainerRouter.get('/edit/:id', async (req, res) => {
     }
 });
 
-// 5. Editar Treino (POST)
+// 5. Ação Editar (POST)
 trainerRouter.post('/edit/:id', async (req, res) => {
     const workoutId = req.params.id;
     const { title, description, exercises } = req.body;
@@ -141,28 +131,22 @@ trainerRouter.post('/edit/:id', async (req, res) => {
     const client = await pool.connect();
     try {
         await client.query('BEGIN');
-        
-        // Atualiza cabeçalho
         await client.query("UPDATE workouts SET title = $1, description = $2 WHERE id = $3", [title, description, workoutId]);
-        
-        // Reescreve exercícios (método simples: apaga todos e recria)
         await client.query("DELETE FROM workout_exercises WHERE workout_id = $1", [workoutId]);
         
         if (exercises && exercises.length > 0) {
             for (let i=0; i<exercises.length; i++) {
                 const ex = exercises[i];
                 await client.query(
-                    "INSERT INTO workout_exercises (workout_id, name, sets, reps, notes, order_index, video_url, image_url, library_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)", 
-                    [workoutId, ex.name, ex.sets, ex.reps, ex.description||'', i, ex.video_url||null, ex.image_url||null, ex.library_id||null]
+                    "INSERT INTO workout_exercises (workout_id, name, sets, reps, notes, order_index, video_url) VALUES ($1, $2, $3, $4, $5, $6, $7)", 
+                    [workoutId, ex.name, ex.sets, ex.reps, ex.notes||'', i, ex.video_url||null]
                 );
             }
         }
-        
         await client.query('COMMIT');
         
         const w = await pool.query("SELECT client_id FROM workouts WHERE id = $1", [workoutId]);
         res.json({ success: true, clientId: w.rows[0].client_id });
-        
     } catch(e) {
         console.error(e);
         await client.query('ROLLBACK');
@@ -172,36 +156,22 @@ trainerRouter.post('/edit/:id', async (req, res) => {
     }
 });
 
-router.use('/', trainerRouter); // Aplica as rotas de trainer primeiro
+router.use('/', trainerRouter);
 
 // =========================================================================
-// Rota Pública/Visualização (Aluno e Personal)
-// IMPORTANTE: Esta rota deve ficar por ÚLTIMO pois captura qualquer string como ID
+// Rota Genérica (Visualizar) - TEM QUE FICAR POR ÚLTIMO
 // =========================================================================
 router.get('/:id', async (req, res) => {
     if (!req.session.user) return res.redirect('/auth/login');
-
     try {
         const workoutId = req.params.id;
-        const userId = req.session.user.id;
-
-        // Marca notificação como lida
-        await pool.query(
-            "UPDATE notifications SET is_read = true WHERE user_id = $1 AND link = $2",
-            [userId, `/workouts/${workoutId}`]
-        );
+        // Evita erro de sintaxe UUID se passar 'create' aqui sem querer
+        if (workoutId === 'create') return res.redirect('/workouts/create');
 
         const workoutRes = await pool.query("SELECT * FROM workouts WHERE id = $1", [workoutId]);
         if (workoutRes.rows.length === 0) return res.status(404).render('pages/error', { message: 'Treino não encontrado.' });
         
-        const exercisesRes = await pool.query(`
-            SELECT we.*, 
-                   COALESCE(el.description, we.notes) as final_description,
-                   el.recommendations, el.execution_instructions, el.tips, el.image_url as lib_image
-            FROM workout_exercises we 
-            LEFT JOIN exercise_library el ON we.library_id = el.id
-            WHERE we.workout_id = $1 ORDER BY we.order_index
-        `, [workoutId]);
+        const exercisesRes = await pool.query("SELECT * FROM workout_exercises WHERE workout_id = $1 ORDER BY order_index", [workoutId]);
         
         res.render('pages/workout-details', {
             title: workoutRes.rows[0].title,
@@ -211,7 +181,6 @@ router.get('/:id', async (req, res) => {
             currentPage: 'workouts'
         });
     } catch(e) { 
-        // Se cair aqui, provavelmente o ID não é um UUID ou int válido
         console.error(e);
         res.status(404).render('pages/error', { message: 'Treino não encontrado.' }); 
     }

@@ -4,12 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= typeof title !== 'undefined' ? title + ' | Momentum Fit' : 'Momentum Fit' %></title>
-    
     <link rel="icon" type="image/png" href="/images/momentum-fit-icon.png">
-    <link rel="shortcut icon" href="/images/momentum-fit-icon.png">
     
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -24,18 +20,21 @@
             <div class="header-content">
                 <div class="brand">
                     <a href="/">
-                        <img src="/images/momentum-fit-logo-completo.png" alt="Momentum Fit" class="header-logo">
+                        <%# Tenta usar a imagem, se falhar mostra texto %>
+                        <img src="/images/momentum-fit-logo-completo.png" alt="Momentum Fit" class="header-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+                        <span style="display:none; font-weight:bold; font-size:1.5rem; color:#2563eb;">Momentum Fit</span>
                     </a>
                 </div>
                 
                 <div class="user-actions">
-                    <% if (typeof user !== 'undefined') { %>
+                    <% if (typeof user !== 'undefined' && user) { %>
                         <div class="user-info">
                             <span class="greeting">Olá, <strong><%= user.name.split(' ')[0] %></strong></span>
-                            <% if (user.role === 'admin' || user.role === 'superadmin' || user.role === 'trainer') { %>
-                                <span class="badge-role"><%= user.role === 'superadmin' ? 'Admin' : 'Personal' %></span>
-                            <% } %>
+                            <span class="badge-role"><%= user.role === 'superadmin' ? 'Admin' : (user.role === 'trainer' ? 'Personal' : 'Aluno') %></span>
                         </div>
+                        <a href="/notifications" class="btn-icon" title="Notificações">
+                            <i class="fas fa-bell"></i>
+                        </a>
                         <a href="/auth/logout" class="btn-logout" title="Sair">
                             <i class="fas fa-sign-out-alt"></i>
                         </a>
@@ -47,19 +46,17 @@
             </div>
         </header>
 
-        <div class="flash-messages-container">
+        <div class="flash-messages-container" style="position:fixed; top:80px; right:20px; z-index:1100;">
             <% if (typeof messages !== 'undefined' && messages.error) { %>
                 <div class="alert alert-danger global-alert">
-                    <i class="fas fa-exclamation-circle"></i>
-                    <span><%= messages.error %></span>
-                    <button onclick="this.parentElement.remove()" class="close-btn">×</button>
+                    <i class="fas fa-exclamation-circle"></i> <%= messages.error %>
+                    <button onclick="this.parentElement.remove()" style="margin-left:10px; background:none; border:none; cursor:pointer;">&times;</button>
                 </div>
             <% } %>
             <% if (typeof messages !== 'undefined' && messages.success) { %>
                 <div class="alert alert-success global-alert">
-                    <i class="fas fa-check-circle"></i>
-                    <span><%= messages.success %></span>
-                    <button onclick="this.parentElement.remove()" class="close-btn">×</button>
+                    <i class="fas fa-check-circle"></i> <%= messages.success %>
+                    <button onclick="this.parentElement.remove()" style="margin-left:10px; background:none; border:none; cursor:pointer;">&times;</button>
                 </div>
             <% } %>
         </div>
