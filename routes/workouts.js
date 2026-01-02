@@ -16,7 +16,7 @@ const requireTrainerAuth = (req, res, next) => {
 const trainerRouter = express.Router();
 trainerRouter.use(requireTrainerAuth);
 
-// 1. Tela de Criar (GET) - CORRIGIDO
+// 1. Tela de Criar (GET)
 trainerRouter.get('/create', async (req, res) => {
     try {
         const userId = req.session.user.id;
@@ -31,14 +31,14 @@ trainerRouter.get('/create', async (req, res) => {
         }
         
         const clients = await pool.query(query, params);
-
-        // --- CORREÇÃO IMPORTANTE: Busca a biblioteca de exercícios ---
-        const library = await pool.query("SELECT * FROM exercise_library ORDER BY name ASC");
         
+        // Busca a biblioteca para passar para o front-end (Modal de Seleção)
+        const library = await pool.query("SELECT * FROM exercise_library ORDER BY name ASC");
+
         res.render('pages/create-workout', { 
             title: 'Novo Treino', 
             clients: clients.rows, 
-            exerciseLibrary: library.rows, // Envia para a View
+            exerciseLibrary: library.rows,
             selectedClientId: req.query.client_id || '', 
             user: req.session.user, 
             currentPage: 'create-workout' 
@@ -68,7 +68,7 @@ trainerRouter.post('/create', async (req, res) => {
         
         for (let i=0; i<exercises.length; i++) {
             const ex = exercises[i];
-            // Salva image_url vinda do front
+            // CORREÇÃO: Adicionado image_url no INSERT
             await client.query(
                 "INSERT INTO workout_exercises (workout_id, name, sets, reps, notes, order_index, video_url, image_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)", 
                 [wid, ex.name, ex.sets, ex.reps, ex.notes||'', ex.order_index, ex.video_url||null, ex.image_url||null]
@@ -141,6 +141,7 @@ trainerRouter.post('/edit/:id', async (req, res) => {
         if (exercises && exercises.length > 0) {
             for (let i=0; i<exercises.length; i++) {
                 const ex = exercises[i];
+                // CORREÇÃO: Adicionado image_url no INSERT
                 await client.query(
                     "INSERT INTO workout_exercises (workout_id, name, sets, reps, notes, order_index, video_url, image_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)", 
                     [workoutId, ex.name, ex.sets, ex.reps, ex.notes||'', i, ex.video_url||null, ex.image_url||null]
@@ -148,9 +149,11 @@ trainerRouter.post('/edit/:id', async (req, res) => {
             }
         }
         await client.query('COMMIT');
+        
         const w = await pool.query("SELECT client_id FROM workouts WHERE id = $1", [workoutId]);
         res.json({ success: true, clientId: w.rows[0].client_id });
     } catch(e) {
+        console.error(e);
         await client.query('ROLLBACK');
         res.status(500).json({ success: false, message: e.message });
     } finally { client.release(); }
@@ -158,7 +161,9 @@ trainerRouter.post('/edit/:id', async (req, res) => {
 
 router.use('/', trainerRouter);
 
-// Rota Visualizar (Pública/Aluno)
+// =========================================================================
+// Rota Visualizar (Aluno/Público) - CORREÇÃO CRÍTICA AQUI
+// =========================================================================
 router.get('/:id', async (req, res) => {
     if (!req.session.user) return res.redirect('/auth/login');
     try {
@@ -168,7 +173,23 @@ router.get('/:id', async (req, res) => {
         const workoutRes = await pool.query("SELECT * FROM workouts WHERE id = $1", [workoutId]);
         if (workoutRes.rows.length === 0) return res.status(404).render('pages/error', { message: 'Treino não encontrado.' });
         
-        const exercisesRes = await pool.query("SELECT * FROM workout_exercises WHERE workout_id = $1 ORDER BY order_index", [workoutId]);
+        // CORREÇÃO: JOIN com a Library para pegar imagens e detalhes
+        // COALESCE: Se o treino tiver imagem salva, usa ela. Se não, pega da biblioteca.
+        const exercisesQuery = `
+            SELECT 
+                we.*,
+                COALESCE(we.image_url, el.image_url) as image_url,
+                COALESCE(el.description, we.notes) as description_lib,
+                el.execution_instructions,
+                el.tips,
+                el.recommendations
+            FROM workout_exercises we
+            LEFT JOIN exercise_library el ON LOWER(TRIM(we.name)) = LOWER(TRIM(el.name))
+            WHERE we.workout_id = $1 
+            ORDER BY we.order_index
+        `;
+
+        const exercisesRes = await pool.query(exercisesQuery, [workoutId]);
         
         res.render('pages/workout-details', {
             title: workoutRes.rows[0].title,
@@ -177,7 +198,10 @@ router.get('/:id', async (req, res) => {
             user: req.session.user,
             currentPage: 'workouts'
         });
-    } catch(e) { res.status(404).render('pages/error', { message: 'Treino não encontrado.' }); }
+    } catch(e) { 
+        console.error("Erro ao carregar detalhes do treino:", e);
+        res.status(500).render('pages/error', { message: 'Erro ao carregar o treino.' }); 
+    }
 });
 
 module.exports = router;
