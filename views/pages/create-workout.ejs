@@ -1,239 +1,243 @@
-<%- include('../partials/header.ejs', { title, bodyClass: 'dashboard-body' }) %>
-<style>
-    .suggestions-list {
-        position: absolute;
-        background: var(--c-bg-card);
-        border: 1px solid var(--c-border);
-        width: 100%;
-        max-height: 200px;
-        overflow-y: auto;
-        z-index: 1000;
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        border-radius: 0 0 var(--radius) var(--radius);
-    }
-    .suggestions-list li {
-        padding: 10px;
-        cursor: pointer;
-        border-bottom: 1px solid var(--c-border);
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-    .suggestions-list li:hover {
-        background: var(--c-bg-main);
-    }
-    .suggestions-list img {
-        width: 30px; height: 30px; border-radius: 4px; object-fit: cover;
-    }
-    .preview-box {
-        margin-top: 10px;
-        padding: 10px;
-        background: var(--c-bg-main);
-        border-radius: var(--radius);
-        display: none;
-        align-items: flex-start;
-        gap: 15px;
-    }
-    .preview-box img {
-        width: 80px; height: 80px; object-fit: cover; border-radius: 6px;
-    }
-    .preview-info { font-size: 0.85rem; color: var(--c-text-secondary); }
-</style>
+<%- include('../partials/header') %>
+<div class="main-layout">
+    <%- include('../partials/admin-sidebar') %>
+    
+    <main class="content">
+        <div class="page-header">
+            <a href="/admin/clients/<%= selectedClientId %>" class="back-link">
+                <i class="fas fa-arrow-left"></i> Voltar
+            </a>
+            <h1>Novo Treino</h1>
+        </div>
 
-<div class="dashboard-container">
-    <%- include('../partials/admin-sidebar.ejs') %>
-    <main class="dashboard-main">
-        <div class="section">
-            <div class="section-header">
-                <h1>Novo Treino</h1>
-                <p>Busque exercícios na biblioteca oficial para incluir fotos e dicas.</p>
-            </div>
-           
-            <% if (!clients || clients.length === 0) { %>
-                <div class="alert alert-warning">Sem alunos ativos. <a href="/admin/dashboard">Voltar</a></div>
-            <% } else { %>
-                <form id="createWorkoutForm" class="dashboard-form" style="max-width: 800px;">
-                    <div class="form-group">
-                        <label for="client_id">Aluno *</label>
-                        <select name="client_id" id="client_id" required>
-                            <option value="">Selecione...</option>
-                            <% clients.forEach(client => { %>
-                                <option value="<%= client.id %>" <%= typeof selectedClientId !== 'undefined' && selectedClientId == client.id ? 'selected' : '' %>><%= client.name %></option>
-                            <% }); %>
-                        </select>
+        <div class="workout-form-container">
+            <form id="createWorkoutForm">
+                <section class="form-section">
+                    <h2>Informações do Treino</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="client_id">Aluno</label>
+                            <select name="client_id" id="client_id" required>
+                                <option value="" disabled <%= !selectedClientId ? 'selected' : '' %>>Selecione o aluno...</option>
+                                <% clients.forEach(client => { %>
+                                    <option value="<%= client.id %>" <%= selectedClientId == client.id ? 'selected' : '' %>>
+                                        <%= client.name %>
+                                    </option>
+                                <% }) %>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="title">Título do Treino</label>
+                            <input type="text" id="title" name="title" placeholder="Ex: Treino A - Superiores" required>
+                        </div>
                     </div>
-                    
                     <div class="form-group">
-                        <label for="title">Título do Treino *</label>
-                        <input type="text" id="title" name="title" required placeholder="Ex: Treino A - Superiores">
+                        <label for="description">Descrição / Foco</label>
+                        <textarea id="description" name="description" rows="2" placeholder="Objetivo deste treino..."></textarea>
                     </div>
-                    
-                    <div class="form-group">
-                        <label>Descrição Geral</label>
-                        <textarea id="description" name="description" rows="2"></textarea>
-                    </div>
+                </section>
 
-                    <h3 style="margin: 2rem 0 1rem; color: var(--c-text-primary);">Exercícios</h3>
-                    <div id="exercisesContainer"></div>
-                    
-                    <button type="button" class="btn btn-outline" id="addExerciseBtn" style="width: 100%; border-style: dashed; margin-top: 1rem;">+ Adicionar Exercício</button>
-                    
-                    <div class="form-actions" style="margin-top: 2rem; display: flex; justify-content: flex-end; gap: 10px;">
-                        <a href="/admin/dashboard" class="btn btn-secondary">Cancelar</a>
-                        <button type="submit" class="btn btn-primary">Salvar Treino</button>
+                <section class="form-section">
+                    <div class="section-header">
+                        <h2>Exercícios</h2>
+                        <button type="button" id="addExerciseBtn" class="btn btn-secondary">
+                            <i class="fas fa-plus"></i> Adicionar Exercício
+                        </button>
                     </div>
-                </form>
-            <% } %>
+                    
+                    <div id="exercisesList" class="exercises-list">
+                        </div>
+                </section>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-save"></i> Salvar Treino
+                    </button>
+                </div>
+            </form>
         </div>
     </main>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const container = document.getElementById('exercisesContainer');
-    const addBtn = document.getElementById('addExerciseBtn');
-    
-    if (!container || !addBtn) return;
-
-    function addExercise() {
-        const count = container.children.length + 1;
-        const html = `
-            <div class="exercise-item" style="background: var(--c-bg-card); border: 1px solid var(--c-border); padding: 1.5rem; border-radius: var(--radius); margin-bottom: 1.5rem;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
-                    <h4 style="color: var(--c-accent-primary); margin:0;">#${count}</h4>
-                    <button type="button" class="btn btn-sm btn-outline remove-exercise" style="color: var(--c-error); border-color: var(--c-error);">Remover</button>
-                </div>
-                
-                <input type="hidden" class="ex-lib-id">
-                <input type="hidden" class="ex-img-url">
-
-                <div class="form-group" style="position: relative;">
-                    <label>Nome do Exercício (Digite para buscar na biblioteca) *</label>
-                    <input type="text" class="ex-name" required autocomplete="off" placeholder="Ex: Agachamento...">
-                    <ul class="suggestions-list" style="display:none;"></ul>
-                </div>
-
-                <div class="preview-box">
-                    <img src="" class="preview-img">
-                    <div class="preview-info">
-                        <strong>Biblioteca:</strong> <span class="preview-desc"></span>
-                    </div>
-                </div>
-
-                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
-                    <div class="form-group">
-                        <label>Séries x Repetições *</label>
-                        <input type="text" class="ex-sets" required placeholder="Ex: 4x12">
-                    </div>
-                    <div class="form-group">
-                        <label>Link Vídeo (Opcional)</label>
-                        <input type="text" class="ex-video">
-                    </div>
-                </div>
-                
+<template id="exerciseTemplate">
+    <div class="exercise-card">
+        <div class="exercise-header">
+            <span class="exercise-number">#1</span>
+            <button type="button" class="btn-icon delete remove-exercise" title="Remover">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="exercise-body">
+            <div class="form-group">
+                <label>Nome do Exercício</label>
+                <input type="text" class="ex-name" required placeholder="Ex: Supino Reto">
+            </div>
+            <div class="form-row three-cols">
                 <div class="form-group">
-                    <label>Observações Extras</label>
-                    <textarea class="ex-notes" rows="1" placeholder="Obs pessoais para este aluno..."></textarea>
+                    <label>Séries</label>
+                    <input type="text" class="ex-sets" required placeholder="Ex: 4">
+                </div>
+                <div class="form-group">
+                    <label>Repetições</label>
+                    <input type="text" class="ex-reps" required placeholder="Ex: 10-12">
+                </div>
+                <div class="form-group">
+                    <label>Descanso (s)</label>
+                    <input type="text" class="ex-rest" placeholder="Ex: 60">
                 </div>
             </div>
-        `;
-        container.insertAdjacentHTML('beforeend', html);
-        setupAutocomplete(container.lastElementChild);
-    }
+            <div class="form-group">
+                <label>Observações / Técnica</label>
+                <input type="text" class="ex-notes" placeholder="Detalhes de execução...">
+            </div>
+            <div class="form-group">
+                <label>Link de Vídeo (Opcional)</label>
+                <input type="url" class="ex-video" placeholder="https://youtube.com/...">
+            </div>
+        </div>
+    </div>
+</template>
 
-    function setupAutocomplete(item) {
-        const input = item.querySelector('.ex-name');
-        const list = item.querySelector('.suggestions-list');
-        const libId = item.querySelector('.ex-lib-id');
-        const imgUrl = item.querySelector('.ex-img-url');
-        const previewBox = item.querySelector('.preview-box');
-        const previewImg = item.querySelector('.preview-img');
-        const previewDesc = item.querySelector('.preview-desc');
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const exercisesList = document.getElementById('exercisesList');
+    const addBtn = document.getElementById('addExerciseBtn');
+    const form = document.getElementById('createWorkoutForm');
+    const template = document.getElementById('exerciseTemplate');
 
-        input.addEventListener('input', async (e) => {
-            const val = e.target.value;
-            if (val.length < 2) { list.style.display = 'none'; return; }
-            
-            const res = await fetch('/api/exercises/search?q=' + encodeURIComponent(val));
-            const data = await res.json();
-            
-            list.innerHTML = '';
-            if (data.length > 0) {
-                list.style.display = 'block';
-                data.forEach(ex => {
-                    const li = document.createElement('li');
-                    // Mostra miniatura se tiver
-                    const thumb = ex.image_url ? `<img src="${ex.image_url}">` : '';
-                    li.innerHTML = `${thumb} <span>${ex.name}</span>`;
-                    
-                    li.onclick = () => {
-                        input.value = ex.name;
-                        libId.value = ex.id;
-                        imgUrl.value = ex.image_url;
-                        if(ex.image_url) {
-                            previewBox.style.display = 'flex';
-                            previewImg.src = ex.image_url;
-                            previewDesc.textContent = ex.tips || ex.description;
-                        }
-                        list.style.display = 'none';
-                    };
-                    list.appendChild(li);
-                });
-            } else { list.style.display = 'none'; }
-        });
+    // Função para adicionar exercício
+    addBtn.addEventListener('click', () => {
+        const clone = template.content.cloneNode(true);
+        const index = exercisesList.children.length + 1;
+        clone.querySelector('.exercise-number').textContent = '#' + index;
         
-        // Fechar lista ao clicar fora
-        document.addEventListener('click', (e) => {
-            if (!item.contains(e.target)) list.style.display = 'none';
+        // Botão remover
+        clone.querySelector('.remove-exercise').addEventListener('click', (e) => {
+            e.target.closest('.exercise-card').remove();
+            updateNumbers();
         });
-    }
 
-    addBtn.addEventListener('click', addExercise);
-    addExercise();
-
-    container.addEventListener('click', (e) => {
-        if (e.target.classList.contains('remove-exercise')) {
-            e.target.closest('.exercise-item').remove();
-        }
+        exercisesList.appendChild(clone);
     });
 
-    document.getElementById('createWorkoutForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const exercises = [];
-        document.querySelectorAll('.exercise-item').forEach(item => {
-            if (item.querySelector('.ex-name').value) {
-                exercises.push({
-                    name: item.querySelector('.ex-name').value,
-                    sets: item.querySelector('.ex-sets').value,
-                    reps: item.querySelector('.ex-sets').value,
-                    description: item.querySelector('.ex-notes').value,
-                    video_url: item.querySelector('.ex-video').value,
-                    library_id: item.querySelector('.ex-lib-id').value,
-                    image_url: item.querySelector('.ex-img-url').value
-                });
-            }
+    // Atualiza numeração ao remover
+    function updateNumbers() {
+        Array.from(exercisesList.children).forEach((card, idx) => {
+            card.querySelector('.exercise-number').textContent = '#' + (idx + 1);
         });
+    }
 
-        if (exercises.length === 0) return alert('Adicione exercícios.');
+    // Adiciona um exercício inicial por padrão
+    addBtn.click();
+
+    // Envio do formulário
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
 
         try {
-            const res = await fetch('/workouts/create', {
+            // Coletar dados dos exercícios
+            const exerciseCards = document.querySelectorAll('.exercise-card');
+            const exercises = Array.from(exerciseCards).map((card, index) => ({
+                name: card.querySelector('.ex-name').value,
+                sets: card.querySelector('.ex-sets').value,
+                reps: card.querySelector('.ex-reps').value,
+                notes: card.querySelector('.ex-notes').value + (card.querySelector('.ex-rest').value ? ` | Descanso: ${card.querySelector('.ex-rest').value}s` : ''),
+                video_url: card.querySelector('.ex-video').value,
+                order_index: index
+            }));
+
+            if (exercises.length === 0) {
+                alert('Adicione pelo menos um exercício.');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-save"></i> Salvar Treino';
+                return;
+            }
+
+            const payload = {
+                client_id: document.getElementById('client_id').value,
+                title: document.getElementById('title').value,
+                description: document.getElementById('description').value,
+                exercises: exercises
+            };
+
+            const response = await fetch('/workouts/create', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'CSRF-Token': '<%= csrfToken %>' },
-                body: JSON.stringify({
-                    client_id: document.getElementById('client_id').value,
-                    title: document.getElementById('title').value,
-                    description: document.getElementById('description').value,
-                    exercises
-                })
+                headers: {
+                    'Content-Type': 'application/json',
+                    // Incluir CSRF token se estiver usando
+                    'CSRF-Token': '<%= typeof csrfToken !== "undefined" ? csrfToken : "" %>'
+                },
+                body: JSON.stringify(payload)
             });
-            const json = await res.json();
-            if (json.success) window.location.href = '/admin/clients/' + json.clientId;
-            else alert('Erro: ' + json.message);
-        } catch (err) { alert('Erro ao salvar.'); }
+
+            const result = await response.json();
+
+            if (result.success) {
+                // Redireciona para o detalhe do cliente
+                window.location.href = `/admin/clients/${result.clientId}`;
+            } else {
+                alert('Erro ao salvar: ' + (result.message || 'Erro desconhecido'));
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-save"></i> Salvar Treino';
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Erro de conexão ao salvar treino.');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-save"></i> Salvar Treino';
+        }
     });
 });
 </script>
-<%- include('../partials/footer.ejs') %>
+
+<style>
+/* Estilos específicos para o form dinâmico */
+.workout-form-container {
+    max-width: 800px;
+    background: white;
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+}
+.form-section {
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid #eee;
+}
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+.exercise-card {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    position: relative;
+}
+.exercise-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+.exercise-number {
+    font-weight: bold;
+    color: var(--primary-color);
+    background: rgba(37, 99, 235, 0.1);
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+}
+.three-cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1rem;
+}
+</style>
+<%- include('../partials/footer') %>

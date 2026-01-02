@@ -3,57 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= typeof title !== 'undefined' ? title : 'Momentum Fit' %></title>
-    <link rel="stylesheet" href="/css/styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title><%= typeof title !== 'undefined' ? title + ' | Momentum Fit' : 'Momentum Fit' %></title>
+    
+    <link rel="icon" type="image/png" href="/images/momentum-fit-icon.png">
+    <link rel="shortcut icon" href="/images/momentum-fit-icon.png">
+    <link rel="apple-touch-icon" href="/images/momentum-fit-icon.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="/js/main.js" defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="/css/styles.css">
+    <% if (typeof currentPage !== 'undefined' && (currentPage === 'dashboard' || currentPage === 'admin')) { %>
+        <link rel="stylesheet" href="/css/dashboard.css">
+    <% } %>
 </head>
 <body>
-    <header class="site-header">
-        <div class="header-container">
-            <a href="/" class="logo">
-                <img src="/images/momentum-fit-icon.png" alt="Momentum Fit" class="logo-img">
-                <span class="logo-text">Momentum Fit</span>
-            </a>
-
-            <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menu">
-                <i class="fas fa-bars"></i>
-            </button>
-
-            <div class="nav-wrapper" id="navWrapper">
-                <nav class="main-nav">
-                    <ul class="nav-list">
-                        <li><a href="/" class="nav-link">Início</a></li>
-                        <li><a href="/#features" class="nav-link">Funcionalidades</a></li>
-                        <li><a href="/articles" class="nav-link">Artigos</a></li>
-                        <li><a href="/about" class="nav-link">Sobre</a></li>
-                    </ul>
-                </nav>
-
-                <div class="header-actions">
-                    <% if (typeof user !== 'undefined' && user) { %>
-                        <div class="user-menu-container">
-                            <span class="user-welcome">Olá, <%= user.name.split(' ')[0] %></span>
-                            <% let dashboardLink = '/client/dashboard'; %>
-                            <% if (user.role === 'trainer') dashboardLink = '/admin/dashboard'; %>
-                            <% if (user.role === 'superadmin') dashboardLink = '/superadmin/dashboard'; %>
-                            
-                            <a href="<%= dashboardLink %>" class="btn btn-sm btn-primary">Painel</a>
-                            
-                            <form action="/auth/logout" method="POST" class="logout-form">
-                                <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
-                                <button type="submit" class="btn btn-sm btn-outline">Sair</button>
-                            </form>
-                        </div>
-                    <% } else { %>
-                        <div class="auth-buttons">
-                            <a href="/auth/login" class="nav-link-login">Entrar</a>
-                            <a href="/auth/register" class="btn btn-sm btn-primary">Começar</a>
-                        </div>
-                    <% } %>
-                </div>
+    <div class="app-container">
+        <% if (typeof messages !== 'undefined' && messages.error) { %>
+            <div class="alert alert-danger global-alert">
+                <%= messages.error %>
+                <button onclick="this.parentElement.remove()">×</button>
             </div>
-        </div>
-    </header>
-    <div class="header-spacer"></div>
+        <% } %>
+        <% if (typeof messages !== 'undefined' && messages.success) { %>
+            <div class="alert alert-success global-alert">
+                <%= messages.success %>
+                <button onclick="this.parentElement.remove()">×</button>
+            </div>
+        <% } %>
