@@ -9,13 +9,12 @@ const requireClient = (req, res, next) => {
 
 router.use(requireClient);
 
+// Dashboard
 router.get('/dashboard', async (req, res) => {
     try {
-        // Busca perfil
         const profileRes = await pool.query("SELECT * FROM client_profiles WHERE user_id = $1", [req.session.user.id]);
         const profile = profileRes.rows[0] || {};
 
-        // Busca treinos com nome do treinador
         const workoutsRes = await pool.query(`
             SELECT w.*, u.name as trainer_name 
             FROM workouts w 
@@ -24,11 +23,16 @@ router.get('/dashboard', async (req, res) => {
             ORDER BY w.created_at DESC LIMIT 5`, 
             [req.session.user.id]
         );
+        
+        // Busca último check-in
+        const checkinRes = await pool.query("SELECT * FROM checkins WHERE user_id = $1 ORDER BY date DESC LIMIT 1", [req.session.user.id]);
+        const lastCheckin = checkinRes.rows[0];
 
         res.render('pages/client-dashboard', {
             title: 'Meu Painel',
-            profile: profile, // View precisa desta variável
-            workouts: workoutsRes.rows, // View precisa desta variável
+            profile: profile,
+            workouts: workoutsRes.rows,
+            lastCheckin: lastCheckin,
             currentPage: 'dashboard'
         });
     } catch (err) {
@@ -37,12 +41,12 @@ router.get('/dashboard', async (req, res) => {
     }
 });
 
+// Perfil
 router.get('/profile', async (req, res) => {
     try {
         const profileRes = await pool.query("SELECT * FROM client_profiles WHERE user_id = $1", [req.session.user.id]);
         const profile = profileRes.rows[0] || {};
         
-        // Calcula IMC
         let imc = '--';
         if (profile.weight && profile.height) {
             const h = parseFloat(profile.height);
@@ -62,9 +66,7 @@ router.get('/profile', async (req, res) => {
     }
 });
 
-// Update Profile
 router.post('/profile', async (req, res) => {
-    // ... Lógica de update simplificada para focar na correção de carregamento ...
     const { name, phone, age, weight, height, main_goal } = req.body;
     try {
         await pool.query("UPDATE users SET name = $1 WHERE id = $2", [name, req.session.user.id]);
@@ -76,6 +78,12 @@ router.post('/profile', async (req, res) => {
             height = EXCLUDED.height, main_goal = EXCLUDED.main_goal`,
             [req.session.user.id, phone, age, weight, height, main_goal]
         );
+        
+        // Atualiza tabela checkins se houver peso novo
+        if(weight) {
+             await pool.query("INSERT INTO checkins (user_id, weight) VALUES ($1, $2)", [req.session.user.id, weight]);
+        }
+
         req.flash('success', 'Perfil atualizado!');
         res.redirect('/client/profile');
     } catch (err) {
@@ -85,6 +93,7 @@ router.post('/profile', async (req, res) => {
     }
 });
 
+// Treinos
 router.get('/workouts', async (req, res) => {
     try {
         const workouts = await pool.query("SELECT * FROM workouts WHERE client_id = $1 ORDER BY created_at DESC", [req.session.user.id]);
@@ -96,19 +105,21 @@ router.get('/workouts', async (req, res) => {
     } catch (err) { res.status(500).render('pages/error', { message: 'Erro.' }); }
 });
 
+// Formulário Inicial
 router.get('/initial-form', (req, res) => {
-    // Verifica se já tem perfil, se tiver redireciona
     res.render('pages/initial-form', { title: 'Avaliação', profile: {}, currentPage: 'profile' });
 });
 
 router.post('/initial-form', async (req, res) => {
-     // Lógica similar ao profile update mas redireciona para dashboard
      const { weight, height, main_goal } = req.body;
      try {
          await pool.query(
             "INSERT INTO client_profiles (user_id, weight, height, main_goal) VALUES ($1, $2, $3, $4) ON CONFLICT (user_id) DO NOTHING",
             [req.session.user.id, weight, height, main_goal]
          );
+         if(weight) {
+             await pool.query("INSERT INTO checkins (user_id, weight) VALUES ($1, $2)", [req.session.user.id, weight]);
+         }
          await pool.query("UPDATE users SET status = 'pending_approval' WHERE id = $1", [req.session.user.id]);
          res.redirect('/client/dashboard');
      } catch(e) { console.error(e); res.redirect('/client/initial-form'); }
