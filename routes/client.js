@@ -24,8 +24,12 @@ router.get('/dashboard', async (req, res) => {
             [req.session.user.id]
         );
         
-        const checkinRes = await pool.query("SELECT * FROM checkins WHERE user_id = $1 ORDER BY date DESC LIMIT 1", [req.session.user.id]);
-        const lastCheckin = checkinRes.rows[0];
+        // Verifica tabela checkins (tratamento de erro se não existir)
+        let lastCheckin = null;
+        try {
+            const checkinRes = await pool.query("SELECT * FROM checkins WHERE user_id = $1 ORDER BY date DESC LIMIT 1", [req.session.user.id]);
+            lastCheckin = checkinRes.rows[0];
+        } catch (e) { console.log('Tabela checkins ainda não criada ou vazia'); }
 
         res.render('pages/client-dashboard', {
             title: 'Meu Painel',
@@ -79,7 +83,7 @@ router.post('/profile', async (req, res) => {
         );
         
         if(weight) {
-             await pool.query("INSERT INTO checkins (user_id, weight) VALUES ($1, $2)", [req.session.user.id, weight]);
+             try { await pool.query("INSERT INTO checkins (user_id, weight) VALUES ($1, $2)", [req.session.user.id, weight]); } catch(e){}
         }
 
         req.flash('success', 'Perfil atualizado!');
@@ -91,18 +95,25 @@ router.post('/profile', async (req, res) => {
     }
 });
 
-// CORREÇÃO: Busca treinos E perfil (para a Sidebar)
+// Meus Treinos (Lista) - CORREÇÃO: Envia profile para sidebar
 router.get('/workouts', async (req, res) => {
     try {
         const profileRes = await pool.query("SELECT * FROM client_profiles WHERE user_id = $1", [req.session.user.id]);
         const profile = profileRes.rows[0] || {};
 
-        const workouts = await pool.query("SELECT * FROM workouts WHERE client_id = $1 ORDER BY created_at DESC", [req.session.user.id]);
-        
+        const workouts = await pool.query(`
+            SELECT w.*, u.name as trainer_name 
+            FROM workouts w 
+            LEFT JOIN users u ON w.trainer_id = u.id 
+            WHERE w.client_id = $1 
+            ORDER BY w.created_at DESC`, 
+            [req.session.user.id]
+        );
+
         res.render('pages/client-workouts', {
             title: 'Meus Treinos',
             workouts: workouts.rows,
-            profile: profile, // NECESSÁRIO para a sidebar não quebrar
+            profile: profile, // Importante para sidebar
             currentPage: 'workouts'
         });
     } catch (err) { 
@@ -123,9 +134,7 @@ router.post('/initial-form', async (req, res) => {
             "INSERT INTO client_profiles (user_id, weight, height, main_goal) VALUES ($1, $2, $3, $4) ON CONFLICT (user_id) DO NOTHING",
             [req.session.user.id, weight, height, main_goal]
          );
-         if(weight) {
-             await pool.query("INSERT INTO checkins (user_id, weight) VALUES ($1, $2)", [req.session.user.id, weight]);
-         }
+         try { await pool.query("INSERT INTO checkins (user_id, weight) VALUES ($1, $2)", [req.session.user.id, weight]); } catch(e){}
          await pool.query("UPDATE users SET status = 'pending_approval' WHERE id = $1", [req.session.user.id]);
          res.redirect('/client/dashboard');
      } catch(e) { console.error(e); res.redirect('/client/initial-form'); }

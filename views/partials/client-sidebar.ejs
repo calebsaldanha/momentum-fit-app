@@ -1,21 +1,23 @@
 <aside class="dashboard-sidebar">
-    <nav class="sidebar-nav">
-        <% if (user.status === 'active') { %>
-            <a href="/client/dashboard" class="nav-item <%= currentPage === 'client-dashboard' ? 'active' : '' %>">Painel Geral</a>
-            <a href="/client/workouts" class="nav-item <%= currentPage === 'client-workouts' ? 'active' : '' %>">Meus Treinos</a>
-            <a href="/chat" class="nav-item <%= currentPage === 'chat' ? 'active' : '' %>">Mensagens</a>
-        <% } else { %>
-            <div style="padding: 10px; font-size: 0.85rem; color: #666; text-transform: uppercase; font-weight: 700; letter-spacing: 1px;">Acesso Restrito</div>
-            <a href="#" class="nav-item" style="opacity: 0.5; cursor: not-allowed;">Painel Geral [Bloqueado]</a>
-            <a href="#" class="nav-item" style="opacity: 0.5; cursor: not-allowed;">Meus Treinos [Bloqueado]</a>
-            <a href="#" class="nav-item" style="opacity: 0.5; cursor: not-allowed;">Mensagens [Bloqueado]</a>
+    <div class="sidebar-header">
+        <div class="user-avatar-large">
+            <i class="fas fa-user"></i>
+        </div>
+        <h3 class="user-name"><%= user.name.split(' ')[0] %></h3>
+        <% if (typeof profile !== 'undefined' && profile.main_goal) { %>
+            <span class="user-goal"><%= profile.main_goal %></span>
         <% } %>
-        <a href="/client/profile" class="nav-item <%= currentPage === 'client-profile' ? 'active' : '' %>">Meu Perfil</a>
-    </nav>
-    <div class="sidebar-footer">
-         <form action="/auth/logout" method="POST" style="margin: 0;">
-            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-            <button type="submit" class="btn-logout-sidebar">Sair</button>
-        </form>
     </div>
+    
+    <nav class="sidebar-nav">
+        <a href="/client/dashboard" class="sidebar-link <%= typeof currentPage !== 'undefined' && currentPage === 'dashboard' ? 'active' : '' %>">
+            <i class="fas fa-home"></i> <span>Visão Geral</span>
+        </a>
+        <a href="/client/workouts" class="sidebar-link <%= typeof currentPage !== 'undefined' && currentPage === 'workouts' ? 'active' : '' %>">
+            <i class="fas fa-dumbbell"></i> <span>Meus Treinos</span>
+        </a>
+        <a href="/client/profile" class="sidebar-link <%= typeof currentPage !== 'undefined' && currentPage === 'profile' ? 'active' : '' %>">
+            <i class="fas fa-user-cog"></i> <span>Meu Perfil</span>
+        </a>
+        </nav>
 </aside>
