@@ -38,12 +38,25 @@
                             <span class="greeting">Olá, <strong><%= user.name.split(' ')[0] %></strong></span>
                             <span class="badge-role"><%= user.role === 'superadmin' ? 'Admin' : (user.role === 'trainer' ? 'Personal' : 'Aluno') %></span>
                         </div>
+                        
+                        <% 
+                            let dashboardLink = '/client/dashboard';
+                            if (user.role === 'superadmin') dashboardLink = '/superadmin/dashboard';
+                            else if (user.role === 'trainer') dashboardLink = '/admin/dashboard';
+                        %>
+                        <a href="<%= dashboardLink %>" class="btn btn-sm btn-primary" style="margin-right: 10px;">
+                            <i class="fas fa-columns"></i> Painel
+                        </a>
+
                         <a href="/notifications" class="btn-icon" title="Notificações">
                             <i class="fas fa-bell"></i>
                         </a>
-                        <a href="/auth/logout" class="btn-logout" title="Sair">
+                        <a href="/auth/logout" class="btn-logout" title="Sair" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                             <i class="fas fa-sign-out-alt"></i>
                         </a>
+                        <form id="logout-form" action="/auth/logout" method="POST" style="display: none;">
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        </form>
                     <% } else { %>
                         <a href="/auth/login" class="btn btn-sm btn-outline">Entrar</a>
                         <a href="/auth/register" class="btn btn-sm btn-primary">Cadastrar</a>

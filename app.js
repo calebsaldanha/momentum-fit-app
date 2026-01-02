@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const path = require('path');
 const flash = require('connect-flash');
+const csrf = require('csurf'); // Importa o csurf
 const db = require('./database/db'); 
 require('dotenv').config();
 
@@ -36,23 +37,44 @@ app.use(session({
     secure: process.env.NODE_ENV === 'production', 
     maxAge: 30 * 24 * 60 * 60 * 1000,
     httpOnly: true,
-    sameSite: 'lax' // Recomendado para evitar problemas de CSRF/Navegação
+    sameSite: 'lax'
   }
 }));
 
 app.use(flash());
 
+// Configuração do CSRF (Deve vir APÓS session e cookieParser)
+const csrfProtection = csrf({ cookie: false }); // usa sessão por padrão se cookie for false
+app.use(csrfProtection);
+
 // Middleware Global
 app.use((req, res, next) => {
+  // Variáveis Flash
   res.locals.success_msg = req.flash('success_msg');
   res.locals.error_msg = req.flash('error_msg');
   res.locals.error = req.flash('error');
   
-  // Define 'user' e 'isAuthenticated' para todas as views
+  // Variáveis de Usuário
   res.locals.user = req.session.user || null;
   res.locals.isAuthenticated = !!req.session.user; 
   
+  // CORREÇÃO: Disponibiliza o csrfToken para TODAS as views
+  res.locals.csrfToken = req.csrfToken();
+  
   next();
+});
+
+// Tratamento de Erro CSRF
+app.use((err, req, res, next) => {
+  if (err.code !== 'EBADCSRFTOKEN') return next(err);
+  
+  // Se der erro de token inválido/ausente
+  console.error('Erro CSRF:', err);
+  res.status(403);
+  res.render('pages/error', { 
+    message: 'Sessão expirada ou token inválido. Por favor, recarregue a página e tente novamente.',
+    error: { status: 403 }
+  });
 });
 
 // Rotas
