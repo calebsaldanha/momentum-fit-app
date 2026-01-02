@@ -242,6 +242,7 @@ body.dashboard-body {
 }
 .action-btn:hover { color: white; background: rgba(255,255,255,0.1); }
 
+
 /* --- Correção Visual do Admin Dashboard (Cards e Tabelas) --- */
 .content-card {
     background: #111;
