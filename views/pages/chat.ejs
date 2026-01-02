@@ -11,10 +11,7 @@
 
 <div class="dashboard-container">
     
-    <% if (user.role === 'client') { %>
-        <%- include('../partials/client-sidebar.ejs', { currentPage: 'chat' }) %>
-    <% } else { %>
-        <% if (user.role === 'superadmin') { %> <%- include('../partials/superadmin-sidebar.ejs', { currentPage: 'chat' }) %> <% } else { %> <%- include('../partials/admin-sidebar.ejs', { currentPage: 'chat' }) %> <% } %>
+    <%- include('../partials/sidebar.ejs', { currentPage: 'chat' }) %>
     <% } %>
 
     <main class="dashboard-main">
@@ -48,7 +45,7 @@
                     
                     <div id="filePreview" style="display: none; padding: 0.8rem; background: rgba(255,255,255,0.05); border-top: 1px solid var(--c-border); align-items: center; justify-content: space-between;">
                         <div style="display: flex; align-items: center; gap: 10px; overflow: hidden;">
-                            <span style="font-size: 1.2rem;">í³Ž</span>
+                            <span style="font-size: 1.2rem;">ï¿½ï¿½ï¿½</span>
                             <span id="fileName" style="font-size: 0.9rem; color: var(--c-accent-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;"></span>
                         </div>
                         <button type="button" id="clearFileBtn" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 1.2rem;">&times;</button>

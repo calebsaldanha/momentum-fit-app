@@ -2,10 +2,10 @@
 
 <div class="dashboard-container">
     <% if (user.role === 'trainer' || user.role === 'superadmin') { %>
-        <%- include('../partials/admin-sidebar.ejs') %>
+        <%- include('../partials/sidebar.ejs', { currentPage: 'workouts' }) %>
     <% } else { %>
         <% if (typeof profile === 'undefined') { var profile = {}; } %>
-        <%- include('../partials/client-sidebar.ejs') %>
+        <%- include('../partials/sidebar.ejs', { currentPage: 'workouts' }) %>
     <% } %>
 
     <main class="dashboard-main">

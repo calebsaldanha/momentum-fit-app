@@ -1,6 +1,6 @@
 <%- include('../partials/header.ejs', { title: 'Meu Perfil', bodyClass: 'dashboard-body' }) %>
 <div class="dashboard-container">
-    <%- include('../partials/client-sidebar.ejs', { currentPage: 'profile' }) %>
+    <%- include('../partials/sidebar.ejs', { currentPage: 'profile' }) %>
     <main class="dashboard-main">
         
         <% if (user.status === 'pending_approval') { %>

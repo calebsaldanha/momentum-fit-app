@@ -1,13 +1,7 @@
 <%- include('../partials/header', { title: 'Notificações', bodyClass: 'dashboard-body' }) %>
 
 <div class="dashboard-container">
-    <% if (user.role === 'client') { %>
-        <%- include('../partials/client-sidebar.ejs', { currentPage: 'notifications' }) %>
-    <% } else if (user.role === 'superadmin') { %>
-        <%- include('../partials/superadmin-sidebar.ejs', { currentPage: 'notifications' }) %>
-    <% } else { %>
-        <%- include('../partials/admin-sidebar.ejs', { currentPage: 'notifications' }) %>
-    <% } %>
+    <%- include('../partials/sidebar.ejs', { currentPage: 'notifications' }) %>
 
     <main class="dashboard-main">
         <div class="section">
