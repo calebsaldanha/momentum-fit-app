@@ -5,10 +5,11 @@ const connectionString = process.env.POSTGRES_URL || process.env.DATABASE_URL;
 
 const pool = new Pool({
   connectionString,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  // Força SSL se existir connectionString (Neon exige SSL), independente do ambiente
+  ssl: connectionString ? { rejectUnauthorized: false } : false,
   max: 4,
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 30000, // 30s para evitar quedas na Vercel
+  connectionTimeoutMillis: 30000,
 });
 
 const initDb = async () => {
@@ -17,7 +18,6 @@ const initDb = async () => {
     client = await pool.connect();
     console.log('✅ DB Conectado com sucesso.');
     
-    // Cria tabelas essenciais se não existirem
     await client.query(`
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
