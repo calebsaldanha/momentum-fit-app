@@ -10,7 +10,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <link rel="stylesheet" href="/css/styles.css">
-    <% if (typeof currentPage !== 'undefined' && (currentPage === 'dashboard' || currentPage === 'admin')) { %>
+    <% 
+       // CORREÇÃO: Carrega o CSS do Dashboard se a classe do body indicar que é um painel
+       if ((typeof bodyClass !== 'undefined' && bodyClass.includes('dashboard')) || 
+           (typeof currentPage !== 'undefined' && (currentPage === 'dashboard' || currentPage === 'admin'))) { 
+    %>
         <link rel="stylesheet" href="/css/dashboard.css">
     <% } %>
 </head>
@@ -20,7 +24,6 @@
             <div class="header-content">
                 <div class="brand">
                     <a href="/">
-                        <%# Tenta usar a imagem, se falhar mostra texto %>
                         <img src="/images/momentum-fit-logo-completo.png" alt="Momentum Fit" class="header-logo-img" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
                         <span style="display:none; font-weight:bold; font-size:1.5rem; color:#2563eb;">Momentum Fit</span>
                     </a>
@@ -51,11 +54,12 @@
                         <a href="/notifications" class="btn-icon" title="Notificações">
                             <i class="fas fa-bell"></i>
                         </a>
+                        
                         <a href="/auth/logout" class="btn-logout" title="Sair" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                             <i class="fas fa-sign-out-alt"></i>
                         </a>
                         <form id="logout-form" action="/auth/logout" method="POST" style="display: none;">
-                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                            <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
                         </form>
                     <% } else { %>
                         <a href="/auth/login" class="btn btn-sm btn-outline">Entrar</a>
