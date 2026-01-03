@@ -144,8 +144,8 @@
                             <p style="text-align: center; color: #666; margin-top: 2rem;">Nenhuma mensagem ainda.</p>
                         <% } %>
                     </div>
-                    <form action="/chat/send" method="POST" class="chat-input-area" enctype="multipart/form-data">
-                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    
+                    <form action="/chat/send?_csrf=<%= csrfToken %>" method="POST" class="chat-input-area" enctype="multipart/form-data">
                         <input type="hidden" name="recipient_id" value="<%= activeChat.id %>">
                         
                         <label for="file-upload" style="cursor: pointer; color: #888; display: flex; align-items: center; padding: 0 10px;" title="Enviar arquivo, foto ou vídeo">
