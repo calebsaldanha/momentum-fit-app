@@ -112,7 +112,10 @@
                         <% chatUsers.forEach(u => { %>
                             <li class="user-item <%= typeof activeChat !== 'undefined' && activeChat && activeChat.id === u.id ? 'active' : '' %>" 
                                 onclick="selectUser('<%= u.id %>')">
-                                <img src="<%= u.profile_image || '/images/default-avatar.png' %>" class="user-avatar" onerror="this.src='/images/default-avatar.png'">
+                                <img src="<%= u.profile_image ? u.profile_image : 'https://ui-avatars.com/api/?name=' + encodeURIComponent(u.name) + '&background=random' %>" 
+                                     class="user-avatar" 
+                                     alt="<%= u.name %>"
+                                     onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=<%= encodeURIComponent(u.name) %>&background=random'">
                                 <div>
                                     <div style="font-weight: 600; color: white;"><%= u.name %></div>
                                     <small style="color: #888;">Clique para conversar</small>
@@ -134,17 +137,29 @@
                         <% if (messages && messages.length > 0) { %>
                             <% messages.forEach(msg => { %>
                                 <div class="message <%= msg.sender_id === user.id ? 'sent' : 'received' %>">
-                                    <%= msg.content %>
+                                    <% if (msg.message_type === 'image') { %>
+                                        <img src="<%= msg.content %>" style="max-width: 100%; border-radius: 8px;">
+                                    <% } else if (msg.message_type === 'video') { %>
+                                        <video src="<%= msg.content %>" controls style="max-width: 100%; border-radius: 8px;"></video>
+                                    <% } else { %>
+                                        <%= msg.content %>
+                                    <% } %>
                                 </div>
                             <% }); %>
                         <% } else { %>
                             <p style="text-align: center; color: #666; margin-top: 2rem;">Nenhuma mensagem ainda.</p>
                         <% } %>
                     </div>
-                    <form action="/chat/send" method="POST" class="input-area">
+                    <form action="/chat/send" method="POST" class="input-area" enctype="multipart/form-data">
                         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                         <input type="hidden" name="recipient_id" value="<%= activeChat.id %>">
-                        <input type="text" name="content" class="chat-input" placeholder="Digite sua mensagem..." required autocomplete="off">
+                        
+                        <label for="file-upload" style="cursor: pointer; color: #888; display: flex; align-items: center; padding: 0 10px;">
+                            <i class="fas fa-paperclip"></i>
+                        </label>
+                        <input id="file-upload" type="file" name="file" style="display: none;">
+
+                        <input type="text" name="content" class="chat-input" placeholder="Digite sua mensagem..." autocomplete="off">
                         <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i></button>
                     </form>
                 <% } else { %>
