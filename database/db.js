@@ -74,16 +74,16 @@ async function updateUser(id, updates) {
 // --- FUNÇÕES DE TREINO E GESTÃO ---
 
 async function getWorkoutsByUserId(userId) {
-    const res = await query("SELECT * FROM workouts WHERE user_id = $1 ORDER BY created_at DESC", [userId]);
+    const res = await query("SELECT * FROM workouts WHERE client_id = $1 OR user_id = $1 ORDER BY created_at DESC", [userId]);
     return res.rows;
 }
 
 async function createWorkout(workout) {
-    const { user_id, trainer_id, title, description, exercises } = workout;
+    const client_id = workout.client_id || workout.user_id; const { trainer_id, title, description, exercises } = workout;
     const exercisesJson = typeof exercises === 'string' ? exercises : JSON.stringify(exercises);
     
-    const sql = "INSERT INTO workouts (user_id, trainer_id, title, description, exercises) VALUES ($1, $2, $3, $4, $5) RETURNING *";
-    const res = await query(sql, [user_id, trainer_id, title, description, exercisesJson]);
+    const sql = "INSERT INTO workouts (client_id, trainer_id, title, description, exercises) VALUES ($1, $2, $3, $4, $5) RETURNING *";
+    const res = await query(sql, [client_id, trainer_id, title, description, exercisesJson]);
     return res.rows[0];
 }
 
