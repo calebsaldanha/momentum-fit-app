@@ -67,6 +67,8 @@ router.get('/clients/:id', requireAdmin, async (req, res) => {
 
         const workouts = await db.getWorkoutsByUserId(clientId);
         const stats = await db.getUserStats(clientId); 
+        const profileRes = await db.query("SELECT * FROM client_profiles WHERE user_id = $1", [clientId]);
+        const detailedProfile = profileRes.rows[0] || {};
 
         res.render('pages/client-details', {
             // Dados de Layout (Passados aqui para não precisar passar no include)
@@ -78,7 +80,7 @@ router.get('/clients/:id', requireAdmin, async (req, res) => {
             user: req.session.user,
             clientProfile: client, // Compatibilidade caso a view use este nome
             workouts: workouts || [],
-            stats: stats || {}
+            stats: stats || {}, detailedProfile: detailedProfile || {}
         });
     } catch (err) {
         console.error('Erro client details:', err);
