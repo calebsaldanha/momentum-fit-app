@@ -24,7 +24,6 @@ router.get('/dashboard', async (req, res) => {
             [req.session.user.id]
         );
         
-        // Verifica tabela checkins (tratamento de erro se não existir)
         let lastCheckin = null;
         try {
             const checkinRes = await pool.query("SELECT * FROM checkins WHERE user_id = $1 ORDER BY date DESC LIMIT 1", [req.session.user.id]);
@@ -44,7 +43,7 @@ router.get('/dashboard', async (req, res) => {
     }
 });
 
-// Perfil
+// Perfil - Visualização
 router.get('/profile', async (req, res) => {
     try {
         const profileRes = await pool.query("SELECT * FROM client_profiles WHERE user_id = $1", [req.session.user.id]);
@@ -52,7 +51,7 @@ router.get('/profile', async (req, res) => {
         
         let imc = '--';
         if (profile.weight && profile.height) {
-            const h = parseFloat(profile.height);
+            const h = parseFloat(profile.height.toString().replace(',', '.'));
             const w = parseFloat(profile.weight.toString().replace(',', '.'));
             if (h > 0) imc = (w / (h * h)).toFixed(1);
         }
@@ -69,33 +68,83 @@ router.get('/profile', async (req, res) => {
     }
 });
 
+// Perfil - Atualização Completa
 router.post('/profile', async (req, res) => {
-    const { name, phone, age, weight, height, main_goal } = req.body;
+    // Extrai TODOS os campos possíveis do formulário
+    const { 
+        name, phone, age, gender_identity, sex_assigned_at_birth, 
+        hormonal_treatment, hormonal_details,
+        weight, height, body_fat, 
+        measure_waist, measure_hip, measure_arm, measure_leg,
+        main_goal, secondary_goals, specific_event,
+        medical_conditions, medications, injuries, surgeries, allergies,
+        fitness_level, training_days, workout_preference, availability, equipment,
+        sleep_hours, diet_description, challenges
+    } = req.body;
+
     try {
+        // 1. Atualiza nome na tabela de usuários base
         await pool.query("UPDATE users SET name = $1 WHERE id = $2", [name, req.session.user.id]);
-        await pool.query(`
-            INSERT INTO client_profiles (user_id, phone, age, weight, height, main_goal)
-            VALUES ($1, $2, $3, $4, $5, $6)
-            ON CONFLICT (user_id) DO UPDATE SET
-            phone = EXCLUDED.phone, age = EXCLUDED.age, weight = EXCLUDED.weight, 
-            height = EXCLUDED.height, main_goal = EXCLUDED.main_goal`,
-            [req.session.user.id, phone, age, weight, height, main_goal]
-        );
         
+        // 2. Atualiza ou Cria o perfil com TODOS os dados
+        const query = `
+            INSERT INTO client_profiles (
+                user_id, phone, age, gender_identity, sex_assigned_at_birth,
+                hormonal_treatment, hormonal_details,
+                weight, height, body_fat,
+                measure_waist, measure_hip, measure_arm, measure_leg,
+                main_goal, secondary_goals, specific_event,
+                medical_conditions, medications, injuries, surgeries, allergies,
+                fitness_level, training_days, workout_preference, availability, equipment,
+                sleep_hours, diet_description, challenges
+            )
+            VALUES (
+                $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, 
+                $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30
+            )
+            ON CONFLICT (user_id) DO UPDATE SET
+                phone = EXCLUDED.phone, age = EXCLUDED.age, 
+                gender_identity = EXCLUDED.gender_identity, sex_assigned_at_birth = EXCLUDED.sex_assigned_at_birth,
+                hormonal_treatment = EXCLUDED.hormonal_treatment, hormonal_details = EXCLUDED.hormonal_details,
+                weight = EXCLUDED.weight, height = EXCLUDED.height, body_fat = EXCLUDED.body_fat,
+                measure_waist = EXCLUDED.measure_waist, measure_hip = EXCLUDED.measure_hip, 
+                measure_arm = EXCLUDED.measure_arm, measure_leg = EXCLUDED.measure_leg,
+                main_goal = EXCLUDED.main_goal, secondary_goals = EXCLUDED.secondary_goals, specific_event = EXCLUDED.specific_event,
+                medical_conditions = EXCLUDED.medical_conditions, medications = EXCLUDED.medications, 
+                injuries = EXCLUDED.injuries, surgeries = EXCLUDED.surgeries, allergies = EXCLUDED.allergies,
+                fitness_level = EXCLUDED.fitness_level, training_days = EXCLUDED.training_days, 
+                workout_preference = EXCLUDED.workout_preference, availability = EXCLUDED.availability, equipment = EXCLUDED.equipment,
+                sleep_hours = EXCLUDED.sleep_hours, diet_description = EXCLUDED.diet_description, challenges = EXCLUDED.challenges
+        `;
+
+        const values = [
+            req.session.user.id, phone, age, gender_identity, sex_assigned_at_birth,
+            hormonal_treatment, hormonal_details,
+            weight, height, body_fat,
+            measure_waist, measure_hip, measure_arm, measure_leg,
+            main_goal, secondary_goals, specific_event,
+            medical_conditions, medications, injuries, surgeries, allergies,
+            fitness_level, training_days, workout_preference, availability, equipment,
+            sleep_hours, diet_description, challenges
+        ];
+
+        await pool.query(query, values);
+        
+        // 3. Registra histórico de peso se houver alteração
         if(weight) {
              try { await pool.query("INSERT INTO checkins (user_id, weight) VALUES ($1, $2)", [req.session.user.id, weight]); } catch(e){}
         }
 
-        req.flash('success', 'Perfil atualizado!');
+        req.flash('success', 'Perfil atualizado com sucesso!');
         res.redirect('/client/profile');
     } catch (err) {
         console.error(err);
-        req.flash('error', 'Erro ao atualizar.');
+        req.flash('error', 'Erro ao atualizar perfil.');
         res.redirect('/client/profile');
     }
 });
 
-// Meus Treinos (Lista) - CORREÇÃO: Envia profile para sidebar
+// Meus Treinos
 router.get('/workouts', async (req, res) => {
     try {
         const profileRes = await pool.query("SELECT * FROM client_profiles WHERE user_id = $1", [req.session.user.id]);
@@ -113,7 +162,7 @@ router.get('/workouts', async (req, res) => {
         res.render('pages/client-workouts', {
             title: 'Meus Treinos',
             workouts: workouts.rows,
-            profile: profile, // Importante para sidebar
+            profile: profile, 
             currentPage: 'workouts'
         });
     } catch (err) { 
@@ -122,22 +171,54 @@ router.get('/workouts', async (req, res) => {
     }
 });
 
-// Formulário Inicial
+// Formulário Inicial (GET)
 router.get('/initial-form', (req, res) => {
     res.render('pages/initial-form', { title: 'Avaliação', profile: {}, currentPage: 'profile' });
 });
 
+// Formulário Inicial (POST) - Agora salva TUDO
 router.post('/initial-form', async (req, res) => {
-     const { weight, height, main_goal } = req.body;
+     // Reutiliza a mesma lógica de campos do Profile, mas redireciona para dashboard
+     const body = req.body;
+     const userId = req.session.user.id;
+
+     // Lista de campos (mesma do profile, simplificada para query)
+     const fields = [
+        'phone', 'age', 'gender_identity', 'sex_assigned_at_birth', 
+        'hormonal_treatment', 'hormonal_details',
+        'weight', 'height', 'body_fat', 
+        'measure_waist', 'measure_hip', 'measure_arm', 'measure_leg',
+        'main_goal', 'secondary_goals', 'specific_event',
+        'medical_conditions', 'medications', 'injuries', 'surgeries', 'allergies',
+        'fitness_level', 'training_days', 'workout_preference', 'availability', 'equipment',
+        'sleep_hours', 'diet_description', 'challenges'
+     ];
+
      try {
-         await pool.query(
-            "INSERT INTO client_profiles (user_id, weight, height, main_goal) VALUES ($1, $2, $3, $4) ON CONFLICT (user_id) DO NOTHING",
-            [req.session.user.id, weight, height, main_goal]
-         );
-         try { await pool.query("INSERT INTO checkins (user_id, weight) VALUES ($1, $2)", [req.session.user.id, weight]); } catch(e){}
-         await pool.query("UPDATE users SET status = 'pending_approval' WHERE id = $1", [req.session.user.id]);
+         // Constrói query dinâmica ou fixa
+         const cols = ['user_id', ...fields].join(', ');
+         const placeholders = fields.map((_, i) => `$${i + 2}`).join(', ');
+         const values = [userId, ...fields.map(f => body[f])];
+
+         const query = `
+            INSERT INTO client_profiles (${cols}) 
+            VALUES ($1, ${placeholders}) 
+            ON CONFLICT (user_id) DO NOTHING
+         `;
+
+         await pool.query(query, values);
+
+         if(body.weight) {
+            try { await pool.query("INSERT INTO checkins (user_id, weight) VALUES ($1, $2)", [userId, body.weight]); } catch(e){}
+         }
+         
+         await pool.query("UPDATE users SET status = 'pending_approval' WHERE id = $1", [userId]);
          res.redirect('/client/dashboard');
-     } catch(e) { console.error(e); res.redirect('/client/initial-form'); }
+     } catch(e) { 
+         console.error(e); 
+         req.flash('error', 'Erro ao salvar formulário.');
+         res.redirect('/client/initial-form'); 
+     }
 });
 
 module.exports = router;
