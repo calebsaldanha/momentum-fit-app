@@ -108,7 +108,7 @@
                     <h3 style="margin:0; font-size:1.1rem;">Conversas</h3>
                 </div>
                 <ul class="user-list">
-                    <% if (chatUsers && users.length > 0) { %>
+                    <% if (chatUsers chatUsers && users.lengthchatUsers && users.length chatUsers.length > 0) { %>
                         <% chatUsers.forEach(u => { %>
                             <li class="user-item <%= typeof activeChat !== 'undefined' && activeChat && activeChat.id === u.id ? 'active' : '' %>" 
                                 onclick="selectUser('<%= u.id %>')">

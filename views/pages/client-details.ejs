@@ -5,7 +5,7 @@
 
     <main class="main-content">
         <div class="section-header">
-            <h1><i class="fas fa-user"></i> Detalhes do Aluno: <%= clientData.name %></h1>
+            <h1><i class="fas fa-user"></i> Detalhes: <%= clientData ? clientData.name : 'Aluno' %></h1>
             <a href="javascript:history.back()" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Voltar</a>
         </div>
 
@@ -71,76 +71,45 @@
 
         <div class="content-card" style="margin-top: 2rem;">
             <h3 style="color: white; border-bottom: 1px solid #333; padding-bottom: 1rem; margin-bottom: 1rem;">
-                <i class="fas fa-file-medical-alt"></i> Ficha de Anamnese e Perfil Completo
+                <i class="fas fa-file-medical-alt"></i> Ficha de Anamnese
             </h3>
-            
             <% if (typeof detailedProfile !== 'undefined' && detailedProfile && detailedProfile.user_id) { %>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
-                    
                     <div>
-                        <h4 style="color: var(--c-accent-primary); margin-bottom: 0.5rem; font-size: 1rem;">Dados Pessoais</h4>
-                        <p><strong>Idade:</strong> <%= detailedProfile.age || '--' %> anos</p>
+                        <h4 style="color: var(--c-accent-primary);">Dados Pessoais</h4>
+                        <p><strong>Idade:</strong> <%= detailedProfile.age || '--' %></p>
                         <p><strong>Telefone:</strong> <%= detailedProfile.phone || '--' %></p>
                         <p><strong>Gênero:</strong> <%= detailedProfile.gender_identity || '--' %></p>
-                        <p><strong>Profissão:</strong> <%= detailedProfile.occupation || '--' %></p>
                     </div>
-
                     <div>
-                        <h4 style="color: var(--c-accent-primary); margin-bottom: 0.5rem; font-size: 1rem;">Corpo e Medidas</h4>
+                        <h4 style="color: var(--c-accent-primary);">Medidas</h4>
                         <p><strong>Peso:</strong> <%= detailedProfile.weight || '--' %> kg</p>
                         <p><strong>Altura:</strong> <%= detailedProfile.height || '--' %> m</p>
-                        <p><strong>Gordura Corporal:</strong> <%= detailedProfile.body_fat || '--' %> %</p>
                     </div>
-
                     <div>
-                        <h4 style="color: var(--c-accent-primary); margin-bottom: 0.5rem; font-size: 1rem;">Saúde</h4>
-                        <p><strong>Condições Médicas:</strong> <%= detailedProfile.medical_conditions || 'Nenhuma' %></p>
+                        <h4 style="color: var(--c-accent-primary);">Saúde</h4>
+                        <p><strong>Condições:</strong> <%= detailedProfile.medical_conditions || 'Nenhuma' %></p>
                         <p><strong>Lesões:</strong> <%= detailedProfile.injuries || 'Nenhuma' %></p>
-                        <p><strong>Medicamentos:</strong> <%= detailedProfile.medications || 'Nenhum' %></p>
-                        <p><strong>Fumante:</strong> <%= detailedProfile.smoking === 'true' ? 'Sim' : 'Não' %></p>
-                        <p><strong>Álcool:</strong> <%= detailedProfile.alcohol || 'Não informado' %></p>
                     </div>
-
                     <div>
-                        <h4 style="color: var(--c-accent-primary); margin-bottom: 0.5rem; font-size: 1rem;">Objetivos</h4>
+                        <h4 style="color: var(--c-accent-primary);">Objetivos</h4>
                         <p><strong>Principal:</strong> <%= detailedProfile.main_goal || '--' %></p>
-                        <p><strong>Prazo/Evento:</strong> <%= detailedProfile.specific_event || '--' %></p>
-                        <p><strong>Motivação:</strong> <%= detailedProfile.motivation_level || '--' %>/10</p>
-                    </div>
-
-                    <div style="grid-column: 1 / -1; border-top: 1px solid #333; padding-top: 1rem;">
-                        <h4 style="color: var(--c-accent-primary); margin-bottom: 0.5rem; font-size: 1rem;">Histórico e Preferências de Treino</h4>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                            <p><strong>Experiência:</strong> <%= detailedProfile.training_experience || '--' %></p>
-                            <p><strong>Dias Disponíveis:</strong> <%= detailedProfile.training_days_available || '--' %></p>
-                            <p><strong>Horário Preferido:</strong> <%= detailedProfile.training_time || '--' %></p>
-                            <p><strong>Local/Equipamentos:</strong> <%= detailedProfile.equipment_available || '--' %></p>
-                        </div>
-                    </div>
-
-                    <div style="grid-column: 1 / -1; border-top: 1px solid #333; padding-top: 1rem;">
-                        <h4 style="color: var(--c-accent-primary); margin-bottom: 0.5rem; font-size: 1rem;">Nutrição e Rotina</h4>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                            <p><strong>Refeições/dia:</strong> <%= detailedProfile.meal_frequency || '--' %></p>
-                            <p><strong>Água (litros):</strong> <%= detailedProfile.water_intake || '--' %></p>
-                            <p><strong>Horas de Sono:</strong> <%= detailedProfile.sleep_hours || '--' %></p>
-                            <p><strong>Nível de Estresse:</strong> <%= detailedProfile.stress_level || '--' %></p>
-                        </div>
+                        <p><strong>Prazo:</strong> <%= detailedProfile.specific_event || '--' %></p>
                     </div>
                 </div>
             <% } else { %>
-                <p style="color: #888; font-style: italic; padding: 1rem;">
-                    Nenhuma ficha de anamnese foi preenchida para este aluno.
-                </p>
+                <p style="color: #888;">Nenhuma ficha preenchida.</p>
             <% } %>
         </div>
 
         <div class="content-card" style="margin-top: 2rem;">
             <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                 <h2>Treinos Atribuídos</h2>
+                <% if (clientData && clientData.id) { %>
                 <a href="/workouts/create?client_id=<%= clientData.id %>" class="btn btn-primary">
                     <i class="fas fa-plus"></i> Novo Treino
                 </a>
+                <% } %>
             </div>
 
             <% if (workouts && workouts.length > 0) { %>
@@ -157,9 +126,9 @@
                         <tbody>
                             <% workouts.forEach(workout => { %>
                                 <tr>
-                                    <td><%= workout.title %></td>
+                                    <td><%= workout.title || workout.name || 'Sem título' %></td>
                                     <td><%= workout.day_of_week || '--' %></td>
-                                    <td><%= workout.exercises ? workout.exercises.length : 0 %></td>
+                                    <td><%= workout.exercises ? workout.exercises.length : (workout.exercise_count || 0) %></td>
                                     <td>
                                         <div class="action-buttons">
                                             <a href="/workouts/edit/<%= workout.id %>" class="btn-icon" title="Editar"><i class="fas fa-edit"></i></a>
@@ -178,7 +147,6 @@
                 <p class="empty-state">Nenhum treino atribuído ainda.</p>
             <% } %>
         </div>
-
     </main>
 </div>
 <%- include('../partials/footer') %>

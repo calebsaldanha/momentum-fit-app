@@ -92,10 +92,27 @@ router.post('/delete/:id', requireTrainerAuth, async (req, res) => {
 });
 
 // 4. Editar (GET)
-router.get('/edit/:id', requireTrainerAuth, async (req, res) => {
+router.get("/edit/:id", requireTrainerAuth, async (req, res) => {
     try {
         const wRes = await pool.query("SELECT * FROM workouts WHERE id = $1", [req.params.id]);
-        if (wRes.rows.length === 0) return res.status(404).render('pages/error', { message: 'Não encontrado.' });
+        if (wRes.rows.length === 0) return res.status(404).render("pages/error", { message: "Não encontrado." });
+        
+        const exRes = await pool.query("SELECT * FROM workout_exercises WHERE workout_id = $1 ORDER BY order_index", [req.params.id]);
+        const library = await pool.query("SELECT * FROM exercise_library ORDER BY name ASC");
+
+        res.render("pages/edit-workout", {
+            title: "Editar Treino",
+            workout: wRes.rows[0],
+            exercises: exRes.rows,
+            exerciseLibrary: library.rows,
+            user: req.session.user,
+            currentPage: "create-workout"
+        });
+    } catch (err) { 
+        console.error(err);
+        res.status(500).render("pages/error", { message: "Erro ao carregar edição." }); 
+    }
+});
         
         const exRes = await pool.query("SELECT * FROM workout_exercises WHERE workout_id = $1 ORDER BY order_index", [req.params.id]);
         
