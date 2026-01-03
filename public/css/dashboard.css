@@ -74,3 +74,15 @@ body.dashboard-body {
     .dashboard-container { grid-template-columns: 1fr; padding: 1rem; padding-top: 90px; }
     .dashboard-sidebar { display: none; }
 }
+
+/* Ajuste do Chat - Scroll e Tamanho */
+.chat-container .messages {
+    height: 60vh;
+    max-height: 600px;
+    overflow-y: auto;
+    background: #1a1a1a;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid #333;
+}

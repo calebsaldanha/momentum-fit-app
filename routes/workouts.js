@@ -172,7 +172,8 @@ router.get('/:id', async (req, res) => {
 
         res.render('pages/workout-details', {
             title: workoutRes.rows[0].title,
-            workout: workoutRes.rows[0],
+            workout: workout,
+            exercises: exercisesRes.rowsRes.rows[0],
             exercises: exercisesRes.rows,
             user: req.session.user,
             profile: profile, // CRÍTICO: Envia o perfil para a sidebar

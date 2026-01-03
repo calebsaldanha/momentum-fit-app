@@ -78,3 +78,46 @@ router.post('/users/:id/delete', async (req, res) => {
 });
 
 module.exports = router;
+
+// --- Rotas de Ação de Usuário (Injetadas para suporte a detalhes) ---
+router.post('/assign-trainer', async (req, res) => {
+    if(req.session.user.role !== 'superadmin') return res.status(403).send('Acesso negado');
+    const { user_id, trainer_id } = req.body;
+    try {
+        const tid = trainer_id === '' ? null : trainer_id;
+        await pool.query("UPDATE users SET trainer_id = $1 WHERE id = $2", [tid, user_id]);
+        req.flash('success_msg', 'Personal atualizado com sucesso.');
+        res.redirect('/admin/clients/' + user_id);
+    } catch(err) {
+        console.error(err);
+        res.redirect('/admin/clients/' + user_id);
+    }
+});
+
+router.post('/toggle-status', async (req, res) => {
+    if(req.session.user.role !== 'superadmin') return res.status(403).send('Acesso negado');
+    const { user_id, status } = req.body;
+    try {
+        await pool.query("UPDATE users SET status = $1 WHERE id = $2", [status, user_id]);
+        req.flash('success_msg', 'Status atualizado.');
+        res.redirect('/admin/clients/' + user_id);
+    } catch(err) {
+        console.error(err);
+        res.redirect('/admin/clients/' + user_id);
+    }
+});
+
+router.post('/delete-user', async (req, res) => {
+    if(req.session.user.role !== 'superadmin') return res.status(403).send('Acesso negado');
+    const { user_id } = req.body;
+    try {
+        // Excluir dados relacionados (Cascade geralmente resolve, mas garantindo)
+        await pool.query("DELETE FROM users WHERE id = $1", [user_id]);
+        req.flash('success_msg', 'Usuário excluído.');
+        res.redirect('/superadmin/manage');
+    } catch(err) {
+        console.error(err);
+        req.flash('error_msg', 'Erro ao excluir usuário.');
+        res.redirect('/admin/clients/' + user_id);
+    }
+});

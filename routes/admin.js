@@ -52,6 +52,7 @@ router.get('/clients', requireAdmin, async (req, res) => {
 // Detalhes do Aluno (CORRIGIDO)
 router.get('/clients/:id', requireAdmin, async (req, res) => {
     try {
+    try {
         const trainerId = req.session.user.id;
         const clientId = req.params.id;
 
@@ -70,17 +71,22 @@ router.get('/clients/:id', requireAdmin, async (req, res) => {
         const profileRes = await db.query("SELECT * FROM client_profiles WHERE user_id = $1", [clientId]);
         const detailedProfile = profileRes.rows[0] || {};
 
-        res.render('pages/client-details', {
-            // Dados de Layout (Passados aqui para não precisar passar no include)
-            title: 'Detalhes do Aluno',
-            bodyClass: 'dashboard-body',
-            currentPage: 'clients',
-            
-            // Dados da Página
+        const isSuperAdmin = req.session.user.role === "superadmin";
+        const pageContext = isSuperAdmin ? "superadmin_users" : "clients";
+        let trainersList = [];
+        if (isSuperAdmin) { trainersList = await db.getAllTrainers(); }
+
+        res.render("pages/client-details", {
+            title: "Detalhes do Aluno",
+            bodyClass: "dashboard-body",
+            currentPage: pageContext,
             user: req.session.user,
-            clientProfile: client, // Compatibilidade caso a view use este nome
+            client: client,
+            clientProfile: client,
             workouts: workouts || [],
-            stats: stats || {}, detailedProfile: detailedProfile || {}
+            stats: stats || {},
+            detailedProfile: detailedProfile || {},
+            trainers: trainersList
         });
     } catch (err) {
         console.error('Erro client details:', err);
