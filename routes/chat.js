@@ -46,7 +46,7 @@ router.get('/', async (req, res) => {
         const users = result.rows.map(u => {
             if (role === 'superadmin' && u.role) {
                 const roleName = u.role === 'trainer' ? 'Personal' : (u.role === 'client' ? 'Aluno' : 'Admin');
-                return { ...u, name: \`\${u.name} (\${roleName})\` };
+                return { ...u, name: `${u.name} (${roleName})` };
             }
             return u;
         });
@@ -62,11 +62,11 @@ router.get('/', async (req, res) => {
                 activeChat = userCheck.rows[0];
                 
                 // Busca mensagens
-                const msgsRes = await pool.query(\`
+                const msgsRes = await pool.query(`
                     SELECT id, sender_id, content, message_type, created_at 
                     FROM messages 
                     WHERE (sender_id = $1 AND receiver_id = $2) OR (sender_id = $2 AND receiver_id = $1) 
-                    ORDER BY created_at ASC\`, 
+                    ORDER BY created_at ASC`, 
                     [id, selectedUserId]
                 );
                 messages = msgsRes.rows;
@@ -95,11 +95,11 @@ router.get('/messages/:contactId', async (req, res) => {
         const { id: userId } = req.session.user;
         const contactId = req.params.contactId;
 
-        const result = await pool.query(\`
+        const result = await pool.query(`
             SELECT id, sender_id, content, message_type, created_at 
             FROM messages 
             WHERE (sender_id = $1 AND receiver_id = $2) OR (sender_id = $2 AND receiver_id = $1) 
-            ORDER BY created_at ASC\`, 
+            ORDER BY created_at ASC`, 
             [userId, contactId]
         );
 
@@ -120,7 +120,7 @@ router.post('/send', requireAuth, upload.single('file'), async (req, res) => {
         let messageType = 'text';
         
         if (req.file) {
-            const filename = \`\${Date.now()}-\${req.file.originalname}\`;
+            const filename = `${Date.now()}-${req.file.originalname}`;
             const blob = await put(filename, req.file.buffer, { access: 'public', contentType: req.file.mimetype });
             messageContent = blob.url;
             messageType = req.file.mimetype.startsWith('image/') ? 'image' : 'video';
