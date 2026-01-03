@@ -49,9 +49,8 @@ router.get('/clients', requireAdmin, async (req, res) => {
     }
 });
 
-// Detalhes do Aluno (CORRIGIDO)
+// Detalhes do Aluno
 router.get('/clients/:id', requireAdmin, async (req, res) => {
-    try {
     try {
         const trainerId = req.session.user.id;
         const clientId = req.params.id;
@@ -62,30 +61,36 @@ router.get('/clients/:id', requireAdmin, async (req, res) => {
             return res.status(404).render('pages/error', { message: 'Aluno não encontrado.', user: req.session.user });
         }
         
+        // Verifica permissão (apenas o treinador do aluno ou superadmin)
         if (client.trainer_id !== trainerId && req.session.user.role !== 'superadmin') {
              return res.status(403).render('pages/error', { message: 'Sem permissão.', user: req.session.user });
         }
 
         const workouts = await db.getWorkoutsByUserId(clientId);
         const stats = await db.getUserStats(clientId); 
+        
+        // Busca perfil detalhado (Anamnese)
         const profileRes = await db.query("SELECT * FROM client_profiles WHERE user_id = $1", [clientId]);
         const detailedProfile = profileRes.rows[0] || {};
 
-        const isSuperAdmin = req.session.user.role === "superadmin";
-        const pageContext = isSuperAdmin ? "superadmin_users" : "clients";
+        // Lógica para Superadmin (contexto de menu e lista de treinadores)
+        const isSuperAdmin = req.session.user.role === 'superadmin';
+        const pageContext = isSuperAdmin ? 'superadmin_users' : 'clients';
+        
         let trainersList = [];
-        if (isSuperAdmin) { trainersList = await db.getAllTrainers(); }
+        if (isSuperAdmin) { 
+            trainersList = await db.getAllTrainers(); 
+        }
 
-        res.render("pages/client-details", {
-            title: "Detalhes do Aluno",
-            bodyClass: "dashboard-body",
+        res.render('pages/client-details', {
+            title: 'Detalhes do Aluno',
+            bodyClass: 'dashboard-body',
             currentPage: pageContext,
             user: req.session.user,
-            client: client,
-            clientProfile: client,
+            clientProfile: client, // Passado como clientProfile para compatibilidade com o EJS
             workouts: workouts || [],
             stats: stats || {},
-            detailedProfile: detailedProfile || {},
+            detailedProfile: detailedProfile,
             trainers: trainersList
         });
     } catch (err) {
@@ -94,6 +99,7 @@ router.get('/clients/:id', requireAdmin, async (req, res) => {
     }
 });
 
+// Lista de Treinadores (Superadmin)
 router.get('/trainers', requireAdmin, async (req, res) => {
     if(req.session.user.role !== 'superadmin') return res.redirect('/admin/dashboard');
     try {
