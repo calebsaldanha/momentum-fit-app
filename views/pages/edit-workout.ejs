@@ -1,203 +1,239 @@
 <%- include('../partials/header') %>
 
-<style>
-    .workout-builder {
-        display: grid;
-        grid-template-columns: 1fr 350px;
-        gap: 2rem;
-        height: calc(100vh - 120px);
-    }
-    .builder-main { overflow-y: auto; padding-right: 1rem; }
-    .builder-sidebar {
-        background: #1a1a1a;
-        border-left: 1px solid #333;
-        padding: 1.5rem;
-        border-radius: 8px;
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        overflow: hidden;
-    }
-    .exercise-library-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-        gap: 1rem;
-        overflow-y: auto;
-        padding-right: 5px;
-        flex-grow: 1;
-    }
-    .library-item {
-        background: #222;
-        border: 1px solid #333;
-        border-radius: 8px;
-        overflow: hidden;
-        cursor: pointer;
-        transition: transform 0.2s;
-    }
-    .library-item:hover { transform: translateY(-2px); border-color: var(--c-accent-primary); }
-    .library-item img {
-        width: 100%;
-        height: 100px;
-        object-fit: cover;
-        background: #000;
-    }
-    .library-item .info { padding: 0.5rem; }
-    .library-item .name { font-size: 0.85rem; font-weight: 600; color: #fff; }
-    .library-item .category { font-size: 0.7rem; color: #888; }
-    
-    .exercise-card {
-        background: #1a1a1a;
-        border: 1px solid #333;
-        border-radius: 8px;
-        padding: 1rem;
-        margin-bottom: 1rem;
-        display: grid;
-        grid-template-columns: auto 1fr auto;
-        gap: 1rem;
-        align-items: center;
-    }
-    .exercise-card img { width: 60px; height: 60px; object-fit: cover; border-radius: 4px; }
-</style>
-
 <div class="dashboard-container">
     <%- include('../partials/sidebar') %>
 
     <main class="main-content">
-        <form id="workoutForm" action="/workouts/edit/<%= workout.id %>" method="POST" class="workout-builder">
-            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-            <input type="hidden" id="exercisesInput" name="exercises" value='<%= JSON.stringify(exercises || []) %>'>
+        <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <div>
+                <h2 style="margin-bottom: 0.5rem;"><%= title %></h2>
+                <p style="color: #888; margin: 0;">Edite os detalhes e exercícios do treino.</p>
+            </div>
+            <div style="display: gap: 10px;">
+                <a href="/workouts/<%= workout.id %>" class="btn btn-secondary">Cancelar</a>
+                <button type="button" class="btn btn-primary" onclick="saveWorkout()">
+                    <i class="fas fa-save"></i> Salvar Alterações
+                </button>
+            </div>
+        </div>
 
-            <div class="builder-main">
-                <div class="section-header">
-                    <h1>Editar Treino</h1>
-                    <div class="actions">
-                        <a href="javascript:history.back()" class="btn btn-secondary">Cancelar</a>
-                        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
-                    </div>
-                </div>
-
-                <div class="content-card">
-                    <div class="form-group">
-                        <label>Título do Treino</label>
-                        <input type="text" name="title" class="form-control" value="<%= workout.title %>" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Descrição</label>
-                        <textarea name="description" class="form-control" rows="2"><%= workout.description %></textarea>
-                    </div>
-                </div>
-
-                <h3 style="margin-top: 1.5rem;">Exercícios Selecionados</h3>
-                <div id="selectedExercisesList" class="selected-exercises"></div>
+        <div class="card" style="margin-bottom: 2rem; padding: 2rem;">
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; color: #ccc;">Título do Treino</label>
+                <input type="text" id="workoutTitle" class="form-control" value="<%= workout.title %>" placeholder="Ex: Treino A - Peito e Tríceps">
             </div>
 
-            <aside class="builder-sidebar">
-                <h3 style="color: var(--c-accent-primary); margin-bottom: 1rem;">Biblioteca</h3>
-                <input type="text" id="searchBox" placeholder="Buscar..." class="form-control" style="margin-bottom: 1rem;" onkeyup="filterLibrary()">
-                
-                <div class="exercise-library-grid">
-                    <% if(typeof exerciseLibrary !== "undefined") { %>
-                        <% exerciseLibrary.forEach(ex => { %>
-                            <div class="library-item" onclick="addExercise('<%= ex.id %>', '<%= ex.name %>', '<%= ex.image_url %>')" data-name="<%= ex.name.toLowerCase() %>">
-                                <img src="<%= ex.image_url || '/images/default-exercise.png' %>" onerror="this.src='/images/default-exercise.png'">
-                                <div class="info">
-                                    <div class="name"><%= ex.name %></div>
-                                    <div class="category"><%= ex.category %></div>
-                                </div>
-                            </div>
-                        <% }); %>
-                    <% } %>
+            <div class="form-group">
+                <label style="display: block; margin-bottom: 0.5rem; color: #ccc;">Descrição / Foco</label>
+                <textarea id="workoutDescription" class="form-control" rows="3" placeholder="Instruções gerais..."><%= workout.description %></textarea>
+            </div>
+        </div>
+
+        <div class="exercises-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h3 style="margin: 0; font-size: 1.2rem;">Exercícios</h3>
+                <button type="button" class="btn btn-outline" onclick="openLibraryModal()">
+                    <i class="fas fa-plus"></i> Adicionar Exercício
+                </button>
+            </div>
+
+            <div id="exerciseList" style="display: flex; flex-direction: column; gap: 1rem;">
                 </div>
-            </aside>
-        </form>
+        </div>
     </main>
 </div>
 
-<script>
-    let selectedExercises = <%- JSON.stringify(exercises || []) %>;
-    
-    function renderExercises() {
-        const list = document.getElementById('selectedExercisesList');
-        const input = document.getElementById('exercisesInput');
-        list.innerHTML = '';
+<div id="libraryModal" class="modal-overlay" style="display: none;">
+    <div class="modal-content" style="max-width: 800px; max-height: 80vh; display: flex; flex-direction: column;">
+        <div class="modal-header" style="padding: 1rem; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="margin: 0;">Biblioteca de Exercícios</h3>
+            <button type="button" onclick="closeLibraryModal()" style="background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer;">&times;</button>
+        </div>
         
-        selectedExercises.forEach((ex, index) => {
-            ex.order_index = index;
-            const img = ex.image_url || '/images/default-exercise.png';
-            
-            list.innerHTML += `
-                <div class="exercise-card">
-                    <img src="${img}" onerror="this.src='/images/default-exercise.png'">
-                    <div>
-                        <h4 style="color:white; margin:0 0 5px 0;">${ex.name}</h4>
-                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                            <input type="text" placeholder="Séries (ex: 3)" value="${ex.sets || ''}" class="form-control" onchange="updateEx(${index}, 'sets', this.value)">
-                            <input type="text" placeholder="Reps (ex: 12)" value="${ex.reps || ''}" class="form-control" onchange="updateEx(${index}, 'reps', this.value)">
-                        </div>
-                        <input type="text" placeholder="Obs / Técnica" value="${ex.notes || ''}" class="form-control" style="margin-top:5px;" onchange="updateEx(${index}, 'notes', this.value)">
+        <div style="padding: 1rem;">
+            <input type="text" id="searchExercise" class="form-control" placeholder="Buscar exercício..." onkeyup="filterLibrary()">
+        </div>
+
+        <div class="modal-body" style="flex: 1; overflow-y: auto; padding: 1rem;">
+            <div class="library-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem;">
+                <% exerciseLibrary.forEach(ex => { %>
+                    <div class="library-item card" onclick='addExerciseToWorkout(<%- JSON.stringify(ex) %>)' style="cursor: pointer; transition: transform 0.2s;">
+                        <% if(ex.image_url) { %>
+                            <img src="<%= ex.image_url %>" alt="<%= ex.name %>" style="width: 100%; height: 120px; object-fit: cover; border-radius: 4px; margin-bottom: 0.5rem;">
+                        <% } else { %>
+                            <div style="width: 100%; height: 120px; background: #333; display: flex; align-items: center; justify-content: center; border-radius: 4px; margin-bottom: 0.5rem;">
+                                <i class="fas fa-dumbbell" style="font-size: 2rem; color: #555;"></i>
+                            </div>
+                        <% } %>
+                        <h4 style="margin: 0 0 0.5rem 0; font-size: 1rem;"><%= ex.name %></h4>
+                        <small style="color: #888;"><%= ex.category || 'Geral' %></small>
                     </div>
-                    <button type="button" class="btn-icon delete" onclick="removeEx(${index})"><i class="fas fa-times"></i></button>
+                <% }); %>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .modal-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.8); z-index: 1000;
+        display: flex; justify-content: center; align-items: center;
+    }
+    .modal-content {
+        background: #1a1a1a; border-radius: 8px; width: 90%;
+        border: 1px solid #333;
+    }
+    .exercise-card {
+        background: #222; border: 1px solid #333; border-radius: 8px; padding: 1rem;
+        display: grid; grid-template-columns: auto 1fr auto; gap: 1rem; align-items: start;
+    }
+    .exercise-inputs {
+        display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;
+        margin-top: 1rem;
+    }
+    .form-control {
+        background: #111; border: 1px solid #333; color: white;
+        padding: 0.8rem; border-radius: 4px; width: 100%;
+    }
+    .btn-outline {
+        background: transparent; border: 1px solid var(--c-accent-primary); color: var(--c-accent-primary);
+        padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer;
+    }
+    .btn-outline:hover { background: var(--c-accent-primary); color: #000; }
+</style>
+
+<script>
+    // Inicializa com os exercícios vindos do backend
+    let currentExercises = <%- JSON.stringify(exercises || []) %>;
+    const workoutId = '<%= workout.id %>';
+
+    // Ao carregar a página, renderiza a lista
+    document.addEventListener('DOMContentLoaded', () => {
+        renderExercises();
+    });
+
+    function renderExercises() {
+        const container = document.getElementById('exerciseList');
+        container.innerHTML = '';
+
+        currentExercises.forEach((ex, index) => {
+            const div = document.createElement('div');
+            div.className = 'exercise-card';
+            div.innerHTML = `
+                <div style="color: #888; font-weight: bold; padding-top: 0.5rem;">#${index + 1}</div>
+                <div style="width: 100%;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <h4 style="margin: 0; color: var(--c-accent-primary);">${ex.name}</h4>
+                    </div>
+                    
+                    <div class="exercise-inputs">
+                        <div>
+                            <label style="font-size: 0.8rem; color: #888;">Séries</label>
+                            <input type="text" class="form-control" value="${ex.sets || ''}" 
+                                onchange="updateExercise(${index}, 'sets', this.value)" placeholder="Ex: 4">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.8rem; color: #888;">Repetições</label>
+                            <input type="text" class="form-control" value="${ex.reps || ''}" 
+                                onchange="updateExercise(${index}, 'reps', this.value)" placeholder="Ex: 12">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.8rem; color: #888;">Carga/Notas</label>
+                            <input type="text" class="form-control" value="${ex.notes || ''}" 
+                                onchange="updateExercise(${index}, 'notes', this.value)" placeholder="Ex: 20kg">
+                        </div>
+                    </div>
                 </div>
+                <button onclick="removeExercise(${index})" style="background: none; border: none; color: #ff4444; cursor: pointer; padding: 0.5rem;">
+                    <i class="fas fa-trash"></i>
+                </button>
             `;
+            container.appendChild(div);
         });
-        
-        // Atualiza o input hidden para enviar ao backend
-        input.value = JSON.stringify(selectedExercises);
     }
 
-    function addExercise(id, name, img) {
-        selectedExercises.push({
-            name: name,
+    function updateExercise(index, field, value) {
+        currentExercises[index][field] = value;
+    }
+
+    function removeExercise(index) {
+        if(confirm('Remover este exercício?')) {
+            currentExercises.splice(index, 1);
+            renderExercises();
+        }
+    }
+
+    // --- Lógica do Modal ---
+    function openLibraryModal() {
+        document.getElementById('libraryModal').style.display = 'flex';
+    }
+    
+    function closeLibraryModal() {
+        document.getElementById('libraryModal').style.display = 'none';
+    }
+
+    function addExerciseToWorkout(exerciseLib) {
+        // Adiciona novo objeto de exercício à lista
+        currentExercises.push({
+            name: exerciseLib.name,
             sets: '3',
-            reps: '12',
+            reps: '10',
             notes: '',
-            image_url: img
+            video_url: exerciseLib.video_url,
+            image_url: exerciseLib.image_url,
+            order_index: currentExercises.length
         });
         renderExercises();
-    }
-
-    function removeEx(index) {
-        selectedExercises.splice(index, 1);
-        renderExercises();
-    }
-
-    function updateEx(index, field, value) {
-        selectedExercises[index][field] = value;
-        document.getElementById('exercisesInput').value = JSON.stringify(selectedExercises);
+        closeLibraryModal();
     }
 
     function filterLibrary() {
-        const term = document.getElementById('searchBox').value.toLowerCase();
-        document.querySelectorAll('.library-item').forEach(item => {
-            item.style.display = item.dataset.name.includes(term) ? 'block' : 'none';
+        const term = document.getElementById('searchExercise').value.toLowerCase();
+        const items = document.querySelectorAll('.library-item');
+        items.forEach(item => {
+            const text = item.innerText.toLowerCase();
+            item.style.display = text.includes(term) ? 'block' : 'none';
         });
     }
 
-    document.addEventListener('DOMContentLoaded', renderExercises);
-    
-    // Intercepta submit para garantir JSON atualizado
-    document.getElementById('workoutForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const data = {
-            title: this.title.value,
-            description: this.description.value,
-            exercises: selectedExercises
-        };
-        
-        fetch(this.action, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'CSRF-Token': this.querySelector('[name=_csrf]').value
-            },
-            body: JSON.stringify(data)
-        })
-        .then(r => r.json())
-        .then(data => {
-            if(data.success) window.location.href = '/admin/clients/' + data.clientId;
-            else alert('Erro: ' + data.message);
-        })
-        .catch(err => alert('Erro de conexão'));
-    });
+    // --- Salvar ---
+    async function saveWorkout() {
+        const title = document.getElementById('workoutTitle').value;
+        const description = document.getElementById('workoutDescription').value;
+
+        if (!title) return alert('Por favor, dê um título ao treino.');
+        if (currentExercises.length === 0) return alert('Adicione pelo menos um exercício.');
+
+        // Prepara dados com índices atualizados
+        const exercisesToSave = currentExercises.map((ex, i) => ({
+            ...ex,
+            order_index: i
+        }));
+
+        try {
+            const res = await fetch(`/workouts/edit/${workoutId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    title,
+                    description,
+                    exercises: exercisesToSave
+                })
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                // Redireciona para o perfil do cliente ou detalhes do treino
+                window.location.href = `/admin/clients/${data.clientId}`;
+            } else {
+                alert('Erro ao salvar: ' + (data.message || 'Erro desconhecido'));
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Erro de conexão ao salvar.');
+        }
+    }
 </script>
+
 <%- include('../partials/footer') %>
