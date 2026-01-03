@@ -120,4 +120,19 @@ router.post('/delete-user', async (req, res) => {
         req.flash('error_msg', 'Erro ao excluir usuário.');
         res.redirect('/admin/clients/' + user_id);
     }
+
+// --- NOVA ROTA: Alterar Senha de Usuário (Admin) ---
+router.post('/users/:id/change-password', requireSuperAdmin, async (req, res) => {
+    const { new_password } = req.body;
+    try {
+        const hashedPassword = await bcrypt.hash(new_password, 10);
+        await pool.query("UPDATE users SET password = $1 WHERE id = $2", [hashedPassword, req.params.id]);
+        // Redireciona de volta para onde veio (referer) ou dashboard
+        res.redirect(req.get('referer') || '/superadmin/manage');
+    } catch (err) {
+        console.error(err);
+        res.status(500).render('pages/error', { message: 'Erro ao alterar senha.' });
+    }
 });
+
+module.exports = router;

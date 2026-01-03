@@ -1,65 +1,46 @@
 const nodemailer = require('nodemailer');
-const { generateEmailTemplate } = require('./emailTemplates');
-const path = require('path');
 require('dotenv').config();
 
+// Configuração do Transporter (Gmail, Outlook, etc ou Mailtrap)
+// Se não houver variáveis, ele vai apenas logar no console
 const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false,
-    auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
-    tls: { rejectUnauthorized: false }
+    service: process.env.EMAIL_SERVICE || 'gmail',
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+    }
 });
 
-const getHost = () => {
-    if (process.env.APP_URL) return process.env.APP_URL;
-    if (process.env.VERCEL_URL) return process.env.VERCEL_URL;
-    return 'localhost:3000';
-};
+async function sendPasswordResetEmail(email, token, host) {
+    const resetLink = `http://${host}/auth/reset/${token}`;
+    
+    const mailOptions = {
+        from: '"Momentum Fit" <no-reply@momentumfit.com>',
+        to: email,
+        subject: 'Redefinição de Senha - Momentum Fit',
+        html: `
+            <h3>Você solicitou a redefinição de senha?</h3>
+            <p>Clique no link abaixo para criar uma nova senha:</p>
+            <a href="${resetLink}">${resetLink}</a>
+            <p>Se você não solicitou isso, ignore este e-mail.</p>
+        `
+    };
 
-const getCommonAttachments = () => {
-    try {
-        return [{
-            filename: 'momentum-fit-logo-completo.png',
-            path: path.join(process.cwd(), 'public', 'images', 'momentum-fit-logo-completo.png'),
-            cid: 'logo@momentumfit'
-        }];
-    } catch (e) {
-        console.warn("Logo não encontrada para anexo.", e.message);
-        return [];
+    if (!process.env.EMAIL_USER) {
+        console.log("⚠️  EMAIL_USER não configurado. Simulando envio:");
+        console.log(`��� Para: ${email}`);
+        console.log(`��� Link: ${resetLink}`);
+        return true;
     }
-};
-
-const sendEmail = async (to, type, role, data, link, linkText) => {
-    const host = getHost();
-    const { subject, html } = generateEmailTemplate(type, role, data, link, linkText, host);
-    const fromAddress = process.env.EMAIL_FROM ? `"Momentum Fit" <${process.env.EMAIL_FROM}>` : `"Momentum Fit" <${process.env.EMAIL_USER}>`;
 
     try {
-        const info = await transporter.sendMail({
-            from: fromAddress, to, subject, html, replyTo: fromAddress,
-            attachments: getCommonAttachments()
-        });
-        console.log(`[Email] Enviado para ${to}`);
+        await transporter.sendMail(mailOptions);
+        console.log(`✅ Email enviado para ${email}`);
         return true;
     } catch (error) {
-        console.error(`[Email] Erro envio:`, error);
+        console.error("❌ Erro ao enviar email:", error);
         return false;
     }
-};
+}
 
-const sendPasswordResetEmail = async (email, resetToken, host) => {
-    const resetUrl = `https://${host}/auth/reset-password/${resetToken}`;
-    const { subject, html } = generateEmailTemplate('custom', 'client', { text: 'Recebemos uma solicitação para redefinir sua senha.<br>O link expira em 1 hora.' }, resetUrl, 'Redefinir Senha', host);
-    const fromAddress = process.env.EMAIL_FROM || process.env.EMAIL_USER;
-
-    try {
-        await transporter.sendMail({
-            from: `"Momentum Fit" <${fromAddress}>`, to: email, subject: 'Recuperação de Senha', html,
-            attachments: getCommonAttachments()
-        });
-        return true;
-    } catch (error) { return false; }
-};
-
-module.exports = { sendEmail, sendPasswordResetEmail };
+module.exports = { sendPasswordResetEmail };

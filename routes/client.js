@@ -221,4 +221,33 @@ router.post('/initial-form', async (req, res) => {
      }
 });
 
+
+// --- NOVA ROTA: Alterar Minha Senha ---
+router.post('/change-password', requireClient, async (req, res) => {
+    const { current_password, new_password, confirm_password } = req.body;
+    
+    if (new_password !== confirm_password) {
+        return res.redirect('/client/profile?error=Senhas não conferem');
+    }
+
+    try {
+        // Verificar senha atual
+        const userRes = await pool.query("SELECT * FROM users WHERE id = $1", [req.session.user.id]);
+        const user = userRes.rows[0];
+
+        if (!await bcrypt.compare(current_password, user.password)) {
+             return res.redirect('/client/profile?error=Senha atual incorreta');
+        }
+
+        // Atualizar
+        const hashedPassword = await bcrypt.hash(new_password, 10);
+        await pool.query("UPDATE users SET password = $1 WHERE id = $2", [hashedPassword, req.session.user.id]);
+        
+        res.redirect('/client/profile?success=Senha alterada com sucesso');
+    } catch (err) {
+        console.error(err);
+        res.status(500).render('pages/error', { message: 'Erro ao alterar senha.' });
+    }
+});
+
 module.exports = router;

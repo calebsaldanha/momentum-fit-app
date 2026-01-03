@@ -1,193 +1,72 @@
-<%- include('../partials/header') %>
-
+<%- include('../partials/header', { title: 'Detalhes do Aluno', bodyClass: 'dashboard-body' }) %>
 <div class="dashboard-container">
-    <%- include('../partials/sidebar') %>
-
-    <main class="main-content">
+    <%- include('../partials/sidebar.ejs', { currentPage: 'clients' }) %>
+    
+    <main class="dashboard-main">
         <div class="section-header">
-            <h1><i class="fas fa-user"></i> Detalhes: <%= clientData ? clientData.name : 'Aluno' %></h1>
-            <a href="javascript:history.back()" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Voltar</a>
+            <a href="javascript:history.back()" class="btn-back"><i class="fas fa-arrow-left"></i> Voltar</a>
+            <h1>Perfil de <%= client.name %></h1>
         </div>
 
-        <% if (typeof showAdminOptions !== 'undefined' && showAdminOptions) { %>
-        <div class="content-card" style="margin-bottom: 2rem; border: 1px solid #444; background: #1a1a1a;">
-            <h3 style="color: var(--c-accent-primary); border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px;">
-                <i class="fas fa-user-shield"></i> Gestão Administrativa
-            </h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
-                <div>
-                    <form action="/superadmin/assign-trainer" method="POST">
-                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                        <input type="hidden" name="user_id" value="<%= clientData.id %>">
-                        <label style="display:block; margin-bottom:5px; color:#ccc;">Atribuir Personal:</label>
-                        <div style="display: flex; gap: 10px;">
-                            <select name="trainer_id" class="form-control" style="padding: 8px; background: #333; color: white; border: 1px solid #555; border-radius: 4px; flex-grow: 1;">
-                                <option value="">Sem Personal</option>
-                                <% if(typeof trainers !== "undefined") { %>
-                                    <% trainers.forEach(t => { %>
-                                        <option value="<%= t.id %>" <%= clientData.trainer_id === t.id ? "selected" : "" %>><%= t.name %></option>
-                                    <% }); %>
-                                <% } %>
-                            </select>
-                            <button type="submit" class="btn btn-primary btn-sm">Salvar</button>
-                        </div>
-                    </form>
-                </div>
-                <div style="display: flex; gap: 1rem; align-items: flex-end;">
-                    <form action="/superadmin/toggle-status" method="POST" style="margin: 0;">
-                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                        <input type="hidden" name="user_id" value="<%= clientData.id %>">
-                        <input type="hidden" name="status" value="<%= clientData.status === "active" ? "suspended" : "active" %>">
-                        <button type="submit" class="btn <%= clientData.status === "active" ? "btn-warning" : "btn-success" %> btn-sm">
-                            <i class="fas fa-power-off"></i> <%= clientData.status === "active" ? "Suspender" : "Ativar" %>
-                        </button>
-                    </form>
-                    <form action="/superadmin/delete-user" method="POST" onsubmit="return confirm('Tem certeza que deseja excluir este usuário permanentemente?');" style="margin: 0;">
-                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                        <input type="hidden" name="user_id" value="<%= clientData.id %>">
-                        <button type="submit" class="btn btn-danger btn-sm">
-                            <i class="fas fa-trash"></i> Excluir
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-        <% } %>
-
-        <div class="stats-grid">
-            <div class="stat-card">
-                <h3>Treinos Realizados</h3>
-                <div class="value"><%= stats.completed_workouts || 0 %></div>
-            </div>
-            <div class="stat-card">
-                <h3>Check-ins</h3>
-                <div class="value"><%= stats.total_checkins || 0 %></div>
-            </div>
-            <div class="stat-card">
-                <h3>Sequência Atual</h3>
-                <div class="value"><%= stats.current_streak || 0 %> dias</div>
-            </div>
-        </div>
-
-        <div class="content-card" style="margin-top: 2rem;">
-            <h3 style="color: white; border-bottom: 1px solid #333; padding-bottom: 1rem; margin-bottom: 1rem;">
-                <i class="fas fa-file-medical-alt"></i> Ficha de Anamnese Completa
-            </h3>
-            
-            <% if (typeof detailedProfile !== 'undefined' && detailedProfile && detailedProfile.user_id) { %>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
-                    
-                    <div style="background: #222; padding: 1.5rem; border-radius: 8px;">
-                        <h4 style="color: var(--c-accent-primary); margin-top:0; border-bottom: 1px solid #444; padding-bottom: 8px; margin-bottom: 12px;">1. Dados Pessoais</h4>
-                        <p><strong>Idade:</strong> <%= detailedProfile.age || '--' %> anos</p>
-                        <p><strong>Telefone:</strong> <%= detailedProfile.phone || '--' %></p>
-                        <p><strong>Gênero:</strong> <%= detailedProfile.gender_identity || '--' %></p>
-                        <p><strong>Sexo Biológico:</strong> <%= detailedProfile.sex_assigned_at_birth === 'M' ? 'Masculino' : (detailedProfile.sex_assigned_at_birth === 'F' ? 'Feminino' : '--') %></p>
-                        <p><strong>Uso de Hormônios:</strong> <%= (detailedProfile.hormonal_treatment === true || detailedProfile.hormonal_treatment === 'true') ? 'Sim' : 'Não' %></p>
-                        <% if (detailedProfile.hormonal_treatment === true || detailedProfile.hormonal_treatment === 'true') { %>
-                            <p style="color: #ccc; font-size: 0.9rem; margin-left: 10px;"><em>Detalhes: <%= detailedProfile.hormonal_details || '--' %></em></p>
+        <div class="profile-grid">
+            <div class="profile-card">
+                <div class="text-center">
+                    <div class="avatar-large" style="margin: 0 auto 1rem;">
+                        <% if (client.profile_image) { %>
+                            <img src="<%= client.profile_image %>" alt="<%= client.name %>">
+                        <% } else { %>
+                            <i class="fas fa-user"></i>
                         <% } %>
                     </div>
-
-                    <div style="background: #222; padding: 1.5rem; border-radius: 8px;">
-                        <h4 style="color: var(--c-accent-primary); margin-top:0; border-bottom: 1px solid #444; padding-bottom: 8px; margin-bottom: 12px;">2. Corpo & Medidas</h4>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                            <p><strong>Peso:</strong> <%= detailedProfile.weight || '--' %> kg</p>
-                            <p><strong>Altura:</strong> <%= detailedProfile.height || '--' %> m</p>
-                            <p><strong>Gordura (%):</strong> <%= detailedProfile.body_fat || '--' %>%</p>
-                        </div>
-                        <hr style="border: 0; border-top: 1px dashed #444; margin: 10px 0;">
-                        <p><strong>Circunferências:</strong></p>
-                        <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.9rem; color: #ccc;">
-                            <li>• Cintura: <%= detailedProfile.measure_waist || '--' %> cm</li>
-                            <li>• Quadril: <%= detailedProfile.measure_hip || '--' %> cm</li>
-                            <li>• Braço: <%= detailedProfile.measure_arm || '--' %> cm</li>
-                            <li>• Perna: <%= detailedProfile.measure_leg || '--' %> cm</li>
-                        </ul>
-                    </div>
-
-                    <div style="background: #222; padding: 1.5rem; border-radius: 8px;">
-                        <h4 style="color: var(--c-accent-primary); margin-top:0; border-bottom: 1px solid #444; padding-bottom: 8px; margin-bottom: 12px;">3. Objetivos</h4>
-                        <p><strong>Principal:</strong> <%= detailedProfile.main_goal || '--' %></p>
-                        <p><strong>Secundários:</strong> <%= detailedProfile.secondary_goals || '--' %></p>
-                        <p><strong>Prazo/Evento:</strong> <%= detailedProfile.specific_event || '--' %></p>
-                    </div>
-
-                    <div style="background: #222; padding: 1.5rem; border-radius: 8px;">
-                        <h4 style="color: var(--c-accent-primary); margin-top:0; border-bottom: 1px solid #444; padding-bottom: 8px; margin-bottom: 12px;">4. Saúde</h4>
-                        <p><strong>Condições:</strong> <%= detailedProfile.medical_conditions || 'Nenhuma' %></p>
-                        <p><strong>Medicamentos:</strong> <%= detailedProfile.medications || 'Nenhum' %></p>
-                        <p><strong>Lesões:</strong> <%= detailedProfile.injuries || 'Nenhuma' %></p>
-                        <p><strong>Cirurgias:</strong> <%= detailedProfile.surgeries || 'Nenhuma' %></p>
-                        <p><strong>Alergias:</strong> <%= detailedProfile.allergies || 'Nenhuma' %></p>
-                    </div>
-
-                    <div style="background: #222; padding: 1.5rem; border-radius: 8px;">
-                        <h4 style="color: var(--c-accent-primary); margin-top:0; border-bottom: 1px solid #444; padding-bottom: 8px; margin-bottom: 12px;">5. Rotina de Treino</h4>
-                        <p><strong>Nível:</strong> <span style="text-transform: capitalize;"><%= detailedProfile.fitness_level || '--' %></span></p>
-                        <p><strong>Frequência:</strong> <%= detailedProfile.training_days || '--' %> dias/semana</p>
-                        <p><strong>Preferência:</strong> <%= detailedProfile.workout_preference === 'gym' ? 'Academia' : (detailedProfile.workout_preference === 'home_basic' ? 'Casa (Pesos)' : (detailedProfile.workout_preference === 'home_bodyweight' ? 'Casa (Corporal)' : 'Parque')) %></p>
-                        <p><strong>Disponibilidade:</strong> <%= detailedProfile.availability || '--' %></p>
-                        <p><strong>Equipamentos:</strong> <%= detailedProfile.equipment || 'Nenhum' %></p>
-                    </div>
-
-                    <div style="background: #222; padding: 1.5rem; border-radius: 8px;">
-                        <h4 style="color: var(--c-accent-primary); margin-top:0; border-bottom: 1px solid #444; padding-bottom: 8px; margin-bottom: 12px;">6. Estilo de Vida</h4>
-                        <p><strong>Sono:</strong> <%= detailedProfile.sleep_hours || '--' %></p>
-                        <p><strong>Dieta:</strong> <%= detailedProfile.diet_description || '--' %></p>
-                        <p><strong>Desafios:</strong> <%= detailedProfile.challenges || '--' %></p>
-                    </div>
-
+                    <h2><%= client.name %></h2>
+                    <p class="text-muted"><%= client.email %></p>
+                    <span class="status-badge status-<%= client.status || 'active' %>">
+                        <%= client.status === 'active' ? 'Ativo' : 'Inativo' %>
+                    </span>
                 </div>
-            <% } else { %>
-                <p style="color: #888; text-align: center; padding: 2rem;">Nenhuma ficha de anamnese preenchida para este aluno.</p>
-            <% } %>
-        </div>
+                
+                <div class="info-list" style="margin-top: 2rem;">
+                    <div class="info-item">
+                        <strong>Objetivo:</strong>
+                        <span><%= client.goal || '-' %></span>
+                    </div>
+                    <div class="info-item">
+                        <strong>Nível:</strong>
+                        <span><%= client.fitness_level || '-' %></span>
+                    </div>
+                </div>
 
-        <div class="content-card" style="margin-top: 2rem;">
-            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <h2>Treinos Atribuídos</h2>
-                <% if (clientData && clientData.id) { %>
-                <a href="/workouts/create?client_id=<%= clientData.id %>" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> Novo Treino
-                </a>
+                <% if (user.role === 'superadmin') { %>
+                    <hr style="margin: 20px 0;">
+                    <h4 style="color: var(--c-error);">Zona de Admin</h4>
+                    <form action="/superadmin/users/<%= client.id %>/change-password" method="POST" onsubmit="return confirm('Tem certeza que deseja alterar a senha deste usuário?');">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <div class="form-group">
+                            <label style="font-size: 0.9rem;">Definir Nova Senha</label>
+                            <div style="display: flex; gap: 10px;">
+                                <input type="text" name="new_password" placeholder="Nova senha" required style="padding: 5px;">
+                                <button type="submit" class="btn btn-sm btn-secondary">Salvar</button>
+                            </div>
+                        </div>
+                    </form>
                 <% } %>
             </div>
 
-            <% if (workouts && workouts.length > 0) { %>
-                <div class="table-responsive">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Título</th>
-                                <th>Dia</th>
-                                <th>Exercícios</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% workouts.forEach(workout => { %>
-                                <tr>
-                                    <td><%= workout.title || workout.name || 'Sem título' %></td>
-                                    <td><%= workout.day_of_week || '--' %></td>
-                                    <td><%= workout.exercises ? workout.exercises.length : (workout.exercise_count || 0) %></td>
-                                    <td>
-                                        <div class="action-buttons">
-                                            <a href="/workouts/edit/<%= workout.id %>" class="btn-icon" title="Editar"><i class="fas fa-edit"></i></a>
-                                            <form action="/workouts/delete/<%= workout.id %>" method="POST" style="display:inline;" onsubmit="return confirm('Excluir treino?');">
-                                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                                <button type="submit" class="btn-icon delete" title="Excluir"><i class="fas fa-trash"></i></button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
-                            <% }) %>
-                        </tbody>
-                    </table>
+            <div class="profile-content">
+                <div class="card">
+                    <h3>Estatísticas Rápidas</h3>
+                    <div class="stats-row">
+                        <div class="stat-box">
+                            <span class="stat-number">0</span>
+                            <span class="stat-label">Treinos Completos</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-number">0</span>
+                            <span class="stat-label">Dias Consecutivos</span>
+                        </div>
+                    </div>
                 </div>
-            <% } else { %>
-                <p class="empty-state">Nenhum treino atribuído ainda.</p>
-            <% } %>
+            </div>
         </div>
     </main>
 </div>

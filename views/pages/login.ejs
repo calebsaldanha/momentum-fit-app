@@ -1,38 +1,67 @@
-<%- include('../partials/header.ejs', { bodyClass: 'auth-body' }) %>
-
-<main class="auth-main">
-    <div class="auth-card">
-        <div class="auth-header">
-            <h2>Acesse sua Conta</h2>
-            <p>Bem-vindo de volta! Insira seus dados para continuar.</p>
-        </div>
-
-        <% if (typeof error !== 'undefined' && error) { %>
-            <div class="alert alert-error" style="background: #fee2e2; color: #ef4444; padding: 10px; border-radius: 6px; margin-bottom: 15px; font-size: 0.9rem;">
-                <%= error %>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> | Momentum Fit</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="auth-body">
+    <div class="auth-container">
+        <div class="auth-box">
+            <div class="logo-container">
+                <img src="/images/momentum-fit-logo-completo.png" alt="Momentum Fit" class="auth-logo">
             </div>
-        <% } %>
-
-        <form class="auth-form" method="POST" action="/auth/login">
-            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
             
-            <div class="form-group">
-                <label for="email">E-mail</label>
-                <input type="email" id="email" name="email" required placeholder="seu@email.com">
+            <div class="auth-header">
+                <h2>Bem-vindo de volta!</h2>
+                <p>Acesse sua conta para continuar</p>
             </div>
 
-            <div class="form-group">
-                <label for="password">Senha</label>
-                <input type="password" id="password" name="password" required placeholder="********">
+            <% if (locals.error) { %>
+                <div class="alert alert-error">
+                    <i class="fas fa-exclamation-circle"></i> <%= error %>
+                </div>
+            <% } %>
+
+            <form action="/auth/login" method="POST">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <div class="form-group">
+                    <label for="email">E-mail</label>
+                    <div class="input-icon">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="email" name="email" required placeholder="seu@email.com">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Senha</label>
+                    <div class="input-icon">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="password" name="password" required placeholder="******">
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <a href="/auth/forgot-password" class="forgot-password">Esqueceu a senha?</a>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block">Entrar</button>
+            </form>
+            
+            <div class="auth-footer">
+                <p>Ainda não tem conta? <a href="/auth/register">Cadastre-se</a></p>
             </div>
-
-            <button type="submit" class="btn btn-primary" style="width: 100%;">Entrar</button>
-        </form>
-
-        <div style="text-align: center; margin-top: 1.5rem;">
-            <p style="font-size: 0.9rem;">Ainda não tem conta? <a href="/auth/register" style="color: var(--c-accent-primary); font-weight: 600;">Cadastre-se</a></p>
         </div>
     </div>
-</main>
-
-<%- include('../partials/footer.ejs') %>
+    
+    <script>
+        // Check URL params for success message
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('reset') === 'success') {
+            alert('Senha redefinida com sucesso! Por favor, faça login.');
+        }
+    </script>
+</body>
+</html>
