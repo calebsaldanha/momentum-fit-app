@@ -73,7 +73,7 @@
             </a>
             <p style="color: #888; margin-bottom: 2rem;">Bem-vindo de volta!</p>
 
-            <% if (locals.error) { %>
+            <% if (locals.error && locals.error.length > 0) { %>
                 <div style="background: rgba(239, 68, 68, 0.2); color: #fca5a5; padding: 10px; border-radius: 6px; margin-bottom: 1rem; font-size: 0.9rem; text-align: left; display: flex; align-items: center; gap: 10px;">
                     <i class="fas fa-exclamation-circle"></i> <%= error %>
                 </div>
