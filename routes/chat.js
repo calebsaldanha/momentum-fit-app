@@ -15,38 +15,40 @@ router.get('/', requireAuth, async (req, res) => {
         let contacts = [];
 
         if (role === 'client') {
-            // Se for cliente, pega o trainer
+            // Se for cliente, pega o trainer associado
             const trainerRes = await pool.query(`
-                SELECT u.id, u.name, u.role FROM users u 
+                SELECT u.id, u.name, u.role, u.profile_image FROM users u 
                 JOIN client_profiles cp ON cp.trainer_id = u.id 
                 WHERE cp.user_id = $1
             `, [userId]);
             contacts = trainerRes.rows;
-            // Se não tiver trainer, pega o admin? (Opcional, mas simplifica)
-             if (contacts.length === 0) {
-                const adminRes = await pool.query("SELECT id, name, role FROM users WHERE role = 'superadmin'");
+            
+            // Se não tiver trainer, pega o admin para suporte
+            if (contacts.length === 0) {
+                const adminRes = await pool.query("SELECT id, name, role, profile_image FROM users WHERE role = 'superadmin'");
                 contacts = adminRes.rows;
             }
         } else {
-            // Se for trainer/admin, pega todos os clientes associados
-            const clientsRes = await pool.query(`
-                SELECT u.id, u.name, u.role FROM users u 
-                JOIN client_profiles cp ON cp.user_id = u.id 
-                WHERE cp.trainer_id = $1 OR $2 = 'superadmin'
-            `, [userId, role]); // Superadmin vê todos se quiser, mas aqui simplificado
-             // Se for superadmin, talvez queira ver todos. Vou manter simples.
-             if (role === 'superadmin') {
-                 const allUsers = await pool.query("SELECT id, name, role FROM users WHERE id != $1", [userId]);
+            // Se for Superadmin
+            if (role === 'superadmin') {
+                 const allUsers = await pool.query("SELECT id, name, role, profile_image FROM users WHERE id != $1 ORDER BY name ASC", [userId]);
                  contacts = allUsers.rows;
-             } else {
+            } else {
+                // Se for Trainer, pega seus alunos
+                 const clientsRes = await pool.query(`
+                    SELECT u.id, u.name, u.role, u.profile_image FROM users u 
+                    JOIN client_profiles cp ON cp.user_id = u.id 
+                    WHERE cp.trainer_id = $1
+                    ORDER BY u.name ASC
+                `, [userId]);
                  contacts = clientsRes.rows;
-             }
+            }
         }
 
         res.render('pages/chat', { 
             title: 'Mensagens', 
             user: req.session.user, 
-            contacts: contacts,
+            chatUsers: contacts, // CORREÇÃO: Nome da variável ajustado para 'chatUsers'
             csrfToken: res.locals.csrfToken
         });
     } catch (err) {
@@ -55,7 +57,7 @@ router.get('/', requireAuth, async (req, res) => {
     }
 });
 
-// API para buscar mensagens
+// API para buscar mensagens (JSON)
 router.get('/messages/:contactId', requireAuth, async (req, res) => {
     try {
         const userId = req.session.user.id;
@@ -70,11 +72,12 @@ router.get('/messages/:contactId', requireAuth, async (req, res) => {
         
         res.json(msgs.rows);
     } catch (err) {
+        console.error(err);
         res.status(500).json({ error: 'Erro ao buscar mensagens' });
     }
 });
 
-// API para enviar mensagem
+// API para enviar mensagem (JSON)
 router.post('/send', requireAuth, async (req, res) => {
     const { receiver_id, content } = req.body;
     const senderId = req.session.user.id;
@@ -85,10 +88,12 @@ router.post('/send', requireAuth, async (req, res) => {
             [senderId, receiver_id, content]
         );
 
-        // NOTIFICAÇÃO: Email para o receptor
+        // NOTIFICAÇÃO DE EMAIL
+        // Busca email do destinatário
         const receiverRes = await pool.query("SELECT email, name FROM users WHERE id = $1", [receiver_id]);
         if (receiverRes.rows.length > 0) {
             const receiver = receiverRes.rows[0];
+            // Envia email em background (não espera para responder a request)
             sendNewMessageEmail(receiver.email, req.session.user.name, content, req.headers.host).catch(console.error);
         }
 
