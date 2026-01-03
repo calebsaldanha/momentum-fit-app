@@ -1,165 +1,115 @@
-<%- include('../partials/header', { bodyClass: 'dashboard-body' }) %>
+<%- include('../partials/header', { title: 'Detalhes do Aluno', bodyClass: 'dashboard-body' }) %>
+
 <div class="dashboard-container">
-    <%- include('../partials/sidebar.ejs', { currentPage: 'clients' }) %>
+    <%- include('../partials/sidebar', { currentPage: 'clients' }) %>
+
     <main class="dashboard-main">
-        <div class="container">
-            <div style="margin-bottom: 2rem;">
-                <a href="/admin/clients" style="color: #888; font-size: 0.9rem;">&larr; Voltar</a>
-                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 10px;">
-                    <div>
-                        <h1 style="margin-bottom: 5px;"><%= clientProfile.name %></h1>
-                        <span class="user-badge"><%= clientProfile.email %></span>
-                        <% if (clientProfile.status === 'pending_approval') { %>
-                             <span style="background: #f59e0b; color: black; padding: 2px 8px; border-radius: 4px; font-weight: bold; margin-left: 10px;">PENDENTE</span>
+        <section class="section">
+            <div class="section-header">
+                <h1>Perfil do Aluno</h1>
+                <a href="/admin/clients" class="btn btn-secondary btn-sm">
+                    <i class="fas fa-arrow-left"></i> Voltar
+                </a>
+            </div>
+
+            <div class="content-card" style="margin-bottom: 2rem;">
+                <div style="display: flex; gap: 1.5rem; align-items: flex-start; flex-wrap: wrap;">
+                    <div class="user-avatar-large" style="margin: 0; width: 80px; height: 80px; font-size: 2rem;">
+                        <% if (client && client.name) { %>
+                            <%= client.name.charAt(0) %>
+                        <% } else { %>
+                            <i class="fas fa-user"></i>
                         <% } %>
                     </div>
-                    <% if (user.role === 'superadmin') { %>
-                        <div style="display: flex; gap: 10px;">
-                            <form action="/admin/clients/<%= clientProfile.user_id %>/status" method="POST" style="margin: 0;">
-                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                <% if (clientProfile.status === 'active') { %>
-                                    <input type="hidden" name="action" value="suspend">
-                                    <button type="submit" class="btn btn-secondary btn-sm" style="color: #f59e0b; border-color: #f59e0b;">Suspender</button>
-                                <% } else { %>
-                                    <input type="hidden" name="action" value="approve">
-                                    <button type="submit" class="btn btn-primary btn-sm">Aprovar Aluno</button>
-                                <% } %>
-                            </form>
-                            <form action="/admin/clients/<%= clientProfile.user_id %>/delete" method="POST" onsubmit="return confirm('Tem certeza?');" style="margin: 0;">
-                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                <button type="submit" class="btn btn-secondary btn-sm">Excluir</button>
-                            </form>
+                    <div style="flex: 1;">
+                        <h2 style="margin-top: 0; margin-bottom: 0.5rem; color: white;">
+                            <%= client ? client.name : 'Aluno não encontrado' %>
+                        </h2>
+                        <p style="color: #888; margin-bottom: 1rem;">
+                            <%= client ? client.email : '--' %>
+                        </p>
+                        
+                        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                            <span class="user-role-badge">
+                                <i class="fas fa-bullseye" style="margin-right: 5px;"></i>
+                                <%= (client && client.goal) ? client.goal : 'Objetivo não definido' %>
+                            </span>
+                            <span class="user-role-badge" style="background: rgba(255,255,255,0.1);">
+                                <i class="fas fa-layer-group" style="margin-right: 5px;"></i>
+                                <%= (client && client.fitness_level) ? client.fitness_level : 'Nível não definido' %>
+                            </span>
                         </div>
-                    <% } %>
+                    </div>
                 </div>
             </div>
 
-            <div style="background: var(--c-bg-card); padding: 20px; border-radius: 12px; border: 1px solid var(--c-border); margin-bottom: 30px;">
-                <% if (user.role === 'superadmin') { %>
-                    <div style="display: flex; align-items: center; justify-content: space-between;">
-                        <div><h4 style="margin: 0;">Treinador Responsável</h4><p style="margin: 0; color: #888;">Selecione quem fará o acompanhamento.</p></div>
-                        <form action="/admin/clients/<%= clientProfile.user_id %>/assign" method="POST" style="display: flex; gap: 10px; margin: 0;">
-                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                            <select name="trainer_id" style="padding: 10px; border-radius: 8px; background: #222; color: white;">
-                                <option value="">-- Selecione --</option>
-                                <% allTrainers.forEach(t => { %>
-                                    <option value="<%= t.id %>" <%= clientProfile.assigned_trainer_id === t.id ? 'selected' : '' %>><%= t.name %></option>
-                                <% }) %>
-                            </select>
-                            <button type="submit" class="btn btn-primary btn-sm">Salvar</button>
-                        </form>
+            <h3 style="margin-bottom: 1rem; color: #ccc; font-size: 1.1rem;">Estatísticas</h3>
+            <div class="stats-grid" style="margin-bottom: 2rem;">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                    <div class="stat-info">
+                        <h3><%= (typeof stats !== 'undefined' && stats.completed_workouts) ? stats.completed_workouts : 0 %></h3>
+                        <p>Treinos Concluídos</p>
                     </div>
-                <% } else { %>
-                    <h4 style="margin: 0 0 10px 0;">Treinador Responsável</h4>
-                    <p style="color: var(--c-accent-primary); font-weight: bold;">
-                        <% const t = allTrainers.find(x => x.id === clientProfile.assigned_trainer_id); %><%= t ? t.name : 'Não atribuído' %>
-                    </p>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-fire"></i></div>
+                    <div class="stat-info">
+                        <h3><%= (typeof stats !== 'undefined' && stats.streak) ? stats.streak : 0 %></h3>
+                        <p>Sequência (Dias)</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-dumbbell"></i></div>
+                    <div class="stat-info">
+                        <h3><%= (typeof workouts !== 'undefined') ? workouts.length : 0 %></h3>
+                        <p>Planos Ativos</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-header" style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem; margin-bottom: 1rem;">
+                <h3 style="margin: 0;">Planos de Treino</h3>
+                <% if (client) { %>
+                    <a href="/workouts/create?client_id=<%= client.id %>" class="btn btn-primary btn-sm">
+                        <i class="fas fa-plus"></i> Novo Treino
+                    </a>
                 <% } %>
             </div>
 
-            <h3 style="border-bottom: 1px solid var(--c-border); padding-bottom: 10px; margin-bottom: 20px;">Ficha do Aluno</h3>
-            
-            <div class="client-info-grid">
-                <div class="info-card">
-                    <h4 style="color: var(--c-accent-primary);">1. Dados Pessoais</h4>
-                    <p><strong>Idade:</strong> <%= clientProfile.age %> anos</p>
-                    <p><strong>Telefone:</strong> <%= clientProfile.phone %></p>
-                    <p><strong>Gênero:</strong> <%= clientProfile.gender_identity %></p>
-                    <p><strong>Sexo Atribuído:</strong> <%= clientProfile.sex_assigned_at_birth %></p>
-                    <% if (clientProfile.hormonal_treatment) { %>
-                        <div style="margin-top: 10px; padding: 10px; background: rgba(245, 158, 11, 0.1); border-radius: 6px;">
-                            <strong>⚡ Tratamento Hormonal:</strong><br>
-                            <%= clientProfile.hormonal_details %>
+            <div class="workouts-list">
+                <% if (typeof workouts !== 'undefined' && workouts.length > 0) { %>
+                    <% workouts.forEach(workout => { %>
+                        <div class="content-card" style="display: flex; justify-content: space-between; align-items: center; padding: 1.2rem; margin-bottom: 1rem; transition: transform 0.2s;">
+                            <div>
+                                <h4 style="margin: 0 0 0.4rem 0; font-size: 1.1rem; color: white;"><%= workout.title %></h4>
+                                <span style="font-size: 0.85rem; color: #666;">
+                                    <i class="far fa-calendar-alt"></i> Criado em: <%= new Date(workout.created_at).toLocaleDateString('pt-BR') %>
+                                </span>
+                            </div>
+                            <div style="display: flex; gap: 0.8rem;">
+                                <a href="/workouts/<%= workout.id %>" class="btn btn-sm btn-outline" title="Visualizar">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="/workouts/edit/<%= workout.id %>" class="btn btn-sm btn-secondary" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                            </div>
                         </div>
-                    <% } %>
-                </div>
-
-                <div class="info-card">
-                    <h4 style="color: var(--c-accent-primary);">2. Medidas & Corpo</h4>
-                    <div style="display: flex; gap: 20px;">
-                        <div>
-                            <p><strong>Peso:</strong> <%= clientProfile.weight %> kg</p>
-                            <p><strong>Altura:</strong> <%= clientProfile.height %> m</p>
-                        </div>
-                        <div style="background: #222; padding: 5px 15px; border-radius: 8px;">
-                            <span style="font-size:0.8rem; color:#888;">IMC</span><br>
-                            <strong style="font-size:1.2rem;"><%= imc %></strong>
-                        </div>
+                    <% }); %>
+                <% } else { %>
+                    <div style="text-align: center; padding: 3rem; background: rgba(255,255,255,0.02); border: 1px dashed rgba(255,255,255,0.1); border-radius: 12px; color: #666;">
+                        <i class="fas fa-dumbbell" style="font-size: 2rem; margin-bottom: 1rem; display: block; opacity: 0.5;"></i>
+                        <p>Nenhum treino atribuído a este aluno ainda.</p>
+                        <% if (client) { %>
+                            <a href="/workouts/create?client_id=<%= client.id %>" style="color: var(--c-accent-primary); text-decoration: none; font-weight: 600;">Criar primeiro treino</a>
+                        <% } %>
                     </div>
-                    <p><strong>% Gordura:</strong> <%= clientProfile.body_fat ? clientProfile.body_fat + '%' : '-' %></p>
-                    <hr style="border-color: #333;">
-                    <p><strong>Circunferências:</strong></p>
-                    <ul style="padding-left: 20px; color: #ccc; font-size: 0.95rem;">
-                        <li>Cintura: <%= clientProfile.measure_waist || '-' %> cm</li>
-                        <li>Quadril: <%= clientProfile.measure_hip || '-' %> cm</li>
-                        <li>Braço: <%= clientProfile.measure_arm || '-' %> cm</li>
-                        <li>Perna: <%= clientProfile.measure_leg || '-' %> cm</li>
-                    </ul>
-                </div>
-
-                <div class="info-card">
-                    <h4 style="color: var(--c-accent-primary);">3. Objetivos</h4>
-                    <p><strong>Principal:</strong> <%= clientProfile.main_goal %></p>
-                    <p><strong>Secundários:</strong> <%= clientProfile.secondary_goals || '-' %></p>
-                    <p><strong>Evento/Prazo:</strong> <%= clientProfile.specific_event || 'Não' %></p>
-                    <p><strong>Desafios:</strong> <%= clientProfile.challenges || '-' %></p>
-                </div>
-
-                <div class="info-card">
-                    <h4 style="color: var(--c-accent-primary);">4. Histórico de Saúde</h4>
-                    <p><strong>Condições Médicas:</strong> <%= clientProfile.medical_conditions || 'Nenhuma' %></p>
-                    <p><strong>Medicamentos:</strong> <%= clientProfile.medications || 'Nenhum' %></p>
-                    <p><strong>Cirurgias:</strong> <%= clientProfile.surgeries || 'Nenhuma' %></p>
-                    <p><strong>Lesões:</strong> <%= clientProfile.injuries || 'Nenhuma' %></p>
-                    <p><strong>Alergias:</strong> <%= clientProfile.allergies || 'Nenhuma' %></p>
-                </div>
-
-                <div class="info-card" style="grid-column: 1 / -1;">
-                    <h4 style="color: var(--c-accent-primary);">5. Estilo de Vida & Preferências</h4>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                        <div>
-                            <p><strong>Nível de Atividade:</strong> <%= clientProfile.fitness_level %></p>
-                            <p><strong>Histórico:</strong> <%= clientProfile.past_activity || '-' %></p>
-                            <p><strong>Preferência de Local:</strong> <%= clientProfile.workout_preference %></p>
-                            <p><strong>Disponibilidade:</strong> <%= clientProfile.availability %></p>
-                        </div>
-                        <div>
-                            <p><strong>Gosta de:</strong> <%= clientProfile.liked_activities || '-' %></p>
-                            <p><strong>Evita:</strong> <%= clientProfile.disliked_activities || '-' %></p>
-                            <p><strong>Sono (Média):</strong> <%= clientProfile.sleep_hours || '-' %></p>
-                            <p><strong>Dieta Atual:</strong> <%= clientProfile.diet_description || '-' %></p>
-                        </div>
-                    </div>
-                </div>
+                <% } %>
             </div>
 
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; margin-top: 30px;">
-                <h3>Treinos</h3>
-                <a href="/workouts/create?client_id=<%= clientProfile.user_id %>" class="btn btn-primary btn-sm">Novo Treino</a>
-            </div>
-            
-            <div class="table-container">
-                <table>
-                    <thead><tr><th>Título</th><th>Data</th><th>Ações</th></tr></thead>
-                    <tbody>
-                        <% if (workouts.length > 0) { workouts.forEach(w => { %>
-                            <tr>
-                                <td><%= w.title %></td>
-                                <td><%= new Date(w.created_at).toLocaleDateString('pt-BR') %></td>
-                                <td style="display:flex; gap:10px;">
-                                    <a href="/workouts/<%= w.id %>" class="btn-text">Ver</a>
-                                    <a href="/workouts/edit/<%= w.id %>" class="btn-text">Editar</a>
-                                    <form action="/workouts/delete/<%= w.id %>" method="POST" onsubmit="return confirm('Apagar?')" style="margin:0;">
-                                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                        <button type="submit" style="background:none; border:none; color:var(--c-error); cursor:pointer;">X</button>
-                                    </form>
-                                </td>
-                            </tr>
-                        <% })} else { %> <tr><td colspan="3" style="text-align:center;">Sem treinos.</td></tr> <% } %>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+        </section>
     </main>
 </div>
+
 <%- include('../partials/footer') %>
