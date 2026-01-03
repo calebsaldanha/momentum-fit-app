@@ -1,24 +1,10 @@
-<%- include('../partials/header') %>
+<%- include('../partials/header.ejs', { title, bodyClass: 'dashboard-body' }) %>
 
 <style>
-/* Chat Styles */
-.chat-wrapper {
-    display: flex;
-    height: calc(100vh - 100px);
-    gap: 1rem;
-    overflow: hidden;
-}
-.chat-sidebar {
-    width: 300px;
-    background: #1a1a1a;
-    border-radius: 8px;
-    border: 1px solid #333;
-    display: flex;
-    flex-direction: column;
-}
+/* Estilos Específicos de Componentes do Chat */
+/* O layout geral agora é controlado pelo dashboard.css */
+
 .user-list {
-    flex: 1;
-    overflow-y: auto;
     list-style: none;
     padding: 0;
     margin: 0;
@@ -42,34 +28,14 @@
     background: #444;
     object-fit: cover;
 }
-.chat-main {
-    flex: 1;
-    background: #111;
-    border-radius: 8px;
-    border: 1px solid #333;
-    display: flex;
-    flex-direction: column;
-}
-.chat-header {
-    padding: 1rem;
-    border-bottom: 1px solid #333;
-    background: #1a1a1a;
-    font-weight: bold;
-}
-.messages-area {
-    flex: 1;
-    padding: 1rem;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
 .message {
     max-width: 70%;
     padding: 10px 15px;
     border-radius: 12px;
     line-height: 1.4;
     position: relative;
+    word-wrap: break-word;
+    margin-bottom: 5px;
 }
 .message.sent {
     background: var(--c-accent-primary);
@@ -81,13 +47,6 @@
     color: #fff;
     align-self: flex-start;
 }
-.input-area {
-    padding: 1rem;
-    border-top: 1px solid #333;
-    background: #1a1a1a;
-    display: flex;
-    gap: 10px;
-}
 .chat-input {
     flex: 1;
     padding: 10px;
@@ -96,16 +55,20 @@
     background: #222;
     color: white;
 }
+.chat-input:focus {
+    outline: none;
+    border-color: var(--c-accent-primary);
+}
 </style>
 
 <div class="dashboard-container">
-    <%- include('../partials/sidebar') %>
+    <%- include('../partials/sidebar.ejs', { currentPage: 'chat' }) %>
     
-    <main class="main-content" style="padding-bottom: 0;">
-        <div class="chat-wrapper">
+    <main class="dashboard-main" style="padding: 0; height: 100%;">
+        <div class="chat-container">
             <aside class="chat-sidebar">
                 <div style="padding: 1rem; border-bottom: 1px solid #333;">
-                    <h3 style="margin:0; font-size:1.1rem;">Conversas</h3>
+                    <h3 style="margin:0; font-size:1.1rem; color: white;">Conversas</h3>
                 </div>
                 <ul class="user-list">
                     <% if (chatUsers && chatUsers.length > 0) { %>
@@ -128,12 +91,12 @@
                 </ul>
             </aside>
 
-            <section class="chat-main">
+            <section class="chat-content">
                 <% if (typeof activeChat !== 'undefined' && activeChat) { %>
                     <div class="chat-header">
-                        Conversando com: <%= activeChat.name %>
+                        Conversando com: <span style="color: var(--c-accent-primary);"><%= activeChat.name %></span>
                     </div>
-                    <div class="messages-area" id="messagesList">
+                    <div class="chat-messages" id="messagesList">
                         <% if (messages && messages.length > 0) { %>
                             <% messages.forEach(msg => { %>
                                 <div class="message <%= msg.sender_id === user.id ? 'sent' : 'received' %>">
@@ -150,7 +113,7 @@
                             <p style="text-align: center; color: #666; margin-top: 2rem;">Nenhuma mensagem ainda.</p>
                         <% } %>
                     </div>
-                    <form action="/chat/send" method="POST" class="input-area" enctype="multipart/form-data">
+                    <form action="/chat/send" method="POST" class="chat-input-area" enctype="multipart/form-data">
                         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                         <input type="hidden" name="recipient_id" value="<%= activeChat.id %>">
                         
