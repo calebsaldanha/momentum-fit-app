@@ -15,7 +15,7 @@
                 <% if (!articles || articles.length === 0) { %>
                     <div class="empty-state" style="text-align: center; padding: 3rem; color: #888;">
                         <i class="fas fa-newspaper" style="font-size: 2rem; margin-bottom: 1rem;"></i>
-                        <p>Nenhum artigo publicado ainda.</p>
+                        <p>Nenhum artigo encontrado.</p>
                     </div>
                 <% } else { %>
                     <table>
@@ -23,14 +23,17 @@
                             <tr>
                                 <th>Imagem</th>
                                 <th>Título</th>
-                                <th>Categoria</th>
+                                <th>Status</th>
+                                <% if (user.role === 'superadmin') { %>
+                                    <th>Autor</th>
+                                <% } %>
                                 <th>Data</th>
                                 <th style="text-align: right;">Ações</th>
                             </tr>
                         </thead>
                         <tbody>
                             <% articles.forEach(article => { %>
-                                <tr>
+                                <tr style="<%= article.status === 'pending' && user.role === 'superadmin' ? 'background-color: rgba(255, 193, 7, 0.1);' : '' %>">
                                     <td style="width: 80px;">
                                         <% if(article.image_url) { %>
                                             <img src="<%= article.image_url %>" alt="<%= article.title %>" style="width: 60px; height: 40px; object-fit: cover; border-radius: 4px;">
@@ -38,15 +41,48 @@
                                             <div style="width: 60px; height: 40px; background: #333; border-radius: 4px; display: flex; align-items: center; justify-content: center;"><i class="fas fa-image"></i></div>
                                         <% } %>
                                     </td>
-                                    <td><strong><%= article.title %></strong></td>
-                                    <td><span class="badge"><%= article.category %></span></td>
+                                    <td>
+                                        <strong><%= article.title %></strong>
+                                    </td>
+                                    <td>
+                                        <% if (article.status === 'published') { %>
+                                            <span class="badge" style="background-color: #28a745; color: white;">Publicado</span>
+                                        <% } else if (article.status === 'pending') { %>
+                                            <span class="badge" style="background-color: #ffc107; color: black;">Pendente</span>
+                                        <% } else if (article.status === 'rejected') { %>
+                                            <span class="badge" style="background-color: #dc3545; color: white;">Rejeitado</span>
+                                        <% } %>
+                                    </td>
+                                    <% if (user.role === 'superadmin') { %>
+                                        <td><small><%= article.author_name || 'Desconhecido' %></small></td>
+                                    <% } %>
                                     <td><%= new Date(article.created_at).toLocaleDateString('pt-BR') %></td>
                                     <td style="text-align: right;">
-                                        <div style="display: flex; gap: 10px; justify-content: flex-end;">
-                                            <a href="/articles/edit/<%= article.id %>" class="btn btn-secondary btn-sm">Editar</a>
-                                            <form action="/articles/delete/<%= article.id %>" method="POST" onsubmit="return confirm('Tem certeza que deseja excluir este artigo?');" style="margin:0;">
+                                        <div style="display: flex; gap: 5px; justify-content: flex-end; align-items: center;">
+                                            
+                                            <% if (user.role === 'superadmin' && article.status === 'pending') { %>
+                                                <form action="/articles/approve/<%= article.id %>" method="POST" style="margin:0;">
+                                                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                                    <button type="submit" class="btn btn-sm" style="background-color: #28a745; color: white; padding: 4px 8px;" title="Aprovar">
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
+                                                </form>
+                                                <form action="/articles/reject/<%= article.id %>" method="POST" style="margin:0;">
+                                                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                                    <button type="submit" class="btn btn-sm" style="background-color: #dc3545; color: white; padding: 4px 8px;" title="Rejeitar">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                </form>
+                                                <div style="width: 1px; height: 20px; background: #ddd; margin: 0 5px;"></div>
+                                            <% } %>
+
+                                            <a href="/articles/edit/<%= article.id %>" class="btn btn-secondary btn-sm" title="Editar"><i class="fas fa-edit"></i></a>
+                                            
+                                            <form action="/articles/delete/<%= article.id %>" method="POST" onsubmit="return confirm('Tem certeza que deseja excluir?');" style="margin:0;">
                                                 <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                                <button type="submit" class="btn btn-secondary btn-sm" style="color: var(--c-error); border-color: var(--c-error);">Excluir</button>
+                                                <button type="submit" class="btn btn-secondary btn-sm" style="color: var(--c-error); border-color: var(--c-error);" title="Excluir">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
                                             </form>
                                         </div>
                                     </td>
