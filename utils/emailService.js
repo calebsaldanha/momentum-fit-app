@@ -13,12 +13,11 @@ const transporter = nodemailer.createTransport({
 const sendEmail = async (to, subject, htmlContent) => {
     if (!to) return false;
     
-    // Simulação se não houver credenciais (para não quebrar o app em dev)
+    // Simulação se não houver credenciais (para não travar em dev)
     if (!process.env.EMAIL_USER) {
         console.log(`\n��� [SIMULAÇÃO DE EMAIL]`);
         console.log(`Para: ${to}`);
         console.log(`Assunto: ${subject}`);
-        console.log(`Conteúdo (resumo): ${htmlContent.substring(0, 100)}...`);
         return true;
     }
 
@@ -39,7 +38,7 @@ const sendEmail = async (to, subject, htmlContent) => {
 
 module.exports = {
     sendPasswordResetEmail: async (email, token, host) => {
-        const link = \`http://\${host}/auth/reset/\${token}\`;
+        const link = `http://${host}/auth/reset/${token}`;
         return sendEmail(email, 'Redefinição de Senha', templates.resetPassword(link));
     },
 
@@ -52,24 +51,23 @@ module.exports = {
     },
 
     sendNewMessageEmail: async (email, senderName, messageText, host) => {
-        const link = \`http://\${host}/chat\`;
+        const link = `http://${host}/chat`;
         return sendEmail(email, 'Você tem uma nova mensagem', templates.newMessage(senderName, messageText.substring(0, 50), link));
     },
 
     sendArticlePublishedEmail: async (emails, title, authorName, host) => {
-        const link = \`http://\${host}/articles\`;
-        // Envia individualmente ou em BCC para não expor lista (aqui simulando loop simples)
-        // Para muitos usuários, o ideal seria BCC ou fila de processamento
-        return sendEmail(emails.join(','), 'Novo Artigo Publicado!', templates.articlePublished(title, authorName, link));
+        const link = `http://${host}/articles`;
+        // Envia como lista de BCC ou individualmente (aqui simplificado para string separada por virgula)
+        return sendEmail(emails, 'Novo Artigo Publicado!', templates.articlePublished(title, authorName, link));
     },
 
     sendNewArticlePendingEmail: async (adminEmail, title, authorName, host) => {
-        const link = \`http://\${host}/articles/manage\`;
+        const link = `http://${host}/articles/manage`;
         return sendEmail(adminEmail, 'Novo Artigo Pendente', templates.articlePending(title, authorName, link));
     },
 
     sendNewWorkoutEmail: async (email, workoutTitle, clientName, host) => {
-        const link = \`http://\${host}/client/workouts\`;
+        const link = `http://${host}/client/workouts`;
         return sendEmail(email, 'Novo Treino Adicionado', templates.newWorkout(workoutTitle, clientName, link));
     },
 

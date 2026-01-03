@@ -38,7 +38,6 @@ const baseTemplate = (title, bodyContent, actionButton = '') => `
 `;
 
 module.exports = {
-    // 1. Recuperação de Senha (Link)
     resetPassword: (link) => baseTemplate(
         'Redefinição de Senha',
         `<p>Você solicitou a recuperação da sua senha.</p>
@@ -46,14 +45,12 @@ module.exports = {
         `<a href="${link}" style="${styles.button}">Redefinir Minha Senha</a>`
     ),
 
-    // 2. Senha Alterada (Confirmação)
     passwordChanged: (name) => baseTemplate(
         'Senha Alterada com Sucesso',
         `<p>Olá, <span style="${styles.highlight}">${name}</span>.</p>
          <p>Confirmamos que sua senha foi alterada com sucesso. Se você não realizou esta ação, entre em contato conosco imediatamente.</p>`
     ),
 
-    // 3. Senha Alterada pelo Admin
     adminPasswordReset: (name, newPassword) => baseTemplate(
         'Sua Senha foi Redefinida',
         `<p>Olá, <span style="${styles.highlight}">${name}</span>.</p>
@@ -65,7 +62,6 @@ module.exports = {
         `<a href="http://localhost:3000/auth/login" style="${styles.button}">Acessar Plataforma</a>`
     ),
 
-    // 4. Nova Mensagem no Chat
     newMessage: (senderName, messagePreview, link) => baseTemplate(
         'Nova Mensagem Recebida',
         `<p>Você recebeu uma nova mensagem de <span style="${styles.highlight}">${senderName}</span>.</p>
@@ -75,7 +71,6 @@ module.exports = {
         `<a href="${link}" style="${styles.button}">Responder no Chat</a>`
     ),
 
-    // 5. Novo Artigo Publicado (Para Clientes/Trainers)
     articlePublished: (title, authorName, link) => baseTemplate(
         'Novo Artigo no Blog!',
         `<p>Um novo conteúdo acaba de ser publicado na plataforma.</p>
@@ -85,7 +80,6 @@ module.exports = {
         `<a href="${link}" style="${styles.button}">Ler Artigo</a>`
     ),
 
-    // 6. Novo Artigo Pendente (Para Admin)
     articlePending: (title, authorName, link) => baseTemplate(
         'Novo Artigo Aguardando Aprovação',
         `<p>O treinador <span style="${styles.highlight}">${authorName}</span> enviou um novo artigo.</p>
@@ -94,7 +88,6 @@ module.exports = {
         `<a href="${link}" style="${styles.button}">Gerenciar Artigos</a>`
     ),
 
-    // 7. Novo Treino Criado (Para Client e Admin)
     newWorkout: (workoutTitle, clientName, link) => baseTemplate(
         'Novo Treino Disponível',
         `<p>Um novo treino foi adicionado para <span style="${styles.highlight}">${clientName}</span>.</p>
@@ -103,7 +96,6 @@ module.exports = {
         `<a href="${link}" style="${styles.button}">Ver Treino</a>`
     ),
 
-    // 8. Novo Usuário (Para Admin)
     newUser: (name, email, role) => baseTemplate(
         'Novo Usuário Registrado',
         `<p>Um novo usuário acabou de se cadastrar na plataforma.</p>
