@@ -1,12 +1,12 @@
 const { Pool } = require('pg');
-const bcrypt = require('bcryptjs'); // Usando bcryptjs conforme seu package.json
+const bcrypt = require('bcryptjs');
 require('dotenv').config();
 
 // Configuração da Conexão
 const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL;
 
 if (!connectionString) {
-  console.error("❌ ERRO CRÍTICO: Nenhuma string de conexão encontrada.");
+  console.error("❌ ERRO CRÍTICO: Nenhuma string de conexão encontrada. Verifique suas variáveis de ambiente.");
 }
 
 const isProduction = process.env.NODE_ENV === 'production';
@@ -16,10 +16,10 @@ const pool = new Pool({
   ssl: isProduction ? { rejectUnauthorized: false } : false
 });
 
-// Wrapper para facilitar queries simples
+// Wrapper para facilitar queries
 const query = (text, params) => pool.query(text, params);
 
-// --- FUNÇÕES DE USUÁRIO (Sintaxe PostgreSQL $1, $2...) ---
+// --- FUNÇÕES DE USUÁRIO ---
 
 async function getUserByEmail(email) {
     const res = await query("SELECT * FROM users WHERE email = $1", [email]);
@@ -71,6 +71,8 @@ async function updateUser(id, updates) {
     return res.rows[0];
 }
 
+// --- FUNÇÕES DE TREINO E GESTÃO ---
+
 async function getWorkoutsByUserId(userId) {
     const res = await query("SELECT * FROM workouts WHERE user_id = $1 ORDER BY created_at DESC", [userId]);
     return res.rows;
@@ -78,7 +80,6 @@ async function getWorkoutsByUserId(userId) {
 
 async function createWorkout(workout) {
     const { user_id, trainer_id, title, description, exercises } = workout;
-    // Garante que exercises seja string JSON se não for
     const exercisesJson = typeof exercises === 'string' ? exercises : JSON.stringify(exercises);
     
     const sql = "INSERT INTO workouts (user_id, trainer_id, title, description, exercises) VALUES ($1, $2, $3, $4, $5) RETURNING *";
@@ -97,7 +98,7 @@ async function getClients() {
 }
 
 async function getUserStats(userId) {
-    // Mock ou implementação futura
+    // Implementação básica para evitar erro
     return {
         completed_workouts: 0,
         streak: 0,
@@ -105,7 +106,7 @@ async function getUserStats(userId) {
     };
 }
 
-// --- NOVAS FUNÇÕES PARA O PAINEL DO TREINADOR (Sintaxe PostgreSQL) ---
+// --- FUNÇÕES EXCLUSIVAS DO PAINEL DO TREINADOR (FILTRADAS POR ID) ---
 
 async function getClientsByTrainer(trainerId) {
     const sql = `
@@ -134,13 +135,15 @@ async function getTrainerStats(trainerId) {
     const stats = { totalClients: 0, totalWorkouts: 0, weeklyCheckins: 0 };
     
     try {
+        // 1. Total de Alunos
         const clientsRes = await query("SELECT COUNT(*) FROM users WHERE role = 'client' AND trainer_id = $1", [trainerId]);
         stats.totalClients = parseInt(clientsRes.rows[0].count || 0);
 
+        // 2. Total de Treinos
         const workoutsRes = await query("SELECT COUNT(*) FROM workouts WHERE trainer_id = $1", [trainerId]);
         stats.totalWorkouts = parseInt(workoutsRes.rows[0].count || 0);
 
-        // Checkins (protegido caso a tabela não exista)
+        // 3. Checkins (com tratamento de erro caso a tabela não exista)
         try {
             const checkinsRes = await query(`
                 SELECT COUNT(*) 
@@ -150,11 +153,10 @@ async function getTrainerStats(trainerId) {
             `, [trainerId]);
             stats.weeklyCheckins = parseInt(checkinsRes.rows[0].count || 0);
         } catch (e) {
-            // Tabela checkins pode não existir ainda
             stats.weeklyCheckins = 0;
         }
     } catch (err) {
-        console.error("Erro ao calcular estatísticas:", err);
+        console.error("Erro ao calcular estatísticas do treinador:", err);
     }
     
     return stats;
