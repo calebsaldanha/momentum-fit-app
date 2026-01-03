@@ -113,18 +113,6 @@ router.get("/edit/:id", requireTrainerAuth, async (req, res) => {
         res.status(500).render("pages/error", { message: "Erro ao carregar edição." }); 
     }
 });
-        
-        const exRes = await pool.query("SELECT * FROM workout_exercises WHERE workout_id = $1 ORDER BY order_index", [req.params.id]);
-        
-        res.render('pages/edit-workout', {
-            title: 'Editar Treino',
-            workout: wRes.rows[0],
-            exercises: exRes.rows,
-            user: req.session.user,
-            currentPage: 'create-workout'
-        });
-    } catch (err) { res.status(500).render('pages/error', { message: 'Erro ao carregar edição.' }); }
-});
 
 // 5. Salvar Edição (POST)
 router.post('/edit/:id', requireTrainerAuth, async (req, res) => {
@@ -189,8 +177,7 @@ router.get('/:id', async (req, res) => {
 
         res.render('pages/workout-details', {
             title: workoutRes.rows[0].title,
-            workout: workout,
-            exercises: exercisesRes.rowsRes.rows[0],
+            workout: workoutRes.rows[0],
             exercises: exercisesRes.rows,
             user: req.session.user,
             profile: profile, // CRÍTICO: Envia o perfil para a sidebar
