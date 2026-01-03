@@ -52,7 +52,7 @@
                             </td>
                             <td style="text-align: right;">
                                 <div style="display: flex; justify-content: flex-end; gap: 10px;">
-                                    <a href="/admin/clients/<%= user.id %>" class="btn btn-secondary btn-sm" style="background: var(--c-accent-primary); color: black; border: none;">Detalhes</a>
+                                    <a href="/admin/clients/<%= user.id %>?source=admin_manage" class="btn btn-secondary btn-sm" style="background: var(--c-accent-primary); color: black; border: none;">Detalhes</a>
                                     <form action="/superadmin/users/<%= user.id %>/delete" method="POST" onsubmit="return confirm('Excluir este aluno?');" style="margin:0;">
                                         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                                         <button type="submit" class="btn btn-secondary btn-sm" style="color: var(--c-error); border-color: var(--c-error);">Excluir</button>

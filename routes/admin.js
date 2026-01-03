@@ -49,11 +49,12 @@ router.get('/clients', requireAdmin, async (req, res) => {
     }
 });
 
-// Detalhes do Aluno
+// Detalhes do Aluno (Rota unificada)
 router.get('/clients/:id', requireAdmin, async (req, res) => {
     try {
         const trainerId = req.session.user.id;
         const clientId = req.params.id;
+        const source = req.query.source; // Recebe a origem do clique
 
         const client = await db.getUserById(clientId);
         
@@ -61,9 +62,19 @@ router.get('/clients/:id', requireAdmin, async (req, res) => {
             return res.status(404).render('pages/error', { message: 'Aluno não encontrado.', user: req.session.user });
         }
         
-        // Verifica permissão (apenas o treinador do aluno ou superadmin)
-        if (client.trainer_id !== trainerId && req.session.user.role !== 'superadmin') {
-             return res.status(403).render('pages/error', { message: 'Sem permissão.', user: req.session.user });
+        // Regras de Visualização e Contexto
+        let pageContext = 'clients'; // Padrão: Painel de Personal
+        let showAdminOptions = false;
+
+        // Se for Superadmin E estiver vindo explicitamente da gestão de usuários
+        if (req.session.user.role === 'superadmin' && source === 'admin_manage') {
+            pageContext = 'superadmin_users';
+            showAdminOptions = true;
+        } else {
+            // Contexto de Personal: verifica se é o treinador do aluno ou se é superadmin (mas sem poderes de gestão nessa tela)
+            if (client.trainer_id !== trainerId && req.session.user.role !== 'superadmin') {
+                return res.status(403).render('pages/error', { message: 'Sem permissão.', user: req.session.user });
+            }
         }
 
         const workouts = await db.getWorkoutsByUserId(clientId);
@@ -73,12 +84,8 @@ router.get('/clients/:id', requireAdmin, async (req, res) => {
         const profileRes = await db.query("SELECT * FROM client_profiles WHERE user_id = $1", [clientId]);
         const detailedProfile = profileRes.rows[0] || {};
 
-        // Lógica para Superadmin (contexto de menu e lista de treinadores)
-        const isSuperAdmin = req.session.user.role === 'superadmin';
-        const pageContext = isSuperAdmin ? 'superadmin_users' : 'clients';
-        
         let trainersList = [];
-        if (isSuperAdmin) { 
+        if (showAdminOptions) { 
             trainersList = await db.getAllTrainers(); 
         }
 
@@ -87,32 +94,16 @@ router.get('/clients/:id', requireAdmin, async (req, res) => {
             bodyClass: 'dashboard-body',
             currentPage: pageContext,
             user: req.session.user,
-            clientProfile: client, // Passado como clientProfile para compatibilidade com o EJS
+            clientData: client, // Alterado para clientData para evitar conflito com EJS
             workouts: workouts || [],
             stats: stats || {},
             detailedProfile: detailedProfile,
-            trainers: trainersList
+            trainers: trainersList,
+            showAdminOptions: showAdminOptions // Controla exibição do bloco admin
         });
     } catch (err) {
         console.error('Erro client details:', err);
         res.status(500).render('pages/error', { message: 'Erro ao carregar detalhes.', user: req.session.user });
-    }
-});
-
-// Lista de Treinadores (Superadmin)
-router.get('/trainers', requireAdmin, async (req, res) => {
-    if(req.session.user.role !== 'superadmin') return res.redirect('/admin/dashboard');
-    try {
-        const trainers = await db.getAllTrainers();
-        res.render('pages/admin-trainers', { 
-            title: 'Treinadores',
-            bodyClass: 'dashboard-body',
-            currentPage: 'trainers',
-            user: req.session.user,
-            trainers: trainers
-        });
-    } catch(err) {
-        res.redirect('/admin/dashboard');
     }
 });
 

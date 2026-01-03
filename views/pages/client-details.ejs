@@ -5,11 +5,11 @@
 
     <main class="main-content">
         <div class="section-header">
-            <h1><i class="fas fa-user"></i> Detalhes do Aluno: <%= client.name %></h1>
-            <a href="/admin/clients" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Voltar</a>
+            <h1><i class="fas fa-user"></i> Detalhes do Aluno: <%= clientData.name %></h1>
+            <a href="javascript:history.back()" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Voltar</a>
         </div>
 
-        <% if (user.role === "superadmin") { %>
+        <% if (showAdminOptions) { %>
         <div class="content-card" style="margin-bottom: 2rem; border: 1px solid #444; background: #1a1a1a;">
             <h3 style="color: var(--c-accent-primary); border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px;">
                 <i class="fas fa-user-shield"></i> Gestão Administrativa
@@ -18,14 +18,14 @@
                 <div>
                     <form action="/superadmin/assign-trainer" method="POST">
                         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                        <input type="hidden" name="user_id" value="<%= client.id %>">
+                        <input type="hidden" name="user_id" value="<%= clientData.id %>">
                         <label style="display:block; margin-bottom:5px; color:#ccc;">Atribuir Personal:</label>
                         <div style="display: flex; gap: 10px;">
                             <select name="trainer_id" class="form-control" style="padding: 8px; background: #333; color: white; border: 1px solid #555; border-radius: 4px; flex-grow: 1;">
                                 <option value="">Sem Personal</option>
                                 <% if(typeof trainers !== "undefined") { %>
                                     <% trainers.forEach(t => { %>
-                                        <option value="<%= t.id %>" <%= client.trainer_id === t.id ? "selected" : "" %>><%= t.name %></option>
+                                        <option value="<%= t.id %>" <%= clientData.trainer_id === t.id ? "selected" : "" %>><%= t.name %></option>
                                     <% }); %>
                                 <% } %>
                             </select>
@@ -36,15 +36,15 @@
                 <div style="display: flex; gap: 1rem; align-items: flex-end;">
                     <form action="/superadmin/toggle-status" method="POST" style="margin: 0;">
                         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                        <input type="hidden" name="user_id" value="<%= client.id %>">
-                        <input type="hidden" name="status" value="<%= client.status === "active" ? "suspended" : "active" %>">
-                        <button type="submit" class="btn <%= client.status === "active" ? "btn-warning" : "btn-success" %> btn-sm">
-                            <i class="fas fa-power-off"></i> <%= client.status === "active" ? "Suspender" : "Ativar" %>
+                        <input type="hidden" name="user_id" value="<%= clientData.id %>">
+                        <input type="hidden" name="status" value="<%= clientData.status === "active" ? "suspended" : "active" %>">
+                        <button type="submit" class="btn <%= clientData.status === "active" ? "btn-warning" : "btn-success" %> btn-sm">
+                            <i class="fas fa-power-off"></i> <%= clientData.status === "active" ? "Suspender" : "Ativar" %>
                         </button>
                     </form>
                     <form action="/superadmin/delete-user" method="POST" onsubmit="return confirm('Tem certeza que deseja excluir este usuário permanentemente?');" style="margin: 0;">
                         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                        <input type="hidden" name="user_id" value="<%= client.id %>">
+                        <input type="hidden" name="user_id" value="<%= clientData.id %>">
                         <button type="submit" class="btn btn-danger btn-sm">
                             <i class="fas fa-trash"></i> Excluir
                         </button>
@@ -74,7 +74,7 @@
                 <i class="fas fa-file-medical-alt"></i> Ficha de Anamnese e Perfil Completo
             </h3>
             
-            <% if (typeof detailedProfile !== 'undefined' && detailedProfile) { %>
+            <% if (typeof detailedProfile !== 'undefined' && detailedProfile && detailedProfile.user_id) { %>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
                     <div>
                         <h4 style="color: var(--c-accent-primary); margin-bottom: 0.5rem; font-size: 1rem;">Dados Pessoais</h4>
@@ -107,7 +107,7 @@
         <div class="content-card" style="margin-top: 2rem;">
             <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                 <h2>Treinos Atribuídos</h2>
-                <a href="/admin/workouts/create?clientId=<%= client.id %>" class="btn btn-primary">
+                <a href="/admin/workouts/create?clientId=<%= clientData.id %>" class="btn btn-primary">
                     <i class="fas fa-plus"></i> Novo Treino
                 </a>
             </div>
