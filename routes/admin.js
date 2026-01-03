@@ -76,7 +76,6 @@ router.get('/clients/:id', requireAdmin, async (req, res) => {
             
             // Dados da Página
             user: req.session.user,
-            client: client,
             clientProfile: client, // Compatibilidade caso a view use este nome
             workouts: workouts || [],
             stats: stats || {}
