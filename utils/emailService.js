@@ -1,8 +1,7 @@
 const nodemailer = require('nodemailer');
+const templates = require('./emailTemplates');
 require('dotenv').config();
 
-// Configuração do Transporter (Gmail, Outlook, etc ou Mailtrap)
-// Se não houver variáveis, ele vai apenas logar no console
 const transporter = nodemailer.createTransport({
     service: process.env.EMAIL_SERVICE || 'gmail',
     auth: {
@@ -11,36 +10,70 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-async function sendPasswordResetEmail(email, token, host) {
-    const resetLink = `http://${host}/auth/reset/${token}`;
+const sendEmail = async (to, subject, htmlContent) => {
+    if (!to) return false;
     
-    const mailOptions = {
-        from: '"Momentum Fit" <no-reply@momentumfit.com>',
-        to: email,
-        subject: 'Redefinição de Senha - Momentum Fit',
-        html: `
-            <h3>Você solicitou a redefinição de senha?</h3>
-            <p>Clique no link abaixo para criar uma nova senha:</p>
-            <a href="${resetLink}">${resetLink}</a>
-            <p>Se você não solicitou isso, ignore este e-mail.</p>
-        `
-    };
-
+    // Simulação se não houver credenciais (para não quebrar o app em dev)
     if (!process.env.EMAIL_USER) {
-        console.log("⚠️  EMAIL_USER não configurado. Simulando envio:");
-        console.log(`��� Para: ${email}`);
-        console.log(`��� Link: ${resetLink}`);
+        console.log(`\n��� [SIMULAÇÃO DE EMAIL]`);
+        console.log(`Para: ${to}`);
+        console.log(`Assunto: ${subject}`);
+        console.log(`Conteúdo (resumo): ${htmlContent.substring(0, 100)}...`);
         return true;
     }
 
     try {
-        await transporter.sendMail(mailOptions);
-        console.log(`✅ Email enviado para ${email}`);
+        await transporter.sendMail({
+            from: '"Momentum Fit" <no-reply@momentumfit.com>',
+            to,
+            subject,
+            html: htmlContent
+        });
+        console.log(`✅ Email enviado para ${to}`);
         return true;
     } catch (error) {
         console.error("❌ Erro ao enviar email:", error);
         return false;
     }
-}
+};
 
-module.exports = { sendPasswordResetEmail };
+module.exports = {
+    sendPasswordResetEmail: async (email, token, host) => {
+        const link = \`http://\${host}/auth/reset/\${token}\`;
+        return sendEmail(email, 'Redefinição de Senha', templates.resetPassword(link));
+    },
+
+    sendPasswordChangedEmail: async (email, name) => {
+        return sendEmail(email, 'Sua senha foi alterada', templates.passwordChanged(name));
+    },
+
+    sendAdminPasswordResetEmail: async (email, name, newPassword) => {
+        return sendEmail(email, 'Nova Senha de Acesso', templates.adminPasswordReset(name, newPassword));
+    },
+
+    sendNewMessageEmail: async (email, senderName, messageText, host) => {
+        const link = \`http://\${host}/chat\`;
+        return sendEmail(email, 'Você tem uma nova mensagem', templates.newMessage(senderName, messageText.substring(0, 50), link));
+    },
+
+    sendArticlePublishedEmail: async (emails, title, authorName, host) => {
+        const link = \`http://\${host}/articles\`;
+        // Envia individualmente ou em BCC para não expor lista (aqui simulando loop simples)
+        // Para muitos usuários, o ideal seria BCC ou fila de processamento
+        return sendEmail(emails.join(','), 'Novo Artigo Publicado!', templates.articlePublished(title, authorName, link));
+    },
+
+    sendNewArticlePendingEmail: async (adminEmail, title, authorName, host) => {
+        const link = \`http://\${host}/articles/manage\`;
+        return sendEmail(adminEmail, 'Novo Artigo Pendente', templates.articlePending(title, authorName, link));
+    },
+
+    sendNewWorkoutEmail: async (email, workoutTitle, clientName, host) => {
+        const link = \`http://\${host}/client/workouts\`;
+        return sendEmail(email, 'Novo Treino Adicionado', templates.newWorkout(workoutTitle, clientName, link));
+    },
+
+    sendNewUserEmail: async (adminEmail, name, email, role) => {
+        return sendEmail(adminEmail, 'Novo Registro no Sistema', templates.newUser(name, email, role));
+    }
+};

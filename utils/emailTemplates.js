@@ -1,146 +1,117 @@
 const styles = {
-    bgBody: '#050505',
-    bgCard: '#121212',
-    textPrimary: '#FFFFFF',
-    textSecondary: '#A3A3A3',
-    accent: '#BEF202',
-    border: '#2A2A2A',
-    fontFamily: "'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
-    containerWidth: '600px',
-    borderRadius: '16px',
+    body: 'background-color: #f4f6f9; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; padding: 20px; color: #333;',
+    container: 'max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);',
+    header: 'background-color: #1a1a1a; padding: 30px 20px; text-align: center;',
+    logo: 'color: #ffffff; font-size: 24px; font-weight: 800; text-decoration: none; letter-spacing: 1px;',
+    logoAccent: 'color: #e74c3c;',
+    content: 'padding: 40px 30px; line-height: 1.6; color: #555;',
+    button: 'display: inline-block; background-color: #e74c3c; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; margin-top: 20px;',
+    footer: 'background-color: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #888; border-top: 1px solid #eee;',
+    highlight: 'color: #1a1a1a; font-weight: 700;'
 };
 
-const getBaseLayout = (preheader, title, content, host) => {
-    const protocol = host.includes('localhost') ? 'http' : 'https';
-    const baseUrl = `${protocol}://${host}`;
-
-    // Background da Página Inicial (Hero BG)
-    // Nota: Em localhost, usamos um placeholder para evitar erros de carregamento
-    const bgUrl = host.includes('localhost')
-        ? 'https://placehold.co/800x1000/050505/050505.png' 
-        : `${baseUrl}/images/hero-bg.png`;
-
-    // Logo via CID (Anexo) para garantir exibição
-    const logoSrc = 'cid:logo@momentumfit';
-
-    return `
-    <!DOCTYPE html>
-    <html lang="pt-BR">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>${title}</title>
-        <style>
-            body { margin: 0; padding: 0; background-color: ${styles.bgBody}; font-family: ${styles.fontFamily}; -webkit-font-smoothing: antialiased; }
-            a { color: ${styles.accent}; text-decoration: none; }
-            img { display: block; border: 0; max-width: 100%; height: auto; }
-            .bg-image {
-                background-image: url('${bgUrl}');
-                background-size: cover;
-                background-position: center top;
-                background-repeat: no-repeat;
-                background-color: ${styles.bgBody};
-            }
-        </style>
-    </head>
-    <body style="margin: 0; padding: 0; background-color: ${styles.bgBody};">
-        <div style="display: none; max-height: 0px; overflow: hidden;">${preheader}</div>
-
-        <table border="0" cellpadding="0" cellspacing="0" width="100%" class="bg-image" style="padding: 60px 0;">
-            <tr>
-                <td align="center">
-                    
-                    <table border="0" cellpadding="0" cellspacing="0" width="${styles.containerWidth}" style="background-color: rgba(18, 18, 18, 0.96); border-radius: ${styles.borderRadius}; border: 1px solid ${styles.border}; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.8); backdrop-filter: blur(5px);">
-                        
-                        <tr>
-                            <td align="center" style="padding: 40px 0; border-bottom: 1px solid ${styles.border}; background: linear-gradient(to bottom, rgba(30,30,30,0.5), rgba(18,18,18,0));">
-                                <a href="${baseUrl}" target="_blank">
-                                    <img src="${logoSrc}" alt="Momentum Fit" width="180" style="color: #fff;">
-                                </a>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td style="padding: 50px; color: ${styles.textPrimary};">
-                                <h1 style="margin: 0 0 25px 0; font-size: 24px; font-weight: 800; text-transform: uppercase; text-align: center; letter-spacing: -0.5px;">
-                                    ${title}
-                                </h1>
-                                <div style="font-size: 16px; line-height: 1.7; color: ${styles.textSecondary}; text-align: left;">
-                                    ${content}
-                                </div>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td style="background-color: #080808; padding: 30px; text-align: center; border-top: 1px solid ${styles.border};">
-                                <p style="margin: 0; font-size: 11px; color: #555;">
-                                    © ${new Date().getFullYear()} Momentum Fit. Todos os direitos reservados.
-                                </p>
-                            </td>
-                        </tr>
-                    </table>
-                    <table border="0" cellpadding="0" cellspacing="0"><tr><td height="40"></td></tr></table>
-                </td>
-            </tr>
-        </table>
-    </body>
-    </html>
-    `;
-};
-
-const createButton = (link, text) => `
-    <table border="0" cellpadding="0" cellspacing="0" style="margin-top: 35px; margin-bottom: 15px; width: 100%;">
-        <tr>
-            <td align="center">
-                <table border="0" cellpadding="0" cellspacing="0">
-                    <tr>
-                        <td align="center" bgcolor="${styles.accent}" style="border-radius: 8px;">
-                            <a href="${link}" target="_blank" style="display: inline-block; padding: 16px 36px; font-family: ${styles.fontFamily}; font-size: 14px; font-weight: 800; color: #000000; text-decoration: none; text-transform: uppercase; letter-spacing: 1px;">
-                                ${text}
-                            </a>
-                        </td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-    </table>
+const baseTemplate = (title, bodyContent, actionButton = '') => `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${title} | Momentum Fit</title>
+</head>
+<body style="${styles.body}">
+    <div style="${styles.container}">
+        <div style="${styles.header}">
+            <a href="#" style="${styles.logo}">MOMENTUM <span style="${styles.logoAccent}">FIT</span></a>
+        </div>
+        <div style="${styles.content}">
+            <h2 style="color: #1a1a1a; margin-top: 0;">${title}</h2>
+            ${bodyContent}
+            ${actionButton ? `<div style="text-align: center; margin-top: 30px;">${actionButton}</div>` : ''}
+        </div>
+        <div style="${styles.footer}">
+            <p>&copy; ${new Date().getFullYear()} Momentum Fit. Todos os direitos reservados.</p>
+            <p>Este é um email automático, por favor não responda.</p>
+        </div>
+    </div>
+</body>
+</html>
 `;
 
-const highlight = (text) => `<span style="color: ${styles.textPrimary}; font-weight: 700;">${text}</span>`;
-const accent = (text) => `<span style="color: ${styles.accent}; font-weight: 700;">${text}</span>`;
+module.exports = {
+    // 1. Recuperação de Senha (Link)
+    resetPassword: (link) => baseTemplate(
+        'Redefinição de Senha',
+        `<p>Você solicitou a recuperação da sua senha.</p>
+         <p>Clique no botão abaixo para criar uma nova senha. Este link expira em 1 hora.</p>`,
+        `<a href="${link}" style="${styles.button}">Redefinir Minha Senha</a>`
+    ),
 
-const templates = {
-    pendingTrainer: (data) => ({ title: 'Solicitação de Personal', text: `Um novo personal trainer, ${highlight(data.name)} (<a href="mailto:${data.email}" style="color:${styles.accent}">${data.email}</a>), realizou o cadastro.` }),
-    pendingClient: (data) => ({ title: 'Novo Cliente', text: `O cliente ${highlight(data.name)} completou o cadastro e aguarda vinculação.` }),
-    newMessageAdmin: (data) => ({ title: 'Nova Mensagem', text: `O usuário ${highlight(data.name)} enviou uma mensagem:<br><br><em>"${data.subject}"</em>` }),
-    newMessageTrainer: (data) => ({ title: 'Nova Mensagem', text: `Seu aluno ${highlight(data.clientName)} enviou uma mensagem no chat.` }),
-    clientAssigned: (data) => ({ title: 'Novo Aluno', text: `Você recebeu um novo aluno! ${highlight(data.clientName)} foi adicionado à sua lista.` }),
-    newMessageClient: (data) => ({ title: 'Mensagem do Personal', text: `${highlight(data.trainerName)} respondeu sua mensagem no chat.` }),
-    registrationApproved: () => ({ title: 'Bem-vindo(a)!', text: `Sua conta na Momentum Fit foi aprovada.` }),
-    newWorkout: (data) => ({ title: 'Novo Treino', text: `Um novo treino foi adicionado à sua rotina: <br><br>${accent(data.workoutTitle)}` }),
-    newWorkoutCreated: (data) => ({ title: 'Treino Criado', text: `Personal ${highlight(data.trainerName)} criou o treino "${accent(data.workoutTitle)}".` }),
-    workoutEdited: (data) => ({ title: 'Treino Atualizado', text: `Seu personal fez ajustes no treino ${highlight(data.workoutTitle)}.` }),
-    newArticle: (data) => ({ title: 'Novo Artigo', text: `Um novo artigo foi publicado: ${highlight(data.articleTitle)}.` }),
-    custom: (data) => ({ title: 'Notificação', text: data.text })
+    // 2. Senha Alterada (Confirmação)
+    passwordChanged: (name) => baseTemplate(
+        'Senha Alterada com Sucesso',
+        `<p>Olá, <span style="${styles.highlight}">${name}</span>.</p>
+         <p>Confirmamos que sua senha foi alterada com sucesso. Se você não realizou esta ação, entre em contato conosco imediatamente.</p>`
+    ),
+
+    // 3. Senha Alterada pelo Admin
+    adminPasswordReset: (name, newPassword) => baseTemplate(
+        'Sua Senha foi Redefinida',
+        `<p>Olá, <span style="${styles.highlight}">${name}</span>.</p>
+         <p>Um administrador redefiniu sua senha de acesso.</p>
+         <p style="background: #eee; padding: 15px; border-radius: 4px; text-align: center; font-family: monospace; font-size: 18px; margin: 20px 0;">
+            ${newPassword}
+         </p>
+         <p>Recomendamos que você altere esta senha após o login.</p>`,
+        `<a href="http://localhost:3000/auth/login" style="${styles.button}">Acessar Plataforma</a>`
+    ),
+
+    // 4. Nova Mensagem no Chat
+    newMessage: (senderName, messagePreview, link) => baseTemplate(
+        'Nova Mensagem Recebida',
+        `<p>Você recebeu uma nova mensagem de <span style="${styles.highlight}">${senderName}</span>.</p>
+         <blockquote style="border-left: 4px solid #e74c3c; padding-left: 15px; margin: 20px 0; color: #666; font-style: italic;">
+            "${messagePreview}..."
+         </blockquote>`,
+        `<a href="${link}" style="${styles.button}">Responder no Chat</a>`
+    ),
+
+    // 5. Novo Artigo Publicado (Para Clientes/Trainers)
+    articlePublished: (title, authorName, link) => baseTemplate(
+        'Novo Artigo no Blog!',
+        `<p>Um novo conteúdo acaba de ser publicado na plataforma.</p>
+         <p><span style="${styles.highlight}">${title}</span></p>
+         <p>Escrito por: ${authorName}</p>
+         <p>Acesse agora para conferir as novidades!</p>`,
+        `<a href="${link}" style="${styles.button}">Ler Artigo</a>`
+    ),
+
+    // 6. Novo Artigo Pendente (Para Admin)
+    articlePending: (title, authorName, link) => baseTemplate(
+        'Novo Artigo Aguardando Aprovação',
+        `<p>O treinador <span style="${styles.highlight}">${authorName}</span> enviou um novo artigo.</p>
+         <p><strong>Título:</strong> ${title}</p>
+         <p>Por favor, revise o conteúdo para aprovação.</p>`,
+        `<a href="${link}" style="${styles.button}">Gerenciar Artigos</a>`
+    ),
+
+    // 7. Novo Treino Criado (Para Client e Admin)
+    newWorkout: (workoutTitle, clientName, link) => baseTemplate(
+        'Novo Treino Disponível',
+        `<p>Um novo treino foi adicionado para <span style="${styles.highlight}">${clientName}</span>.</p>
+         <p><strong>Treino:</strong> ${workoutTitle}</p>
+         <p>Prepare-se para suar a camisa!</p>`,
+        `<a href="${link}" style="${styles.button}">Ver Treino</a>`
+    ),
+
+    // 8. Novo Usuário (Para Admin)
+    newUser: (name, email, role) => baseTemplate(
+        'Novo Usuário Registrado',
+        `<p>Um novo usuário acabou de se cadastrar na plataforma.</p>
+         <ul style="list-style: none; padding: 0;">
+            <li><strong>Nome:</strong> ${name}</li>
+            <li><strong>Email:</strong> ${email}</li>
+            <li><strong>Tipo:</strong> <span style="text-transform: capitalize;">${role === 'trainer' ? 'Personal' : 'Aluno'}</span></li>
+         </ul>`,
+        `<a href="http://localhost:3000/superadmin/manage" style="${styles.button}">Ver Usuários</a>`
+    )
 };
-
-const generateEmailTemplate = (type, role, data, link, linkText, host) => {
-    let templateKey = type;
-    if (type === 'newMessage') {
-        if (role === 'admin') templateKey = 'newMessageAdmin';
-        else if (role === 'trainer') templateKey = 'newMessageTrainer';
-        else templateKey = 'newMessageClient';
-    }
-    const templateFn = templates[templateKey] || templates.custom;
-    const { title, text } = templateFn(data);
-    
-    let bodyContent = text;
-    let fullLink = '#';
-    if (link) {
-        fullLink = link.startsWith('http') ? link : (host.startsWith('http') ? `${host}${link}` : `https://${host}${link}`);
-        bodyContent += createButton(fullLink, linkText || 'Acessar');
-    }
-    return { subject: title, html: getBaseLayout(title, title, bodyContent, host) };
-};
-
-module.exports = { generateEmailTemplate };
