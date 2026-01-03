@@ -6,7 +6,11 @@ const multer = require('multer');
 const { put } = require('@vercel/blob'); 
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } });
-const requireAuth = (req, res, next) => { if (!req.session.user) return res.redirect('/auth/login'); next(); };
+
+const requireAuth = (req, res, next) => { 
+    if (!req.session.user) return res.redirect('/auth/login'); 
+    next(); 
+};
 
 router.use(requireAuth);
 
@@ -14,9 +18,9 @@ router.use(requireAuth);
 router.get('/', async (req, res) => {
     try {
         const { id, role, status } = req.session.user;
-        const selectedUserId = req.query.user_id; // ID do usuário selecionado para conversa
+        const selectedUserId = req.query.user_id;
         
-        // --- NOVO: Limpa notificações genéricas de chat ao entrar na página ---
+        // Limpa notificações
         await pool.query(
             "UPDATE notifications SET is_read = true WHERE user_id = $1 AND (link = '/chat' OR title = 'Nova Mensagem')",
             [id]
@@ -25,7 +29,7 @@ router.get('/', async (req, res) => {
         let query;
         let params = [];
 
-        // Lógica de listagem de usuários
+        // Lista usuários disponíveis para conversa
         if (role === 'superadmin') {
             query = "SELECT id, name, role, profile_image FROM users WHERE id != $1 ORDER BY name ASC";
             params = [id];
@@ -51,17 +55,14 @@ router.get('/', async (req, res) => {
             return u;
         });
 
-        // Carrega conversa ativa se houver user_id
         let activeChat = null;
         let messages = [];
 
         if (selectedUserId) {
-            // Verifica se o usuário selecionado está na lista permitida ou é válido
             const userCheck = await pool.query("SELECT id, name, profile_image FROM users WHERE id = $1", [selectedUserId]);
             if (userCheck.rows.length > 0) {
                 activeChat = userCheck.rows[0];
                 
-                // Busca mensagens
                 const msgsRes = await pool.query(`
                     SELECT id, sender_id, content, message_type, created_at 
                     FROM messages 
@@ -89,33 +90,13 @@ router.get('/', async (req, res) => {
     }
 });
 
-// API Mensagens (JSON) - Mantida caso seja usada via fetch em outro lugar
-router.get('/messages/:contactId', async (req, res) => {
-    try {
-        const { id: userId } = req.session.user;
-        const contactId = req.params.contactId;
-
-        const result = await pool.query(`
-            SELECT id, sender_id, content, message_type, created_at 
-            FROM messages 
-            WHERE (sender_id = $1 AND receiver_id = $2) OR (sender_id = $2 AND receiver_id = $1) 
-            ORDER BY created_at ASC`, 
-            [userId, contactId]
-        );
-
-        await pool.query(
-            "UPDATE notifications SET is_read = true WHERE user_id = $1 AND (link = '/chat' OR title = 'Nova Mensagem')",
-            [userId]
-        );
-
-        res.json(result.rows);
-    } catch (err) { res.status(500).json({ error: "Erro mensagens" }); }
-});
-
+// Envio de Mensagem
 router.post('/send', requireAuth, upload.single('file'), async (req, res) => {
     try {
         const { id: sender_id, name: senderName } = req.session.user;
-        const { receiver_id, content } = req.body;
+        // CORREÇÃO: Mapeando recipient_id corretamente do formulário
+        const { recipient_id, content } = req.body;
+        
         let messageContent = content || '';
         let messageType = 'text';
         
@@ -123,20 +104,28 @@ router.post('/send', requireAuth, upload.single('file'), async (req, res) => {
             const filename = `${Date.now()}-${req.file.originalname}`;
             const blob = await put(filename, req.file.buffer, { access: 'public', contentType: req.file.mimetype });
             messageContent = blob.url;
-            messageType = req.file.mimetype.startsWith('image/') ? 'image' : 'video';
+            
+            // CORREÇÃO: Lógica aprimorada para tipos de arquivo
+            if (req.file.mimetype.startsWith('image/')) {
+                messageType = 'image';
+            } else if (req.file.mimetype.startsWith('video/')) {
+                messageType = 'video';
+            } else {
+                messageType = 'file'; // Para PDFs e outros documentos
+            }
+        } else if (!messageContent.trim()) {
+            // Evita envio de mensagem vazia sem arquivo
+            return res.redirect('/chat?user_id=' + recipient_id);
         }
         
-        // Insere mensagem
         await pool.query(
             'INSERT INTO messages (sender_id, receiver_id, content, message_type) VALUES ($1, $2, $3, $4)', 
-            [sender_id, receiver_id, messageContent, messageType]
+            [sender_id, recipient_id, messageContent, messageType]
         );
         
-        // Notifica
-        notificationService.notifyNewMessage(senderName, receiver_id).catch(e => console.error(e));
+        notificationService.notifyNewMessage(senderName, recipient_id).catch(e => console.error(e));
         
-        // Redireciona de volta para o chat com o usuário aberto
-        res.redirect('/chat?user_id=' + receiver_id);
+        res.redirect('/chat?user_id=' + recipient_id);
     } catch (err) { 
         console.error(err);
         res.status(500).render('pages/error', { message: "Erro ao enviar mensagem." }); 
