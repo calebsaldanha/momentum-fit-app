@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { pool } = require('../database/db');
-const bcrypt = require('bcryptjs'); // Garantindo a importação do bcrypt
+const bcrypt = require('bcryptjs');
 
 // Middleware de autenticação para Superadmin
 const requireSuperAdmin = (req, res, next) => {
@@ -38,10 +38,19 @@ router.get('/dashboard', requireSuperAdmin, async (req, res) => {
 // Gerenciar Usuários (Listagem)
 router.get('/manage', requireSuperAdmin, async (req, res) => {
     try {
+        // Busca todos os usuários
         const result = await pool.query("SELECT * FROM users ORDER BY created_at DESC");
+        const allUsers = result.rows;
+
+        // CORREÇÃO: Separar Treinadores e Clientes para a View
+        const trainers = allUsers.filter(u => u.role === 'trainer');
+        const clients = allUsers.filter(u => u.role === 'client');
+
         res.render('pages/superadmin-manage', { 
             title: 'Gerenciar Usuários', 
-            users: result.rows, 
+            users: allUsers, // Mantemos o geral por segurança
+            trainers: trainers, // <--- A variável que faltava
+            clients: clients,   // <--- Provavelmente usada também
             user: req.session.user,
             csrfToken: res.locals.csrfToken,
             currentPage: 'superadmin-manage'
@@ -54,7 +63,7 @@ router.get('/manage', requireSuperAdmin, async (req, res) => {
 
 // Criar Treinador (Página)
 router.get('/create-trainer', requireSuperAdmin, (req, res) => {
-    res.render('pages/pending-trainer', { // Usando pending-trainer temporariamente ou criar view especifica
+    res.render('pages/pending-trainer', { 
         title: 'Novo Treinador',
         user: req.session.user,
         csrfToken: res.locals.csrfToken,
@@ -87,13 +96,12 @@ router.post('/users/:id/delete', requireSuperAdmin, async (req, res) => {
     }
 });
 
-// --- NOVA ROTA: Alterar Senha de Usuário (Admin) ---
+// Alterar Senha de Usuário (Admin)
 router.post('/users/:id/change-password', requireSuperAdmin, async (req, res) => {
     const { new_password } = req.body;
     try {
         const hashedPassword = await bcrypt.hash(new_password, 10);
         await pool.query("UPDATE users SET password = $1 WHERE id = $2", [hashedPassword, req.params.id]);
-        // Redireciona de volta para onde veio (referer) ou dashboard
         res.redirect(req.get('referer') || '/superadmin/manage');
     } catch (err) {
         console.error(err);
