@@ -1,209 +1,168 @@
-const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
-const bcrypt = require('bcrypt');
+const { Pool } = require('pg');
+const bcrypt = require('bcryptjs'); // Usando bcryptjs conforme seu package.json
+require('dotenv').config();
 
-const dbPath = path.resolve(__dirname, 'database.sqlite');
+// Configuração da Conexão
+const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL;
 
-const db = new sqlite3.Database(dbPath, (err) => {
-    if (err) {
-        console.error('Erro ao conectar ao banco de dados:', err.message);
-    } else {
-        console.log('Conectado ao banco de dados SQLite.');
-    }
+if (!connectionString) {
+  console.error("❌ ERRO CRÍTICO: Nenhuma string de conexão encontrada.");
+}
+
+const isProduction = process.env.NODE_ENV === 'production';
+
+const pool = new Pool({
+  connectionString: connectionString,
+  ssl: isProduction ? { rejectUnauthorized: false } : false
 });
 
-// --- Funções Originais ---
+// Wrapper para facilitar queries simples
+const query = (text, params) => pool.query(text, params);
 
-function getUserByEmail(email) {
-    return new Promise((resolve, reject) => {
-        const sql = "SELECT * FROM users WHERE email = ?";
-        db.get(sql, [email], (err, row) => {
-            if (err) reject(err);
-            else resolve(row);
-        });
-    });
+// --- FUNÇÕES DE USUÁRIO (Sintaxe PostgreSQL $1, $2...) ---
+
+async function getUserByEmail(email) {
+    const res = await query("SELECT * FROM users WHERE email = $1", [email]);
+    return res.rows[0];
 }
 
-function getUserById(id) {
-    return new Promise((resolve, reject) => {
-        const sql = "SELECT * FROM users WHERE id = ?";
-        db.get(sql, [id], (err, row) => {
-            if (err) reject(err);
-            else resolve(row);
-        });
-    });
+async function getUserById(id) {
+    const res = await query("SELECT * FROM users WHERE id = $1", [id]);
+    return res.rows[0];
 }
 
-function createUser(user) {
-    return new Promise(async (resolve, reject) => {
-        const { name, email, password, role, trainer_id, profile_image, goal, fitness_level, height, weight } = user;
-        let hashedPassword = null;
-        if (password) {
-             hashedPassword = await bcrypt.hash(password, 10);
+async function createUser(user) {
+    const { name, email, password, role, trainer_id, profile_image, goal, fitness_level, height, weight } = user;
+    let hashedPassword = null;
+    if (password) {
+         hashedPassword = await bcrypt.hash(password, 10);
+    }
+
+    const sql = `
+        INSERT INTO users (name, email, password, role, trainer_id, profile_image, goal, fitness_level, height, weight) 
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) 
+        RETURNING *`;
+    
+    const res = await query(sql, [name, email, hashedPassword, role, trainer_id, profile_image, goal, fitness_level, height, weight]);
+    return res.rows[0];
+}
+
+async function updateUser(id, updates) {
+    const fields = [];
+    const values = [];
+    let idx = 1;
+
+    for (const key in updates) {
+        if (key === 'password') {
+            const hashedPassword = await bcrypt.hash(updates[key], 10);
+            fields.push(`${key} = $${idx}`);
+            values.push(hashedPassword);
+        } else {
+            fields.push(`${key} = $${idx}`);
+            values.push(updates[key]);
         }
+        idx++;
+    }
+    
+    values.push(id);
+    const sql = `UPDATE users SET ${fields.join(', ')} WHERE id = $${idx} RETURNING *`;
 
-        const sql = `INSERT INTO users (name, email, password, role, trainer_id, profile_image, goal, fitness_level, height, weight) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-        
-        db.run(sql, [name, email, hashedPassword, role, trainer_id, profile_image, goal, fitness_level, height, weight], function(err) {
-            if (err) reject(err);
-            else resolve({ id: this.lastID, ...user });
-        });
-    });
+    const res = await query(sql, values);
+    return res.rows[0];
 }
 
-function updateUser(id, updates) {
-    return new Promise(async (resolve, reject) => {
-        const fields = [];
-        const values = [];
-
-        for (const key in updates) {
-            if (key === 'password') {
-                const hashedPassword = await bcrypt.hash(updates[key], 10);
-                fields.push(`${key} = ?`);
-                values.push(hashedPassword);
-            } else {
-                fields.push(`${key} = ?`);
-                values.push(updates[key]);
-            }
-        }
-        
-        values.push(id);
-        const sql = `UPDATE users SET ${fields.join(', ')} WHERE id = ?`;
-
-        db.run(sql, values, function(err) {
-            if (err) reject(err);
-            else resolve({ id, ...updates });
-        });
-    });
+async function getWorkoutsByUserId(userId) {
+    const res = await query("SELECT * FROM workouts WHERE user_id = $1 ORDER BY created_at DESC", [userId]);
+    return res.rows;
 }
 
-function getWorkoutsByUserId(userId) {
-     return new Promise((resolve, reject) => {
-        const sql = "SELECT * FROM workouts WHERE user_id = ? ORDER BY created_at DESC";
-        db.all(sql, [userId], (err, rows) => {
-            if (err) reject(err);
-            else resolve(rows);
-        });
-    });
+async function createWorkout(workout) {
+    const { user_id, trainer_id, title, description, exercises } = workout;
+    // Garante que exercises seja string JSON se não for
+    const exercisesJson = typeof exercises === 'string' ? exercises : JSON.stringify(exercises);
+    
+    const sql = "INSERT INTO workouts (user_id, trainer_id, title, description, exercises) VALUES ($1, $2, $3, $4, $5) RETURNING *";
+    const res = await query(sql, [user_id, trainer_id, title, description, exercisesJson]);
+    return res.rows[0];
 }
 
-function createWorkout(workout) {
-    return new Promise((resolve, reject) => {
-        const { user_id, trainer_id, title, description, exercises } = workout; // exercises is JSON string
-        const sql = "INSERT INTO workouts (user_id, trainer_id, title, description, exercises) VALUES (?, ?, ?, ?, ?)";
-        db.run(sql, [user_id, trainer_id, title, description, exercises], function(err) {
-            if (err) reject(err);
-            else resolve({ id: this.lastID, ...workout });
-        });
-    });
+async function getAllTrainers() {
+    const res = await query("SELECT id, name, email, profile_image FROM users WHERE role = 'trainer' OR role = 'superadmin'", []);
+    return res.rows;
 }
 
-function getAllTrainers() {
-    return new Promise((resolve, reject) => {
-        const sql = "SELECT id, name, email, profile_image FROM users WHERE role = 'trainer' OR role = 'superadmin'";
-        db.all(sql, [], (err, rows) => {
-            if (err) reject(err);
-            else resolve(rows);
-        });
-    });
+async function getClients() {
+    const res = await query("SELECT * FROM users WHERE role = 'client'", []);
+    return res.rows;
 }
 
-function getClients() {
-    return new Promise((resolve, reject) => {
-        const sql = "SELECT * FROM users WHERE role = 'client'";
-        db.all(sql, [], (err, rows) => {
-            if (err) reject(err);
-            else resolve(rows);
-        });
-    });
+async function getUserStats(userId) {
+    // Mock ou implementação futura
+    return {
+        completed_workouts: 0,
+        streak: 0,
+        last_workout: null
+    };
 }
 
-function getUserStats(userId) {
-    return new Promise((resolve, reject) => {
-        // Mock ou implementação simples
-        const stats = {
-            completed_workouts: 0,
-            streak: 0,
-            last_workout: null
-        };
-        // Aqui poderia ter queries reais
-        resolve(stats);
-    });
-}
-
-// --- NOVAS FUNÇÕES (CORRIGIDAS) ---
+// --- NOVAS FUNÇÕES PARA O PAINEL DO TREINADOR (Sintaxe PostgreSQL) ---
 
 async function getClientsByTrainer(trainerId) {
-    return new Promise((resolve, reject) => {
-        const sql = `
-            SELECT id, name, email, profile_image, goal, status, created_at 
-            FROM users 
-            WHERE role = 'client' AND trainer_id = ? 
-            ORDER BY name ASC
-        `;
-        db.all(sql, [trainerId], (err, rows) => {
-            if (err) reject(err);
-            else resolve(rows || []);
-        });
-    });
+    const sql = `
+        SELECT id, name, email, profile_image, goal, status, created_at 
+        FROM users 
+        WHERE role = 'client' AND trainer_id = $1 
+        ORDER BY name ASC
+    `;
+    const res = await query(sql, [trainerId]);
+    return res.rows;
 }
 
 async function getRecentClientsByTrainer(trainerId) {
-    return new Promise((resolve, reject) => {
-        const sql = `
-            SELECT id, name, email, created_at 
-            FROM users 
-            WHERE role = 'client' AND trainer_id = ? 
-            ORDER BY created_at DESC 
-            LIMIT 5
-        `;
-        db.all(sql, [trainerId], (err, rows) => {
-            if (err) reject(err);
-            else resolve(rows || []);
-        });
-    });
+    const sql = `
+        SELECT id, name, email, created_at 
+        FROM users 
+        WHERE role = 'client' AND trainer_id = $1 
+        ORDER BY created_at DESC 
+        LIMIT 5
+    `;
+    const res = await query(sql, [trainerId]);
+    return res.rows;
 }
 
 async function getTrainerStats(trainerId) {
-    return new Promise((resolve, reject) => {
-        const stats = { totalClients: 0, totalWorkouts: 0, weeklyCheckins: 0 };
-        
-        const sqlClients = "SELECT COUNT(*) as count FROM users WHERE role = 'client' AND trainer_id = ?";
-        const sqlWorkouts = "SELECT COUNT(*) as count FROM workouts WHERE trainer_id = ?";
-        const sqlCheckins = `
-            SELECT COUNT(*) as count 
-            FROM checkins 
-            JOIN users ON checkins.user_id = users.id 
-            WHERE users.trainer_id = ? AND checkins.created_at >= date('now', '-7 days')
-        `;
+    const stats = { totalClients: 0, totalWorkouts: 0, weeklyCheckins: 0 };
+    
+    try {
+        const clientsRes = await query("SELECT COUNT(*) FROM users WHERE role = 'client' AND trainer_id = $1", [trainerId]);
+        stats.totalClients = parseInt(clientsRes.rows[0].count || 0);
 
-        db.get(sqlClients, [trainerId], (err, row) => {
-            if (err) return reject(err);
-            stats.totalClients = row ? row.count : 0;
+        const workoutsRes = await query("SELECT COUNT(*) FROM workouts WHERE trainer_id = $1", [trainerId]);
+        stats.totalWorkouts = parseInt(workoutsRes.rows[0].count || 0);
 
-            db.get(sqlWorkouts, [trainerId], (err, row) => {
-                if (err) return reject(err);
-                stats.totalWorkouts = row ? row.count : 0;
-
-                db.get(sqlCheckins, [trainerId], (err, row) => {
-                    // Checkins pode dar erro se a tabela não existir ainda, tratamos com fallback
-                    if (err && err.message.includes('no such table')) {
-                         stats.weeklyCheckins = 0;
-                         resolve(stats);
-                    } else if (err) {
-                        return reject(err);
-                    } else {
-                        stats.weeklyCheckins = row ? row.count : 0;
-                        resolve(stats);
-                    }
-                });
-            });
-        });
-    });
+        // Checkins (protegido caso a tabela não exista)
+        try {
+            const checkinsRes = await query(`
+                SELECT COUNT(*) 
+                FROM checkins 
+                JOIN users ON checkins.user_id = users.id 
+                WHERE users.trainer_id = $1 AND checkins.created_at >= NOW() - INTERVAL '7 days'
+            `, [trainerId]);
+            stats.weeklyCheckins = parseInt(checkinsRes.rows[0].count || 0);
+        } catch (e) {
+            // Tabela checkins pode não existir ainda
+            stats.weeklyCheckins = 0;
+        }
+    } catch (err) {
+        console.error("Erro ao calcular estatísticas:", err);
+    }
+    
+    return stats;
 }
 
 module.exports = {
-    db,
+    query,
+    pool,
     getUserByEmail,
     getUserById,
     createUser,
@@ -213,7 +172,6 @@ module.exports = {
     getAllTrainers,
     getClients,
     getUserStats,
-    // Novas exportações
     getClientsByTrainer,
     getRecentClientsByTrainer,
     getTrainerStats
