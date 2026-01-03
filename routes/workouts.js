@@ -11,10 +11,6 @@ const requireTrainerAuth = (req, res, next) => {
     return res.status(403).render('pages/error', { message: 'Acesso negado: Apenas treinadores.' });
 };
 
-// -------------------------------------------------------------------------
-// ROTAS DE TREINADOR (Criar, Editar, Deletar) - Protegidas individualmente
-// -------------------------------------------------------------------------
-
 // 1. Tela de Criar (GET)
 router.get('/create', requireTrainerAuth, async (req, res) => {
     try {
@@ -28,7 +24,6 @@ router.get('/create', requireTrainerAuth, async (req, res) => {
         const params = userRole === 'superadmin' ? [] : [userId];
         const clients = await pool.query(query, params);
         
-        // Busca biblioteca para o modal
         const library = await pool.query("SELECT * FROM exercise_library ORDER BY name ASC");
 
         res.render('pages/create-workout', { 
@@ -37,7 +32,8 @@ router.get('/create', requireTrainerAuth, async (req, res) => {
             exerciseLibrary: library.rows,
             selectedClientId: req.query.client_id || '', 
             user: req.session.user, 
-            currentPage: 'create-workout' 
+            currentPage: 'create-workout',
+            csrfToken: res.locals.csrfToken || ''
         });
     } catch (err) { 
         console.error(err);
@@ -106,7 +102,8 @@ router.get("/edit/:id", requireTrainerAuth, async (req, res) => {
             exercises: exRes.rows,
             exerciseLibrary: library.rows,
             user: req.session.user,
-            currentPage: "create-workout"
+            currentPage: "create-workout",
+            csrfToken: res.locals.csrfToken || ''
         });
     } catch (err) { 
         console.error(err);
@@ -121,9 +118,11 @@ router.post('/edit/:id', requireTrainerAuth, async (req, res) => {
     try {
         await client.query('BEGIN');
         await client.query("UPDATE workouts SET title = $1, description = $2 WHERE id = $3", [title, description, req.params.id]);
+        
+        // Remove exercícios antigos e insere os novos
         await client.query("DELETE FROM workout_exercises WHERE workout_id = $1", [req.params.id]);
         
-        if (exercises) {
+        if (exercises && Array.isArray(exercises)) {
             for (const ex of exercises) {
                 await client.query(
                     "INSERT INTO workout_exercises (workout_id, name, sets, reps, notes, order_index, video_url, image_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)", 
@@ -136,13 +135,12 @@ router.post('/edit/:id', requireTrainerAuth, async (req, res) => {
         res.json({ success: true, clientId: w.rows[0].client_id });
     } catch(e) {
         await client.query('ROLLBACK');
+        console.error(e);
         res.status(500).json({ success: false, message: e.message });
     } finally { client.release(); }
 });
 
-// -------------------------------------------------------------------------
-// ROTA PÚBLICA / ALUNO (Visualizar) - Aberta para alunos autenticados
-// -------------------------------------------------------------------------
+// ROTA PÚBLICA / ALUNO
 router.get('/:id', async (req, res) => {
     if (!req.session.user) return res.redirect('/auth/login');
     
@@ -150,18 +148,15 @@ router.get('/:id', async (req, res) => {
         const workoutId = req.params.id;
         if (workoutId === 'create') return res.redirect('/workouts/create');
 
-        // 1. Busca Treino
         const workoutRes = await pool.query("SELECT * FROM workouts WHERE id = $1", [workoutId]);
         if (workoutRes.rows.length === 0) return res.status(404).render('pages/error', { message: 'Treino não encontrado.' });
 
-        // 2. Busca Perfil (Se for aluno) para a Sidebar não quebrar
         let profile = {};
         if (req.session.user.role === 'client') {
             const profileRes = await pool.query("SELECT * FROM client_profiles WHERE user_id = $1", [req.session.user.id]);
             profile = profileRes.rows[0] || {};
         }
 
-        // 3. Busca Exercícios com Detalhes (Library)
         const exercisesQuery = `
             SELECT 
                 we.id, we.workout_id, we.name, we.sets, we.reps, we.notes, we.order_index, we.video_url,
@@ -180,7 +175,7 @@ router.get('/:id', async (req, res) => {
             workout: workoutRes.rows[0],
             exercises: exercisesRes.rows,
             user: req.session.user,
-            profile: profile, // CRÍTICO: Envia o perfil para a sidebar
+            profile: profile,
             currentPage: 'workouts'
         });
 
