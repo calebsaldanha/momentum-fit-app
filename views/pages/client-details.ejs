@@ -1,7 +1,7 @@
-<%- include('../partials/header', { title: 'Detalhes do Aluno', bodyClass: 'dashboard-body' }) %>
+<%- include('../partials/header.ejs', { title: 'Detalhes do Aluno', bodyClass: 'dashboard-body' }) %>
 
 <div class="dashboard-container">
-    <%- include('../partials/sidebar', { currentPage: 'clients' }) %>
+    <%- include('../partials/sidebar.ejs', { currentPage: 'clients' }) %>
 
     <main class="dashboard-main">
         <section class="section">
@@ -15,15 +15,20 @@
             <div class="content-card" style="margin-bottom: 2rem;">
                 <div style="display: flex; gap: 1.5rem; align-items: center;">
                     <div class="user-avatar-large" style="margin: 0;">
-                        <%= (typeof client !== 'undefined' && client.name) ? client.name.charAt(0) : '?' %>
+                        <%= (client && client.name) ? client.name.charAt(0) : 'U' %>
                     </div>
                     <div>
                         <h2 style="margin: 0; color: white;">
-                            <%= (typeof client !== 'undefined' && client.name) ? client.name : 'Aluno não encontrado' %>
+                            <%= (client && client.name) ? client.name : 'Nome Indisponível' %>
                         </h2>
                         <p style="color: #888; margin: 0.5rem 0;">
-                            <%= (typeof client !== 'undefined' && client.email) ? client.email : '--' %>
+                            <%= (client && client.email) ? client.email : 'Email Indisponível' %>
                         </p>
+                        <div style="margin-top: 0.5rem;">
+                            <span class="user-role-badge">
+                                <%= (client && client.goal) ? client.goal : 'Sem objetivo' %>
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -31,39 +36,49 @@
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-info">
-                        <h3><%= (typeof stats !== 'undefined' && stats.completed_workouts) ? stats.completed_workouts : 0 %></h3>
-                        <p>Treinos Concluídos</p>
+                        <h3><%= (stats && stats.completed_workouts) ? stats.completed_workouts : 0 %></h3>
+                        <p>Treinos Feitos</p>
                     </div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-info">
-                        <h3><%= (typeof workouts !== 'undefined') ? workouts.length : 0 %></h3>
+                        <h3><%= (workouts) ? workouts.length : 0 %></h3>
                         <p>Planos Ativos</p>
                     </div>
                 </div>
             </div>
 
             <div style="margin-top: 2rem;">
-                <h3 style="color: white; margin-bottom: 1rem;">Treinos Atribuídos</h3>
-                <% if (typeof workouts !== 'undefined' && workouts.length > 0) { %>
-                    <% workouts.forEach(workout => { %>
-                        <div class="content-card" style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
-                            <div>
-                                <strong style="color: white; font-size: 1.1rem;"><%= workout.title %></strong>
-                                <p style="color: #666; margin: 0; font-size: 0.9rem;">Criado em: <%= new Date(workout.created_at).toLocaleDateString() %></p>
-                            </div>
-                            <a href="/workouts/<%= workout.id %>" class="btn btn-sm btn-primary">Ver</a>
-                        </div>
-                    <% }) %>
-                <% } else { %>
-                    <p style="color: #666;">Nenhum treino encontrado.</p>
-                    <% if (typeof client !== 'undefined') { %>
-                        <a href="/workouts/create?client_id=<%= client.id %>" class="btn btn-primary btn-sm">Criar Treino</a>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3 style="color: white; margin: 0;">Treinos Atribuídos</h3>
+                    <% if (client && client.id) { %>
+                        <a href="/workouts/create?client_id=<%= client.id %>" class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus"></i> Novo Treino
+                        </a>
                     <% } %>
+                </div>
+
+                <% if (workouts && workouts.length > 0) { %>
+                    <% workouts.forEach(function(workout) { %>
+                        <div class="content-card" style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; padding: 1rem;">
+                            <div>
+                                <strong style="color: white; font-size: 1.1rem; display: block;"><%= workout.title %></strong>
+                                <small style="color: #666;">Criado em: <%= new Date(workout.created_at).toLocaleDateString() %></small>
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <a href="/workouts/<%= workout.id %>" class="btn btn-sm btn-outline">Ver</a>
+                                <a href="/workouts/edit/<%= workout.id %>" class="btn btn-sm btn-secondary">Editar</a>
+                            </div>
+                        </div>
+                    <% }); %>
+                <% } else { %>
+                    <div style="text-align: center; padding: 2rem; color: #666; border: 1px dashed #333; border-radius: 8px;">
+                        Nenhum treino encontrado.
+                    </div>
                 <% } %>
             </div>
         </section>
     </main>
 </div>
 
-<%- include('../partials/footer') %>
+<%- include('../partials/footer.ejs') %>

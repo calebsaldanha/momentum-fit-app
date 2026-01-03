@@ -2,26 +2,17 @@ const express = require('express');
 const router = express.Router();
 const db = require('../database/db');
 
-// Middleware para garantir que é Admin ou Superadmin
+// Middleware de Autenticação Admin
 const requireAdmin = (req, res, next) => {
-    if (!req.session.user) {
-        return res.redirect('/auth/login');
-    }
-    // Superadmin TAMBÉM pode acessar a área de admin (Modo Personal)
-    if (req.session.user.role === 'trainer' || req.session.user.role === 'superadmin') {
-        return next();
-    }
-    return res.status(403).render('pages/error', { 
-        message: 'Acesso negado. Apenas treinadores.',
-        user: req.session.user 
-    });
+    if (!req.session.user) return res.redirect('/auth/login');
+    if (req.session.user.role === 'trainer' || req.session.user.role === 'superadmin') return next();
+    return res.status(403).render('pages/error', { message: 'Acesso negado.', user: req.session.user });
 };
 
-// --- ROTA: DASHBOARD DO TREINADOR ---
+// Dashboard
 router.get('/dashboard', requireAdmin, async (req, res) => {
     try {
-        const trainerId = req.session.user.id; 
-        
+        const trainerId = req.session.user.id;
         const stats = await db.getTrainerStats(trainerId);
         const recentClients = await db.getRecentClientsByTrainer(trainerId);
 
@@ -34,12 +25,12 @@ router.get('/dashboard', requireAdmin, async (req, res) => {
             bodyClass: 'dashboard-body'
         });
     } catch (err) {
-        console.error('Erro no dashboard admin:', err);
-        res.status(500).render('pages/error', { message: 'Erro ao carregar dashboard', user: req.session.user });
+        console.error(err);
+        res.status(500).render('pages/error', { message: 'Erro no dashboard.', user: req.session.user });
     }
 });
 
-// --- ROTA: MEUS ALUNOS ---
+// Meus Alunos
 router.get('/clients', requireAdmin, async (req, res) => {
     try {
         const trainerId = req.session.user.id;
@@ -53,12 +44,12 @@ router.get('/clients', requireAdmin, async (req, res) => {
             bodyClass: 'dashboard-body'
         });
     } catch (err) {
-        console.error('Erro ao listar alunos:', err);
-        res.status(500).render('pages/error', { message: 'Erro ao buscar alunos', user: req.session.user });
+        console.error(err);
+        res.status(500).render('pages/error', { message: 'Erro ao listar alunos.', user: req.session.user });
     }
 });
 
-// --- ROTA: DETALHES DO ALUNO ---
+// Detalhes do Aluno (A rota com problema)
 router.get('/clients/:id', requireAdmin, async (req, res) => {
     try {
         const trainerId = req.session.user.id;
@@ -66,32 +57,37 @@ router.get('/clients/:id', requireAdmin, async (req, res) => {
 
         const client = await db.getUserById(clientId);
         
-        if (!client || (client.trainer_id !== trainerId && req.session.user.role !== 'superadmin')) {
-             return res.status(403).render('pages/error', { message: 'Este aluno não está vinculado a você.', user: req.session.user });
+        // Verificação de segurança
+        if (!client) {
+            return res.status(404).render('pages/error', { message: 'Aluno não encontrado.', user: req.session.user });
+        }
+        
+        // Verifica permissão (apenas treinador dono ou superadmin)
+        if (client.trainer_id !== trainerId && req.session.user.role !== 'superadmin') {
+             return res.status(403).render('pages/error', { message: 'Sem permissão para ver este aluno.', user: req.session.user });
         }
 
         const workouts = await db.getWorkoutsByUserId(clientId);
         const stats = await db.getUserStats(clientId); 
 
+        // Renderização com objeto limpo
         res.render('pages/client-details', {
-            title: `Aluno: ${client.name}`,
+            title: 'Detalhes do Aluno',
             user: req.session.user,
             client: client,
-            workouts: workouts,
+            workouts: workouts || [],
             stats: stats || {},
             currentPage: 'clients',
             bodyClass: 'dashboard-body'
         });
     } catch (err) {
-        console.error('Erro detalhes aluno:', err);
-        res.status(500).render('pages/error', { message: 'Erro ao carregar detalhes', user: req.session.user });
+        console.error('Erro rota client-details:', err);
+        res.status(500).render('pages/error', { message: 'Erro interno ao carregar aluno.', user: req.session.user });
     }
 });
 
 router.get('/trainers', requireAdmin, async (req, res) => {
-    if(req.session.user.role !== 'superadmin') {
-        return res.redirect('/admin/dashboard');
-    }
+    if(req.session.user.role !== 'superadmin') return res.redirect('/admin/dashboard');
     try {
         const trainers = await db.getAllTrainers();
         res.render('pages/admin-trainers', { 
