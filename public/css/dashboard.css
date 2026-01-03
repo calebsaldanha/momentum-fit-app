@@ -2,124 +2,75 @@
     --c-dash-bg: #050505;
     --c-dash-surface: #121212;
     --c-dash-card: #1A1A1A;
+    --c-accent-primary: #bef202;
+    --c-border: rgba(255,255,255,0.1);
 }
 body.dashboard-body { 
     background: radial-gradient(circle at 20% 20%, #1a1a1a 0%, #050505 60%); 
 }
 
-/* --- Layout Principal --- */
+/* --- Layout Principal (GRID) --- */
 .dashboard-container { 
     width: 100%; margin: 0; display: grid; 
     grid-template-columns: 260px 1fr; gap: 2rem; 
     padding: 2rem 24px; padding-top: 100px; min-height: 100vh;
 }
 
-/* --- Sidebar (Usando GRID para travar o layout verticalmente) --- */
+/* --- Sidebar (GRID Vertical para travar Header/Footer) --- */
 .dashboard-sidebar { 
     background: var(--c-dash-surface); 
     border-radius: 16px;
     border: 1px solid rgba(255, 255, 255, 0.05); 
-    
     align-self: start; 
     position: sticky; top: 100px; 
-    
-    /* Altura fixa e calculada */
     height: calc(100vh - 120px); 
     max-height: calc(100vh - 120px);
-    
-    /* MUDANÇA: Usando Grid em vez de Flex para controle total */
     display: grid;
-    grid-template-rows: auto 1fr auto; /* Header | Nav (rola) | Footer */
-    
+    grid-template-rows: auto 1fr auto; /* Topo Auto | Meio Flex | Fundo Auto */
     overflow: hidden; 
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     padding: 0;
 }
 
-/* 1. Header (Tamanho do conteúdo) */
-.sidebar-header { 
-    padding: 1.5rem; 
-    text-align: center; 
-    border-bottom: 1px solid rgba(255,255,255,0.05); 
-}
+/* Header e Footer Fixos */
+.sidebar-header { padding: 1.5rem; text-align: center; border-bottom: 1px solid var(--c-border); }
+.sidebar-footer { padding: 1.5rem; border-top: 1px solid var(--c-border); background: var(--c-dash-surface); z-index: 5; }
 
-/* 2. Navegação (Ocupa o espaço do meio e rola) */
+/* Navegação com Scroll Interno */
 .sidebar-nav { 
     display: flex; flex-direction: column; 
-    overflow-y: auto; /* Scroll apenas aqui */
+    overflow-y: auto; 
     padding: 0.5rem 0;
-    
-    /* Garante que a scrollbar não fique em cima do conteúdo */
     scrollbar-gutter: stable;
 }
-
-/* Scrollbar fina */
 .sidebar-nav::-webkit-scrollbar { width: 4px; }
 .sidebar-nav::-webkit-scrollbar-track { background: transparent; }
 .sidebar-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
-.sidebar-nav { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.15) transparent; }
 
-/* 3. Footer (Tamanho do conteúdo, fixo no fundo) */
-.sidebar-footer { 
-    padding: 1.5rem; 
-    border-top: 1px solid rgba(255,255,255,0.05); 
-    background: var(--c-dash-surface); 
-    z-index: 5;
-}
-
-/* --- Estilos dos Elementos --- */
-.user-avatar-large { width: 64px; height: 64px; background: rgba(190, 242, 2, 0.05); border: 1px solid rgba(190, 242, 2, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.8rem; color: var(--c-accent-primary); font-size: 1.5rem; box-shadow: 0 0 15px rgba(190, 242, 2, 0.1); }
+/* Elementos Visuais */
+.user-avatar-large { width: 64px; height: 64px; background: rgba(190, 242, 2, 0.05); border: 1px solid rgba(190, 242, 2, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.8rem; color: var(--c-accent-primary); font-size: 1.5rem; }
 .user-name { color: white; font-size: 1.1rem; margin-bottom: 0.2rem; font-weight: 600; }
-.user-role-badge, .user-goal { font-size: 0.7rem; color: #888; background: rgba(255,255,255,0.05); padding: 4px 10px; border-radius: 12px; display: inline-block; text-transform: uppercase; letter-spacing: 0.5px; }
+.user-role-badge { font-size: 0.7rem; color: #888; background: rgba(255,255,255,0.05); padding: 4px 10px; border-radius: 12px; display: inline-block; text-transform: uppercase; letter-spacing: 0.5px; }
 
 .nav-section-label { padding: 1rem 1.5rem 0.5rem; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: rgba(255,255,255,0.4); pointer-events: none; }
 .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 24px; text-decoration: none; color: #888; font-weight: 600; transition: all 0.3s; border-left: 3px solid transparent; }
 .nav-item:hover { color: white; background: linear-gradient(90deg, rgba(255,255,255,0.03), transparent); }
-.nav-item.active { color: white; border-left-color: var(--c-accent-primary); background: linear-gradient(90deg, rgba(190, 242, 2, 0.1), transparent); text-shadow: 0 0 10px rgba(190, 242, 2, 0.4); }
+.nav-item.active { color: white; border-left-color: var(--c-accent-primary); background: linear-gradient(90deg, rgba(190, 242, 2, 0.1), transparent); }
 
 .btn-logout-sidebar { width: 100%; background: transparent; border: 1px solid rgba(255,255,255,0.1); color: #888; padding: 10px; border-radius: 8px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 500; font-size: 0.9rem; }
 .btn-logout-sidebar:hover { background: rgba(255, 50, 50, 0.1); color: #ff4444; border-color: rgba(255,50,50,0.3); }
 
-/* --- Conteúdo Geral --- */
-.section { background: var(--c-dash-card); padding: 2.5rem; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.03); margin-bottom: 2rem; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.6); position: relative; }
-.section::before { content: ''; position: absolute; top: 0; left: 2rem; right: 2rem; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent); }
+/* Cards e Tabelas */
+.section { background: var(--c-dash-card); padding: 2.5rem; border-radius: 16px; border: 1px solid rgba(255,255,255,0.03); margin-bottom: 2rem; position: relative; }
 .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid var(--c-border); flex-wrap: wrap; gap: 1rem; }
-.section-header h1 { font-size: 1.8rem; color: white; }
+.content-card { background: #111; border: 1px solid var(--c-border); border-radius: 12px; padding: 1.5rem; }
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; }
+.stat-card { background: linear-gradient(145deg, #222, #1a1a1a); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--c-border); display: flex; align-items: center; gap: 1rem; }
+.stat-info h3 { font-size: 1.8rem; margin: 0; color: white; }
+.stat-info p { font-size: 0.8rem; color: #888; margin: 0; text-transform: uppercase; }
 
-.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; }
-.stat-card { background: linear-gradient(145deg, #222, #1a1a1a); padding: 1.5rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 1.5rem; transition: transform 0.2s; }
-.stat-card:hover { transform: translateY(-3px); border-color: rgba(190, 242, 2, 0.2); }
-.stat-icon { width: 56px; height: 56px; background: rgba(190, 242, 2, 0.05); border: 1px solid rgba(190, 242, 2, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 15px rgba(190, 242, 2, 0.1); font-size: 1.5rem; color: var(--c-accent-primary); }
-.stat-info h3 { font-size: 2rem; margin: 0; color: white; }
-.stat-info p { font-size: 0.8rem; color: #888; text-transform: uppercase; letter-spacing: 1px; margin: 0; }
-
-.content-card { background: #111; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
-.card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 1rem; }
-.data-table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
-.data-table th { text-align: left; padding: 1rem; color: #888; font-size: 0.8rem; text-transform: uppercase; border-bottom: 1px solid rgba(255,255,255,0.1); }
-.data-table td { padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); color: white; }
-.data-table tr:last-child td { border-bottom: none; }
-.user-avatar-sm { width: 32px; height: 32px; background: rgba(190, 242, 2, 0.1); color: var(--c-accent-primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: bold; }
-.action-btn { color: #aaa; transition: 0.2s; padding: 6px; border-radius: 4px; }
-.action-btn:hover { color: white; background: rgba(255,255,255,0.1); }
-
-/* Chat */
-.chat-layout { display: grid; grid-template-columns: 300px 1fr; height: calc(100vh - 200px); min-height: 500px; background: #151515; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); overflow: hidden; }
-.chat-users { background: #111; border-right: 1px solid #222; }
-.user-item { padding: 15px; border-bottom: 1px solid #222; cursor: pointer; display: flex; align-items: center; gap: 12px; color: #ccc; transition: 0.2s; }
-.user-item:hover { background: #1a1a1a; color: white; }
-.user-item.active { background: rgba(190, 242, 2, 0.05); border-left: 3px solid var(--c-accent-primary); color: white; }
-.messages-container { background-color: #0a0a0a; padding: 1.5rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; }
-.message { padding: 12px 18px; border-radius: 12px; max-width: 75%; font-size: 0.95rem; line-height: 1.5; }
-.message.own-message { background: linear-gradient(135deg, var(--c-accent-primary), #a3cf02); color: #000; align-self: flex-end; border-bottom-right-radius: 2px; font-weight: 600; box-shadow: 0 4px 10px rgba(190, 242, 2, 0.2); }
-.message.other-message { background: #222; color: #ddd; align-self: flex-start; border-bottom-left-radius: 2px; border: 1px solid #333; }
-.message-input-container { padding: 1rem; border-top: 1px solid #222; background: #111; }
-#chatForm input { background: #050505; border-color: #333; color: white; }
-#chatForm input:focus { border-color: var(--c-accent-primary); box-shadow: none; }
-
+/* Mobile */
 @media (max-width: 992px) {
     .dashboard-container { grid-template-columns: 1fr; padding: 1rem; padding-top: 90px; }
     .dashboard-sidebar { display: none; }
-    .chat-layout { grid-template-columns: 1fr; grid-template-rows: 80px 1fr; height: calc(100vh - 120px); }
-    .chat-users { border-right: none; border-bottom: 1px solid #222; flex-direction: row; overflow-x: auto; }
 }
