@@ -49,12 +49,12 @@ router.get('/clients', requireAdmin, async (req, res) => {
     }
 });
 
-// Detalhes do Aluno (Rota unificada)
+// Detalhes do Aluno
 router.get('/clients/:id', requireAdmin, async (req, res) => {
     try {
         const trainerId = req.session.user.id;
         const clientId = req.params.id;
-        const source = req.query.source; // Recebe a origem do clique
+        const source = req.query.source;
 
         const client = await db.getUserById(clientId);
         
@@ -62,18 +62,17 @@ router.get('/clients/:id', requireAdmin, async (req, res) => {
             return res.status(404).render('pages/error', { message: 'Aluno não encontrado.', user: req.session.user });
         }
         
-        // Regras de Visualização e Contexto
-        let pageContext = 'clients'; // Padrão: Painel de Personal
+        // Contexto: Superadmin vindo do painel de gestão vs Personal
         let showAdminOptions = false;
+        let pageContext = 'clients';
 
-        // Se for Superadmin E estiver vindo explicitamente da gestão de usuários
         if (req.session.user.role === 'superadmin' && source === 'admin_manage') {
             pageContext = 'superadmin_users';
             showAdminOptions = true;
         } else {
-            // Contexto de Personal: verifica se é o treinador do aluno ou se é superadmin (mas sem poderes de gestão nessa tela)
+            // Se não for superadmin, verifica se é o treinador do aluno
             if (client.trainer_id !== trainerId && req.session.user.role !== 'superadmin') {
-                return res.status(403).render('pages/error', { message: 'Sem permissão.', user: req.session.user });
+                 return res.status(403).render('pages/error', { message: 'Sem permissão.', user: req.session.user });
             }
         }
 
@@ -94,12 +93,12 @@ router.get('/clients/:id', requireAdmin, async (req, res) => {
             bodyClass: 'dashboard-body',
             currentPage: pageContext,
             user: req.session.user,
-            clientData: client, // Alterado para clientData para evitar conflito com EJS
+            clientData: client, // Renomeado para evitar conflito com 'client' do EJS
             workouts: workouts || [],
             stats: stats || {},
             detailedProfile: detailedProfile,
             trainers: trainersList,
-            showAdminOptions: showAdminOptions // Controla exibição do bloco admin
+            showAdminOptions: showAdminOptions
         });
     } catch (err) {
         console.error('Erro client details:', err);

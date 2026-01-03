@@ -9,7 +9,7 @@
             <a href="javascript:history.back()" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Voltar</a>
         </div>
 
-        <% if (showAdminOptions) { %>
+        <% if (typeof showAdminOptions !== 'undefined' && showAdminOptions) { %>
         <div class="content-card" style="margin-bottom: 2rem; border: 1px solid #444; background: #1a1a1a;">
             <h3 style="color: var(--c-accent-primary); border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px;">
                 <i class="fas fa-user-shield"></i> Gestão Administrativa
@@ -76,38 +76,69 @@
             
             <% if (typeof detailedProfile !== 'undefined' && detailedProfile && detailedProfile.user_id) { %>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
+                    
                     <div>
                         <h4 style="color: var(--c-accent-primary); margin-bottom: 0.5rem; font-size: 1rem;">Dados Pessoais</h4>
-                        <p><strong>Idade:</strong> <%= detailedProfile.age || '--' %></p>
+                        <p><strong>Idade:</strong> <%= detailedProfile.age || '--' %> anos</p>
                         <p><strong>Telefone:</strong> <%= detailedProfile.phone || '--' %></p>
-                        <p><strong>Identidade Gênero:</strong> <%= detailedProfile.gender_identity || '--' %></p>
+                        <p><strong>Gênero:</strong> <%= detailedProfile.gender_identity || '--' %></p>
+                        <p><strong>Profissão:</strong> <%= detailedProfile.occupation || '--' %></p>
                     </div>
+
                     <div>
-                        <h4 style="color: var(--c-accent-primary); margin-bottom: 0.5rem; font-size: 1rem;">Medidas</h4>
+                        <h4 style="color: var(--c-accent-primary); margin-bottom: 0.5rem; font-size: 1rem;">Corpo e Medidas</h4>
                         <p><strong>Peso:</strong> <%= detailedProfile.weight || '--' %> kg</p>
                         <p><strong>Altura:</strong> <%= detailedProfile.height || '--' %> m</p>
-                        <p><strong>Gordura:</strong> <%= detailedProfile.body_fat || '--' %> %</p>
+                        <p><strong>Gordura Corporal:</strong> <%= detailedProfile.body_fat || '--' %> %</p>
                     </div>
+
                     <div>
                         <h4 style="color: var(--c-accent-primary); margin-bottom: 0.5rem; font-size: 1rem;">Saúde</h4>
-                        <p><strong>Condições:</strong> <%= detailedProfile.medical_conditions || 'Nenhuma' %></p>
+                        <p><strong>Condições Médicas:</strong> <%= detailedProfile.medical_conditions || 'Nenhuma' %></p>
                         <p><strong>Lesões:</strong> <%= detailedProfile.injuries || 'Nenhuma' %></p>
+                        <p><strong>Medicamentos:</strong> <%= detailedProfile.medications || 'Nenhum' %></p>
+                        <p><strong>Fumante:</strong> <%= detailedProfile.smoking === 'true' ? 'Sim' : 'Não' %></p>
+                        <p><strong>Álcool:</strong> <%= detailedProfile.alcohol || 'Não informado' %></p>
                     </div>
+
                     <div>
                         <h4 style="color: var(--c-accent-primary); margin-bottom: 0.5rem; font-size: 1rem;">Objetivos</h4>
                         <p><strong>Principal:</strong> <%= detailedProfile.main_goal || '--' %></p>
-                        <p><strong>Prazo:</strong> <%= detailedProfile.specific_event || '--' %></p>
+                        <p><strong>Prazo/Evento:</strong> <%= detailedProfile.specific_event || '--' %></p>
+                        <p><strong>Motivação:</strong> <%= detailedProfile.motivation_level || '--' %>/10</p>
+                    </div>
+
+                    <div style="grid-column: 1 / -1; border-top: 1px solid #333; padding-top: 1rem;">
+                        <h4 style="color: var(--c-accent-primary); margin-bottom: 0.5rem; font-size: 1rem;">Histórico e Preferências de Treino</h4>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                            <p><strong>Experiência:</strong> <%= detailedProfile.training_experience || '--' %></p>
+                            <p><strong>Dias Disponíveis:</strong> <%= detailedProfile.training_days_available || '--' %></p>
+                            <p><strong>Horário Preferido:</strong> <%= detailedProfile.training_time || '--' %></p>
+                            <p><strong>Local/Equipamentos:</strong> <%= detailedProfile.equipment_available || '--' %></p>
+                        </div>
+                    </div>
+
+                    <div style="grid-column: 1 / -1; border-top: 1px solid #333; padding-top: 1rem;">
+                        <h4 style="color: var(--c-accent-primary); margin-bottom: 0.5rem; font-size: 1rem;">Nutrição e Rotina</h4>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                            <p><strong>Refeições/dia:</strong> <%= detailedProfile.meal_frequency || '--' %></p>
+                            <p><strong>Água (litros):</strong> <%= detailedProfile.water_intake || '--' %></p>
+                            <p><strong>Horas de Sono:</strong> <%= detailedProfile.sleep_hours || '--' %></p>
+                            <p><strong>Nível de Estresse:</strong> <%= detailedProfile.stress_level || '--' %></p>
+                        </div>
                     </div>
                 </div>
             <% } else { %>
-                <p style="color: #888; font-style: italic;">Nenhuma ficha de anamnese preenchida.</p>
+                <p style="color: #888; font-style: italic; padding: 1rem;">
+                    Nenhuma ficha de anamnese foi preenchida para este aluno.
+                </p>
             <% } %>
         </div>
 
         <div class="content-card" style="margin-top: 2rem;">
             <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                 <h2>Treinos Atribuídos</h2>
-                <a href="/admin/workouts/create?clientId=<%= clientData.id %>" class="btn btn-primary">
+                <a href="/workouts/create?client_id=<%= clientData.id %>" class="btn btn-primary">
                     <i class="fas fa-plus"></i> Novo Treino
                 </a>
             </div>
@@ -117,7 +148,7 @@
                     <table class="data-table">
                         <thead>
                             <tr>
-                                <th>Nome</th>
+                                <th>Título</th>
                                 <th>Dia</th>
                                 <th>Exercícios</th>
                                 <th>Ações</th>
@@ -126,13 +157,13 @@
                         <tbody>
                             <% workouts.forEach(workout => { %>
                                 <tr>
-                                    <td><%= workout.name %></td>
-                                    <td><%= workout.day_of_week %></td>
+                                    <td><%= workout.title %></td>
+                                    <td><%= workout.day_of_week || '--' %></td>
                                     <td><%= workout.exercises ? workout.exercises.length : 0 %></td>
                                     <td>
                                         <div class="action-buttons">
-                                            <a href="/admin/workouts/edit/<%= workout.id %>" class="btn-icon" title="Editar"><i class="fas fa-edit"></i></a>
-                                            <form action="/admin/workouts/delete/<%= workout.id %>" method="POST" style="display:inline;" onsubmit="return confirm('Excluir treino?');">
+                                            <a href="/workouts/edit/<%= workout.id %>" class="btn-icon" title="Editar"><i class="fas fa-edit"></i></a>
+                                            <form action="/workouts/delete/<%= workout.id %>" method="POST" style="display:inline;" onsubmit="return confirm('Excluir treino?');">
                                                 <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                                                 <button type="submit" class="btn-icon delete" title="Excluir"><i class="fas fa-trash"></i></button>
                                             </form>
