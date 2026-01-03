@@ -1,151 +1,248 @@
-<%- include('../partials/header.ejs', { title, bodyClass: 'dashboard-body' }) %>
-<div class="dashboard-container" style="display: grid; grid-template-columns: 1fr 300px; gap: 2rem;">
-    <%- include('../partials/sidebar.ejs', { currentPage: 'dashboard' }) %>
-    <main class="dashboard-main">
-        <div class="section">
-            <div class="section-header"><h1>Editar Treino</h1></div>
-                <div style="display:flex; gap:10px;">
-                    <a href="javascript:history.back()" class="btn btn-secondary btn-sm">Voltar</a>
-                    <a href="/admin/dashboard" class="btn btn-outline btn-sm">Cancelar</a>
-                </div>
-            
-            <form id="editWorkoutForm" class="dashboard-form" style="max-width: 800px;">
-                <div class="form-group">
-                    <label>Título</label>
-                    <input type="text" id="title" value="<%= workout.title %>" required>
-                </div>
-                <div class="form-group">
-                    <label>Descrição</label>
-                    <textarea id="description" rows="2"><%= workout.description %></textarea>
+<%- include('../partials/header') %>
+
+<style>
+    /* Layout Grid igual ao create-workout */
+    .workout-builder {
+        display: grid;
+        grid-template-columns: 1fr 350px;
+        gap: 2rem;
+        height: calc(100vh - 120px);
+    }
+    
+    .builder-main {
+        overflow-y: auto;
+        padding-right: 1rem;
+    }
+
+    .builder-sidebar {
+        background: #1a1a1a;
+        border-left: 1px solid #333;
+        padding: 1.5rem;
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    /* Cards da Biblioteca Visual */
+    .exercise-library-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 1rem;
+        overflow-y: auto;
+        padding-right: 5px;
+    }
+
+    .library-item {
+        background: #222;
+        border: 1px solid #333;
+        border-radius: 8px;
+        overflow: hidden;
+        cursor: pointer;
+        transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .library-item:hover {
+        transform: translateY(-2px);
+        border-color: var(--c-accent-primary);
+    }
+
+    .library-item img {
+        width: 100%;
+        height: 100px;
+        object-fit: cover;
+        background: #000;
+    }
+
+    .library-item .info {
+        padding: 0.5rem;
+    }
+
+    .library-item .name {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #fff;
+        margin-bottom: 2px;
+    }
+
+    .library-item .category {
+        font-size: 0.7rem;
+        color: #888;
+    }
+
+    /* Lista de Exercicios Selecionados */
+    .selected-exercises {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    .exercise-card {
+        background: #1a1a1a;
+        border: 1px solid #333;
+        border-radius: 8px;
+        padding: 1rem;
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .exercise-card img {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 4px;
+        background: #000;
+    }
+    
+    @media (max-width: 900px) {
+        .workout-builder {
+            grid-template-columns: 1fr;
+            height: auto;
+        }
+        .builder-sidebar {
+            height: 500px;
+            border-left: none;
+            border-top: 1px solid #333;
+        }
+    }
+</style>
+
+<div class="dashboard-container">
+    <%- include('../partials/sidebar') %>
+
+    <main class="main-content">
+        <form id="workoutForm" action="/admin/workouts/edit/<%= workout.id %>" method="POST" class="workout-builder">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <input type="hidden" id="exercisesInput" name="exercises" value='<%= JSON.stringify(workout.exercises) %>'>
+
+            <div class="builder-main">
+                <div class="section-header">
+                    <h1>Editar Treino</h1>
+                    <div class="actions">
+                        <a href="/admin/clients/<%= workout.client_id || workout.user_id %>" class="btn btn-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                    </div>
                 </div>
 
-                <h3 style="margin: 2rem 0 1rem;">Exercícios</h3>
-                <div id="exercisesContainer">
-                    <% exercises.forEach((ex, index) => { %>
-                        <div class="exercise-item" style="background: var(--c-bg-card); border: 1px solid var(--c-border); padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem;">
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
-                                <h4 style="color: var(--c-accent-primary); margin: 0;">Exercício <%= index + 1 %></h4>
-                                <button type="button" class="btn btn-sm btn-outline remove-exercise" style="color: var(--c-error); border-color: var(--c-error);">Remover</button>
-                            </div>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                                <div class="form-group"><label>Nome</label><input type="text" class="exercise-name" value="<%= ex.name %>" required></div>
-                                <div class="form-group"><label>Séries x Reps</label><input type="text" class="exercise-sets" value="<%= ex.sets %>" required></div>
-                            </div>
-                            <div class="form-group"><label>Obs</label><textarea class="exercise-description" rows="1"><%= ex.notes %></textarea></div>
-                            <div class="form-group"><label>Vídeo URL</label><input type="text" class="exercise-video" value="<%= ex.video_url %>"></div>
+                <div class="content-card">
+                    <div class="form-group">
+                        <label>Nome do Treino</label>
+                        <input type="text" name="name" class="form-control" value="<%= workout.name %>" required>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Dia da Semana</label>
+                            <select name="day_of_week" class="form-control">
+                                <% const days = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo']; %>
+                                <% days.forEach(d => { %>
+                                    <option value="<%= d %>" <%= workout.day_of_week === d ? 'selected' : '' %>><%= d %></option>
+                                <% }); %>
+                            </select>
                         </div>
-                    <% }) %>
+                    </div>
                 </div>
-                <button type="button" class="btn btn-outline" id="addExerciseBtn" style="width: 100%; border-style: dashed;">+ Adicionar Exercício</button>
+
+                <h3 style="margin-top: 1.5rem;">Exercícios Selecionados</h3>
+                <div id="selectedExercisesList" class="selected-exercises">
+                    </div>
+            </div>
+
+            <aside class="builder-sidebar">
+                <h3 style="color: var(--c-accent-primary); margin-bottom: 1rem;">Biblioteca</h3>
+                <input type="text" id="searchBox" placeholder="Buscar exercício..." class="form-control" style="margin-bottom: 1rem;" onkeyup="filterLibrary()">
                 
-                <div class="form-actions" style="margin-top: 2rem; display: flex; justify-content: flex-end;">
-                    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                <div class="exercise-library-grid" id="libraryGrid">
+                    <% if(typeof exercises !== "undefined") { %>
+                        <% exercises.forEach(ex => { %>
+                            <div class="library-item" onclick="addExercise('<%= ex.id %>', '<%= ex.name %>', '<%= ex.image_url || '/images/default-exercise.png' %>')" data-name="<%= ex.name.toLowerCase() %>">
+                                <img src="<%= ex.image_url || '/images/default-exercise.png' %>" alt="<%= ex.name %>" onerror="this.src='/images/default-exercise.png'">
+                                <div class="info">
+                                    <div class="name"><%= ex.name %></div>
+                                    <div class="category"><%= ex.category %></div>
+                                </div>
+                            </div>
+                        <% }); %>
+                    <% } %>
                 </div>
-            </form>
-        </div>
+            </aside>
+        </form>
     </main>
 </div>
+
 <script>
-    // Mesma lógica de JS do create, adaptada se necessário
-    document.addEventListener('DOMContentLoaded', function() {
-        const container = document.getElementById('exercisesContainer');
-        const addBtn = document.getElementById('addExerciseBtn');
-        
-        function addExercise() {
-            const count = container.children.length + 1;
-            const html = `
-                <div class="exercise-item" style="background: var(--c-bg-card); border: 1px solid var(--c-border); padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
-                        <h4 style="color: var(--c-accent-primary); margin: 0;">Exercício ${count}</h4>
-                        <button type="button" class="btn btn-sm btn-outline remove-exercise" style="color: var(--c-error); border-color: var(--c-error);">Remover</button>
-                    </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                        <div class="form-group"><label>Nome *</label><input type="text" class="exercise-name" required></div>
-                        <div class="form-group"><label>Séries x Reps *</label><input type="text" class="exercise-sets" required></div>
-                    </div>
-                    <div class="form-group"><label>Obs</label><textarea class="exercise-description" rows="1"></textarea></div>
-                    <div class="form-group"><label>Vídeo URL</label><input type="text" class="exercise-video"></div>
-                </div>`;
-            container.insertAdjacentHTML('beforeend', html);
-        }
-        addBtn.addEventListener('click', addExercise);
-        container.addEventListener('click', (e) => { if(e.target.classList.contains('remove-exercise')) e.target.closest('.exercise-item').remove(); });
-
-        document.getElementById('editWorkoutForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const exercises = [];
-            document.querySelectorAll('.exercise-item').forEach(item => {
-                exercises.push({
-                    name: item.querySelector('.exercise-name').value,
-                    sets: item.querySelector('.exercise-sets').value,
-                    description: item.querySelector('.exercise-description').value,
-                    video_url: item.querySelector('.exercise-video').value
-                });
-            });
-
-            const formData = {
-                title: document.getElementById('title').value,
-                description: document.getElementById('description').value,
-                exercises: exercises
-            };
-
-            try {
-                const res = await fetch(window.location.pathname, { // POST para a mesma URL
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'CSRF-Token': '<%= csrfToken %>' },
-                    body: JSON.stringify(formData)
-                });
-                const json = await res.json();
-                if (json.success) window.location.href = '/admin/clients/' + json.clientId;
-                else alert('Erro: ' + json.message);
-            } catch (err) { alert('Erro.'); }
-        });
-    });
-</script>
+    // Inicializa lista com dados do backend
+    let selectedExercises = <%- JSON.stringify(workout.exercises || []) %>;
     
-    <aside class="exercises-sidebar" style="background: #111; padding: 1.5rem; border-radius: 12px; border: 1px solid #333; height: fit-content;">
-        <h3 style="color: var(--c-accent-primary); margin-bottom: 1rem; font-size: 1.2rem;">Biblioteca</h3>
-        <div class="search-box" style="margin-bottom: 1rem;">
-            <input type="text" id="exerciseSearch" placeholder="Buscar exercício..." 
-                   style="width: 100%; padding: 10px; background: #222; border: 1px solid #444; color: white; border-radius: 6px;"
-                   onkeyup="filterExercises()">
-        </div>
-        <div class="exercises-list" id="exercisesList" style="max-height: 500px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;">
-            <% if(typeof exercises !== "undefined") { %>
-                <% exercises.forEach(function(ex) { %>
-                    <div class="exercise-item draggable-source" draggable="true" 
-                         data-id="<%= ex.id %>" data-name="<%= ex.name %>" 
-                         style="background: #222; padding: 10px; border-radius: 6px; border: 1px solid #333; cursor: grab;">
-                        <strong style="color: white; font-size: 0.9rem;"><%= ex.name %></strong>
-                        <div style="display: flex; justify-content: space-between; margin-top: 5px;">
-                            <span style="font-size: 0.75rem; color: #888;"><%= ex.category %></span>
-                            <button type="button" onclick="addExerciseToWorkout('<%= ex.name %>r)" style="background: var(--c-accent-primary); border: none; color: black; border-radius: 4px; padding: 2px 6px; font-weight: bold; cursor: pointer; font-size: 0.8rem;">+</button>
+    function renderExercises() {
+        const list = document.getElementById('selectedExercisesList');
+        const input = document.getElementById('exercisesInput');
+        
+        list.innerHTML = '';
+        
+        selectedExercises.forEach((ex, index) => {
+            // Garante valores padrão se faltar algo no JSON antigo
+            const sets = ex.sets || 3;
+            const reps = ex.reps || 12;
+            const obs = ex.obs || '';
+            const img = ex.image_url || '/images/default-exercise.png'; // Tenta recuperar imagem se possível ou usa default
+
+            list.innerHTML += `
+                <div class="exercise-card">
+                    <img src="${img}" onerror="this.src='/images/default-exercise.png'">
+                    <div class="details">
+                        <h4 style="color:white; margin-bottom:5px;">${ex.name}</h4>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr 2fr; gap: 10px;">
+                            <input type="number" placeholder="Séries" value="${sets}" class="form-control" onchange="updateEx(${index}, 'sets', this.value)">
+                            <input type="text" placeholder="Reps" value="${reps}" class="form-control" onchange="updateEx(${index}, 'reps', this.value)">
+                            <input type="text" placeholder="Obs (ex: drop-set)" value="${obs}" class="form-control" onchange="updateEx(${index}, 'obs', this.value)">
                         </div>
                     </div>
-                <% }); %>
-            <% } %>
-        </div>
-    </aside>
-    <script>
-    function filterExercises() {
-        const input = document.getElementById("exerciseSearch");
-        const filter = input.value.toUpperCase();
-        const list = document.getElementById("exercisesList");
-        const items = list.getElementsByClassName("exercise-item");
-        for (let i = 0; i < items.length; i++) {
-            const txtValue = items[i].getAttribute("data-name");
-            if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                items[i].style.display = "";
-            } else {
-                items[i].style.display = "none";
-            }
-        }
+                    <button type="button" class="btn-icon delete" onclick="removeEx(${index})">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+        });
+        
+        input.value = JSON.stringify(selectedExercises);
     }
-    // Função auxiliar simples para adicionar ao container (assume que a lógica de JS existente lida com a lista)
-    function addExerciseToWorkout(name) {
-        // Tenta usar a função global se existir, senão alerta
-        if(typeof addExercise === "function") { addExercise(name); }
-        else { alert("Adicione manualmente: " + name); }
+
+    function addExercise(id, name, img) {
+        selectedExercises.push({
+            id: id,
+            name: name,
+            sets: 3,
+            reps: '10-12',
+            obs: '',
+            image_url: img
+        });
+        renderExercises();
     }
-    </script>
-<%- include('../partials/footer.ejs') %>
+
+    function removeEx(index) {
+        selectedExercises.splice(index, 1);
+        renderExercises();
+    }
+
+    function updateEx(index, field, value) {
+        selectedExercises[index][field] = value;
+        document.getElementById('exercisesInput').value = JSON.stringify(selectedExercises);
+    }
+
+    function filterLibrary() {
+        const term = document.getElementById('searchBox').value.toLowerCase();
+        const items = document.querySelectorAll('.library-item');
+        items.forEach(item => {
+            const name = item.getAttribute('data-name');
+            item.style.display = name.includes(term) ? 'block' : 'none';
+        });
+    }
+
+    // Renderiza ao carregar
+    document.addEventListener('DOMContentLoaded', renderExercises);
+</script>
+<%- include('../partials/footer') %>

@@ -1,755 +1,153 @@
-<% const client = clientProfile; %>
-<%- include('../partials/header.ejs') %>
+<%- include('../partials/header') %>
 
 <div class="dashboard-container">
-    <%- include('../partials/sidebar.ejs') %>
+    <%- include('../partials/sidebar') %>
 
-    <main class="dashboard-main">
-        <section class="section">
-            <div class="section-header">
-                <h1>Perfil do Aluno</h1>
-            <% if (user.role === "superadmin") { %>
-            <div class="content-card" style="margin-bottom: 2rem; border: 1px solid #444; background: #1a1a1a;">
-                <h3 style="color: var(--c-accent-primary); border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px;">
-                    <i class="fas fa-user-shield"></i> Gestão Administrativa
-                </h3>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
-                    
-                    <div>
-                        <form action="/superadmin/assign-trainer" method="POST">
-                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                            <input type="hidden" name="user_id" value="<%= client.id %>">
-                            <label style="display:block; margin-bottom:5px; color:#ccc;">Atribuir Personal:</label>
-                            <div style="display: flex; gap: 10px;">
-                                <select name="trainer_id" class="form-control" style="padding: 8px; background: #333; color: white; border: 1px solid #555; border-radius: 4px; flex-grow: 1;">
-                                    <option value="">Sem Personal</option>
-                                    <% if(typeof trainers !== "undefined") { %>
-                                        <% trainers.forEach(t => { %>
-                                            <option value="<%= t.id %>" <%= client.trainer_id === t.id ? "selected" : "" %>><%= t.name %></option>
-                                        <% }); %>
-                                    <% } %>
-                                </select>
-                                <button type="submit" class="btn btn-primary btn-sm">Salvar</button>
-                            </div>
-                        </form>
-                    </div>
-                    
-                    <div style="display: flex; gap: 1rem; align-items: flex-end;">
-                        <form action="/superadmin/toggle-status" method="POST" style="margin: 0;">
-                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                            <input type="hidden" name="user_id" value="<%= client.id %>">
-                            <input type="hidden" name="status" value="<%= client.status === "active" ? "suspended" : "active" %>">
-                            <button type="submit" class="btn <%= client.status === "active" ? "btn-warning" : "btn-success" %> btn-sm">
-                                <i class="fas fa-power-off"></i> <%= client.status === "active" ? "Suspender Aluno" : "Ativar Aluno" %>
-                            </button>
-                        </form>
-                        <form action="/superadmin/delete-user" method="POST" onsubmit="return confirm("Tem certeza que deseja excluir este usuário permanentemente?");" style="margin: 0;">
-                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                            <input type="hidden" name="user_id" value="<%= client.id %>">
-                            <button type="submit" class="btn btn-danger btn-sm">
-                                <i class="fas fa-trash"></i> Excluir
-                            </button>
-                        </form>
-                    </div>
+    <main class="main-content">
+        <div class="section-header">
+            <h1><i class="fas fa-user"></i> Detalhes do Aluno: <%= client.name %></h1>
+            <a href="/admin/clients" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Voltar</a>
+        </div>
+
+        <% if (user.role === "superadmin") { %>
+        <div class="content-card" style="margin-bottom: 2rem; border: 1px solid #444; background: #1a1a1a;">
+            <h3 style="color: var(--c-accent-primary); border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px;">
+                <i class="fas fa-user-shield"></i> Gestão Administrativa
+            </h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+                <div>
+                    <form action="/superadmin/assign-trainer" method="POST">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <input type="hidden" name="user_id" value="<%= client.id %>">
+                        <label style="display:block; margin-bottom:5px; color:#ccc;">Atribuir Personal:</label>
+                        <div style="display: flex; gap: 10px;">
+                            <select name="trainer_id" class="form-control" style="padding: 8px; background: #333; color: white; border: 1px solid #555; border-radius: 4px; flex-grow: 1;">
+                                <option value="">Sem Personal</option>
+                                <% if(typeof trainers !== "undefined") { %>
+                                    <% trainers.forEach(t => { %>
+                                        <option value="<%= t.id %>" <%= client.trainer_id === t.id ? "selected" : "" %>><%= t.name %></option>
+                                    <% }); %>
+                                <% } %>
+                            </select>
+                            <button type="submit" class="btn btn-primary btn-sm">Salvar</button>
+                        </div>
+                    </form>
+                </div>
+                <div style="display: flex; gap: 1rem; align-items: flex-end;">
+                    <form action="/superadmin/toggle-status" method="POST" style="margin: 0;">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <input type="hidden" name="user_id" value="<%= client.id %>">
+                        <input type="hidden" name="status" value="<%= client.status === "active" ? "suspended" : "active" %>">
+                        <button type="submit" class="btn <%= client.status === "active" ? "btn-warning" : "btn-success" %> btn-sm">
+                            <i class="fas fa-power-off"></i> <%= client.status === "active" ? "Suspender" : "Ativar" %>
+                        </button>
+                    </form>
+                    <form action="/superadmin/delete-user" method="POST" onsubmit="return confirm('Tem certeza que deseja excluir este usuário permanentemente?');" style="margin: 0;">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <input type="hidden" name="user_id" value="<%= client.id %>">
+                        <button type="submit" class="btn btn-danger btn-sm">
+                            <i class="fas fa-trash"></i> Excluir
+                        </button>
+                    </form>
                 </div>
             </div>
-            <% } %>
-                <a href="/admin/clients" class="btn btn-secondary btn-sm">
-                    <i class="fas fa-arrow-left"></i> Voltar
-            <% if (user.role === "superadmin") { %>
-            <div class="content-card" style="margin-bottom: 2rem; border: 1px solid #444; background: #1a1a1a;">
-                <h3 style="color: var(--c-accent-primary); border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px;">
-                    <i class="fas fa-user-shield"></i> Gestão Administrativa
-                </h3>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
-                    
+        </div>
+        <% } %>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Treinos Realizados</h3>
+                <div class="value"><%= stats.completed_workouts || 0 %></div>
+            </div>
+            <div class="stat-card">
+                <h3>Check-ins</h3>
+                <div class="value"><%= stats.total_checkins || 0 %></div>
+            </div>
+            <div class="stat-card">
+                <h3>Sequência Atual</h3>
+                <div class="value"><%= stats.current_streak || 0 %> dias</div>
+            </div>
+        </div>
+
+        <div class="content-card" style="margin-top: 2rem;">
+            <h3 style="color: white; border-bottom: 1px solid #333; padding-bottom: 1rem; margin-bottom: 1rem;">
+                <i class="fas fa-file-medical-alt"></i> Ficha de Anamnese e Perfil Completo
+            </h3>
+            
+            <% if (typeof detailedProfile !== 'undefined' && detailedProfile) { %>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
                     <div>
-                        <form action="/superadmin/assign-trainer" method="POST">
-                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                            <input type="hidden" name="user_id" value="<%= client.id %>">
-                            <label style="display:block; margin-bottom:5px; color:#ccc;">Atribuir Personal:</label>
-                            <div style="display: flex; gap: 10px;">
-                                <select name="trainer_id" class="form-control" style="padding: 8px; background: #333; color: white; border: 1px solid #555; border-radius: 4px; flex-grow: 1;">
-                                    <option value="">Sem Personal</option>
-                                    <% if(typeof trainers !== "undefined") { %>
-                                        <% trainers.forEach(t => { %>
-                                            <option value="<%= t.id %>" <%= client.trainer_id === t.id ? "selected" : "" %>><%= t.name %></option>
-                                        <% }); %>
-                                    <% } %>
-                                </select>
-                                <button type="submit" class="btn btn-primary btn-sm">Salvar</button>
-                            </div>
-                        </form>
+                        <h4 style="color: var(--c-accent-primary); margin-bottom: 0.5rem; font-size: 1rem;">Dados Pessoais</h4>
+                        <p><strong>Idade:</strong> <%= detailedProfile.age || '--' %></p>
+                        <p><strong>Telefone:</strong> <%= detailedProfile.phone || '--' %></p>
+                        <p><strong>Identidade Gênero:</strong> <%= detailedProfile.gender_identity || '--' %></p>
                     </div>
-                    
-                    <div style="display: flex; gap: 1rem; align-items: flex-end;">
-                        <form action="/superadmin/toggle-status" method="POST" style="margin: 0;">
-                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                            <input type="hidden" name="user_id" value="<%= client.id %>">
-                            <input type="hidden" name="status" value="<%= client.status === "active" ? "suspended" : "active" %>">
-                            <button type="submit" class="btn <%= client.status === "active" ? "btn-warning" : "btn-success" %> btn-sm">
-                                <i class="fas fa-power-off"></i> <%= client.status === "active" ? "Suspender Aluno" : "Ativar Aluno" %>
-                            </button>
-                        </form>
-                        <form action="/superadmin/delete-user" method="POST" onsubmit="return confirm("Tem certeza que deseja excluir este usuário permanentemente?");" style="margin: 0;">
-                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                            <input type="hidden" name="user_id" value="<%= client.id %>">
-                            <button type="submit" class="btn btn-danger btn-sm">
-                                <i class="fas fa-trash"></i> Excluir
-                            </button>
-                        </form>
+                    <div>
+                        <h4 style="color: var(--c-accent-primary); margin-bottom: 0.5rem; font-size: 1rem;">Medidas</h4>
+                        <p><strong>Peso:</strong> <%= detailedProfile.weight || '--' %> kg</p>
+                        <p><strong>Altura:</strong> <%= detailedProfile.height || '--' %> m</p>
+                        <p><strong>Gordura:</strong> <%= detailedProfile.body_fat || '--' %> %</p>
+                    </div>
+                    <div>
+                        <h4 style="color: var(--c-accent-primary); margin-bottom: 0.5rem; font-size: 1rem;">Saúde</h4>
+                        <p><strong>Condições:</strong> <%= detailedProfile.medical_conditions || 'Nenhuma' %></p>
+                        <p><strong>Lesões:</strong> <%= detailedProfile.injuries || 'Nenhuma' %></p>
+                    </div>
+                    <div>
+                        <h4 style="color: var(--c-accent-primary); margin-bottom: 0.5rem; font-size: 1rem;">Objetivos</h4>
+                        <p><strong>Principal:</strong> <%= detailedProfile.main_goal || '--' %></p>
+                        <p><strong>Prazo:</strong> <%= detailedProfile.specific_event || '--' %></p>
                     </div>
                 </div>
-            </div>
+            <% } else { %>
+                <p style="color: #888; font-style: italic;">Nenhuma ficha de anamnese preenchida.</p>
             <% } %>
+        </div>
+
+        <div class="content-card" style="margin-top: 2rem;">
+            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h2>Treinos Atribuídos</h2>
+                <a href="/admin/workouts/create?clientId=<%= client.id %>" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Novo Treino
                 </a>
             </div>
-            <% if (user.role === "superadmin") { %>
-            <div class="content-card" style="margin-bottom: 2rem; border: 1px solid #444; background: #1a1a1a;">
-                <h3 style="color: var(--c-accent-primary); border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px;">
-                    <i class="fas fa-user-shield"></i> Gestão Administrativa
-                </h3>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
-                    
-                    <div>
-                        <form action="/superadmin/assign-trainer" method="POST">
-                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                            <input type="hidden" name="user_id" value="<%= client.id %>">
-                            <label style="display:block; margin-bottom:5px; color:#ccc;">Atribuir Personal:</label>
-                            <div style="display: flex; gap: 10px;">
-                                <select name="trainer_id" class="form-control" style="padding: 8px; background: #333; color: white; border: 1px solid #555; border-radius: 4px; flex-grow: 1;">
-                                    <option value="">Sem Personal</option>
-                                    <% if(typeof trainers !== "undefined") { %>
-                                        <% trainers.forEach(t => { %>
-                                            <option value="<%= t.id %>" <%= client.trainer_id === t.id ? "selected" : "" %>><%= t.name %></option>
-                                        <% }); %>
-                                    <% } %>
-                                </select>
-                                <button type="submit" class="btn btn-primary btn-sm">Salvar</button>
-                            </div>
-                        </form>
-                    </div>
-                    
-                    <div style="display: flex; gap: 1rem; align-items: flex-end;">
-                        <form action="/superadmin/toggle-status" method="POST" style="margin: 0;">
-                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                            <input type="hidden" name="user_id" value="<%= client.id %>">
-                            <input type="hidden" name="status" value="<%= client.status === "active" ? "suspended" : "active" %>">
-                            <button type="submit" class="btn <%= client.status === "active" ? "btn-warning" : "btn-success" %> btn-sm">
-                                <i class="fas fa-power-off"></i> <%= client.status === "active" ? "Suspender Aluno" : "Ativar Aluno" %>
-                            </button>
-                        </form>
-                        <form action="/superadmin/delete-user" method="POST" onsubmit="return confirm("Tem certeza que deseja excluir este usuário permanentemente?");" style="margin: 0;">
-                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                            <input type="hidden" name="user_id" value="<%= client.id %>">
-                            <button type="submit" class="btn btn-danger btn-sm">
-                                <i class="fas fa-trash"></i> Excluir
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            <% } %>
 
-            <div class="content-card" style="margin-bottom: 2rem;">
-            <% if (user.role === "superadmin") { %>
-            <div class="content-card" style="margin-bottom: 2rem; border: 1px solid #444; background: #1a1a1a;">
-                <h3 style="color: var(--c-accent-primary); border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px;">
-                    <i class="fas fa-user-shield"></i> Gestão Administrativa
-                </h3>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
-                    
-                    <div>
-                        <form action="/superadmin/assign-trainer" method="POST">
-                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                            <input type="hidden" name="user_id" value="<%= client.id %>">
-                            <label style="display:block; margin-bottom:5px; color:#ccc;">Atribuir Personal:</label>
-                            <div style="display: flex; gap: 10px;">
-                                <select name="trainer_id" class="form-control" style="padding: 8px; background: #333; color: white; border: 1px solid #555; border-radius: 4px; flex-grow: 1;">
-                                    <option value="">Sem Personal</option>
-                                    <% if(typeof trainers !== "undefined") { %>
-                                        <% trainers.forEach(t => { %>
-                                            <option value="<%= t.id %>" <%= client.trainer_id === t.id ? "selected" : "" %>><%= t.name %></option>
-                                        <% }); %>
-                                    <% } %>
-                                </select>
-                                <button type="submit" class="btn btn-primary btn-sm">Salvar</button>
-                            </div>
-                        </form>
-                    </div>
-                    
-                    <div style="display: flex; gap: 1rem; align-items: flex-end;">
-                        <form action="/superadmin/toggle-status" method="POST" style="margin: 0;">
-                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                            <input type="hidden" name="user_id" value="<%= client.id %>">
-                            <input type="hidden" name="status" value="<%= client.status === "active" ? "suspended" : "active" %>">
-                            <button type="submit" class="btn <%= client.status === "active" ? "btn-warning" : "btn-success" %> btn-sm">
-                                <i class="fas fa-power-off"></i> <%= client.status === "active" ? "Suspender Aluno" : "Ativar Aluno" %>
-                            </button>
-                        </form>
-                        <form action="/superadmin/delete-user" method="POST" onsubmit="return confirm("Tem certeza que deseja excluir este usuário permanentemente?");" style="margin: 0;">
-                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                            <input type="hidden" name="user_id" value="<%= client.id %>">
-                            <button type="submit" class="btn btn-danger btn-sm">
-                                <i class="fas fa-trash"></i> Excluir
-                            </button>
-                        </form>
-                    </div>
+            <% if (workouts && workouts.length > 0) { %>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Dia</th>
+                                <th>Exercícios</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% workouts.forEach(workout => { %>
+                                <tr>
+                                    <td><%= workout.name %></td>
+                                    <td><%= workout.day_of_week %></td>
+                                    <td><%= workout.exercises ? workout.exercises.length : 0 %></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <a href="/admin/workouts/edit/<%= workout.id %>" class="btn-icon" title="Editar"><i class="fas fa-edit"></i></a>
+                                            <form action="/admin/workouts/delete/<%= workout.id %>" method="POST" style="display:inline;" onsubmit="return confirm('Excluir treino?');">
+                                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                                <button type="submit" class="btn-icon delete" title="Excluir"><i class="fas fa-trash"></i></button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
                 </div>
-            </div>
+            <% } else { %>
+                <p class="empty-state">Nenhum treino atribuído ainda.</p>
             <% } %>
-                <div style="display: flex; gap: 1.5rem; align-items: center;">
-                    <div class="user-avatar-large" style="margin: 0;">
-            <% if (user.role === "superadmin") { %>
-            <div class="content-card" style="margin-bottom: 2rem; border: 1px solid #444; background: #1a1a1a;">
-                <h3 style="color: var(--c-accent-primary); border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px;">
-                    <i class="fas fa-user-shield"></i> Gestão Administrativa
-                </h3>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
-                    
-                    <div>
-                        <form action="/superadmin/assign-trainer" method="POST">
-                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                            <input type="hidden" name="user_id" value="<%= client.id %>">
-                            <label style="display:block; margin-bottom:5px; color:#ccc;">Atribuir Personal:</label>
-                            <div style="display: flex; gap: 10px;">
-                                <select name="trainer_id" class="form-control" style="padding: 8px; background: #333; color: white; border: 1px solid #555; border-radius: 4px; flex-grow: 1;">
-                                    <option value="">Sem Personal</option>
-                                    <% if(typeof trainers !== "undefined") { %>
-                                        <% trainers.forEach(t => { %>
-                                            <option value="<%= t.id %>" <%= client.trainer_id === t.id ? "selected" : "" %>><%= t.name %></option>
-                                        <% }); %>
-                                    <% } %>
-                                </select>
-                                <button type="submit" class="btn btn-primary btn-sm">Salvar</button>
-                            </div>
-                        </form>
-                    </div>
-                    
-                    <div style="display: flex; gap: 1rem; align-items: flex-end;">
-                        <form action="/superadmin/toggle-status" method="POST" style="margin: 0;">
-                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                            <input type="hidden" name="user_id" value="<%= client.id %>">
-                            <input type="hidden" name="status" value="<%= client.status === "active" ? "suspended" : "active" %>">
-                            <button type="submit" class="btn <%= client.status === "active" ? "btn-warning" : "btn-success" %> btn-sm">
-                                <i class="fas fa-power-off"></i> <%= client.status === "active" ? "Suspender Aluno" : "Ativar Aluno" %>
-                            </button>
-                        </form>
-                        <form action="/superadmin/delete-user" method="POST" onsubmit="return confirm("Tem certeza que deseja excluir este usuário permanentemente?");" style="margin: 0;">
-                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                            <input type="hidden" name="user_id" value="<%= client.id %>">
-                            <button type="submit" class="btn btn-danger btn-sm">
-                                <i class="fas fa-trash"></i> Excluir
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            <% } %>
-                        <%= (client && client.name) ? client.name.charAt(0) : 'U' %>
-                    </div>
-            <% if (user.role === "superadmin") { %>
-            <div class="content-card" style="margin-bottom: 2rem; border: 1px solid #444; background: #1a1a1a;">
-                <h3 style="color: var(--c-accent-primary); border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px;">
-                    <i class="fas fa-user-shield"></i> Gestão Administrativa
-                </h3>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
-                    
-                    <div>
-                        <form action="/superadmin/assign-trainer" method="POST">
-                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                            <input type="hidden" name="user_id" value="<%= client.id %>">
-                            <label style="display:block; margin-bottom:5px; color:#ccc;">Atribuir Personal:</label>
-                            <div style="display: flex; gap: 10px;">
-                                <select name="trainer_id" class="form-control" style="padding: 8px; background: #333; color: white; border: 1px solid #555; border-radius: 4px; flex-grow: 1;">
-                                    <option value="">Sem Personal</option>
-                                    <% if(typeof trainers !== "undefined") { %>
-                                        <% trainers.forEach(t => { %>
-                                            <option value="<%= t.id %>" <%= client.trainer_id === t.id ? "selected" : "" %>><%= t.name %></option>
-                                        <% }); %>
-                                    <% } %>
-                                </select>
-                                <button type="submit" class="btn btn-primary btn-sm">Salvar</button>
-                            </div>
-                        </form>
-                    </div>
-                    
-                    <div style="display: flex; gap: 1rem; align-items: flex-end;">
-                        <form action="/superadmin/toggle-status" method="POST" style="margin: 0;">
-                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                            <input type="hidden" name="user_id" value="<%= client.id %>">
-                            <input type="hidden" name="status" value="<%= client.status === "active" ? "suspended" : "active" %>">
-                            <button type="submit" class="btn <%= client.status === "active" ? "btn-warning" : "btn-success" %> btn-sm">
-                                <i class="fas fa-power-off"></i> <%= client.status === "active" ? "Suspender Aluno" : "Ativar Aluno" %>
-                            </button>
-                        </form>
-                        <form action="/superadmin/delete-user" method="POST" onsubmit="return confirm("Tem certeza que deseja excluir este usuário permanentemente?");" style="margin: 0;">
-                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                            <input type="hidden" name="user_id" value="<%= client.id %>">
-                            <button type="submit" class="btn btn-danger btn-sm">
-                                <i class="fas fa-trash"></i> Excluir
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            <% } %>
-                    <div>
-                        <h2 style="margin: 0; color: white;">
-            <% if (user.role === "superadmin") { %>
-            <div class="content-card" style="margin-bottom: 2rem; border: 1px solid #444; background: #1a1a1a;">
-                <h3 style="color: var(--c-accent-primary); border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px;">
-                    <i class="fas fa-user-shield"></i> Gestão Administrativa
-                </h3>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
-                    
-                    <div>
-                        <form action="/superadmin/assign-trainer" method="POST">
-                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                            <input type="hidden" name="user_id" value="<%= client.id %>">
-                            <label style="display:block; margin-bottom:5px; color:#ccc;">Atribuir Personal:</label>
-                            <div style="display: flex; gap: 10px;">
-                                <select name="trainer_id" class="form-control" style="padding: 8px; background: #333; color: white; border: 1px solid #555; border-radius: 4px; flex-grow: 1;">
-                                    <option value="">Sem Personal</option>
-                                    <% if(typeof trainers !== "undefined") { %>
-                                        <% trainers.forEach(t => { %>
-                                            <option value="<%= t.id %>" <%= client.trainer_id === t.id ? "selected" : "" %>><%= t.name %></option>
-                                        <% }); %>
-                                    <% } %>
-                                </select>
-                                <button type="submit" class="btn btn-primary btn-sm">Salvar</button>
-                            </div>
-                        </form>
-                    </div>
-                    
-                    <div style="display: flex; gap: 1rem; align-items: flex-end;">
-                        <form action="/superadmin/toggle-status" method="POST" style="margin: 0;">
-                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                            <input type="hidden" name="user_id" value="<%= client.id %>">
-                            <input type="hidden" name="status" value="<%= client.status === "active" ? "suspended" : "active" %>">
-                            <button type="submit" class="btn <%= client.status === "active" ? "btn-warning" : "btn-success" %> btn-sm">
-                                <i class="fas fa-power-off"></i> <%= client.status === "active" ? "Suspender Aluno" : "Ativar Aluno" %>
-                            </button>
-                        </form>
-                        <form action="/superadmin/delete-user" method="POST" onsubmit="return confirm("Tem certeza que deseja excluir este usuário permanentemente?");" style="margin: 0;">
-                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                            <input type="hidden" name="user_id" value="<%= client.id %>">
-                            <button type="submit" class="btn btn-danger btn-sm">
-                                <i class="fas fa-trash"></i> Excluir
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            <% } %>
-                            <%= (client && client.name) ? client.name : 'Nome Indisponível' %>
-                        </h2>
-            <% if (user.role === "superadmin") { %>
-            <div class="content-card" style="margin-bottom: 2rem; border: 1px solid #444; background: #1a1a1a;">
-                <h3 style="color: var(--c-accent-primary); border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px;">
-                    <i class="fas fa-user-shield"></i> Gestão Administrativa
-                </h3>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
-                    
-                    <div>
-                        <form action="/superadmin/assign-trainer" method="POST">
-                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                            <input type="hidden" name="user_id" value="<%= client.id %>">
-                            <label style="display:block; margin-bottom:5px; color:#ccc;">Atribuir Personal:</label>
-                            <div style="display: flex; gap: 10px;">
-                                <select name="trainer_id" class="form-control" style="padding: 8px; background: #333; color: white; border: 1px solid #555; border-radius: 4px; flex-grow: 1;">
-                                    <option value="">Sem Personal</option>
-                                    <% if(typeof trainers !== "undefined") { %>
-                                        <% trainers.forEach(t => { %>
-                                            <option value="<%= t.id %>" <%= client.trainer_id === t.id ? "selected" : "" %>><%= t.name %></option>
-                                        <% }); %>
-                                    <% } %>
-                                </select>
-                                <button type="submit" class="btn btn-primary btn-sm">Salvar</button>
-                            </div>
-                        </form>
-                    </div>
-                    
-                    <div style="display: flex; gap: 1rem; align-items: flex-end;">
-                        <form action="/superadmin/toggle-status" method="POST" style="margin: 0;">
-                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                            <input type="hidden" name="user_id" value="<%= client.id %>">
-                            <input type="hidden" name="status" value="<%= client.status === "active" ? "suspended" : "active" %>">
-                            <button type="submit" class="btn <%= client.status === "active" ? "btn-warning" : "btn-success" %> btn-sm">
-                                <i class="fas fa-power-off"></i> <%= client.status === "active" ? "Suspender Aluno" : "Ativar Aluno" %>
-                            </button>
-                        </form>
-                        <form action="/superadmin/delete-user" method="POST" onsubmit="return confirm("Tem certeza que deseja excluir este usuário permanentemente?");" style="margin: 0;">
-                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                            <input type="hidden" name="user_id" value="<%= client.id %>">
-                            <button type="submit" class="btn btn-danger btn-sm">
-                                <i class="fas fa-trash"></i> Excluir
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            <% } %>
-                        <p style="color: #888; margin: 0.5rem 0;">
-                            <%= (client && client.email) ? client.email : 'Email Indisponível' %>
-            <% if (user.role === "superadmin") { %>
-            <div class="content-card" style="margin-bottom: 2rem; border: 1px solid #444; background: #1a1a1a;">
-                <h3 style="color: var(--c-accent-primary); border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px;">
-                    <i class="fas fa-user-shield"></i> Gestão Administrativa
-                </h3>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
-                    
-                    <div>
-                        <form action="/superadmin/assign-trainer" method="POST">
-                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                            <input type="hidden" name="user_id" value="<%= client.id %>">
-                            <label style="display:block; margin-bottom:5px; color:#ccc;">Atribuir Personal:</label>
-                            <div style="display: flex; gap: 10px;">
-                                <select name="trainer_id" class="form-control" style="padding: 8px; background: #333; color: white; border: 1px solid #555; border-radius: 4px; flex-grow: 1;">
-                                    <option value="">Sem Personal</option>
-                                    <% if(typeof trainers !== "undefined") { %>
-                                        <% trainers.forEach(t => { %>
-                                            <option value="<%= t.id %>" <%= client.trainer_id === t.id ? "selected" : "" %>><%= t.name %></option>
-                                        <% }); %>
-                                    <% } %>
-                                </select>
-                                <button type="submit" class="btn btn-primary btn-sm">Salvar</button>
-                            </div>
-                        </form>
-                    </div>
-                    
-                    <div style="display: flex; gap: 1rem; align-items: flex-end;">
-                        <form action="/superadmin/toggle-status" method="POST" style="margin: 0;">
-                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                            <input type="hidden" name="user_id" value="<%= client.id %>">
-                            <input type="hidden" name="status" value="<%= client.status === "active" ? "suspended" : "active" %>">
-                            <button type="submit" class="btn <%= client.status === "active" ? "btn-warning" : "btn-success" %> btn-sm">
-                                <i class="fas fa-power-off"></i> <%= client.status === "active" ? "Suspender Aluno" : "Ativar Aluno" %>
-                            </button>
-                        </form>
-                        <form action="/superadmin/delete-user" method="POST" onsubmit="return confirm("Tem certeza que deseja excluir este usuário permanentemente?");" style="margin: 0;">
-                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                            <input type="hidden" name="user_id" value="<%= client.id %>">
-                            <button type="submit" class="btn btn-danger btn-sm">
-                                <i class="fas fa-trash"></i> Excluir
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            <% } %>
-                        </p>
-                        <div style="margin-top: 0.5rem;">
-            <% if (user.role === "superadmin") { %>
-            <div class="content-card" style="margin-bottom: 2rem; border: 1px solid #444; background: #1a1a1a;">
-                <h3 style="color: var(--c-accent-primary); border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px;">
-                    <i class="fas fa-user-shield"></i> Gestão Administrativa
-                </h3>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
-                    
-                    <div>
-                        <form action="/superadmin/assign-trainer" method="POST">
-                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                            <input type="hidden" name="user_id" value="<%= client.id %>">
-                            <label style="display:block; margin-bottom:5px; color:#ccc;">Atribuir Personal:</label>
-                            <div style="display: flex; gap: 10px;">
-                                <select name="trainer_id" class="form-control" style="padding: 8px; background: #333; color: white; border: 1px solid #555; border-radius: 4px; flex-grow: 1;">
-                                    <option value="">Sem Personal</option>
-                                    <% if(typeof trainers !== "undefined") { %>
-                                        <% trainers.forEach(t => { %>
-                                            <option value="<%= t.id %>" <%= client.trainer_id === t.id ? "selected" : "" %>><%= t.name %></option>
-                                        <% }); %>
-                                    <% } %>
-                                </select>
-                                <button type="submit" class="btn btn-primary btn-sm">Salvar</button>
-                            </div>
-                        </form>
-                    </div>
-                    
-                    <div style="display: flex; gap: 1rem; align-items: flex-end;">
-                        <form action="/superadmin/toggle-status" method="POST" style="margin: 0;">
-                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                            <input type="hidden" name="user_id" value="<%= client.id %>">
-                            <input type="hidden" name="status" value="<%= client.status === "active" ? "suspended" : "active" %>">
-                            <button type="submit" class="btn <%= client.status === "active" ? "btn-warning" : "btn-success" %> btn-sm">
-                                <i class="fas fa-power-off"></i> <%= client.status === "active" ? "Suspender Aluno" : "Ativar Aluno" %>
-                            </button>
-                        </form>
-                        <form action="/superadmin/delete-user" method="POST" onsubmit="return confirm("Tem certeza que deseja excluir este usuário permanentemente?");" style="margin: 0;">
-                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                            <input type="hidden" name="user_id" value="<%= client.id %>">
-                            <button type="submit" class="btn btn-danger btn-sm">
-                                <i class="fas fa-trash"></i> Excluir
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            <% } %>
-                            <span class="user-role-badge">
-                                <%= (client && client.goal) ? client.goal : 'Sem objetivo definido' %>
-            <% if (user.role === "superadmin") { %>
-            <div class="content-card" style="margin-bottom: 2rem; border: 1px solid #444; background: #1a1a1a;">
-                <h3 style="color: var(--c-accent-primary); border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px;">
-                    <i class="fas fa-user-shield"></i> Gestão Administrativa
-                </h3>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
-                    
-                    <div>
-                        <form action="/superadmin/assign-trainer" method="POST">
-                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                            <input type="hidden" name="user_id" value="<%= client.id %>">
-                            <label style="display:block; margin-bottom:5px; color:#ccc;">Atribuir Personal:</label>
-                            <div style="display: flex; gap: 10px;">
-                                <select name="trainer_id" class="form-control" style="padding: 8px; background: #333; color: white; border: 1px solid #555; border-radius: 4px; flex-grow: 1;">
-                                    <option value="">Sem Personal</option>
-                                    <% if(typeof trainers !== "undefined") { %>
-                                        <% trainers.forEach(t => { %>
-                                            <option value="<%= t.id %>" <%= client.trainer_id === t.id ? "selected" : "" %>><%= t.name %></option>
-                                        <% }); %>
-                                    <% } %>
-                                </select>
-                                <button type="submit" class="btn btn-primary btn-sm">Salvar</button>
-                            </div>
-                        </form>
-                    </div>
-                    
-                    <div style="display: flex; gap: 1rem; align-items: flex-end;">
-                        <form action="/superadmin/toggle-status" method="POST" style="margin: 0;">
-                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                            <input type="hidden" name="user_id" value="<%= client.id %>">
-                            <input type="hidden" name="status" value="<%= client.status === "active" ? "suspended" : "active" %>">
-                            <button type="submit" class="btn <%= client.status === "active" ? "btn-warning" : "btn-success" %> btn-sm">
-                                <i class="fas fa-power-off"></i> <%= client.status === "active" ? "Suspender Aluno" : "Ativar Aluno" %>
-                            </button>
-                        </form>
-                        <form action="/superadmin/delete-user" method="POST" onsubmit="return confirm("Tem certeza que deseja excluir este usuário permanentemente?");" style="margin: 0;">
-                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                            <input type="hidden" name="user_id" value="<%= client.id %>">
-                            <button type="submit" class="btn btn-danger btn-sm">
-                                <i class="fas fa-trash"></i> Excluir
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            <% } %>
-                            </span>
-                        </div>
-            <% if (user.role === "superadmin") { %>
-            <div class="content-card" style="margin-bottom: 2rem; border: 1px solid #444; background: #1a1a1a;">
-                <h3 style="color: var(--c-accent-primary); border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px;">
-                    <i class="fas fa-user-shield"></i> Gestão Administrativa
-                </h3>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
-                    
-                    <div>
-                        <form action="/superadmin/assign-trainer" method="POST">
-                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                            <input type="hidden" name="user_id" value="<%= client.id %>">
-                            <label style="display:block; margin-bottom:5px; color:#ccc;">Atribuir Personal:</label>
-                            <div style="display: flex; gap: 10px;">
-                                <select name="trainer_id" class="form-control" style="padding: 8px; background: #333; color: white; border: 1px solid #555; border-radius: 4px; flex-grow: 1;">
-                                    <option value="">Sem Personal</option>
-                                    <% if(typeof trainers !== "undefined") { %>
-                                        <% trainers.forEach(t => { %>
-                                            <option value="<%= t.id %>" <%= client.trainer_id === t.id ? "selected" : "" %>><%= t.name %></option>
-                                        <% }); %>
-                                    <% } %>
-                                </select>
-                                <button type="submit" class="btn btn-primary btn-sm">Salvar</button>
-                            </div>
-                        </form>
-                    </div>
-                    
-                    <div style="display: flex; gap: 1rem; align-items: flex-end;">
-                        <form action="/superadmin/toggle-status" method="POST" style="margin: 0;">
-                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                            <input type="hidden" name="user_id" value="<%= client.id %>">
-                            <input type="hidden" name="status" value="<%= client.status === "active" ? "suspended" : "active" %>">
-                            <button type="submit" class="btn <%= client.status === "active" ? "btn-warning" : "btn-success" %> btn-sm">
-                                <i class="fas fa-power-off"></i> <%= client.status === "active" ? "Suspender Aluno" : "Ativar Aluno" %>
-                            </button>
-                        </form>
-                        <form action="/superadmin/delete-user" method="POST" onsubmit="return confirm("Tem certeza que deseja excluir este usuário permanentemente?");" style="margin: 0;">
-                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                            <input type="hidden" name="user_id" value="<%= client.id %>">
-                            <button type="submit" class="btn btn-danger btn-sm">
-                                <i class="fas fa-trash"></i> Excluir
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            <% } %>
-                    </div>
-                </div>
-            <% if (user.role === "superadmin") { %>
-            <div class="content-card" style="margin-bottom: 2rem; border: 1px solid #444; background: #1a1a1a;">
-                <h3 style="color: var(--c-accent-primary); border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px;">
-                    <i class="fas fa-user-shield"></i> Gestão Administrativa
-                </h3>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
-                    
-                    <div>
-                        <form action="/superadmin/assign-trainer" method="POST">
-                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                            <input type="hidden" name="user_id" value="<%= client.id %>">
-                            <label style="display:block; margin-bottom:5px; color:#ccc;">Atribuir Personal:</label>
-                            <div style="display: flex; gap: 10px;">
-                                <select name="trainer_id" class="form-control" style="padding: 8px; background: #333; color: white; border: 1px solid #555; border-radius: 4px; flex-grow: 1;">
-                                    <option value="">Sem Personal</option>
-                                    <% if(typeof trainers !== "undefined") { %>
-                                        <% trainers.forEach(t => { %>
-                                            <option value="<%= t.id %>" <%= client.trainer_id === t.id ? "selected" : "" %>><%= t.name %></option>
-                                        <% }); %>
-                                    <% } %>
-                                </select>
-                                <button type="submit" class="btn btn-primary btn-sm">Salvar</button>
-                            </div>
-                        </form>
-                    </div>
-                    
-                    <div style="display: flex; gap: 1rem; align-items: flex-end;">
-                        <form action="/superadmin/toggle-status" method="POST" style="margin: 0;">
-                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                            <input type="hidden" name="user_id" value="<%= client.id %>">
-                            <input type="hidden" name="status" value="<%= client.status === "active" ? "suspended" : "active" %>">
-                            <button type="submit" class="btn <%= client.status === "active" ? "btn-warning" : "btn-success" %> btn-sm">
-                                <i class="fas fa-power-off"></i> <%= client.status === "active" ? "Suspender Aluno" : "Ativar Aluno" %>
-                            </button>
-                        </form>
-                        <form action="/superadmin/delete-user" method="POST" onsubmit="return confirm("Tem certeza que deseja excluir este usuário permanentemente?");" style="margin: 0;">
-                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                            <input type="hidden" name="user_id" value="<%= client.id %>">
-                            <button type="submit" class="btn btn-danger btn-sm">
-                                <i class="fas fa-trash"></i> Excluir
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            <% } %>
-            </div>
+        </div>
 
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-info">
-                        <h3><%= (stats && stats.completed_workouts) ? stats.completed_workouts : 0 %></h3>
-                        <p>Treinos Feitos</p>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-info">
-                        <h3><%= (workouts) ? workouts.length : 0 %></h3>
-                        <p>Planos Ativos</p>
-                    </div>
-                </div>
-            </div>
-
-
-            <div class="content-card" style="margin-top: 2rem;">
-                <h3 style="color: white; border-bottom: 1px solid #333; padding-bottom: 1rem; margin-bottom: 1rem;">
-                    <i class="fas fa-file-medical-alt"></i> Ficha de Anamnese e Perfil Completo
-                </h3>
-                
-                <% if (typeof detailedProfile !== 'undefined' && detailedProfile) { %>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
-                        
-                        <div>
-                            <h4 style="color: var(--c-accent-primary); margin-bottom: 0.5rem; font-size: 1rem;">Dados Pessoais</h4>
-                            <p style="margin-bottom: 5px;"><strong>Idade:</strong> <%= detailedProfile.age || '--' %></p>
-                            <p style="margin-bottom: 5px;"><strong>Telefone:</strong> <%= detailedProfile.phone || '--' %></p>
-                            <p style="margin-bottom: 5px;"><strong>Identidade Gênero:</strong> <%= detailedProfile.gender_identity || '--' %></p>
-                            <p style="margin-bottom: 5px;"><strong>Sexo Biológico:</strong> <%= detailedProfile.sex_assigned_at_birth || '--' %></p>
-                            <p style="margin-bottom: 5px;"><strong>Hormônios:</strong> <%= detailedProfile.hormonal_treatment === 'true' ? 'Sim' : 'Não' %></p>
-                            <% if(detailedProfile.hormonal_details) { %>
-                                <p style="color: #aaa; font-size: 0.9em; margin-top: 2px;">Obs: <%= detailedProfile.hormonal_details %></p>
-                            <% } %>
-                        </div>
-
-                        <div>
-                            <h4 style="color: var(--c-accent-primary); margin-bottom: 0.5rem; font-size: 1rem;">Corpo e Medidas</h4>
-                            <p style="margin-bottom: 5px;"><strong>Peso:</strong> <%= detailedProfile.weight || '--' %> kg</p>
-                            <p style="margin-bottom: 5px;"><strong>Altura:</strong> <%= detailedProfile.height || '--' %> m</p>
-                            <p style="margin-bottom: 5px;"><strong>Gordura:</strong> <%= detailedProfile.body_fat || '--' %> %</p>
-                            <div style="background: #222; padding: 0.8rem; border-radius: 6px; font-size: 0.9em; margin-top: 5px;">
-                                <p style="margin:2px 0;"><strong>Cintura:</strong> <%= detailedProfile.measure_waist || '--' %></p>
-                                <p style="margin:2px 0;"><strong>Quadril:</strong> <%= detailedProfile.measure_hip || '--' %></p>
-                                <p style="margin:2px 0;"><strong>Braço:</strong> <%= detailedProfile.measure_arm || '--' %></p>
-                                <p style="margin:2px 0;"><strong>Perna:</strong> <%= detailedProfile.measure_leg || '--' %></p>
-                            </div>
-                        </div>
-
-                        <div>
-                            <h4 style="color: var(--c-accent-primary); margin-bottom: 0.5rem; font-size: 1rem;">Histórico de Saúde</h4>
-                            <p style="margin-bottom: 5px;"><strong>Condições:</strong> <%= detailedProfile.medical_conditions || 'Nenhuma' %></p>
-                            <p style="margin-bottom: 5px;"><strong>Medicamentos:</strong> <%= detailedProfile.medications || 'Nenhum' %></p>
-                            <p style="margin-bottom: 5px;"><strong>Lesões:</strong> <%= detailedProfile.injuries || 'Nenhuma' %></p>
-                            <p style="margin-bottom: 5px;"><strong>Alergias:</strong> <%= detailedProfile.allergies || 'Nenhuma' %></p>
-                            <p style="margin-bottom: 5px;"><strong>Cirurgias:</strong> <%= detailedProfile.surgeries || 'Nenhuma' %></p>
-                        </div>
-
-                        <div>
-                            <h4 style="color: var(--c-accent-primary); margin-bottom: 0.5rem; font-size: 1rem;">Objetivos</h4>
-                            <p style="margin-bottom: 5px;"><strong>Principal:</strong> <%= detailedProfile.main_goal || '--' %></p>
-                            <p style="margin-bottom: 5px;"><strong>Secundários:</strong> <%= detailedProfile.secondary_goals || '--' %></p>
-                            <p style="margin-bottom: 5px;"><strong>Prazo/Evento:</strong> <%= detailedProfile.specific_event || '--' %></p>
-                        </div>
-
-                        <div style="grid-column: 1 / -1; border-top: 1px solid #222; padding-top: 1rem;">
-                            <h4 style="color: var(--c-accent-primary); margin-bottom: 0.5rem; font-size: 1rem;">Rotina e Estilo de Vida</h4>
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                                <div>
-                                    <p style="margin-bottom: 5px;"><strong>Nível:</strong> <%= detailedProfile.fitness_level || '--' %></p>
-                                    <p style="margin-bottom: 5px;"><strong>Dias de Treino:</strong> <%= detailedProfile.training_days || '--' %></p>
-                                    <p style="margin-bottom: 5px;"><strong>Local:</strong> <%= detailedProfile.workout_preference || '--' %></p>
-                                    <p style="margin-bottom: 5px;"><strong>Equipamentos:</strong> <%= detailedProfile.equipment || '--' %></p>
-                                </div>
-                                <div>
-                                    <p style="margin-bottom: 5px;"><strong>Sono:</strong> <%= detailedProfile.sleep_hours || '--' %></p>
-                                    <p style="margin-bottom: 5px;"><strong>Dieta:</strong> <%= detailedProfile.diet_description || '--' %></p>
-                                    <p style="margin-bottom: 5px;"><strong>Dificuldades:</strong> <%= detailedProfile.challenges || '--' %></p>
-                                    <p style="margin-bottom: 5px;"><strong>Disponibilidade:</strong> <%= detailedProfile.availability || '--' %></p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                <% } else { %>
-                    <p style="color: #888; font-style: italic;">Nenhuma ficha de anamnese preenchida para este aluno.</p>
-                <% } %>
-            </div>
-            <div style="margin-top: 2rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <h3 style="color: white; margin: 0;">Treinos Atribuídos</h3>
-                    <% if (client && client.id) { %>
-                        <a href="/workouts/create?client_id=<%= client.id %>" class="btn btn-primary btn-sm">
-                            <i class="fas fa-plus"></i> Novo Treino
-                        </a>
-                    <% } %>
-                </div>
-
-                <% if (workouts && workouts.length > 0) { %>
-                    <% workouts.forEach(function(workout) { %>
-                        <div class="content-card" style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; padding: 1rem;">
-                            <div>
-                                <strong style="color: white; font-size: 1.1rem; display: block;"><%= workout.title %></strong>
-                                <small style="color: #666;">Criado em: <%= new Date(workout.created_at).toLocaleDateString() %></small>
-                            </div>
-                            <div style="display: flex; gap: 10px;">
-                                <a href="/workouts/<%= workout.id %>" class="btn btn-sm btn-outline">Ver</a>
-                                <a href="/workouts/edit/<%= workout.id %>" class="btn btn-sm btn-secondary">Editar</a>
-                            </div>
-                        </div>
-                    <% }); %>
-                <% } else { %>
-                    <div style="text-align: center; padding: 2rem; color: #666; border: 1px dashed #333; border-radius: 8px;">
-                        Nenhum treino encontrado.
-                    </div>
-                <% } %>
-            </div>
-        </section>
     </main>
 </div>
-
-<%- include('../partials/footer.ejs') %>
+<%- include('../partials/footer') %>
