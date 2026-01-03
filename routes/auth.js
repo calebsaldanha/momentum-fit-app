@@ -55,7 +55,9 @@ router.post('/forgot-password', async (req, res) => {
     const { email } = req.body;
     try {
         const token = crypto.randomBytes(20).toString('hex');
-        const expires = Date.now() + 3600000; // 1 hora
+        
+        // CORREÇÃO: Usar objeto Date do JavaScript em vez de milissegundos
+        const expires = new Date(Date.now() + 3600000); // 1 hora a partir de agora
 
         const result = await pool.query(
             "UPDATE users SET reset_password_token = $1, reset_password_expires = $2 WHERE email = $3 RETURNING id",
@@ -66,7 +68,6 @@ router.post('/forgot-password', async (req, res) => {
             await sendPasswordResetEmail(email, token, req.headers.host);
         }
 
-        // Sempre mostra mensagem de sucesso por segurança (para não revelar se o email existe)
         res.render('pages/forgot-password', { 
             title: 'Recuperar Senha', 
             success: 'Se o e-mail estiver cadastrado, você receberá um link de redefinição.',
@@ -82,9 +83,10 @@ router.post('/forgot-password', async (req, res) => {
 // 3. Formulário de Nova Senha (via Link do Email)
 router.get('/reset/:token', async (req, res) => {
     try {
+        // CORREÇÃO: Comparar com new Date() (agora)
         const result = await pool.query(
             "SELECT * FROM users WHERE reset_password_token = $1 AND reset_password_expires > $2",
-            [req.params.token, Date.now()]
+            [req.params.token, new Date()]
         );
 
         if (result.rows.length === 0) {
@@ -120,9 +122,10 @@ router.post('/reset/:token', async (req, res) => {
     }
 
     try {
+        // CORREÇÃO: Comparar com new Date()
         const result = await pool.query(
             "SELECT * FROM users WHERE reset_password_token = $1 AND reset_password_expires > $2",
-            [req.params.token, Date.now()]
+            [req.params.token, new Date()]
         );
 
         if (result.rows.length === 0) {
