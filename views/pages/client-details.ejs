@@ -1,71 +1,158 @@
 <%- include('../partials/header', { title: 'Detalhes do Aluno', bodyClass: 'dashboard-body' }) %>
 <div class="dashboard-container">
-    <%- include('../partials/sidebar.ejs', { currentPage: 'clients' }) %>
+    <%- include('../partials/sidebar.ejs', { currentPage: typeof currentPage !== 'undefined' ? currentPage : 'clients' }) %>
     
     <main class="dashboard-main">
         <div class="section-header">
             <a href="javascript:history.back()" class="btn-back"><i class="fas fa-arrow-left"></i> Voltar</a>
-            <h1>Perfil de <%= client.name %></h1>
+            <h1>Perfil de <%= clientData ? clientData.name : 'Aluno' %></h1>
         </div>
 
         <div class="profile-grid">
             <div class="profile-card">
                 <div class="text-center">
                     <div class="avatar-large" style="margin: 0 auto 1rem;">
-                        <% if (client.profile_image) { %>
-                            <img src="<%= client.profile_image %>" alt="<%= client.name %>">
+                        <% if (clientData && clientData.profile_image) { %>
+                            <img src="<%= clientData.profile_image %>" alt="<%= clientData.name %>">
                         <% } else { %>
                             <i class="fas fa-user"></i>
                         <% } %>
                     </div>
-                    <h2><%= client.name %></h2>
-                    <p class="text-muted"><%= client.email %></p>
-                    <span class="status-badge status-<%= client.status || 'active' %>">
-                        <%= client.status === 'active' ? 'Ativo' : 'Inativo' %>
-                    </span>
+                    <h2><%= clientData ? clientData.name : 'Nome Indisponível' %></h2>
+                    <p class="text-muted"><%= clientData ? clientData.email : '' %></p>
+                    <% if (clientData && clientData.status) { %>
+                        <span class="status-badge status-<%= clientData.status %>">
+                            <%= clientData.status === 'active' ? 'Ativo' : 'Inativo' %>
+                        </span>
+                    <% } %>
                 </div>
                 
                 <div class="info-list" style="margin-top: 2rem;">
                     <div class="info-item">
                         <strong>Objetivo:</strong>
-                        <span><%= client.goal || '-' %></span>
+                        <span><%= clientData && clientData.goal ? clientData.goal : '-' %></span>
                     </div>
                     <div class="info-item">
                         <strong>Nível:</strong>
-                        <span><%= client.fitness_level || '-' %></span>
+                        <span><%= clientData && clientData.fitness_level ? clientData.fitness_level : '-' %></span>
                     </div>
                 </div>
 
-                <% if (user.role === 'superadmin') { %>
+                <% if (typeof showAdminOptions !== 'undefined' && showAdminOptions) { %>
                     <hr style="margin: 20px 0;">
                     <h4 style="color: var(--c-error);">Zona de Admin</h4>
-                    <form action="/superadmin/users/<%= client.id %>/change-password" method="POST" onsubmit="return confirm('Tem certeza que deseja alterar a senha deste usuário?');">
+                    
+                    <form action="/superadmin/users/<%= clientData.id %>/change-password" method="POST" onsubmit="return confirm('Tem certeza que deseja alterar a senha deste usuário?');" style="margin-bottom: 1rem;">
                         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                         <div class="form-group">
                             <label style="font-size: 0.9rem;">Definir Nova Senha</label>
                             <div style="display: flex; gap: 10px;">
-                                <input type="text" name="new_password" placeholder="Nova senha" required style="padding: 5px;">
+                                <input type="text" name="new_password" placeholder="Nova senha" required style="padding: 5px; flex: 1;">
                                 <button type="submit" class="btn btn-sm btn-secondary">Salvar</button>
                             </div>
                         </div>
+                    </form>
+
+                    <form action="/superadmin/users/<%= clientData.id %>/status" method="POST" style="margin-bottom: 1rem;">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <input type="hidden" name="status" value="<%= clientData.status === 'active' ? 'inactive' : 'active' %>">
+                        <button type="submit" class="btn btn-sm btn-block" style="<%= clientData.status === 'active' ? 'background: #e74c3c;' : 'background: #2ecc71;' %> color: white;">
+                            <%= clientData.status === 'active' ? 'Desativar Usuário' : 'Ativar Usuário' %>
+                        </button>
                     </form>
                 <% } %>
             </div>
 
             <div class="profile-content">
-                <div class="card">
-                    <h3>Estatísticas Rápidas</h3>
+                <div class="card mb-4">
+                    <h3>Estatísticas</h3>
                     <div class="stats-row">
                         <div class="stat-box">
-                            <span class="stat-number">0</span>
+                            <span class="stat-number"><%= stats ? (stats.completed_workouts || 0) : 0 %></span>
                             <span class="stat-label">Treinos Completos</span>
                         </div>
                         <div class="stat-box">
-                            <span class="stat-number">0</span>
+                            <span class="stat-number"><%= stats ? (stats.current_streak || 0) : 0 %></span>
                             <span class="stat-label">Dias Consecutivos</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-number"><%= stats ? (stats.total_checkins || 0) : 0 %></span>
+                            <span class="stat-label">Check-ins</span>
                         </div>
                     </div>
                 </div>
+
+                <div class="card mb-4">
+                    <div class="card-header-flex">
+                        <h3>Ficha Técnica</h3>
+                    </div>
+                    <% if (typeof detailedProfile !== 'undefined' && detailedProfile && detailedProfile.user_id) { %>
+                        <div class="details-grid-compact">
+                            <div class="detail-group">
+                                <label>Idade</label>
+                                <span><%= detailedProfile.age || '-' %> anos</span>
+                            </div>
+                            <div class="detail-group">
+                                <label>Peso</label>
+                                <span><%= detailedProfile.weight || '-' %> kg</span>
+                            </div>
+                            <div class="detail-group">
+                                <label>Altura</label>
+                                <span><%= detailedProfile.height || '-' %> m</span>
+                            </div>
+                            <div class="detail-group">
+                                <label>Gordura</label>
+                                <span><%= detailedProfile.body_fat || '-' %> %</span>
+                            </div>
+                            <div class="detail-group full-width">
+                                <label>Lesões/Restrições</label>
+                                <span><%= detailedProfile.injuries || 'Nenhuma' %></span>
+                            </div>
+                        </div>
+                    <% } else { %>
+                        <p class="text-muted">Anamnese não preenchida.</p>
+                    <% } %>
+                </div>
+
+                <div class="card">
+                    <div class="card-header-flex">
+                        <h3>Treinos Atribuídos</h3>
+                        <a href="/workouts/create?client_id=<%= clientData.id %>" class="btn btn-sm btn-primary">
+                            <i class="fas fa-plus"></i> Novo Treino
+                        </a>
+                    </div>
+                    <% if (workouts && workouts.length > 0) { %>
+                        <table class="simple-table">
+                            <thead>
+                                <tr>
+                                    <th>Título</th>
+                                    <th>Dia</th>
+                                    <th>Exercícios</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% workouts.forEach(workout => { %>
+                                    <tr>
+                                        <td><strong><%= workout.title %></strong></td>
+                                        <td><%= workout.day_of_week %></td>
+                                        <td><%= workout.exercise_count || (workout.exercises ? workout.exercises.length : 0) %></td>
+                                        <td>
+                                            <a href="/workouts/edit/<%= workout.id %>" class="action-icon"><i class="fas fa-edit"></i></a>
+                                            <form action="/workouts/delete/<%= workout.id %>" method="POST" style="display:inline;" onsubmit="return confirm('Excluir este treino?');">
+                                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                                <button type="submit" class="action-icon delete" style="border:none; background:none; cursor:pointer;"><i class="fas fa-trash"></i></button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    <% } else { %>
+                        <p class="text-muted">Nenhum treino atribuído.</p>
+                    <% } %>
+                </div>
+
             </div>
         </div>
     </main>
