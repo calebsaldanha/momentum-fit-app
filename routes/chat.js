@@ -14,6 +14,7 @@ router.use(requireAuth);
 router.get('/', async (req, res) => {
     try {
         const { id, role, status } = req.session.user;
+        const selectedUserId = req.query.user_id; // ID do usuário selecionado para conversa
         
         // --- NOVO: Limpa notificações genéricas de chat ao entrar na página ---
         await pool.query(
@@ -24,19 +25,20 @@ router.get('/', async (req, res) => {
         let query;
         let params = [];
 
+        // Lógica de listagem de usuários
         if (role === 'superadmin') {
-            query = "SELECT id, name, role FROM users WHERE id != $1 ORDER BY name ASC";
+            query = "SELECT id, name, role, profile_image FROM users WHERE id != $1 ORDER BY name ASC";
             params = [id];
         } else if (role === 'client') {
             if (status !== 'active') {
                 return res.render('pages/chat', { 
-                    title: 'Chat', chatUsers: [], user: req.session.user, currentPage: 'chat', csrfToken: res.locals.csrfToken
+                    title: 'Chat', chatUsers: [], user: req.session.user, currentPage: 'chat', csrfToken: res.locals.csrfToken, activeChat: null, messages: []
                 }); 
             }
-            query = `SELECT u.id, u.name FROM users u JOIN client_profiles cp ON u.id = cp.assigned_trainer_id WHERE cp.user_id = $1`;
+            query = `SELECT u.id, u.name, u.profile_image FROM users u JOIN client_profiles cp ON u.id = cp.assigned_trainer_id WHERE cp.user_id = $1`;
             params = [id];
         } else {
-            query = `SELECT u.id, u.name FROM users u JOIN client_profiles cp ON u.id = cp.user_id WHERE cp.assigned_trainer_id = $1`;
+            query = `SELECT u.id, u.name, u.profile_image FROM users u JOIN client_profiles cp ON u.id = cp.user_id WHERE cp.assigned_trainer_id = $1`;
             params = [id];
         }
         
@@ -44,17 +46,41 @@ router.get('/', async (req, res) => {
         const users = result.rows.map(u => {
             if (role === 'superadmin' && u.role) {
                 const roleName = u.role === 'trainer' ? 'Personal' : (u.role === 'client' ? 'Aluno' : 'Admin');
-                return { ...u, name: `${u.name} (${roleName})` };
+                return { ...u, name: \`\${u.name} (\${roleName})\` };
             }
             return u;
         });
+
+        // Carrega conversa ativa se houver user_id
+        let activeChat = null;
+        let messages = [];
+
+        if (selectedUserId) {
+            // Verifica se o usuário selecionado está na lista permitida ou é válido
+            const userCheck = await pool.query("SELECT id, name, profile_image FROM users WHERE id = $1", [selectedUserId]);
+            if (userCheck.rows.length > 0) {
+                activeChat = userCheck.rows[0];
+                
+                // Busca mensagens
+                const msgsRes = await pool.query(\`
+                    SELECT id, sender_id, content, message_type, created_at 
+                    FROM messages 
+                    WHERE (sender_id = $1 AND receiver_id = $2) OR (sender_id = $2 AND receiver_id = $1) 
+                    ORDER BY created_at ASC\`, 
+                    [id, selectedUserId]
+                );
+                messages = msgsRes.rows;
+            }
+        }
 
         res.render('pages/chat', { 
             title: 'Chat - Momentum Fit', 
             chatUsers: users, 
             user: req.session.user, 
             currentPage: 'chat',
-            csrfToken: res.locals.csrfToken
+            csrfToken: res.locals.csrfToken,
+            activeChat: activeChat,
+            messages: messages
         });
 
     } catch (err) { 
@@ -63,21 +89,20 @@ router.get('/', async (req, res) => {
     }
 });
 
-// API Mensagens
+// API Mensagens (JSON) - Mantida caso seja usada via fetch em outro lugar
 router.get('/messages/:contactId', async (req, res) => {
     try {
         const { id: userId } = req.session.user;
         const contactId = req.params.contactId;
 
-        const result = await pool.query(`
+        const result = await pool.query(\`
             SELECT id, sender_id, content, message_type, created_at 
             FROM messages 
             WHERE (sender_id = $1 AND receiver_id = $2) OR (sender_id = $2 AND receiver_id = $1) 
-            ORDER BY created_at ASC`, 
+            ORDER BY created_at ASC\`, 
             [userId, contactId]
         );
 
-        // --- NOVO: Reforço na limpeza de notificações ao carregar mensagens ---
         await pool.query(
             "UPDATE notifications SET is_read = true WHERE user_id = $1 AND (link = '/chat' OR title = 'Nova Mensagem')",
             [userId]
@@ -95,20 +120,27 @@ router.post('/send', requireAuth, upload.single('file'), async (req, res) => {
         let messageType = 'text';
         
         if (req.file) {
-            const filename = `${Date.now()}-${req.file.originalname}`;
+            const filename = \`\${Date.now()}-\${req.file.originalname}\`;
             const blob = await put(filename, req.file.buffer, { access: 'public', contentType: req.file.mimetype });
             messageContent = blob.url;
             messageType = req.file.mimetype.startsWith('image/') ? 'image' : 'video';
         }
         
-        const result = await pool.query(
-            'INSERT INTO messages (sender_id, receiver_id, content, message_type) VALUES ($1, $2, $3, $4) RETURNING *', 
+        // Insere mensagem
+        await pool.query(
+            'INSERT INTO messages (sender_id, receiver_id, content, message_type) VALUES ($1, $2, $3, $4)', 
             [sender_id, receiver_id, messageContent, messageType]
         );
         
+        // Notifica
         notificationService.notifyNewMessage(senderName, receiver_id).catch(e => console.error(e));
-        res.status(201).json(result.rows[0]);
-    } catch (err) { res.status(500).json({ error: "Erro envio." }); }
+        
+        // Redireciona de volta para o chat com o usuário aberto
+        res.redirect('/chat?user_id=' + receiver_id);
+    } catch (err) { 
+        console.error(err);
+        res.status(500).render('pages/error', { message: "Erro ao enviar mensagem." }); 
+    }
 });
 
 module.exports = router;
