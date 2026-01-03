@@ -71,34 +71,76 @@
 
         <div class="content-card" style="margin-top: 2rem;">
             <h3 style="color: white; border-bottom: 1px solid #333; padding-bottom: 1rem; margin-bottom: 1rem;">
-                <i class="fas fa-file-medical-alt"></i> Ficha de Anamnese
+                <i class="fas fa-file-medical-alt"></i> Ficha de Anamnese Completa
             </h3>
+            
             <% if (typeof detailedProfile !== 'undefined' && detailedProfile && detailedProfile.user_id) { %>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
-                    <div>
-                        <h4 style="color: var(--c-accent-primary);">Dados Pessoais</h4>
-                        <p><strong>Idade:</strong> <%= detailedProfile.age || '--' %></p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+                    
+                    <div style="background: #222; padding: 1.5rem; border-radius: 8px;">
+                        <h4 style="color: var(--c-accent-primary); margin-top:0; border-bottom: 1px solid #444; padding-bottom: 8px; margin-bottom: 12px;">1. Dados Pessoais</h4>
+                        <p><strong>Idade:</strong> <%= detailedProfile.age || '--' %> anos</p>
                         <p><strong>Telefone:</strong> <%= detailedProfile.phone || '--' %></p>
                         <p><strong>Gênero:</strong> <%= detailedProfile.gender_identity || '--' %></p>
+                        <p><strong>Sexo Biológico:</strong> <%= detailedProfile.sex_assigned_at_birth === 'M' ? 'Masculino' : (detailedProfile.sex_assigned_at_birth === 'F' ? 'Feminino' : '--') %></p>
+                        <p><strong>Uso de Hormônios:</strong> <%= (detailedProfile.hormonal_treatment === true || detailedProfile.hormonal_treatment === 'true') ? 'Sim' : 'Não' %></p>
+                        <% if (detailedProfile.hormonal_treatment === true || detailedProfile.hormonal_treatment === 'true') { %>
+                            <p style="color: #ccc; font-size: 0.9rem; margin-left: 10px;"><em>Detalhes: <%= detailedProfile.hormonal_details || '--' %></em></p>
+                        <% } %>
                     </div>
-                    <div>
-                        <h4 style="color: var(--c-accent-primary);">Medidas</h4>
-                        <p><strong>Peso:</strong> <%= detailedProfile.weight || '--' %> kg</p>
-                        <p><strong>Altura:</strong> <%= detailedProfile.height || '--' %> m</p>
+
+                    <div style="background: #222; padding: 1.5rem; border-radius: 8px;">
+                        <h4 style="color: var(--c-accent-primary); margin-top:0; border-bottom: 1px solid #444; padding-bottom: 8px; margin-bottom: 12px;">2. Corpo & Medidas</h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <p><strong>Peso:</strong> <%= detailedProfile.weight || '--' %> kg</p>
+                            <p><strong>Altura:</strong> <%= detailedProfile.height || '--' %> m</p>
+                            <p><strong>Gordura (%):</strong> <%= detailedProfile.body_fat || '--' %>%</p>
+                        </div>
+                        <hr style="border: 0; border-top: 1px dashed #444; margin: 10px 0;">
+                        <p><strong>Circunferências:</strong></p>
+                        <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.9rem; color: #ccc;">
+                            <li>• Cintura: <%= detailedProfile.measure_waist || '--' %> cm</li>
+                            <li>• Quadril: <%= detailedProfile.measure_hip || '--' %> cm</li>
+                            <li>• Braço: <%= detailedProfile.measure_arm || '--' %> cm</li>
+                            <li>• Perna: <%= detailedProfile.measure_leg || '--' %> cm</li>
+                        </ul>
                     </div>
-                    <div>
-                        <h4 style="color: var(--c-accent-primary);">Saúde</h4>
-                        <p><strong>Condições:</strong> <%= detailedProfile.medical_conditions || 'Nenhuma' %></p>
-                        <p><strong>Lesões:</strong> <%= detailedProfile.injuries || 'Nenhuma' %></p>
-                    </div>
-                    <div>
-                        <h4 style="color: var(--c-accent-primary);">Objetivos</h4>
+
+                    <div style="background: #222; padding: 1.5rem; border-radius: 8px;">
+                        <h4 style="color: var(--c-accent-primary); margin-top:0; border-bottom: 1px solid #444; padding-bottom: 8px; margin-bottom: 12px;">3. Objetivos</h4>
                         <p><strong>Principal:</strong> <%= detailedProfile.main_goal || '--' %></p>
-                        <p><strong>Prazo:</strong> <%= detailedProfile.specific_event || '--' %></p>
+                        <p><strong>Secundários:</strong> <%= detailedProfile.secondary_goals || '--' %></p>
+                        <p><strong>Prazo/Evento:</strong> <%= detailedProfile.specific_event || '--' %></p>
                     </div>
+
+                    <div style="background: #222; padding: 1.5rem; border-radius: 8px;">
+                        <h4 style="color: var(--c-accent-primary); margin-top:0; border-bottom: 1px solid #444; padding-bottom: 8px; margin-bottom: 12px;">4. Saúde</h4>
+                        <p><strong>Condições:</strong> <%= detailedProfile.medical_conditions || 'Nenhuma' %></p>
+                        <p><strong>Medicamentos:</strong> <%= detailedProfile.medications || 'Nenhum' %></p>
+                        <p><strong>Lesões:</strong> <%= detailedProfile.injuries || 'Nenhuma' %></p>
+                        <p><strong>Cirurgias:</strong> <%= detailedProfile.surgeries || 'Nenhuma' %></p>
+                        <p><strong>Alergias:</strong> <%= detailedProfile.allergies || 'Nenhuma' %></p>
+                    </div>
+
+                    <div style="background: #222; padding: 1.5rem; border-radius: 8px;">
+                        <h4 style="color: var(--c-accent-primary); margin-top:0; border-bottom: 1px solid #444; padding-bottom: 8px; margin-bottom: 12px;">5. Rotina de Treino</h4>
+                        <p><strong>Nível:</strong> <span style="text-transform: capitalize;"><%= detailedProfile.fitness_level || '--' %></span></p>
+                        <p><strong>Frequência:</strong> <%= detailedProfile.training_days || '--' %> dias/semana</p>
+                        <p><strong>Preferência:</strong> <%= detailedProfile.workout_preference === 'gym' ? 'Academia' : (detailedProfile.workout_preference === 'home_basic' ? 'Casa (Pesos)' : (detailedProfile.workout_preference === 'home_bodyweight' ? 'Casa (Corporal)' : 'Parque')) %></p>
+                        <p><strong>Disponibilidade:</strong> <%= detailedProfile.availability || '--' %></p>
+                        <p><strong>Equipamentos:</strong> <%= detailedProfile.equipment || 'Nenhum' %></p>
+                    </div>
+
+                    <div style="background: #222; padding: 1.5rem; border-radius: 8px;">
+                        <h4 style="color: var(--c-accent-primary); margin-top:0; border-bottom: 1px solid #444; padding-bottom: 8px; margin-bottom: 12px;">6. Estilo de Vida</h4>
+                        <p><strong>Sono:</strong> <%= detailedProfile.sleep_hours || '--' %></p>
+                        <p><strong>Dieta:</strong> <%= detailedProfile.diet_description || '--' %></p>
+                        <p><strong>Desafios:</strong> <%= detailedProfile.challenges || '--' %></p>
+                    </div>
+
                 </div>
             <% } else { %>
-                <p style="color: #888;">Nenhuma ficha preenchida.</p>
+                <p style="color: #888; text-align: center; padding: 2rem;">Nenhuma ficha de anamnese preenchida para este aluno.</p>
             <% } %>
         </div>
 
