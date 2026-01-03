@@ -1,7 +1,7 @@
-<%- include('../partials/header.ejs', { title: 'Detalhes do Aluno', bodyClass: 'dashboard-body' }) %>
+<%- include('../partials/header.ejs') %>
 
 <div class="dashboard-container">
-    <%- include('../partials/sidebar.ejs', { currentPage: 'clients' }) %>
+    <%- include('../partials/sidebar.ejs') %>
 
     <main class="dashboard-main">
         <section class="section">
@@ -26,7 +26,7 @@
                         </p>
                         <div style="margin-top: 0.5rem;">
                             <span class="user-role-badge">
-                                <%= (client && client.goal) ? client.goal : 'Sem objetivo' %>
+                                <%= (client && client.goal) ? client.goal : 'Sem objetivo definido' %>
                             </span>
                         </div>
                     </div>

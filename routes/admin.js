@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../database/db');
 
-// Middleware de Autenticação Admin
+// Middleware Admin
 const requireAdmin = (req, res, next) => {
     if (!req.session.user) return res.redirect('/auth/login');
     if (req.session.user.role === 'trainer' || req.session.user.role === 'superadmin') return next();
@@ -18,11 +18,11 @@ router.get('/dashboard', requireAdmin, async (req, res) => {
 
         res.render('pages/admin-dashboard', {
             title: 'Painel do Treinador',
+            bodyClass: 'dashboard-body',
+            currentPage: 'dashboard',
             user: req.session.user,
             stats: stats,
-            recentClients: recentClients,
-            currentPage: 'dashboard',
-            bodyClass: 'dashboard-body'
+            recentClients: recentClients
         });
     } catch (err) {
         console.error(err);
@@ -38,10 +38,10 @@ router.get('/clients', requireAdmin, async (req, res) => {
 
         res.render('pages/admin-clients', {
             title: 'Meus Alunos',
-            user: req.session.user,
-            clients: clients,
+            bodyClass: 'dashboard-body',
             currentPage: 'clients',
-            bodyClass: 'dashboard-body'
+            user: req.session.user,
+            clients: clients
         });
     } catch (err) {
         console.error(err);
@@ -49,7 +49,7 @@ router.get('/clients', requireAdmin, async (req, res) => {
     }
 });
 
-// Detalhes do Aluno (A rota com problema)
+// Detalhes do Aluno (CORRIGIDO)
 router.get('/clients/:id', requireAdmin, async (req, res) => {
     try {
         const trainerId = req.session.user.id;
@@ -57,32 +57,33 @@ router.get('/clients/:id', requireAdmin, async (req, res) => {
 
         const client = await db.getUserById(clientId);
         
-        // Verificação de segurança
         if (!client) {
             return res.status(404).render('pages/error', { message: 'Aluno não encontrado.', user: req.session.user });
         }
         
-        // Verifica permissão (apenas treinador dono ou superadmin)
         if (client.trainer_id !== trainerId && req.session.user.role !== 'superadmin') {
-             return res.status(403).render('pages/error', { message: 'Sem permissão para ver este aluno.', user: req.session.user });
+             return res.status(403).render('pages/error', { message: 'Sem permissão.', user: req.session.user });
         }
 
         const workouts = await db.getWorkoutsByUserId(clientId);
         const stats = await db.getUserStats(clientId); 
 
-        // Renderização com objeto limpo
         res.render('pages/client-details', {
+            // Dados de Layout (Passados aqui para não precisar passar no include)
             title: 'Detalhes do Aluno',
+            bodyClass: 'dashboard-body',
+            currentPage: 'clients',
+            
+            // Dados da Página
             user: req.session.user,
             client: client,
+            clientProfile: client, // Compatibilidade caso a view use este nome
             workouts: workouts || [],
-            stats: stats || {},
-            currentPage: 'clients',
-            bodyClass: 'dashboard-body'
+            stats: stats || {}
         });
     } catch (err) {
-        console.error('Erro rota client-details:', err);
-        res.status(500).render('pages/error', { message: 'Erro interno ao carregar aluno.', user: req.session.user });
+        console.error('Erro client details:', err);
+        res.status(500).render('pages/error', { message: 'Erro ao carregar detalhes.', user: req.session.user });
     }
 });
 
@@ -92,10 +93,10 @@ router.get('/trainers', requireAdmin, async (req, res) => {
         const trainers = await db.getAllTrainers();
         res.render('pages/admin-trainers', { 
             title: 'Treinadores',
-            user: req.session.user,
-            trainers: trainers,
+            bodyClass: 'dashboard-body',
             currentPage: 'trainers',
-            bodyClass: 'dashboard-body'
+            user: req.session.user,
+            trainers: trainers
         });
     } catch(err) {
         res.redirect('/admin/dashboard');
