@@ -3,28 +3,112 @@
 <style>
 /* --- Layout Tela Cheia --- */
 html, body { height: 100% !important; margin: 0 !important; overflow: hidden !important; }
-.dashboard-container { display: flex; height: 100vh !important; width: 100vw !important; overflow: hidden; position: fixed; top: 0; left: 0; }
-.dashboard-main { flex: 1; display: flex; flex-direction: column; height: 100%; padding: 0 !important; background-color: #1a1a1a; }
-.chat-container { display: flex; flex: 1; height: 100%; overflow: hidden; background-color: #1a1a1a; }
 
-/* Sidebar */
-.chat-sidebar { width: 300px; background: #111; border-right: 1px solid #333; display: flex; flex-direction: column; flex-shrink: 0; height: 100%; }
-.chat-sidebar-header { padding: 15px; border-bottom: 1px solid #333; background: #111; }
+/* Container Principal Fixo */
+.dashboard-container { 
+    display: flex; 
+    height: 100vh !important; 
+    width: 100vw !important; 
+    overflow: hidden; 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+}
+
+.dashboard-main { 
+    flex: 1; 
+    display: flex; 
+    flex-direction: column; 
+    height: 100%; 
+    padding: 0 !important; 
+    background-color: #1a1a1a; 
+}
+
+.chat-container { 
+    display: flex; 
+    flex: 1; 
+    height: 100%; 
+    overflow: hidden; 
+    background-color: #1a1a1a; 
+}
+
+/* --- Sidebar (Lista de Conversas) --- */
+.chat-sidebar { 
+    width: 300px; 
+    background: #111; 
+    border-right: 1px solid #333; 
+    display: flex; 
+    flex-direction: column; 
+    flex-shrink: 0; 
+    height: 100%; 
+}
+
+/* Cabeçalho Sidebar - Alinhado com o Chat */
+.chat-sidebar-header { 
+    height: 60px; /* Altura fixa para alinhar */
+    padding: 0 15px;
+    border-bottom: 1px solid #333; 
+    background: #111; 
+    display: flex;
+    align-items: center;
+}
+
 .user-list { list-style: none; padding: 0; margin: 0; overflow-y: auto; flex: 1; }
 .user-item { padding: 15px; border-bottom: 1px solid #222; cursor: pointer; display: flex; align-items: center; gap: 12px; }
 .user-item:hover, .user-item.active { background: #2a2a2a; }
 .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: #444; object-fit: cover; flex-shrink: 0; }
 
-/* Conteúdo */
-.chat-content { flex: 1; display: flex; flex-direction: column; height: 100%; position: relative; background: #000; }
-.chat-header { padding: 15px; background: #1a1a1a; border-bottom: 1px solid #333; flex-shrink: 0; color: white; }
-.chat-messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; scroll-behavior: smooth; height: 0; min-height: 0; }
+/* --- Conteúdo Principal do Chat --- */
+.chat-content { 
+    flex: 1; 
+    display: flex; 
+    flex-direction: column; 
+    height: 100%; 
+    position: relative; 
+    background: #000; 
+}
+
+/* Cabeçalho do Chat - Mais compacto e no topo */
+.chat-header { 
+    height: 60px; /* Mesma altura da sidebar */
+    padding: 0 20px; 
+    background: #1a1a1a; 
+    border-bottom: 1px solid #333; 
+    flex-shrink: 0; 
+    color: white; 
+    display: flex;
+    align-items: center; /* Centraliza texto verticalmente */
+}
+
+/* Lista de Mensagens - Ocupa todo o espaço sobrando */
+.chat-messages { 
+    flex: 1; 
+    overflow-y: auto; 
+    padding: 15px 20px; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 15px; 
+    scroll-behavior: smooth; 
+    height: 0; 
+    min-height: 0; 
+}
+
 .message { max-width: 80%; padding: 10px 15px; border-radius: 12px; line-height: 1.4; word-wrap: break-word; color: white; }
 .message.sent { background: var(--c-accent-primary); color: #000; align-self: flex-end; }
 .message.received { background: #333; color: #fff; align-self: flex-start; }
 
-/* Input */
-.chat-input-area { padding: 15px; background: #1a1a1a; border-top: 1px solid #333; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+/* Input Area - Colado embaixo */
+.chat-input-area { 
+    padding: 10px 15px; /* Reduzido padding vertical */
+    background: #1a1a1a; 
+    border-top: 1px solid #333; 
+    display: flex; 
+    align-items: center; 
+    gap: 10px; 
+    flex-shrink: 0; 
+    min-height: 60px; /* Altura mínima confortável */
+}
+
 .chat-input { flex: 1; padding: 10px; border-radius: 6px; border: 1px solid #444; background: #222; color: white; }
 .hidden { display: none !important; }
 
@@ -34,7 +118,12 @@ html, body { height: 100% !important; margin: 0 !important; overflow: hidden !im
 @media (max-width: 768px) {
     .dashboard-container { flex-direction: column; position: relative; }
     .chat-container { flex-direction: column; }
-    .chat-sidebar { width: 100%; height: 160px; border-right: none; border-bottom: 1px solid #333; }
+    .chat-sidebar { width: 100%; height: 60px; overflow: hidden; flex-shrink: 0; display: flex; flex-direction: row; align-items: center; } /* Compacto no mobile */
+    .chat-sidebar-header { display: none; } /* Esconde titulo sidebar no mobile */
+    .user-list { display: flex; flex-direction: row; overflow-x: auto; overflow-y: hidden; height: 100%; width: 100%; }
+    .user-item { border-bottom: none; border-right: 1px solid #333; padding: 5px 15px; flex-direction: column; justify-content: center; min-width: 70px; }
+    .user-item div { display: none; } /* Esconde nomes no mobile lista horizontal */
+    .user-avatar { margin: 0; width: 35px; height: 35px; }
 }
 </style>
 
@@ -49,13 +138,15 @@ html, body { height: 100% !important; margin: 0 !important; overflow: hidden !im
             </div>
 
             <aside class="chat-sidebar">
-                <div class="chat-sidebar-header"><h3 style="margin:0; font-size:1.1rem; color:white;">Conversas</h3></div>
+                <div class="chat-sidebar-header">
+                    <h3 style="margin:0; font-size:1.1rem; color:white;">Conversas</h3>
+                </div>
                 <ul class="user-list">
                     <% if (chatUsers && chatUsers.length > 0) { %>
                         <% chatUsers.forEach(u => { %>
                              <li class="user-item <%= typeof activeChat !== 'undefined' && activeChat && activeChat.id === u.id ? 'active' : '' %>" 
                                 onclick="window.location.href='/chat?user_id=<%= u.id %>'">
-                                <img src="<%= u.profile_image || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(u.name) %>" class="user-avatar">
+                                <img src="<%= u.profile_image || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(u.name) %>" class="user-avatar" title="<%= u.name %>">
                                 <div><div style="font-weight: 600; color: white;"><%= u.name %></div></div>
                             </li>
                         <% }); %>
@@ -67,7 +158,12 @@ html, body { height: 100% !important; margin: 0 !important; overflow: hidden !im
 
             <section class="chat-content">
                 <% if (typeof activeChat !== 'undefined' && activeChat) { %>
-                    <div class="chat-header">Conversando com: <span style="color: var(--c-accent-primary);"><%= activeChat.name %></span></div>
+                    <div class="chat-header">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="color: #888;">Conversando com:</span> 
+                            <span style="color: var(--c-accent-primary); font-weight: bold; font-size: 1.1rem;"><%= activeChat.name %></span>
+                        </div>
+                    </div>
                     
                     <div class="chat-messages" id="messagesList">
                         <% if (messages && messages.length > 0) { %>
@@ -126,10 +222,9 @@ html, body { height: 100% !important; margin: 0 !important; overflow: hidden !im
         }
     }
 
-    // --- FUNÇÃO DE COMPRESSÃO DE IMAGEM ---
+    // --- FUNÇÃO DE COMPRESSÃO (Mantida para garantir envio de imagens) ---
     const compressImage = async (file, { quality = 0.7, maxWidth = 1280 } = {}) => {
-        if (!file.type.startsWith('image/')) return file; // Não comprime vídeos/PDFs
-        console.log('Comprimindo imagem:', file.name, 'Tamanho original:', file.size);
+        if (!file.type.startsWith('image/')) return file;
         
         return new Promise((resolve) => {
             const reader = new FileReader();
@@ -151,12 +246,11 @@ html, body { height: 100% !important; margin: 0 !important; overflow: hidden !im
                     ctx.drawImage(img, 0, 0, width, height);
 
                     canvas.toBlob((blob) => {
-                        if (!blob) return resolve(file); // Falha, retorna original
+                        if (!blob) return resolve(file);
                         const newFile = new File([blob], file.name, {
                             type: 'image/jpeg',
                             lastModified: Date.now(),
                         });
-                        console.log('Imagem comprimida. Novo tamanho:', newFile.size);
                         resolve(newFile);
                     }, 'image/jpeg', quality);
                 };
@@ -174,7 +268,6 @@ html, body { height: 100% !important; margin: 0 !important; overflow: hidden !im
         const overlay = document.getElementById('uploadOverlay');
         const statusText = document.getElementById('uploadStatusText');
 
-        // 1. Apenas texto (Modo Leve)
         if (!file) {
             form.enctype = "application/x-www-form-urlencoded";
             fileInput.removeAttribute('name');
@@ -184,21 +277,14 @@ html, body { height: 100% !important; margin: 0 !important; overflow: hidden !im
 
         if(overlay) overlay.style.display = 'flex';
         
-        // 2. Com Arquivo - Tenta comprimir primeiro
         try {
             if(statusText) statusText.textContent = "Otimizando arquivo...";
-            file = await compressImage(file); // Comprime se for imagem
-            
-            // Atualiza o input file com a versão comprimida
+            file = await compressImage(file);
             const dt = new DataTransfer();
             dt.items.add(file);
             fileInput.files = dt.files;
-            
-        } catch(err) {
-            console.warn("Erro na compressão, usando original", err);
-        }
+        } catch(err) { console.warn("Erro compressão", err); }
 
-        // 3. Tenta Upload Rápido (Vercel Blob)
         if (window.vercelUpload) {
             try {
                 if(statusText) statusText.textContent = "Enviando para nuvem...";
@@ -206,29 +292,18 @@ html, body { height: 100% !important; margin: 0 !important; overflow: hidden !im
                     access: 'public',
                     handleUploadUrl: '/chat/upload/authorize',
                 });
-
                 document.getElementById('hiddenFileUrl').value = newBlob.url;
                 fileInput.value = '';
                 fileInput.removeAttribute('name'); 
-                
-                // Envia como form simples (URL já gerada)
                 form.enctype = "application/x-www-form-urlencoded";
                 form.submit();
                 return;
-
-            } catch (err) {
-                console.warn('Upload rápido falhou, usando servidor...', err);
-            }
+            } catch (err) { console.warn('Fallback server...', err); }
         }
 
-        // 4. Fallback: Envio via Servidor (Multipart)
-        // Se chegou aqui, é porque Vercel Blob falhou ou não existe.
-        // O arquivo JÁ ESTÁ COMPRIMIDO no input, então deve passar pelo limite de 4.5MB
         if(statusText) statusText.textContent = "Enviando via servidor...";
         form.enctype = "multipart/form-data";
         fileInput.setAttribute('name', 'file');
-        
-        // Remove handler e envia nativo
         form.removeEventListener('submit', handleChatSubmit);
         form.submit();
     }
