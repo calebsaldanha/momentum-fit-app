@@ -81,7 +81,7 @@
                         <% } %>
                     </div>
                     
-                    <form id="chatForm" action="/chat/send?_csrf=<%= csrfToken %>" method="POST" class="chat-input-area" onsubmit="handleChatSubmit(event)">
+                    <form id="chatForm" action="/chat/send?_csrf=<%= csrfToken %>" method="POST" enctype="multipart/form-data" class="chat-input-area" onsubmit="handleChatSubmit(event)">
                         <input type="hidden" name="recipient_id" value="<%= activeChat.id %>">
                         <input type="hidden" name="fileUrl" id="hiddenFileUrl">
                         
@@ -156,9 +156,9 @@
                 form.submit(); // Envia o formulário agora com a URL e o texto
             } catch (err) {
                 console.error("Erro no upload:", err);
-                alert("Erro ao enviar arquivo: " + err.message);
+                console.warn("Upload client-side falhou, tentando via servidor...");
                 document.getElementById('uploadOverlay').style.display = 'none';
-                fileInput.setAttribute('name', 'file'); // Restaura em caso de erro
+                fileInput.setAttribute('name', 'file'); form.submit();
             }
         } else {
             // Se for só texto, envia normal
