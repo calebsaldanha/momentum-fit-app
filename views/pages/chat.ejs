@@ -1,165 +1,228 @@
 <%- include('../partials/header.ejs', { title, bodyClass: 'dashboard-body' }) %>
 
 <style>
-/* --- Layout Tela Cheia (Reset Total) --- */
-html, body { height: 100% !important; margin: 0 !important; overflow: hidden !important; }
+/* Ajuste Específico para a Página de Chat */
 
-/* Container Principal Fixo e SEM PADDING */
-.dashboard-container { 
-    display: flex; 
-    height: 100vh !important; 
-    width: 100vw !important; 
+/* Trava a rolagem da página principal para focar no chat */
+body {
     overflow: hidden; 
-    position: fixed; 
-    top: 0; 
-    left: 0; 
-    padding: 0 !important; /* CORREÇÃO CRÍTICA: Remove o padding de 100px */
-    z-index: 9999; /* Garante que fique acima de headers antigos */
+}
+
+/* Ajusta o container principal para ocupar 100% da altura visível */
+.dashboard-container {
+    height: 100vh;
+    padding-bottom: 0 !important; /* Remove espaço extra no fundo */
+    overflow: hidden; 
+}
+
+/* Garante que o container do chat ocupe todo o espaço disponível na grade */
+.chat-page-container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    /* Compensa o padding padrão do dashboard.css se necessário */
+    margin-top: -1rem; 
+}
+
+.chat-container {
+    flex: 1;
+    display: flex;
     background: #1a1a1a;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.05);
+    overflow: hidden;
+    /* Sombra para destaque */
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
 }
 
-.dashboard-main { 
-    flex: 1; 
-    display: flex; 
-    flex-direction: column; 
-    height: 100%; 
-    padding: 0 !important; 
-    background-color: #1a1a1a; 
+/* --- Sidebar Interna do Chat (Lista de Contatos) --- */
+.chat-sidebar {
+    width: 280px;
+    background: #111;
+    border-right: 1px solid #333;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
 }
 
-.chat-container { 
-    display: flex; 
-    flex: 1; 
-    height: 100%; 
-    overflow: hidden; 
-    background-color: #1a1a1a; 
+.chat-sidebar-header {
+    padding: 15px;
+    border-bottom: 1px solid #333;
+    background: #151515;
 }
 
-/* --- Sidebar (Lista de Conversas) --- */
-.chat-sidebar { 
-    width: 300px; 
-    background: #111; 
-    border-right: 1px solid #333; 
-    display: flex; 
-    flex-direction: column; 
-    flex-shrink: 0; 
-    height: 100%; 
+.user-list {
+    flex: 1;
+    overflow-y: auto;
+    list-style: none;
+    padding: 0;
+    margin: 0;
 }
 
-/* Cabeçalho Sidebar */
-.chat-sidebar-header { 
-    height: 70px; /* Um pouco mais alto para conforto */
-    padding: 0 15px;
-    border-bottom: 1px solid #333; 
-    background: #111; 
+.user-item {
+    padding: 12px 15px;
+    border-bottom: 1px solid #222;
     display: flex;
     align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: background 0.2s;
 }
 
-.user-list { list-style: none; padding: 0; margin: 0; overflow-y: auto; flex: 1; }
-.user-item { padding: 15px; border-bottom: 1px solid #222; cursor: pointer; display: flex; align-items: center; gap: 12px; }
-.user-item:hover, .user-item.active { background: #2a2a2a; }
-.user-avatar { width: 40px; height: 40px; border-radius: 50%; background: #444; object-fit: cover; flex-shrink: 0; }
-
-/* --- Conteúdo Principal do Chat --- */
-.chat-content { 
-    flex: 1; 
-    display: flex; 
-    flex-direction: column; 
-    height: 100%; 
-    position: relative; 
-    background: #000; 
+.user-item:hover, .user-item.active {
+    background: #222;
 }
 
-/* Cabeçalho do Chat */
-.chat-header { 
-    height: 70px; 
-    padding: 0 20px; 
-    background: #1a1a1a; 
-    border-bottom: 1px solid #333; 
-    flex-shrink: 0; 
-    color: white; 
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #333;
+}
+
+/* --- Área Principal das Mensagens --- */
+.chat-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #000;
+    position: relative;
+    min-width: 0;
+}
+
+.chat-header {
+    height: 60px; /* Altura fixa e compacta */
+    padding: 0 20px;
+    background: #1a1a1a;
+    border-bottom: 1px solid #333;
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
 }
 
-/* Lista de Mensagens */
-.chat-messages { 
-    flex: 1; 
-    overflow-y: auto; 
-    padding: 15px 20px; 
-    display: flex; 
-    flex-direction: column; 
-    gap: 15px; 
-    scroll-behavior: smooth; 
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    scroll-behavior: smooth;
 }
 
-.message { max-width: 80%; padding: 10px 15px; border-radius: 12px; line-height: 1.4; word-wrap: break-word; color: white; }
-.message.sent { background: var(--c-accent-primary); color: #000; align-self: flex-end; }
-.message.received { background: #333; color: #fff; align-self: flex-start; }
-
-/* Input Area - Colada embaixo */
-.chat-input-area { 
-    padding: 15px; 
-    background: #1a1a1a; 
-    border-top: 1px solid #333; 
-    display: flex; 
-    align-items: center; 
-    gap: 10px; 
-    flex-shrink: 0; 
+.message {
+    max-width: 75%;
+    padding: 10px 14px;
+    border-radius: 12px;
+    line-height: 1.4;
+    font-size: 0.95rem;
+    color: white;
+    position: relative;
+    word-wrap: break-word;
 }
 
-.chat-input { flex: 1; padding: 12px; border-radius: 6px; border: 1px solid #444; background: #222; color: white; }
+.message.sent {
+    background: var(--c-accent-primary);
+    color: black;
+    align-self: flex-end;
+    border-bottom-right-radius: 2px;
+}
 
-/* Overlay de Carregamento */
-#uploadOverlay { display:none; position:absolute; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.85); z-index:99; align-items:center; justify-content:center; flex-direction:column; color:white; }
+.message.received {
+    background: #333;
+    align-self: flex-start;
+    border-bottom-left-radius: 2px;
+}
 
+/* Área de Input - Fixada no fundo */
+.chat-input-area {
+    padding: 15px;
+    background: #1a1a1a;
+    border-top: 1px solid #333;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.chat-input {
+    flex: 1;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #444;
+    background: #222;
+    color: white;
+}
+
+/* Responsividade Mobile */
 @media (max-width: 768px) {
-    .dashboard-container { flex-direction: column; position: relative; }
-    .chat-container { flex-direction: column; }
-    .chat-sidebar { width: 100%; height: 60px; overflow: hidden; flex-shrink: 0; display: flex; flex-direction: row; align-items: center; } 
-    .chat-sidebar-header { display: none; } 
-    .user-list { display: flex; flex-direction: row; overflow-x: auto; overflow-y: hidden; height: 100%; width: 100%; }
-    .user-item { border-bottom: none; border-right: 1px solid #333; padding: 5px 15px; flex-direction: column; justify-content: center; min-width: 70px; }
-    .user-item div { display: none; } 
-    .user-avatar { margin: 0; width: 35px; height: 35px; }
+    .dashboard-container {
+        padding: 0 !important;
+        padding-top: 80px !important; /* Espaço pro header mobile */
+        display: block; /* Remove grid no mobile */
+    }
+    .chat-container {
+        flex-direction: column;
+        border-radius: 0;
+        border: none;
+    }
+    .chat-sidebar {
+        width: 100%;
+        height: 70px; /* Lista horizontal no topo */
+        flex-direction: row;
+        overflow-x: auto;
+        border-right: none;
+        border-bottom: 1px solid #333;
+    }
+    .chat-sidebar-header { display: none; }
+    .user-list { display: flex; flex-direction: row; }
+    .user-item { border-bottom: none; border-right: 1px solid #333; min-width: 60px; justify-content: center; padding: 5px; }
+    .user-item div { display: none; } /* Esconde nome, mostra só foto */
+    .user-avatar { margin: 0; }
 }
 </style>
 
 <div class="dashboard-container">
-    <aside class="chat-sidebar">
-        <div class="chat-sidebar-header">
-            <a href="/admin/dashboard" style="color: #888; margin-right: 10px; font-size: 1.2rem;"><i class="fas fa-arrow-left"></i></a>
-            <h3 style="margin:0; font-size:1.1rem; color:white;">Conversas</h3>
-        </div>
-        <ul class="user-list">
-            <% if (chatUsers && chatUsers.length > 0) { %>
-                <% chatUsers.forEach(u => { %>
-                     <li class="user-item <%= typeof activeChat !== 'undefined' && activeChat && activeChat.id === u.id ? 'active' : '' %>" 
-                        onclick="window.location.href='/chat?user_id=<%= u.id %>'">
-                        <img src="<%= u.profile_image || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(u.name) %>" class="user-avatar" title="<%= u.name %>">
-                        <div><div style="font-weight: 600; color: white;"><%= u.name %></div></div>
-                    </li>
-                <% }); %>
-            <% } else { %>
-                <div style="padding:1rem; color:#666; text-align:center">Sem contatos.</div>
-            <% } %>
-        </ul>
-    </aside>
+    <%- include('../partials/sidebar.ejs', { currentPage: 'chat' }) %>
     
-    <main class="dashboard-main">
+    <main class="chat-page-container">
+        <div id="uploadOverlay" style="display:none; position:absolute; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:999; align-items:center; justify-content:center; flex-direction:column; color:white;">
+            <i class="fas fa-spinner fa-spin" style="font-size:3rem; margin-bottom:1rem; color:var(--c-accent-primary);"></i>
+            <p id="uploadStatusText">Processando...</p>
+        </div>
+
         <div class="chat-container">
-            <div id="uploadOverlay">
-                <i class="fas fa-spinner fa-spin" style="font-size:3rem; margin-bottom:1rem; color:var(--c-accent-primary);"></i>
-                <p id="uploadStatusText">Processando imagem...</p>
-            </div>
+            <aside class="chat-sidebar">
+                <div class="chat-sidebar-header">
+                    <h3 style="margin:0; font-size:1rem; color:#888; text-transform:uppercase; letter-spacing:1px;">Conversas</h3>
+                </div>
+                <ul class="user-list">
+                    <% if (chatUsers && chatUsers.length > 0) { %>
+                        <% chatUsers.forEach(u => { %>
+                             <li class="user-item <%= typeof activeChat !== 'undefined' && activeChat && activeChat.id === u.id ? 'active' : '' %>" 
+                                onclick="window.location.href='/chat?user_id=<%= u.id %>'">
+                                <img src="<%= u.profile_image || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(u.name) %>" class="user-avatar">
+                                <div>
+                                    <div style="font-weight: 600; color: white; font-size: 0.9rem;"><%= u.name %></div>
+                                </div>
+                            </li>
+                        <% }); %>
+                    <% } else { %>
+                        <div style="padding:1rem; color:#666; text-align:center; font-size:0.9rem;">Nenhum contato.</div>
+                    <% } %>
+                </ul>
+            </aside>
 
             <section class="chat-content">
                 <% if (typeof activeChat !== 'undefined' && activeChat) { %>
                     <div class="chat-header">
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <span style="color: #888;">Conversando com:</span> 
-                            <span style="color: var(--c-accent-primary); font-weight: bold; font-size: 1.1rem;"><%= activeChat.name %></span>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <img src="<%= activeChat.profile_image || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(activeChat.name) %>" 
+                                 style="width:32px; height:32px; border-radius:50%;">
+                            <span style="color: white; font-weight: 600;"><%= activeChat.name %></span>
                         </div>
                     </div>
                     
@@ -172,14 +235,19 @@ html, body { height: 100% !important; margin: 0 !important; overflow: hidden !im
                                     <% } else if (msg.message_type === 'video') { %>
                                         <video src="<%= msg.content %>" controls style="max-width:100%; border-radius:8px;"></video>
                                     <% } else if (msg.message_type === 'file') { %>
-                                        <a href="<%= msg.content %>" target="_blank" style="color:inherit; text-decoration:underline;"><i class="fas fa-paperclip"></i> Baixar Arquivo</a>
+                                        <a href="<%= msg.content %>" target="_blank" style="color:inherit; text-decoration:underline;">
+                                            <i class="fas fa-paperclip"></i> Anexo
+                                        </a>
                                     <% } else { %>
                                         <%= msg.content %>
                                     <% } %>
                                 </div>
                             <% }); %>
                         <% } else { %>
-                            <div style="text-align:center; color:#666; margin-top:50px;">Nenhuma mensagem.</div>
+                            <div style="flex:1; display:flex; align-items:center; justify-content:center; color:#444; flex-direction:column;">
+                                <i class="far fa-comments" style="font-size:2rem; margin-bottom:10px;"></i>
+                                <p>Inicie a conversa!</p>
+                            </div>
                         <% } %>
                     </div>
                     
@@ -187,15 +255,24 @@ html, body { height: 100% !important; margin: 0 !important; overflow: hidden !im
                         <input type="hidden" name="recipient_id" value="<%= activeChat.id %>">
                         <input type="hidden" name="fileUrl" id="hiddenFileUrl">
                         
-                        <label for="file-upload" style="cursor: pointer; color: #888; padding:5px;"><i class="fas fa-paperclip" style="font-size:1.2rem"></i></label>
+                        <label for="file-upload" style="cursor: pointer; color: #888; padding:5px; transition:color 0.2s;" title="Enviar arquivo">
+                            <i class="fas fa-paperclip" style="font-size:1.2rem"></i>
+                        </label>
                         <input id="file-upload" type="file" name="file" style="display: none;" accept="image/*,video/*,application/pdf" onchange="updateFilePreview(this)">
-                        <span id="file-name-display" style="display:none; font-size:0.8rem; background:#333; padding:2px 6px; border-radius:4px; color:white;"></span>
+                        
+                        <span id="file-name-display" style="display:none; font-size:0.75rem; background:var(--c-accent-primary); color:black; padding:2px 8px; border-radius:10px; margin-right:5px; max-width:100px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"></span>
 
-                        <input type="text" name="content" class="chat-input" placeholder="Digite..." autocomplete="off">
-                        <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i></button>
+                        <input type="text" name="content" class="chat-input" placeholder="Digite sua mensagem..." autocomplete="off">
+                        
+                        <button type="submit" class="btn btn-primary" style="padding: 0 15px; display:flex; align-items:center; justify-content:center; height:42px;">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
                     </form>
                 <% } else { %>
-                    <div style="display:flex; align-items:center; justify-content:center; height:100%; color:#666;">Selecione um usuário.</div>
+                    <div style="flex:1; display:flex; align-items:center; justify-content:center; color:#666; flex-direction:column;">
+                        <i class="fas fa-inbox" style="font-size:3rem; margin-bottom:1rem; opacity:0.3;"></i>
+                        <p>Selecione uma conversa para começar.</p>
+                    </div>
                 <% } %>
             </section>
         </div>
@@ -220,9 +297,9 @@ html, body { height: 100% !important; margin: 0 !important; overflow: hidden !im
         }
     }
 
+    // Compressão de imagem (Client-Side)
     const compressImage = async (file, { quality = 0.7, maxWidth = 1280 } = {}) => {
         if (!file.type.startsWith('image/')) return file;
-        
         return new Promise((resolve) => {
             const reader = new FileReader();
             reader.onload = (event) => {
@@ -231,23 +308,17 @@ html, body { height: 100% !important; margin: 0 !important; overflow: hidden !im
                     const canvas = document.createElement('canvas');
                     let width = img.width;
                     let height = img.height;
-                    
                     if (width > maxWidth) {
                         height = Math.round((height * maxWidth) / width);
                         width = maxWidth;
                     }
-
                     canvas.width = width;
                     canvas.height = height;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
-
                     canvas.toBlob((blob) => {
                         if (!blob) return resolve(file);
-                        const newFile = new File([blob], file.name, {
-                            type: 'image/jpeg',
-                            lastModified: Date.now(),
-                        });
+                        const newFile = new File([blob], file.name, { type: 'image/jpeg', lastModified: Date.now() });
                         resolve(newFile);
                     }, 'image/jpeg', quality);
                 };
@@ -265,6 +336,7 @@ html, body { height: 100% !important; margin: 0 !important; overflow: hidden !im
         const overlay = document.getElementById('uploadOverlay');
         const statusText = document.getElementById('uploadStatusText');
 
+        // Modo Texto Simples
         if (!file) {
             form.enctype = "application/x-www-form-urlencoded";
             fileInput.removeAttribute('name');
@@ -275,16 +347,17 @@ html, body { height: 100% !important; margin: 0 !important; overflow: hidden !im
         if(overlay) overlay.style.display = 'flex';
         
         try {
-            if(statusText) statusText.textContent = "Otimizando arquivo...";
+            if(statusText) statusText.textContent = "Otimizando...";
             file = await compressImage(file);
             const dt = new DataTransfer();
             dt.items.add(file);
             fileInput.files = dt.files;
         } catch(err) { console.warn("Erro compressão", err); }
 
+        // Tenta Vercel Blob
         if (window.vercelUpload) {
             try {
-                if(statusText) statusText.textContent = "Enviando para nuvem...";
+                if(statusText) statusText.textContent = "Enviando...";
                 const newBlob = await window.vercelUpload(file.name, file, {
                     access: 'public',
                     handleUploadUrl: '/chat/upload/authorize',
@@ -298,7 +371,8 @@ html, body { height: 100% !important; margin: 0 !important; overflow: hidden !im
             } catch (err) { console.warn('Fallback server...', err); }
         }
 
-        if(statusText) statusText.textContent = "Enviando via servidor...";
+        // Fallback Servidor
+        if(statusText) statusText.textContent = "Enviando (Server)...";
         form.enctype = "multipart/form-data";
         fileInput.setAttribute('name', 'file');
         form.removeEventListener('submit', handleChatSubmit);

@@ -10,26 +10,23 @@ const requireTrainer = (req, res, next) => {
     res.status(403).render('pages/error', { message: 'Acesso negado.' });
 };
 
-// ... Rotas de listar ...
 router.get('/', requireTrainer, async (req, res) => {
     res.redirect('/admin/dashboard');
 });
 
-// Página Criar
+// GET: Página de Criação
 router.get('/create', requireTrainer, async (req, res) => {
     const clientId = req.query.client_id;
     try {
-        // Carrega cliente
         const clientRes = await pool.query("SELECT id, name FROM users WHERE id = $1", [clientId]);
-        
-        // CORREÇÃO: Carrega Biblioteca de Exercícios
+        // Correção: Busca TODOS os exercícios para preencher o dropdown
         const exercisesRes = await pool.query("SELECT * FROM exercises ORDER BY name ASC");
         
         res.render('pages/create-workout', { 
             title: 'Novo Treino', 
             user: req.session.user, 
             client: clientRes.rows[0],
-            exerciseLibrary: exercisesRes.rows, // Envia para a view
+            exerciseLibrary: exercisesRes.rows, // Envia para o EJS
             csrfToken: res.locals.csrfToken,
             currentPage: 'workouts'
         });
@@ -39,7 +36,7 @@ router.get('/create', requireTrainer, async (req, res) => {
     }
 });
 
-// POST Criar Treino
+// POST: Salvar Treino
 router.post('/create', requireTrainer, async (req, res) => {
     const { client_id, title, day_of_week, description, exercises } = req.body; 
     
@@ -64,15 +61,10 @@ router.post('/create', requireTrainer, async (req, res) => {
              );
         }
 
+        // Email Notification
         const clientRes = await pool.query("SELECT name, email FROM users WHERE id = $1", [client_id]);
-        const client = clientRes.rows[0];
-        const adminRes = await pool.query("SELECT email FROM users WHERE role = 'superadmin' LIMIT 1");
-
-        if (client) {
-            sendNewWorkoutEmail(client.email, title, client.name, req.headers.host).catch(console.error);
-        }
-        if (adminRes.rows.length > 0) {
-            sendNewWorkoutEmail(adminRes.rows[0].email, title, `${client.name} (Criado por ${req.session.user.name})`, req.headers.host).catch(console.error);
+        if (clientRes.rows[0]) {
+            sendNewWorkoutEmail(clientRes.rows[0].email, title, clientRes.rows[0].name, req.headers.host).catch(console.error);
         }
 
         res.json({ success: true, clientId: client_id });
@@ -86,13 +78,7 @@ router.post('/delete/:id', requireTrainer, async (req, res) => {
     try {
         await pool.query("DELETE FROM workouts WHERE id = $1", [req.params.id]);
         res.redirect(req.get('referer'));
-    } catch (err) {
-        res.status(500).send("Erro ao excluir");
-    }
-});
-
-router.get('/edit/:id', requireTrainer, async (req, res) => {
-    res.redirect('/admin/clients'); 
+    } catch (err) { res.status(500).send("Erro ao excluir"); }
 });
 
 module.exports = router;
