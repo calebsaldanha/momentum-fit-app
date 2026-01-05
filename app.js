@@ -19,9 +19,11 @@ app.set('views', path.join(__dirname, 'views'));
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-// CORREÇÃO 413: Aumenta o limite do payload para 50MB
+// --- CORREÇÃO DO ERRO 413 AQUI ---
+// Aumentamos o limite para 50mb para aceitar uploads maiores
 app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
 app.use(bodyParser.json({ limit: '50mb' }));
+// ---------------------------------
 
 app.use(cookieParser());
 
