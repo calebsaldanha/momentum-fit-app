@@ -1,49 +1,58 @@
 <%- include('../partials/header.ejs', { title, bodyClass: 'dashboard-body' }) %>
 
 <style>
-/* --- Layout Fixes para Chat em Tela Cheia --- */
+/* --- Layout Fixes para Chat em Tela Cheia (Prioridade Máxima) --- */
 html, body {
-    height: 100%;
-    margin: 0;
-    overflow: hidden; /* Evita rolagem dupla */
+    height: 100% !important;
+    margin: 0 !important;
+    overflow: hidden !important; /* Remove rolagem da janela principal */
 }
 
+/* Garante que o container do dashboard ocupe tudo */
 .dashboard-container {
     display: flex;
-    height: 100vh; /* Ocupa toda a altura da janela */
+    height: 100vh !important;
+    width: 100vw !important;
     overflow: hidden;
+    position: fixed; /* Fixa na tela */
+    top: 0;
+    left: 0;
 }
 
+/* Área principal */
 .dashboard-main {
     flex: 1;
     display: flex;
     flex-direction: column;
     height: 100%;
-    padding: 0 !important; /* Remove padding padrão para o chat encostar nas bordas */
+    padding: 0 !important;
     overflow: hidden;
+    background-color: #1a1a1a;
 }
 
-/* --- Estilos do Componente de Chat --- */
+/* Container específico do Chat */
 .chat-container {
     display: flex;
     flex: 1;
-    height: 100%;
+    height: 100%; /* Força altura total */
     overflow: hidden;
     background-color: #1a1a1a;
 }
 
 /* Sidebar de Contatos */
 .chat-sidebar {
-    width: 320px;
+    width: 300px;
     background: #111;
     border-right: 1px solid #333;
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
+    height: 100%;
+    z-index: 2;
 }
 
 .chat-sidebar-header {
-    padding: 20px;
+    padding: 15px;
     border-bottom: 1px solid #333;
     background: #111;
 }
@@ -53,165 +62,88 @@ html, body {
     padding: 0;
     margin: 0;
     overflow-y: auto;
-    flex: 1;
+    flex: 1; /* Ocupa o resto da altura da sidebar */
 }
 
 .user-item {
-    padding: 15px 20px;
+    padding: 15px;
     border-bottom: 1px solid #222;
     cursor: pointer;
-    transition: background 0.2s;
     display: flex;
     align-items: center;
     gap: 12px;
 }
-
-.user-item:hover, .user-item.active {
-    background: #2a2a2a;
-}
+.user-item:hover, .user-item.active { background: #2a2a2a; }
 
 .user-avatar {
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
-    background: #444;
-    object-fit: cover;
-    flex-shrink: 0;
+    width: 40px; height: 40px; border-radius: 50%; background: #444; object-fit: cover; flex-shrink: 0;
 }
 
-/* Área Principal de Mensagens */
+/* Conteúdo do Chat */
 .chat-content {
     flex: 1;
     display: flex;
     flex-direction: column;
     height: 100%;
-    background: #1a1a1a;
     position: relative;
-    min-width: 0; /* Impede que flex items estourem o container */
+    background: #000;
 }
 
 .chat-header {
-    padding: 15px 20px;
-    background: #222;
+    padding: 15px;
+    background: #1a1a1a;
     border-bottom: 1px solid #333;
-    font-weight: 600;
     flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
 }
 
+/* Lista de Mensagens - A chave para o scroll correto */
 .chat-messages {
-    flex: 1;
-    overflow-y: auto;
+    flex: 1; /* Cresce para ocupar espaço */
+    overflow-y: auto; /* Scroll apenas aqui */
     padding: 20px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 15px;
     scroll-behavior: smooth;
+    height: 0; /* Hack para flexbox overflow funcionar bem */
+    min-height: 0;
 }
 
 .message {
-    max-width: 75%;
-    padding: 12px 18px;
+    max-width: 80%;
+    padding: 10px 15px;
     border-radius: 12px;
-    line-height: 1.5;
-    position: relative;
+    line-height: 1.4;
     word-wrap: break-word;
-    font-size: 0.95rem;
 }
+.message.sent { background: var(--c-accent-primary); color: #000; align-self: flex-end; }
+.message.received { background: #333; color: #fff; align-self: flex-start; }
 
-.message.sent {
-    background: var(--c-accent-primary);
-    color: #000;
-    align-self: flex-end;
-    border-bottom-right-radius: 2px;
-}
-
-.message.received {
-    background: #333;
-    color: #fff;
-    align-self: flex-start;
-    border-bottom-left-radius: 2px;
-}
-
-/* Área de Input */
+/* Input Area Fixa no Fundo */
 .chat-input-area {
     padding: 15px;
-    background: #222;
+    background: #1a1a1a;
     border-top: 1px solid #333;
     display: flex;
     align-items: center;
-    gap: 12px;
-    flex-shrink: 0;
+    gap: 10px;
+    flex-shrink: 0; /* Não encolhe */
 }
 
 .chat-input {
-    flex: 1;
-    padding: 12px;
-    border-radius: 8px;
-    border: 1px solid #444;
-    background: #111;
-    color: white;
-    font-size: 0.95rem;
+    flex: 1; padding: 10px; border-radius: 6px; border: 1px solid #444; background: #222; color: white;
 }
 
-.chat-input:focus {
-    outline: none;
-    border-color: var(--c-accent-primary);
-}
-
-.file-preview-badge {
-    display: none;
-    font-size: 0.8rem;
-    background: #333;
-    padding: 6px 10px;
-    border-radius: 4px;
-    color: var(--c-accent-primary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 200px;
-}
-
-.file-attachment-link {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: rgba(0,0,0,0.1);
-    padding: 8px;
-    border-radius: 6px;
-    color: inherit;
-    text-decoration: none;
-    margin-top: 5px;
-    font-size: 0.9rem;
-    font-weight: 500;
-}
-
-.file-attachment-link:hover {
-    background: rgba(0,0,0,0.2);
-}
-
-/* Loading Overlay */
-.upload-overlay {
-    position: absolute; /* Mudado de fixed para absolute relativo ao chat */
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.8);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 100;
-    flex-direction: column;
-    color: white;
-    border-radius: 8px;
-}
-
-/* Mobile Responsive */
+/* Mobile */
 @media (max-width: 768px) {
-    .dashboard-container { flex-direction: column; }
+    .dashboard-container { flex-direction: column; position: relative; height: 100vh; }
     .chat-container { flex-direction: column; }
-    .chat-sidebar { width: 100%; height: 25%; min-height: 150px; border-right: none; border-bottom: 1px solid #333; }
-    .chat-content { height: 75%; }
+    .chat-sidebar { 
+        width: 100%; 
+        height: 160px; /* Altura fixa para lista de users no mobile */
+        border-right: none; border-bottom: 1px solid #333;
+    }
+    .chat-content { height: calc(100vh - 160px - 60px); } /* Ajuste manual se necessário */
 }
 </style>
 
@@ -220,9 +152,10 @@ html, body {
     
     <main class="dashboard-main">
         <div class="chat-container">
-            <div id="uploadOverlay" class="upload-overlay">
-                <i class="fas fa-spinner fa-spin" style="font-size: 3rem; color: var(--c-accent-primary); margin-bottom: 1rem;"></i>
-                <p>Enviando arquivo...</p>
+            
+            <div id="uploadOverlay" style="display:none; position:absolute; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:99; align-items:center; justify-content:center; flex-direction:column; color:white;">
+                <i class="fas fa-spinner fa-spin" style="font-size:3rem; margin-bottom:1rem; color:var(--c-accent-primary);"></i>
+                <p>Enviando...</p>
             </div>
 
             <aside class="chat-sidebar">
@@ -233,18 +166,16 @@ html, body {
                     <% if (chatUsers && chatUsers.length > 0) { %>
                         <% chatUsers.forEach(u => { %>
                              <li class="user-item <%= typeof activeChat !== 'undefined' && activeChat && activeChat.id === u.id ? 'active' : '' %>" 
-                                onclick="selectUser('<%= u.id %>')">
-                                <img src="<%= u.profile_image ? u.profile_image : 'https://ui-avatars.com/api/?name=' + encodeURIComponent(u.name) + '&background=random' %>" 
-                                     class="user-avatar" alt="<%= u.name %>"
-                                     onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=<%= encodeURIComponent(u.name) %>&background=random'">
+                                onclick="window.location.href='/chat?user_id=<%= u.id %>'">
+                                <img src="<%= u.profile_image || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(u.name) %>" class="user-avatar">
                                 <div>
                                     <div style="font-weight: 600; color: white;"><%= u.name %></div>
-                                    <small style="color: #888;">Clique para ver mensagens</small>
+                                    <small style="color: #888;">Toque para abrir</small>
                                 </div>
                             </li>
                         <% }); %>
                     <% } else { %>
-                        <div style="padding: 1.5rem; color: #666; text-align: center;">Nenhum contato encontrado.</div>
+                        <div style="padding:1rem; color:#666; text-align:center">Sem contatos.</div>
                     <% } %>
                 </ul>
             </aside>
@@ -252,7 +183,7 @@ html, body {
             <section class="chat-content">
                 <% if (typeof activeChat !== 'undefined' && activeChat) { %>
                     <div class="chat-header">
-                        <div>Conversando com: <span style="color: var(--c-accent-primary); margin-left: 5px;"><%= activeChat.name %></span></div>
+                        Conversando com: <span style="color: var(--c-accent-primary);"><%= activeChat.name %></span>
                     </div>
                     
                     <div class="chat-messages" id="messagesList">
@@ -260,63 +191,45 @@ html, body {
                             <% messages.forEach(msg => { %>
                                 <div class="message <%= msg.sender_id === user.id ? 'sent' : 'received' %>">
                                     <% if (msg.message_type === 'image') { %>
-                                        <a href="<%= msg.content %>" target="_blank">
-                                            <img src="<%= msg.content %>" style="max-width: 100%; border-radius: 8px; max-height: 300px;">
-                                        </a>
+                                        <a href="<%= msg.content %>" target="_blank"><img src="<%= msg.content %>" style="max-width:100%; border-radius:8px; max-height:300px;"></a>
                                     <% } else if (msg.message_type === 'video') { %>
-                                        <video src="<%= msg.content %>" controls style="max-width: 100%; border-radius: 8px; max-height: 300px;"></video>
+                                        <video src="<%= msg.content %>" controls style="max-width:100%; border-radius:8px;"></video>
                                     <% } else if (msg.message_type === 'file') { %>
-                                        <a href="<%= msg.content %>" target="_blank" class="file-attachment-link">
-                                            <i class="fas fa-file-download" style="font-size: 1.2rem;"></i> 
-                                            <div>
-                                                <div>Baixar Arquivo</div>
-                                                <small style="opacity:0.7">Clique para download</small>
-                                            </div>
+                                        <a href="<%= msg.content %>" target="_blank" style="color:inherit; text-decoration:underline;">
+                                            <i class="fas fa-paperclip"></i> Baixar Arquivo
                                         </a>
                                     <% } else { %>
                                         <%= msg.content %>
                                     <% } %>
-                                    <div style="font-size: 0.7rem; opacity: 0.5; text-align: right; margin-top: 5px;">
-                                        <%= new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) %>
-                                    </div>
                                 </div>
                             <% }); %>
                         <% } else { %>
-                            <div style="flex: 1; display: flex; align-items: center; justify-content: center; color: #666; flex-direction: column;">
-                                <i class="far fa-comments" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
-                                <p>Nenhuma mensagem ainda.</p>
-                                <small>Envie um "Olá" para começar!</small>
-                            </div>
+                            <div style="text-align:center; color:#666; margin-top:50px;">Nenhuma mensagem.</div>
                         <% } %>
                     </div>
                     
                     <form id="chatForm" 
                           action="/chat/send?_csrf=<%= csrfToken %>" 
                           method="POST" 
-                          enctype="multipart/form-data"
-                          class="chat-input-area" 
+                          enctype="multipart/form-data" 
+                          class="chat-input-area"
                           onsubmit="handleChatSubmit(event)">
                           
                         <input type="hidden" name="recipient_id" value="<%= activeChat.id %>">
                         <input type="hidden" name="fileUrl" id="hiddenFileUrl">
                         
-                        <label for="file-upload" style="cursor: pointer; color: #888; display: flex; align-items: center; padding: 5px 10px; border-radius: 4px; transition: background 0.2s;" title="Enviar arquivo">
-                            <i class="fas fa-paperclip" style="font-size: 1.2rem;"></i>
+                        <label for="file-upload" style="cursor: pointer; color: #888; padding:5px;">
+                            <i class="fas fa-paperclip" style="font-size:1.2rem"></i>
                         </label>
-                        <input id="file-upload" type="file" name="file" style="display: none;" onchange="updateFileName(this)">
-                        
-                        <span id="file-name-display" class="file-preview-badge"></span>
+                        <input id="file-upload" type="file" name="file" style="display: none;" onchange="updateFilePreview(this)">
+                        <span id="file-name-display" style="display:none; font-size:0.8rem; background:#333; padding:2px 6px; border-radius:4px;"></span>
 
-                        <input type="text" name="content" class="chat-input" placeholder="Digite sua mensagem..." autocomplete="off">
-                        
-                        <button type="submit" class="btn btn-primary" style="border-radius: 8px; width: 50px; display: flex; align-items: center; justify-content: center;">
-                            <i class="fas fa-paper-plane"></i>
-                        </button>
+                        <input type="text" name="content" class="chat-input" placeholder="Digite..." autocomplete="off">
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i></button>
                     </form>
                 <% } else { %>
-                    <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #666; flex-direction: column;">
-                        <i class="fas fa-inbox" style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.3;"></i>
-                        <p style="font-size: 1.2rem;">Selecione uma conversa ao lado</p>
+                    <div style="display:flex; align-items:center; justify-content:center; height:100%; color:#666;">
+                        Selecione um usuário.
                     </div>
                 <% } %>
             </section>
@@ -325,23 +238,20 @@ html, body {
 </div>
 
 <script type="module">
-    // Tenta carregar o SDK do Vercel Blob
     try {
         import { upload } from 'https://cdn.jsdelivr.net/npm/@vercel/blob@0.22.1/dist/client.js';
         window.vercelUpload = upload;
-    } catch (e) {
-        console.warn('Vercel Blob SDK failed to load, falling back to server upload.', e);
-    }
+    } catch(e) { console.log('Modulo blob nao carregou, usara fallback'); }
 </script>
 
 <script>
-    function selectUser(userId) {
-        window.location.href = '/chat?user_id=' + userId;
-    }
+    // Scroll para o fim
+    const msgList = document.getElementById('messagesList');
+    if(msgList) msgList.scrollTop = msgList.scrollHeight;
 
-    function updateFileName(input) {
+    function updateFilePreview(input) {
         const display = document.getElementById('file-name-display');
-        if (input.files && input.files.length > 0) {
+        if (input.files && input.files[0]) {
             display.textContent = input.files[0].name;
             display.style.display = 'inline-block';
         } else {
@@ -350,51 +260,51 @@ html, body {
     }
 
     async function handleChatSubmit(e) {
-        e.preventDefault();
+        e.preventDefault(); // Para tudo primeiro
+        
         const form = e.target;
         const fileInput = document.getElementById('file-upload');
         const file = fileInput.files[0];
-        
-        // Se houver arquivo e o SDK estiver carregado, tenta upload rápido
-        if (file && window.vercelUpload) {
-            const overlay = document.getElementById('uploadOverlay');
-            if(overlay) overlay.style.display = 'flex';
-            
+        const overlay = document.getElementById('uploadOverlay');
+
+        // Cenário 1: Só texto -> Envia direto
+        if (!file) {
+            form.submit();
+            return;
+        }
+
+        // Cenário 2: Tem arquivo -> Tenta Vercel Blob Client-Side
+        if (window.vercelUpload && overlay) {
+            overlay.style.display = 'flex';
             try {
-                // Upload Client-Side (Rápido e Suporta Arquivos Grandes)
                 const newBlob = await window.vercelUpload(file.name, file, {
                     access: 'public',
                     handleUploadUrl: '/chat/upload/authorize',
                 });
-
-                // Sucesso: Coloca a URL no hidden e remove o name do file input
+                
+                // Sucesso: Preenche URL, remove binário do form e envia
                 document.getElementById('hiddenFileUrl').value = newBlob.url;
-                fileInput.value = ''; 
-                fileInput.removeAttribute('name'); // Impede envio duplicado do binário
-                
-                form.submit(); // Envia o form com a URL
+                fileInput.value = ''; // Limpa o input file para não enviar binário
+                fileInput.removeAttribute('name'); // Garante que o backend ignore o campo file
+                form.submit();
+
             } catch (err) {
-                console.warn("Upload rápido falhou, tentando envio tradicional pelo servidor...", err);
+                console.warn('Falha no upload rápido, tentando modo clássico...', err);
                 
-                // Falha no Client-Side: Restaura o envio tradicional
-                if(overlay) overlay.style.display = 'none';
-                fileInput.setAttribute('name', 'file'); // Garante que o arquivo vá pelo body
+                // Falha: Garante que o input file tenha 'name="file"' e envia nativo
+                fileInput.setAttribute('name', 'file'); 
                 
-                // Remove o handler onsubmit para evitar loop e submete nativamente
-                form.removeAttribute('onsubmit');
+                // Remove o listener para não entrar em loop e envia
+                form.removeEventListener('submit', handleChatSubmit);
                 form.submit();
             }
         } else {
-            // Sem arquivo ou sem SDK: Envio padrão
-            form.removeAttribute('onsubmit');
+            // Cenário 3: Não tem suporte a Blob -> Envia nativo (Server-Side Fallback)
+            if(overlay) overlay.style.display = 'flex';
+            // Precisamos remover o preventDefault ou submeter manualmente
+            form.removeEventListener('submit', handleChatSubmit);
             form.submit();
         }
-    }
-
-    // Scroll automático para a última mensagem
-    const msgList = document.getElementById('messagesList');
-    if(msgList) {
-        msgList.scrollTop = msgList.scrollHeight;
     }
 </script>
 

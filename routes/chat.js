@@ -3,11 +3,13 @@ const router = express.Router();
 const { pool } = require('../database/db');
 const { sendNewMessageEmail } = require('../utils/emailService');
 const multer = require('multer');
-const { put, handleUpload } = require('@vercel/blob'); // Adicionado handleUpload
+const { put, handleUpload } = require('@vercel/blob');
 
-// Multer agora é usado apenas como fallback ou para arquivos pequenos, 
-// mas o upload principal será via Client-Side para evitar o limite de 4.5MB.
-const upload = multer({ storage: multer.memoryStorage() });
+// Configuração do Multer (Memória) para fallback de arquivos pequenos
+const upload = multer({ 
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 4.5 * 1024 * 1024 } // Limite de 4.5MB (limite da Vercel Serverless)
+});
 
 const requireAuth = (req, res, next) => {
     if (req.session.user) return next();
@@ -82,7 +84,7 @@ router.get('/', requireAuth, async (req, res) => {
     }
 });
 
-// NOVA ROTA: Autoriza o upload direto do navegador para o Vercel Blob
+// Rota de Autorização Client-Side (Vercel Blob)
 router.post('/upload/authorize', requireAuth, async (req, res) => {
   const { body } = req;
   try {
@@ -90,16 +92,13 @@ router.post('/upload/authorize', requireAuth, async (req, res) => {
       body,
       request: req,
       onBeforeGenerateToken: async (pathname) => {
-        // Gera um token seguro para este upload específico
         return {
           allowedContentTypes: ['image/jpeg', 'image/png', 'image/gif', 'video/mp4', 'application/pdf'],
-          tokenPayload: JSON.stringify({
-            userId: req.session.user.id,
-          }),
+          tokenPayload: JSON.stringify({ userId: req.session.user.id }),
         };
       },
       onUploadCompleted: async ({ blob, tokenPayload }) => {
-        console.log('Upload concluído via Client-Side:', blob.url);
+        console.log('Upload client-side concluído:', blob.url);
       },
     });
     res.json(jsonResponse);
@@ -108,34 +107,27 @@ router.post('/upload/authorize', requireAuth, async (req, res) => {
   }
 });
 
-// API Enviar Mensagem (Atualizada para aceitar URL do Client-Side)
+// Envio de Mensagem (Suporta URL direta ou Arquivo via Multer)
 router.post('/send', requireAuth, upload.single('file'), async (req, res) => {
     try {
         const recipient_id = req.body.recipient_id || req.body.receiver_id;
         const textContent = req.body.content;
-        // Se o client-side upload funcionou, a URL virá no corpo como fileUrl
         const clientSideFileUrl = req.body.fileUrl; 
         const senderId = req.session.user.id;
 
-        if (!recipient_id) throw new Error("ID do destinatário não fornecido.");
+        if (!recipient_id) return res.redirect('/chat');
         
         let finalContent = textContent || '';
         let messageType = 'text';
 
-        // Lógica 1: Arquivo veio via URL (Client-Side Upload - Preferido para > 4.5MB)
-        if (clientSideFileUrl) {
+        // 1. Prioridade: URL vinda do Client-Side (Upload Rápido)
+        if (clientSideFileUrl && clientSideFileUrl.trim() !== '') {
             finalContent = clientSideFileUrl;
-            
-            // Tenta adivinhar o tipo pela extensão
-            if (finalContent.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
-                messageType = 'image';
-            } else if (finalContent.match(/\.(mp4|webm|mov)$/i)) {
-                messageType = 'video';
-            } else {
-                messageType = 'file';
-            }
+            if (finalContent.match(/\.(jpg|jpeg|png|gif|webp)$/i)) messageType = 'image';
+            else if (finalContent.match(/\.(mp4|webm|mov)$/i)) messageType = 'video';
+            else messageType = 'file';
         }
-        // Lógica 2: Arquivo veio direto no request (Server-Side - Fallback para pequenos)
+        // 2. Fallback: Arquivo enviado diretamente pelo form (Server-Side)
         else if (req.file) {
             const filename = `chat/${Date.now()}-${req.file.originalname}`;
             const blob = await put(filename, req.file.buffer, { 
@@ -149,6 +141,7 @@ router.post('/send', requireAuth, upload.single('file'), async (req, res) => {
             else messageType = 'file';
         }
 
+        // Se não tem conteúdo nenhum, ignora
         if (!finalContent && !req.file && !clientSideFileUrl) {
              return res.redirect(`/chat?user_id=${recipient_id}`);
         }
@@ -158,7 +151,7 @@ router.post('/send', requireAuth, upload.single('file'), async (req, res) => {
             [senderId, recipient_id, finalContent, messageType]
         );
 
-        // Notificação
+        // Notificação por e-mail
         const receiverRes = await pool.query("SELECT email, name FROM users WHERE id = $1", [recipient_id]);
         if (receiverRes.rows.length > 0) {
             const receiver = receiverRes.rows[0];
@@ -169,11 +162,10 @@ router.post('/send', requireAuth, upload.single('file'), async (req, res) => {
         res.redirect(`/chat?user_id=${recipient_id}`);
     } catch (err) {
         console.error("Erro no envio:", err);
-        if (req.body.recipient_id) {
-             res.redirect(`/chat?user_id=${req.body.recipient_id}`);
-        } else {
-             res.status(500).render('pages/error', { message: 'Erro ao enviar mensagem.' });
-        }
+        // Em caso de erro, tenta voltar pro chat
+        const recipient = req.body.recipient_id || req.body.receiver_id;
+        if (recipient) res.redirect(`/chat?user_id=${recipient}`);
+        else res.status(500).render('pages/error', { message: 'Erro ao enviar mensagem.' });
     }
 });
 
