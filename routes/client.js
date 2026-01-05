@@ -22,20 +22,35 @@ router.get('/dashboard', requireClient, async (req, res) => {
             WHERE user_id = $1
         `, [req.session.user.id]);
 
+        // CORREÇÃO: Carregar dados do perfil (Peso, Altura, Nível)
+        const profileRes = await pool.query("SELECT * FROM client_profiles WHERE user_id = $1", [req.session.user.id]);
+        const profile = profileRes.rows[0] || {};
+
         res.render('pages/client-dashboard', { 
             title: 'Painel do Aluno', 
             user: req.session.user,
             stats: stats.rows[0] || { completed_workouts: 0, active_days: 0 },
+            profile: profile, // Passa o perfil para a view
+            workouts: [], // Passa array vazio ou carrega treinos recentes se desejar
             currentPage: 'dashboard'
         });
     } catch (err) {
+        console.error(err);
         res.status(500).render('pages/error', { message: 'Erro no dashboard.' });
     }
 });
 
 router.get('/workouts', requireClient, async (req, res) => {
     try {
-        const result = await pool.query("SELECT * FROM workouts WHERE user_id = $1 ORDER BY created_at DESC", [req.session.user.id]);
+        // CORREÇÃO: Join para pegar nome do treinador
+        const result = await pool.query(`
+            SELECT w.*, u.name as trainer_name 
+            FROM workouts w
+            LEFT JOIN users u ON w.trainer_id = u.id
+            WHERE w.user_id = $1 
+            ORDER BY w.created_at DESC
+        `, [req.session.user.id]);
+        
         res.render('pages/client-workouts', { 
             title: 'Meus Treinos', 
             user: req.session.user, 
@@ -48,15 +63,20 @@ router.get('/workouts', requireClient, async (req, res) => {
 });
 
 router.get('/profile', requireClient, async (req, res) => {
-    res.render('pages/client-profile', { 
-        title: 'Meu Perfil', 
-        user: req.session.user, 
-        csrfToken: res.locals.csrfToken,
-        currentPage: 'profile'
-    });
+    try {
+        const profileRes = await pool.query("SELECT * FROM client_profiles WHERE user_id = $1", [req.session.user.id]);
+        res.render('pages/client-profile', { 
+            title: 'Meu Perfil', 
+            user: req.session.user, 
+            profile: profileRes.rows[0] || {},
+            csrfToken: res.locals.csrfToken,
+            currentPage: 'profile'
+        });
+    } catch(err) {
+        res.redirect('/client/dashboard');
+    }
 });
 
-// ALTERAR SENHA (USUÁRIO)
 router.post('/change-password', requireClient, async (req, res) => {
     const { current_password, new_password, confirm_password } = req.body;
     
@@ -75,7 +95,6 @@ router.post('/change-password', requireClient, async (req, res) => {
         const hashedPassword = await bcrypt.hash(new_password, 10);
         await pool.query("UPDATE users SET password = $1 WHERE id = $2", [hashedPassword, req.session.user.id]);
         
-        // NOTIFICAÇÃO: Confirmação
         sendPasswordChangedEmail(user.email, user.name).catch(console.error);
 
         res.redirect('/client/profile?success=Senha alterada com sucesso');

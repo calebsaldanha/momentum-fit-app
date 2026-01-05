@@ -1,10 +1,10 @@
 <%- include('../partials/header.ejs', { title, bodyClass: 'dashboard-body' }) %>
 
 <style>
-/* --- Layout Tela Cheia --- */
+/* --- Layout Tela Cheia (Reset Total) --- */
 html, body { height: 100% !important; margin: 0 !important; overflow: hidden !important; }
 
-/* Container Principal Fixo */
+/* Container Principal Fixo e SEM PADDING */
 .dashboard-container { 
     display: flex; 
     height: 100vh !important; 
@@ -13,6 +13,9 @@ html, body { height: 100% !important; margin: 0 !important; overflow: hidden !im
     position: fixed; 
     top: 0; 
     left: 0; 
+    padding: 0 !important; /* CORREÇÃO CRÍTICA: Remove o padding de 100px */
+    z-index: 9999; /* Garante que fique acima de headers antigos */
+    background: #1a1a1a;
 }
 
 .dashboard-main { 
@@ -43,9 +46,9 @@ html, body { height: 100% !important; margin: 0 !important; overflow: hidden !im
     height: 100%; 
 }
 
-/* Cabeçalho Sidebar - Alinhado com o Chat */
+/* Cabeçalho Sidebar */
 .chat-sidebar-header { 
-    height: 60px; /* Altura fixa para alinhar */
+    height: 70px; /* Um pouco mais alto para conforto */
     padding: 0 15px;
     border-bottom: 1px solid #333; 
     background: #111; 
@@ -68,19 +71,19 @@ html, body { height: 100% !important; margin: 0 !important; overflow: hidden !im
     background: #000; 
 }
 
-/* Cabeçalho do Chat - Mais compacto e no topo */
+/* Cabeçalho do Chat */
 .chat-header { 
-    height: 60px; /* Mesma altura da sidebar */
+    height: 70px; 
     padding: 0 20px; 
     background: #1a1a1a; 
     border-bottom: 1px solid #333; 
     flex-shrink: 0; 
     color: white; 
     display: flex;
-    align-items: center; /* Centraliza texto verticalmente */
+    align-items: center;
 }
 
-/* Lista de Mensagens - Ocupa todo o espaço sobrando */
+/* Lista de Mensagens */
 .chat-messages { 
     flex: 1; 
     overflow-y: auto; 
@@ -89,28 +92,24 @@ html, body { height: 100% !important; margin: 0 !important; overflow: hidden !im
     flex-direction: column; 
     gap: 15px; 
     scroll-behavior: smooth; 
-    height: 0; 
-    min-height: 0; 
 }
 
 .message { max-width: 80%; padding: 10px 15px; border-radius: 12px; line-height: 1.4; word-wrap: break-word; color: white; }
 .message.sent { background: var(--c-accent-primary); color: #000; align-self: flex-end; }
 .message.received { background: #333; color: #fff; align-self: flex-start; }
 
-/* Input Area - Colado embaixo */
+/* Input Area - Colada embaixo */
 .chat-input-area { 
-    padding: 10px 15px; /* Reduzido padding vertical */
+    padding: 15px; 
     background: #1a1a1a; 
     border-top: 1px solid #333; 
     display: flex; 
     align-items: center; 
     gap: 10px; 
     flex-shrink: 0; 
-    min-height: 60px; /* Altura mínima confortável */
 }
 
-.chat-input { flex: 1; padding: 10px; border-radius: 6px; border: 1px solid #444; background: #222; color: white; }
-.hidden { display: none !important; }
+.chat-input { flex: 1; padding: 12px; border-radius: 6px; border: 1px solid #444; background: #222; color: white; }
 
 /* Overlay de Carregamento */
 #uploadOverlay { display:none; position:absolute; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.85); z-index:99; align-items:center; justify-content:center; flex-direction:column; color:white; }
@@ -118,17 +117,35 @@ html, body { height: 100% !important; margin: 0 !important; overflow: hidden !im
 @media (max-width: 768px) {
     .dashboard-container { flex-direction: column; position: relative; }
     .chat-container { flex-direction: column; }
-    .chat-sidebar { width: 100%; height: 60px; overflow: hidden; flex-shrink: 0; display: flex; flex-direction: row; align-items: center; } /* Compacto no mobile */
-    .chat-sidebar-header { display: none; } /* Esconde titulo sidebar no mobile */
+    .chat-sidebar { width: 100%; height: 60px; overflow: hidden; flex-shrink: 0; display: flex; flex-direction: row; align-items: center; } 
+    .chat-sidebar-header { display: none; } 
     .user-list { display: flex; flex-direction: row; overflow-x: auto; overflow-y: hidden; height: 100%; width: 100%; }
     .user-item { border-bottom: none; border-right: 1px solid #333; padding: 5px 15px; flex-direction: column; justify-content: center; min-width: 70px; }
-    .user-item div { display: none; } /* Esconde nomes no mobile lista horizontal */
+    .user-item div { display: none; } 
     .user-avatar { margin: 0; width: 35px; height: 35px; }
 }
 </style>
 
 <div class="dashboard-container">
-    <%- include('../partials/sidebar.ejs', { currentPage: 'chat' }) %>
+    <aside class="chat-sidebar">
+        <div class="chat-sidebar-header">
+            <a href="/admin/dashboard" style="color: #888; margin-right: 10px; font-size: 1.2rem;"><i class="fas fa-arrow-left"></i></a>
+            <h3 style="margin:0; font-size:1.1rem; color:white;">Conversas</h3>
+        </div>
+        <ul class="user-list">
+            <% if (chatUsers && chatUsers.length > 0) { %>
+                <% chatUsers.forEach(u => { %>
+                     <li class="user-item <%= typeof activeChat !== 'undefined' && activeChat && activeChat.id === u.id ? 'active' : '' %>" 
+                        onclick="window.location.href='/chat?user_id=<%= u.id %>'">
+                        <img src="<%= u.profile_image || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(u.name) %>" class="user-avatar" title="<%= u.name %>">
+                        <div><div style="font-weight: 600; color: white;"><%= u.name %></div></div>
+                    </li>
+                <% }); %>
+            <% } else { %>
+                <div style="padding:1rem; color:#666; text-align:center">Sem contatos.</div>
+            <% } %>
+        </ul>
+    </aside>
     
     <main class="dashboard-main">
         <div class="chat-container">
@@ -136,25 +153,6 @@ html, body { height: 100% !important; margin: 0 !important; overflow: hidden !im
                 <i class="fas fa-spinner fa-spin" style="font-size:3rem; margin-bottom:1rem; color:var(--c-accent-primary);"></i>
                 <p id="uploadStatusText">Processando imagem...</p>
             </div>
-
-            <aside class="chat-sidebar">
-                <div class="chat-sidebar-header">
-                    <h3 style="margin:0; font-size:1.1rem; color:white;">Conversas</h3>
-                </div>
-                <ul class="user-list">
-                    <% if (chatUsers && chatUsers.length > 0) { %>
-                        <% chatUsers.forEach(u => { %>
-                             <li class="user-item <%= typeof activeChat !== 'undefined' && activeChat && activeChat.id === u.id ? 'active' : '' %>" 
-                                onclick="window.location.href='/chat?user_id=<%= u.id %>'">
-                                <img src="<%= u.profile_image || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(u.name) %>" class="user-avatar" title="<%= u.name %>">
-                                <div><div style="font-weight: 600; color: white;"><%= u.name %></div></div>
-                            </li>
-                        <% }); %>
-                    <% } else { %>
-                        <div style="padding:1rem; color:#666; text-align:center">Sem contatos.</div>
-                    <% } %>
-                </ul>
-            </aside>
 
             <section class="chat-content">
                 <% if (typeof activeChat !== 'undefined' && activeChat) { %>
@@ -222,7 +220,6 @@ html, body { height: 100% !important; margin: 0 !important; overflow: hidden !im
         }
     }
 
-    // --- FUNÇÃO DE COMPRESSÃO (Mantida para garantir envio de imagens) ---
     const compressImage = async (file, { quality = 0.7, maxWidth = 1280 } = {}) => {
         if (!file.type.startsWith('image/')) return file;
         
