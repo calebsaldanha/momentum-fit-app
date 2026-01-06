@@ -15,6 +15,10 @@ router.get('/dashboard', requireClient, async (req, res) => {
     try {
         const userId = req.session.user.id;
         
+        // Verifica se tem perfil preenchido (para o aviso)
+        const profileCheck = await pool.query("SELECT id FROM client_profiles WHERE user_id = $1", [userId]);
+        const hasProfile = profileCheck.rows.length > 0;
+
         // Verifica checkins da semana
         const checkinsRes = await pool.query(
             "SELECT COUNT(*) FROM checkins WHERE user_id = $1 AND created_at >= date_trunc('week', CURRENT_DATE)", 
@@ -27,9 +31,13 @@ router.get('/dashboard', requireClient, async (req, res) => {
             [userId]
         );
 
-        // Busca o próximo treino (exemplo simples: primeiro treino da lista)
+        // Busca o próximo treino
         const workouts = await db.getWorkoutsByUserId(userId);
         const nextWorkout = workouts.length > 0 ? workouts[0] : null;
+
+        // Busca perfil completo se existir, para mostrar dados no dashboard
+        const profileRes = await pool.query("SELECT * FROM client_profiles WHERE user_id = $1", [userId]);
+        const profileData = profileRes.rows[0] || {};
 
         res.render('pages/client-dashboard', {
             title: 'Meu Painel',
@@ -39,6 +47,8 @@ router.get('/dashboard', requireClient, async (req, res) => {
                 completedWorkouts: completedRes.rows[0].count
             },
             nextWorkout: nextWorkout,
+            profile: profileData,
+            missingProfile: !hasProfile, // Flag para a view
             currentPage: 'dashboard'
         });
     } catch (err) {
@@ -50,14 +60,13 @@ router.get('/dashboard', requireClient, async (req, res) => {
 // GET: Formulário Inicial (Anamnese)
 router.get('/initial-form', requireClient, async (req, res) => {
     try {
-        // Verifica se já tem dados
         const profileRes = await pool.query("SELECT * FROM client_profiles WHERE user_id = $1", [req.session.user.id]);
         const currentData = profileRes.rows[0] || {};
 
         res.render('pages/initial-form', {
             title: 'Ficha de Anamnese',
             user: req.session.user,
-            profile: currentData, // CORREÇÃO: Enviando 'profile' em vez de 'data' para corresponder ao EJS
+            profile: currentData,
             currentPage: 'initial-form'
         });
     } catch(err) {
@@ -81,7 +90,6 @@ router.post('/initial-form', requireClient, async (req, res) => {
     } = req.body;
 
     try {
-        // Verifica se já existe perfil
         const check = await pool.query("SELECT id FROM client_profiles WHERE user_id = $1", [userId]);
 
         if (check.rows.length > 0) {
@@ -137,7 +145,6 @@ router.post('/initial-form', requireClient, async (req, res) => {
             ]);
         }
 
-        // Atualiza dados básicos do usuário também (altura/peso/goal)
         await pool.query("UPDATE users SET height = $1, weight = $2, goal = $3 WHERE id = $4", [height, weight, main_goal, userId]);
 
         res.redirect('/client/dashboard');
@@ -147,7 +154,6 @@ router.post('/initial-form', requireClient, async (req, res) => {
     }
 });
 
-// Perfil do Cliente (Visualização/Edição pelo próprio cliente)
 router.get('/profile', requireClient, async (req, res) => {
     try {
         const profileRes = await pool.query("SELECT * FROM client_profiles WHERE user_id = $1", [req.session.user.id]);

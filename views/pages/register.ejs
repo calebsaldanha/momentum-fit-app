@@ -8,10 +8,10 @@
     <link rel="stylesheet" href="/css/styles.css">
     <style>
         .auth-body { 
-            background: url('/images/auth-bg.png') no-repeat center center/cover; 
+            background: url('/images/auth-bg.png') no-repeat center center/cover;
             min-height: 100vh; 
             display: flex; 
-            flex-direction: column; /* Permite rodapé no final */
+            flex-direction: column;
             position: relative;
         }
         .auth-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.7); z-index: 1; }
@@ -27,7 +27,7 @@
         }
 
         .auth-card { 
-            background: rgba(20, 20, 20, 0.95); 
+            background: rgba(20, 20, 20, 0.95);
             padding: 3rem; 
             border-radius: 12px; 
             border: 1px solid rgba(255,255,255,0.1); 
@@ -39,12 +39,12 @@
         .form-group { margin-bottom: 1.5rem; text-align: left; }
         .form-group label { display: block; font-size: 0.85rem; color: #ccc; margin-bottom: 5px; }
         .form-group input, .form-group select { 
-            width: 100%; padding: 12px; background: #0a0a0a; border: 1px solid #333; 
+            width: 100%;
+            padding: 12px; background: #0a0a0a; border: 1px solid #333; 
             color: #fff; border-radius: 6px; outline: none; transition: 0.3s;
         }
         .form-group input:focus, .form-group select:focus { border-color: var(--c-accent-primary); }
         
-        /* Ajuste para o Footer ficar sobre o overlay */
         footer { position: relative; z-index: 2; background: rgba(0,0,0,0.8); border-top: 1px solid rgba(255,255,255,0.1); }
     </style>
 </head>
@@ -57,14 +57,14 @@
                 <h2 style="font-weight: 800; color: #fff; margin-bottom: 2rem; font-size: 1.8rem;">MOMENTUM <span style="color: var(--c-accent-primary);">FIT</span></h2>
             </a>
             
-            <% if (error) { %>
+            <% if (typeof error !== 'undefined' && error && error.length > 0) { %>
                 <div style="background: rgba(239, 68, 68, 0.2); color: #fca5a5; padding: 10px; border-radius: 6px; margin-bottom: 1rem; font-size: 0.9rem;">
                     <%= error %>
                 </div>
             <% } %>
 
             <form action="/auth/register" method="POST">
-                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
                 
                 <div class="form-group">
                     <label>Nome Completo</label>

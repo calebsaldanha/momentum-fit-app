@@ -3,6 +3,13 @@
     <%- include('../partials/sidebar.ejs', { currentPage: 'dashboard' }) %>
 
     <main class="dashboard-main">
+        <% if (typeof missingProfile !== 'undefined' && missingProfile) { %>
+            <div style="background: rgba(245, 158, 11, 0.2); border: 1px solid rgba(245, 158, 11, 0.5); color: #fbbf24; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                <span>⚠️ Você ainda não preencheu sua Ficha de Anamnese. Isso é essencial para seu treinador montar seu treino.</span>
+                <a href="/client/initial-form" class="btn btn-sm btn-primary" style="white-space: nowrap;">Preencher Agora</a>
+            </div>
+        <% } %>
+
         <section class="section">
             <div class="section-header">
                 <h1>Bem-vindo, <%= user.name %>!</h1>
@@ -11,36 +18,45 @@
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-info">
-                        <h3><%= profile.weight || '--' %> <small>kg</small></h3>
+                        <h3><%= (profile && profile.weight) ? profile.weight : '--' %> <small>kg</small></h3>
                         <p>Peso Atual</p>
                     </div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-info">
-                        <h3><%= workouts.length %></h3>
+                        <h3><%= workouts ? workouts.length : 0 %></h3>
                         <p>Planos Ativos</p>
                     </div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-info">
-                        <h3><%= profile.fitness_level || 'Definir' %></h3>
+                        <h3><%= (profile && profile.fitness_level) ? profile.fitness_level : 'Definir' %></h3>
                         <p>Nível</p>
                     </div>
                 </div>
             </div>
 
             <h2 style="margin-top: 3rem;">Treinos Recentes</h2>
+            
             <div class="workouts-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1rem;">
-                <% if (workouts.length > 0) { %>
+                <% if (workouts && workouts.length > 0) { %>
                     <% workouts.forEach(workout => { %>
                         <div class="info-card">
                             <h3><%= workout.title %></h3>
                             <p>Instrutor: <%= workout.trainer_name %></p>
-                            <a href="/workouts/<%= workout.id %>" class="btn btn-primary btn-sm">Ver Detalhes</a>
+                            <a href="/client/workouts/<%= workout.id %>" class="btn btn-primary btn-sm">Ver Detalhes</a>
                         </div>
                     <% }) %>
                 <% } else { %>
-                    <p>Sem treinos atribuídos. <a href="/chat">Fale com seu treinador.</a></p>
+                    <div style="background: #111; padding: 20px; border-radius: 8px; color: #888;">
+                        <p>Sem treinos atribuídos no momento. 
+                        <% if (typeof missingProfile !== 'undefined' && missingProfile) { %>
+                            Complete sua anamnese para receber um treino.
+                        <% } else { %>
+                            <a href="/chat" style="color: var(--c-accent-primary);">Fale com seu treinador.</a>
+                        <% } %>
+                        </p>
+                    </div>
                 <% } %>
             </div>
         </section>

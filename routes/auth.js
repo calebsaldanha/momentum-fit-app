@@ -58,7 +58,7 @@ router.post('/register', async (req, res) => {
             email,
             password,
             role: 'client',
-            trainer_id: null, // Será atribuído depois pelo admin
+            trainer_id: null,
             profile_image: null,
             goal: '',
             fitness_level: '',
@@ -66,21 +66,19 @@ router.post('/register', async (req, res) => {
             weight: null
         });
 
-        // Autentica o usuário imediatamente (Sessão)
+        // Autentica o usuário imediatamente
         req.session.user = newUser;
 
-        // --- DISPARO DE EMAILS (Non-blocking) ---
-        // 1. Para o Cliente: Boas vindas com link para perfil
+        // Disparo de emails (Non-blocking)
         sendWelcomeEmail(newUser.email, newUser.name, req.headers.host)
             .catch(err => console.error("Falha envio email boas vindas:", err));
 
-        // 2. Para o Admin/Treinador: Aviso de novo aluno
         sendNewClientNotification(newUser.name, newUser.email)
             .catch(err => console.error("Falha envio notificação admin:", err));
 
         // --- REDIRECIONAMENTO ---
-        // Vai direto para o formulário inicial (Anamnese)
-        res.redirect('/client/initial-form');
+        // Vai para o Dashboard (onde verá o aviso de completar perfil)
+        res.redirect('/client/dashboard');
 
     } catch (err) {
         console.error("Erro no registro:", err);
@@ -89,7 +87,6 @@ router.post('/register', async (req, res) => {
 });
 
 // --- LOGOUT ---
-// Adicionado suporte a POST para funcionar com os formulários de logout (recomendado para segurança/CSRF)
 router.post('/logout', (req, res) => {
     req.session.destroy((err) => {
         if (err) console.error('Erro ao destruir sessão:', err);
@@ -97,7 +94,6 @@ router.post('/logout', (req, res) => {
     });
 });
 
-// Mantemos o GET como fallback, mas redirecionando para login também
 router.get('/logout', (req, res) => {
     req.session.destroy((err) => {
         if (err) console.error('Erro ao destruir sessão:', err);
@@ -125,7 +121,6 @@ router.post('/forgot-password', async (req, res) => {
 
             sendPasswordResetEmail(user.email, token, req.headers.host).catch(console.error);
         }
-        // Sempre mostra msg de sucesso por segurança
         res.render('pages/forgot-password', { 
             message: 'Se o email existir, você receberá as instruções.', 
             title: 'Recuperar Senha', 

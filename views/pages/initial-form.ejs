@@ -16,12 +16,12 @@
     .section-card {
         background: #111; 
         padding: 2rem; 
-        border-radius: 12px; 
+        border-radius: 12px;
         border: 1px solid #333; 
         margin-bottom: 2rem;
     }
     .section-title {
-        color: #fff; 
+        color: #fff;
         border-bottom: 1px solid #333; 
         padding-bottom: 10px; 
         margin-bottom: 20px;
@@ -29,16 +29,18 @@
     }
     .form-grid {
         display: grid; 
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
         gap: 1.5rem;
     }
     .form-group label { color: #ccc; font-weight: 500; }
     .form-group input, .form-group select, .form-group textarea {
-        width: 100%; padding: 10px; background: #222; border: 1px solid #444; 
+        width: 100%;
+        padding: 10px; background: #222; border: 1px solid #444; 
         color: white; border-radius: 6px; margin-top: 5px;
     }
     .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-        border-color: var(--c-accent-primary); outline: none;
+        border-color: var(--c-accent-primary);
+        outline: none;
     }
     .help-text { color: #666; font-size: 0.8rem; margin-top: 4px; display: block; }
 </style>
@@ -51,14 +53,14 @@
             <p style="color: #888;">Responda com calma. Essas informações são a base do seu planejamento.</p>
         </div>
 
-        <% if (typeof error !== 'undefined' && error) { %>
+        <% if (typeof error !== 'undefined' && error && error.length > 0) { %>
             <div class="alert alert-error" style="background: rgba(239, 68, 68, 0.2); color: #fca5a5; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
                 <%= error %>
             </div>
         <% } %>
 
         <form action="/client/initial-form" method="POST">
-            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
 
             <div class="section-card">
                 <h3 class="section-title">1. Dados Pessoais</h3>

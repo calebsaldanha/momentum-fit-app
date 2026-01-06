@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= title %> | Momentum Fit</title>
+    <title>Login - Momentum Fit</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         .auth-body { 
             background: url('/images/auth-bg.png') no-repeat center center/cover;
@@ -46,21 +45,7 @@
         }
         .form-group input:focus { border-color: var(--c-accent-primary); }
         
-        /* Ajuste para o Footer */
         footer { position: relative; z-index: 2; background: rgba(0,0,0,0.8); border-top: 1px solid rgba(255,255,255,0.1); }
-
-        /* Links específicos */
-        .forgot-password {
-            display: block;
-            text-align: right;
-            margin-top: -10px;
-            margin-bottom: 20px;
-            font-size: 0.85rem;
-            color: #888;
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-        .forgot-password:hover { color: var(--c-accent-primary); }
     </style>
 </head>
 <body class="auth-body">
@@ -69,47 +54,39 @@
     <div class="auth-wrapper">
         <div class="auth-card">
             <a href="/" style="text-decoration: none;">
-                <h2 style="font-weight: 800; color: #fff; margin-bottom: 0.5rem; font-size: 1.8rem;">MOMENTUM <span style="color: var(--c-accent-primary);">FIT</span></h2>
+                <h2 style="font-weight: 800; color: #fff; margin-bottom: 2rem; font-size: 1.8rem;">MOMENTUM <span style="color: var(--c-accent-primary);">FIT</span></h2>
             </a>
-            <p style="color: #888; margin-bottom: 2rem;">Bem-vindo de volta!</p>
-
-            <% if (locals.error && locals.error.length > 0) { %>
-                <div style="background: rgba(239, 68, 68, 0.2); color: #fca5a5; padding: 10px; border-radius: 6px; margin-bottom: 1rem; font-size: 0.9rem; text-align: left; display: flex; align-items: center; gap: 10px;">
-                    <i class="fas fa-exclamation-circle"></i> <%= error %>
+            
+            <% if (typeof error !== 'undefined' && error && error.length > 0) { %>
+                <div style="background: rgba(239, 68, 68, 0.2); color: #fca5a5; padding: 10px; border-radius: 6px; margin-bottom: 1rem; font-size: 0.9rem;">
+                    <%= error %>
                 </div>
             <% } %>
 
             <form action="/auth/login" method="POST">
-                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
                 
                 <div class="form-group">
-                    <label for="email">E-mail</label>
-                    <input type="email" id="email" name="email" required placeholder="seu@email.com">
+                    <label>Email</label>
+                    <input type="email" name="email" required placeholder="seu@email.com">
                 </div>
 
                 <div class="form-group">
-                    <label for="password">Senha</label>
-                    <input type="password" id="password" name="password" required placeholder="******">
+                    <label>Senha</label>
+                    <input type="password" name="password" required placeholder="Sua senha">
                 </div>
-
-                <a href="/auth/forgot-password" class="forgot-password">Esqueceu a senha?</a>
 
                 <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; font-weight: 700;">ENTRAR</button>
             </form>
-            
+
+            <div style="margin-top: 1.5rem; display: flex; justify-content: space-between; font-size: 0.85rem;">
+                <a href="/auth/forgot-password" style="color: #888;">Esqueci minha senha</a>
+            </div>
+
             <p style="margin-top: 2rem; font-size: 0.9rem; color: #888;">
                 Ainda não tem conta? <a href="/auth/register" style="color: var(--c-accent-primary);">Cadastre-se</a>
             </p>
         </div>
     </div>
-    
-    <%- include('../partials/footer.ejs') %>
 
-    <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('reset') === 'success') {
-            alert('Senha redefinida com sucesso! Por favor, faça login.');
-        }
-    </script>
-</body>
-</html>
+    <%- include('../partials/footer.ejs') %>
