@@ -1,42 +1,43 @@
 <%- include('../partials/header.ejs', { title, bodyClass: 'dashboard-body' }) %>
 
 <style>
-/* Ajuste Específico para a Página de Chat */
+/* --- Layout de Chat Full-Screen --- */
 
-/* Trava a rolagem da página principal para focar no chat */
+/* Trava a rolagem da janela principal */
 body {
-    overflow: hidden; 
+    overflow: hidden;
 }
 
-/* Ajusta o container principal para ocupar 100% da altura visível */
+/* Ajusta o container do dashboard para preencher a tela */
 .dashboard-container {
     height: 100vh;
-    padding-bottom: 0 !important; /* Remove espaço extra no fundo */
-    overflow: hidden; 
+    padding-bottom: 0 !important; /* Remove padding inferior */
+    overflow: hidden;
+    box-sizing: border-box; /* Garante que padding não estoure a altura */
 }
 
-/* Garante que o container do chat ocupe todo o espaço disponível na grade */
+/* Container específico da página de chat */
 .chat-page-container {
-    height: 100%;
+    height: 100%; /* Ocupa a altura restante do grid (100vh - header) */
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    /* Compensa o padding padrão do dashboard.css se necessário */
-    margin-top: -1rem; 
+    padding-bottom: 20px; /* Pequeno respiro na base */
 }
 
+/* O container do chat em si (Sidebar + Conteúdo) */
 .chat-container {
-    flex: 1;
+    flex: 1; /* Cresce para ocupar todo o espaço vertical disponível */
     display: flex;
     background: #1a1a1a;
     border-radius: 12px;
     border: 1px solid rgba(255,255,255,0.05);
-    overflow: hidden;
-    /* Sombra para destaque */
+    overflow: hidden; /* Importante para conter as barras de rolagem internas */
+    min-height: 0; /* CRUCIAL para o flexbox permitir scroll interno */
     box-shadow: 0 4px 20px rgba(0,0,0,0.3);
 }
 
-/* --- Sidebar Interna do Chat (Lista de Contatos) --- */
+/* --- Sidebar (Lista de Usuários) --- */
 .chat-sidebar {
     width: 280px;
     background: #111;
@@ -50,14 +51,16 @@ body {
     padding: 15px;
     border-bottom: 1px solid #333;
     background: #151515;
+    flex-shrink: 0;
 }
 
 .user-list {
-    flex: 1;
-    overflow-y: auto;
+    flex: 1; /* Ocupa o espaço restante na sidebar */
+    overflow-y: auto; /* Scroll apenas na lista */
     list-style: none;
     padding: 0;
     margin: 0;
+    min-height: 0; /* Fix para scroll flex */
 }
 
 .user-item {
@@ -80,32 +83,34 @@ body {
     border-radius: 50%;
     object-fit: cover;
     background: #333;
+    flex-shrink: 0;
 }
 
-/* --- Área Principal das Mensagens --- */
+/* --- Área de Conteúdo (Mensagens) --- */
 .chat-content {
-    flex: 1;
+    flex: 1; /* Ocupa o resto da largura */
     display: flex;
     flex-direction: column;
     background: #000;
     position: relative;
     min-width: 0;
+    min-height: 0; /* Fix para scroll flex */
 }
 
 .chat-header {
-    height: 60px; /* Altura fixa e compacta */
+    height: 60px;
     padding: 0 20px;
     background: #1a1a1a;
     border-bottom: 1px solid #333;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    flex-shrink: 0;
+    flex-shrink: 0; /* Altura fixa */
 }
 
 .chat-messages {
-    flex: 1;
-    overflow-y: auto;
+    flex: 1; /* Ocupa o espaço vertical central */
+    overflow-y: auto; /* Scroll AQUI */
     padding: 20px;
     display: flex;
     flex-direction: column;
@@ -137,7 +142,7 @@ body {
     border-bottom-left-radius: 2px;
 }
 
-/* Área de Input - Fixada no fundo */
+/* Área de Input */
 .chat-input-area {
     padding: 15px;
     background: #1a1a1a;
@@ -145,7 +150,7 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
-    flex-shrink: 0;
+    flex-shrink: 0; /* Altura fixa baseada no conteúdo */
 }
 
 .chat-input {
@@ -161,8 +166,11 @@ body {
 @media (max-width: 768px) {
     .dashboard-container {
         padding: 0 !important;
-        padding-top: 80px !important; /* Espaço pro header mobile */
+        padding-top: 80px !important;
         display: block; /* Remove grid no mobile */
+    }
+    .chat-page-container {
+        margin-top: 0;
     }
     .chat-container {
         flex-direction: column;
@@ -171,16 +179,17 @@ body {
     }
     .chat-sidebar {
         width: 100%;
-        height: 70px; /* Lista horizontal no topo */
+        height: 70px;
         flex-direction: row;
         overflow-x: auto;
         border-right: none;
         border-bottom: 1px solid #333;
+        flex-shrink: 0;
     }
     .chat-sidebar-header { display: none; }
     .user-list { display: flex; flex-direction: row; }
     .user-item { border-bottom: none; border-right: 1px solid #333; min-width: 60px; justify-content: center; padding: 5px; }
-    .user-item div { display: none; } /* Esconde nome, mostra só foto */
+    .user-item div { display: none; }
     .user-avatar { margin: 0; }
 }
 </style>
@@ -195,12 +204,13 @@ body {
         </div>
 
         <div class="chat-container">
+           
             <aside class="chat-sidebar">
                 <div class="chat-sidebar-header">
                     <h3 style="margin:0; font-size:1rem; color:#888; text-transform:uppercase; letter-spacing:1px;">Conversas</h3>
                 </div>
                 <ul class="user-list">
-                    <% if (chatUsers && chatUsers.length > 0) { %>
+                    <% if (typeof chatUsers !== 'undefined' && chatUsers.length > 0) { %>
                         <% chatUsers.forEach(u => { %>
                              <li class="user-item <%= typeof activeChat !== 'undefined' && activeChat && activeChat.id === u.id ? 'active' : '' %>" 
                                 onclick="window.location.href='/chat?user_id=<%= u.id %>'">
@@ -227,7 +237,7 @@ body {
                     </div>
                     
                     <div class="chat-messages" id="messagesList">
-                        <% if (messages && messages.length > 0) { %>
+                         <% if (typeof messages !== 'undefined' && messages.length > 0) { %>
                             <% messages.forEach(msg => { %>
                                 <div class="message <%= msg.sender_id === user.id ? 'sent' : 'received' %>">
                                     <% if (msg.message_type === 'image') { %>
@@ -244,7 +254,7 @@ body {
                                 </div>
                             <% }); %>
                         <% } else { %>
-                            <div style="flex:1; display:flex; align-items:center; justify-content:center; color:#444; flex-direction:column;">
+                             <div style="flex:1; display:flex; align-items:center; justify-content:center; color:#444; flex-direction:column;">
                                 <i class="far fa-comments" style="font-size:2rem; margin-bottom:10px;"></i>
                                 <p>Inicie a conversa!</p>
                             </div>
@@ -297,7 +307,6 @@ body {
         }
     }
 
-    // Compressão de imagem (Client-Side)
     const compressImage = async (file, { quality = 0.7, maxWidth = 1280 } = {}) => {
         if (!file.type.startsWith('image/')) return file;
         return new Promise((resolve) => {
@@ -336,7 +345,6 @@ body {
         const overlay = document.getElementById('uploadOverlay');
         const statusText = document.getElementById('uploadStatusText');
 
-        // Modo Texto Simples
         if (!file) {
             form.enctype = "application/x-www-form-urlencoded";
             fileInput.removeAttribute('name');
@@ -345,7 +353,6 @@ body {
         }
 
         if(overlay) overlay.style.display = 'flex';
-        
         try {
             if(statusText) statusText.textContent = "Otimizando...";
             file = await compressImage(file);
@@ -354,7 +361,6 @@ body {
             fileInput.files = dt.files;
         } catch(err) { console.warn("Erro compressão", err); }
 
-        // Tenta Vercel Blob
         if (window.vercelUpload) {
             try {
                 if(statusText) statusText.textContent = "Enviando...";
@@ -371,7 +377,6 @@ body {
             } catch (err) { console.warn('Fallback server...', err); }
         }
 
-        // Fallback Servidor
         if(statusText) statusText.textContent = "Enviando (Server)...";
         form.enctype = "multipart/form-data";
         fileInput.setAttribute('name', 'file');
