@@ -20,9 +20,9 @@
                         <select name="client_id" id="client_id" required style="width: 100%; padding: 10px; border-radius: 6px; background: #222; color: #fff; border: 1px solid #444;">
                             <option value="" disabled <%= !selectedClientId ? 'selected' : '' %>>Selecione o aluno...</option>
                             <% if (typeof clients !== 'undefined' && clients.length > 0) { %>
-                                <% clients.forEach(client => { %>
-                                    <option value="<%= client.id %>" <%= typeof selectedClientId !== 'undefined' && selectedClientId == client.id ? 'selected' : '' %>>
-                                        <%= client.name %>
+                                <% clients.forEach(c => { %>
+                                    <option value="<%= c.id %>" <%= typeof selectedClientId !== 'undefined' && selectedClientId == c.id ? 'selected' : '' %>>
+                                        <%= c.name %>
                                     </option>
                                 <% }) %>
                             <% } %>
@@ -35,7 +35,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="description">Descrição / Foco</label>
+                   <label for="description">Descrição / Foco</label>
                     <textarea id="description" name="description" rows="2" placeholder="Objetivo deste treino..."></textarea>
                 </div>
 
@@ -67,7 +67,6 @@
 
 <div id="libraryModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; padding: 20px; overflow-y: auto;">
     <div style="max-width: 1000px; margin: 0 auto; background: #111; border-radius: 12px; display: flex; flex-direction: column; height: 90vh; border: 1px solid #333;">
-        
         <div style="padding: 20px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; background: #1a1a1a; border-radius: 12px 12px 0 0;">
             <div>
                 <h2 style="margin: 0; color: white;">Biblioteca de Exercícios</h2>
@@ -75,17 +74,13 @@
             </div>
             <button onclick="closeLibraryModal()" style="background: none; border: none; color: #fff; font-size: 2rem; cursor: pointer;">&times;</button>
         </div>
-        
         <div style="padding: 20px; background: #111;">
             <div style="position: relative;">
                 <i class="fas fa-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #666;"></i>
                 <input type="text" id="searchLibrary" placeholder="Buscar..." style="width: 100%; padding: 15px 15px 15px 45px; background: #000; border: 1px solid #444; color: white; border-radius: 8px; font-size: 1rem;">
             </div>
         </div>
-        
-        <div id="libraryGrid" style="flex: 1; overflow-y: auto; padding: 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; align-content: start;">
-            </div>
-
+        <div id="libraryGrid" style="flex: 1; overflow-y: auto; padding: 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; align-content: start;"></div>
         <div style="padding: 20px; border-top: 1px solid #333; background: #1a1a1a; border-radius: 0 0 12px 12px; display: flex; justify-content: space-between; align-items: center;">
             <div style="color: #ccc;">
                 <span id="selectedCount" style="color: var(--c-accent-primary); font-weight: bold; font-size: 1.2rem;">0</span> selecionados
@@ -99,6 +94,9 @@
 
 <template id="exerciseTemplate">
     <div class="exercise-card" style="background: var(--c-bg-card); border: 1px solid var(--c-border); padding: 20px; border-radius: 8px; margin-bottom: 15px; position: relative; display: grid; grid-template-columns: 100px 1fr; gap: 20px; align-items: start;">
+        
+        <input type="hidden" class="ex-id"> 
+        
         <div class="ex-image-preview" style="width: 100px; height: 100px; background: #000; border-radius: 6px; overflow: hidden; display: flex; align-items: center; justify-content: center; border: 1px solid #333;">
             <i class="fas fa-dumbbell" style="color: #444; font-size: 1.5rem;"></i>
         </div>
@@ -119,7 +117,7 @@
             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 15px;">
                 <input type="text" class="ex-sets" required placeholder="Séries" style="background:#111; border:1px solid #333; color:white; padding:8px; border-radius:4px;">
                 <input type="text" class="ex-reps" required placeholder="Reps" style="background:#111; border:1px solid #333; color:white; padding:8px; border-radius:4px;">
-                <input type="text" class="ex-rest" placeholder="Descanso" style="background:#111; border:1px solid #333; color:white; padding:8px; border-radius:4px;">
+                <input type="text" class="ex-weight" placeholder="Carga (kg)" style="background:#111; border:1px solid #333; color:white; padding:8px; border-radius:4px;">
             </div>
             
             <input type="text" class="ex-notes" placeholder="Observações..." style="margin-top: 10px; width: 100%; background:#111; border:1px solid #333; color:white; padding:8px; border-radius:4px;">
@@ -129,111 +127,39 @@
 </template>
 
 <style>
-    .lib-item {
-        background: #222;
-        border-radius: 8px;
-        overflow: hidden;
-        cursor: pointer;
-        border: 2px solid #333;
-        transition: all 0.2s;
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        min-height: 200px;
-    }
-    .lib-item:hover {
-        transform: translateY(-2px);
-        border-color: var(--c-accent-primary);
-    }
-    .lib-item.selected {
-        border-color: var(--c-accent-primary);
-        background: rgba(37, 99, 235, 0.1);
-    }
-    .lib-item.selected::after {
-        content: '\f00c';
-        font-family: 'Font Awesome 5 Free';
-        font-weight: 900;
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        background: var(--c-accent-primary);
-        color: white;
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-    }
-    .lib-img {
-        width: 100%;
-        height: 120px;
-        object-fit: cover;
-        background: #000;
-        display: block;
-    }
-    .lib-info {
-        padding: 12px;
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-    }
-    .lib-name {
-        font-weight: 600;
-        margin-bottom: 4px;
-        color: #fff;
-        font-size: 0.95rem;
-    }
-    .lib-desc {
-        font-size: 0.8rem;
-        color: #999;
-        display: -webkit-box;
-        -webkit-line-clamp: 3;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        line-height: 1.3;
-    }
-    .lib-category {
-        display: inline-block;
-        font-size: 0.7rem;
-        background: #333;
-        color: #ccc;
-        padding: 2px 6px;
-        border-radius: 4px;
-        margin-bottom: 6px;
-        align-self: flex-start;
-    }
+    .lib-item { background: #222; border-radius: 8px; overflow: hidden; cursor: pointer; border: 2px solid #333; transition: all 0.2s; position: relative; display: flex; flex-direction: column; min-height: 200px; }
+    .lib-item:hover { transform: translateY(-2px); border-color: var(--c-accent-primary); }
+    .lib-item.selected { border-color: var(--c-accent-primary); background: rgba(37, 99, 235, 0.1); }
+    .lib-item.selected::after { content: '\f00c'; font-family: 'Font Awesome 5 Free'; font-weight: 900; position: absolute; top: 10px; right: 10px; background: var(--c-accent-primary); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+    .lib-img { width: 100%; height: 120px; object-fit: cover; background: #000; display: block; }
+    .lib-info { padding: 12px; flex: 1; display: flex; flex-direction: column; }
+    .lib-name { font-weight: 600; margin-bottom: 4px; color: #fff; font-size: 0.95rem; }
+    .lib-desc { font-size: 0.8rem; color: #999; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.3; }
+    .lib-category { display: inline-block; font-size: 0.7rem; background: #333; color: #ccc; padding: 2px 6px; border-radius: 4px; margin-bottom: 6px; align-self: flex-start; }
 </style>
 
 <script>
-    // Carrega dados e garante que seja um array
     let rawLibrary = <%- JSON.stringify(typeof exerciseLibrary !== 'undefined' ? exerciseLibrary : []) %>;
     const libraryData = Array.isArray(rawLibrary) ? rawLibrary : [];
     
-    console.log('Library Data Carregada:', libraryData);
-
     const exercisesList = document.getElementById('exercisesList');
     const template = document.getElementById('exerciseTemplate');
     const libraryModal = document.getElementById('libraryModal');
     const libraryGrid = document.getElementById('libraryGrid');
     const searchInput = document.getElementById('searchLibrary');
     const selectedCountSpan = document.getElementById('selectedCount');
-
     let selectedExercises = new Set(); 
 
     function addExerciseCard(data = null) {
-        console.log('Adicionando Card:', data);
         const clone = template.content.cloneNode(true);
         const index = exercisesList.children.length + 1;
         
         clone.querySelector('.exercise-number').textContent = '#' + index;
-        
         if(data) {
+            clone.querySelector('.ex-id').value = data.id || ''; // Preenche o ID
             clone.querySelector('.ex-name').value = data.name || '';
             clone.querySelector('.ex-video').value = data.video_url || '';
-            clone.querySelector('.ex-notes').value = data.description || '';
-            
+            clone.querySelector('.ex-notes').value = data.description || ''; // Usa descrição como nota inicial
             if(data.image_url) {
                 clone.querySelector('.ex-image-url').value = data.image_url;
                 const imgContainer = clone.querySelector('.ex-image-preview');
@@ -245,7 +171,6 @@
             e.target.closest('.exercise-card').remove();
             updateNumbers();
         });
-
         exercisesList.appendChild(clone);
     }
 
@@ -265,15 +190,12 @@
         searchInput.focus();
     }
 
-    window.closeLibraryModal = function() {
-        libraryModal.style.display = 'none';
-    }
+    window.closeLibraryModal = function() { libraryModal.style.display = 'none'; }
 
     function renderLibrary(items) {
         libraryGrid.innerHTML = '';
-        
         if(!items || items.length === 0) {
-            libraryGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #666; padding: 40px;">Nenhum exercício encontrado. Verifique se o banco de dados foi populado.</div>';
+            libraryGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #666; padding: 40px;">Nenhum exercício encontrado.</div>';
             return;
         }
 
@@ -299,12 +221,9 @@
     }
 
     function toggleSelection(el, id) {
-        // Garante conversão para string para evitar problemas de tipo
         const idStr = String(id);
         const exists = Array.from(selectedExercises).some(x => String(x) === idStr);
-
         if (exists) {
-            // Remove
             selectedExercises.forEach(x => { if(String(x) === idStr) selectedExercises.delete(x); });
             el.classList.remove('selected');
         } else {
@@ -314,9 +233,7 @@
         updateSelectedCount();
     }
 
-    function updateSelectedCount() {
-        selectedCountSpan.textContent = selectedExercises.size;
-    }
+    function updateSelectedCount() { selectedCountSpan.textContent = selectedExercises.size; }
 
     searchInput.addEventListener('input', (e) => {
         const term = e.target.value.toLowerCase();
@@ -329,23 +246,13 @@
 
     window.addSelectedExercises = function() {
         const selectedIds = Array.from(selectedExercises);
-        if(selectedIds.length === 0) {
-            alert("Selecione pelo menos um exercício.");
-            return;
-        }
-
+        if(selectedIds.length === 0) { alert("Selecione pelo menos um exercício."); return; }
         selectedIds.forEach(id => {
-            // Comparação frouxa (==) para garantir match
             const exerciseData = libraryData.find(x => x.id == id);
-            if(exerciseData) {
-                addExerciseCard(exerciseData);
-            }
+            if(exerciseData) addExerciseCard(exerciseData);
         });
-
         closeLibraryModal();
-        setTimeout(() => {
-            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-        }, 100);
+        setTimeout(() => { window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); }, 100);
     }
 
     document.getElementById('createWorkoutForm').addEventListener('submit', async (e) => {
@@ -357,10 +264,12 @@
 
         try {
             const exercises = Array.from(document.querySelectorAll('.exercise-card')).map((card, index) => ({
+                id: card.querySelector('.ex-id').value || null, // Captura o ID aqui!
                 name: card.querySelector('.ex-name').value,
                 sets: card.querySelector('.ex-sets').value,
                 reps: card.querySelector('.ex-reps').value,
-                notes: card.querySelector('.ex-notes').value + (card.querySelector('.ex-rest').value ? ` | Descanso: ${card.querySelector('.ex-rest').value}` : ''),
+                weight: card.querySelector('.ex-weight').value, // Nova captura de peso
+                notes: card.querySelector('.ex-notes').value,
                 video_url: card.querySelector('.ex-video').value,
                 image_url: card.querySelector('.ex-image-url').value,
                 order_index: index
@@ -384,7 +293,6 @@
             const json = await res.json();
             if(json.success) window.location.href = `/admin/clients/${json.clientId}`;
             else throw new Error(json.message);
-
         } catch (err) {
             alert('Erro: ' + err.message);
             btn.disabled = false;
