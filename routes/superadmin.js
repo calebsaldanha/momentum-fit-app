@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const { pool } = require('../database/db');
+const db = require('../database/db'); // Importa o objeto completo
+const { pool, getUserById, getClientsByTrainer } = db; // Desestrutura o que precisamos
 const bcrypt = require('bcryptjs');
 const { sendNewUserEmail, sendAdminPasswordResetEmail } = require('../utils/emailService');
 
@@ -55,8 +56,35 @@ router.get('/manage', requireSuperAdmin, async (req, res) => {
     }
 });
 
-// Criar Treinador (Ação) - Assumindo que você tem uma rota POST para criar trainer ou usa o register genérico.
-// Se não tiver, vou adicionar uma simples aqui caso use o formulário pending-trainer.
+// NOVA ROTA: Detalhes do Treinador (Superadmin)
+router.get('/trainers/:id', requireSuperAdmin, async (req, res) => {
+    try {
+        const trainerId = req.params.id;
+        
+        // Usa os helpers do db.js para buscar dados
+        const trainer = await getUserById(trainerId);
+        
+        if (!trainer) {
+            return res.status(404).render('pages/error', { message: 'Treinador não encontrado.', user: req.session.user });
+        }
+        
+        const clients = await getClientsByTrainer(trainerId);
+        
+        res.render('pages/trainer-details', { 
+            title: 'Detalhes do Treinador',
+            bodyClass: 'dashboard-body',
+            currentPage: 'superadmin-manage',
+            user: req.session.user,
+            trainer: trainer,
+            clients: clients
+        });
+    } catch(err) {
+        console.error("Erro ao carregar detalhes do treinador:", err);
+        res.status(500).render('pages/error', { message: 'Erro ao carregar detalhes.', user: req.session.user });
+    }
+});
+
+// Criar Treinador
 router.get('/create-trainer', requireSuperAdmin, (req, res) => {
     res.render('pages/pending-trainer', { 
         title: 'Novo Treinador',
@@ -65,7 +93,7 @@ router.get('/create-trainer', requireSuperAdmin, (req, res) => {
         currentPage: 'superadmin-manage'
     });
 });
-// Rota POST para criar trainer especificamente (caso não use /auth/register)
+
 router.post('/create-trainer', requireSuperAdmin, async (req, res) => {
     const { name, email, password } = req.body;
     try {
@@ -74,16 +102,12 @@ router.post('/create-trainer', requireSuperAdmin, async (req, res) => {
             "INSERT INTO users (name, email, password, role, status, created_at) VALUES ($1, $2, $3, 'trainer', 'active', NOW())",
             [name, email, hashedPassword]
         );
-        
-        // NOTIFICAÇÃO: Admin recebe confirmação (o proprio admin criou, mas ok)
         sendNewUserEmail(req.session.user.email, name, email, 'trainer').catch(console.error);
-
         res.redirect('/superadmin/manage');
     } catch (err) {
         res.status(500).send('Erro ao criar treinador');
     }
 });
-
 
 router.post('/users/:id/status', requireSuperAdmin, async (req, res) => {
     const { status } = req.body;
@@ -106,17 +130,13 @@ router.post('/users/:id/delete', requireSuperAdmin, async (req, res) => {
     }
 });
 
-// ALTERAR SENHA PELO ADMIN
 router.post('/users/:id/change-password', requireSuperAdmin, async (req, res) => {
     const { new_password } = req.body;
     try {
         const hashedPassword = await bcrypt.hash(new_password, 10);
-        
-        // Atualiza Senha
         const userRes = await pool.query("UPDATE users SET password = $1 WHERE id = $2 RETURNING email, name", [hashedPassword, req.params.id]);
         
         if (userRes.rows.length > 0) {
-            // NOTIFICAÇÃO: Email para o usuário com a nova senha
             const u = userRes.rows[0];
             sendAdminPasswordResetEmail(u.email, u.name, new_password).catch(console.error);
         }
@@ -128,11 +148,9 @@ router.post('/users/:id/change-password', requireSuperAdmin, async (req, res) =>
     }
 });
 
-// Atribuir Trainer (necessário para o client-details funcionar 100%)
 router.post('/assign-trainer', requireSuperAdmin, async (req, res) => {
     const { user_id, trainer_id } = req.body;
     try {
-        // Verifica se existe perfil, se não cria, se sim atualiza
         const check = await pool.query("SELECT * FROM client_profiles WHERE user_id = $1", [user_id]);
         if (check.rows.length === 0) {
             await pool.query("INSERT INTO client_profiles (user_id, trainer_id) VALUES ($1, $2)", [user_id, trainer_id || null]);
