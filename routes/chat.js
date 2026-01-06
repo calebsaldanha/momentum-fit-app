@@ -5,10 +5,10 @@ const { sendNewMessageEmail } = require('../utils/emailService');
 const multer = require('multer');
 const { put, handleUpload } = require('@vercel/blob');
 
-// Configuração Multer segura (Limite 4.5MB)
+// Configuração Multer (Limite 4.5MB)
 const upload = multer({ 
     storage: multer.memoryStorage(),
-    limits: { fileSize: 4.5 * 1024 * 1024 } // 4.5MB
+    limits: { fileSize: 4.5 * 1024 * 1024 }
 });
 
 const requireAuth = (req, res, next) => {
@@ -23,20 +23,27 @@ router.get('/', requireAuth, async (req, res) => {
         const role = req.session.user.role;
         let contacts = [];
 
-        // Lógica simplificada de contatos
-        if (role === 'client') {
-            const trainerRes = await pool.query("SELECT u.id, u.name, u.role, u.profile_image FROM users u JOIN client_profiles cp ON cp.trainer_id = u.id WHERE cp.user_id = $1", [userId]);
-            contacts = trainerRes.rows;
-            if (contacts.length === 0) {
-                const adminRes = await pool.query("SELECT id, name, role, profile_image FROM users WHERE role = 'superadmin'");
-                contacts = adminRes.rows;
+        // Lógica de contatos
+        try {
+            if (role === 'client') {
+                const trainerRes = await pool.query("SELECT u.id, u.name, u.role, u.profile_image FROM users u JOIN client_profiles cp ON cp.trainer_id = u.id WHERE cp.user_id = $1", [userId]);
+                contacts = trainerRes.rows;
+                // Se não tiver treinador, mostra admin
+                if (contacts.length === 0) {
+                    const adminRes = await pool.query("SELECT id, name, role, profile_image FROM users WHERE role = 'superadmin'");
+                    contacts = adminRes.rows;
+                }
+            } else if (role === 'superadmin') {
+                const allUsers = await pool.query("SELECT id, name, role, profile_image FROM users WHERE id != $1 ORDER BY name ASC", [userId]);
+                contacts = allUsers.rows;
+            } else {
+                // Treinador vê seus alunos
+                const clientsRes = await pool.query("SELECT u.id, u.name, u.role, u.profile_image FROM users u JOIN client_profiles cp ON cp.user_id = u.id WHERE cp.trainer_id = $1 ORDER BY u.name ASC", [userId]);
+                contacts = clientsRes.rows;
             }
-        } else if (role === 'superadmin') {
-            const allUsers = await pool.query("SELECT id, name, role, profile_image FROM users WHERE id != $1 ORDER BY name ASC", [userId]);
-            contacts = allUsers.rows;
-        } else {
-            const clientsRes = await pool.query("SELECT u.id, u.name, u.role, u.profile_image FROM users u JOIN client_profiles cp ON cp.user_id = u.id WHERE cp.trainer_id = $1 ORDER BY u.name ASC", [userId]);
-            contacts = clientsRes.rows;
+        } catch (dbErr) {
+            console.error("Erro ao buscar contatos:", dbErr);
+            contacts = [];
         }
 
         let activeChat = null;
@@ -44,32 +51,37 @@ router.get('/', requireAuth, async (req, res) => {
 
         if (req.query.user_id) {
             const targetId = req.query.user_id;
-            const targetRes = await pool.query("SELECT id, name, profile_image FROM users WHERE id = $1", [targetId]);
-            if (targetRes.rows.length > 0) {
-                activeChat = targetRes.rows[0];
-                const msgRes = await pool.query("SELECT * FROM messages WHERE (sender_id = $1 AND receiver_id = $2) OR (sender_id = $2 AND receiver_id = $1) ORDER BY created_at ASC", [userId, targetId]);
-                messages = msgRes.rows;
-                // Marca como lida
-                await pool.query("UPDATE messages SET is_read = TRUE WHERE sender_id = $1 AND receiver_id = $2", [targetId, userId]);
+            try {
+                const targetRes = await pool.query("SELECT id, name, profile_image, role FROM users WHERE id = $1", [targetId]);
+                if (targetRes.rows.length > 0) {
+                    activeChat = targetRes.rows[0];
+                    const msgRes = await pool.query("SELECT * FROM messages WHERE (sender_id = $1 AND receiver_id = $2) OR (sender_id = $2 AND receiver_id = $1) ORDER BY created_at ASC", [userId, targetId]);
+                    messages = msgRes.rows;
+                    
+                    // Marca mensagens como lidas
+                    await pool.query("UPDATE messages SET is_read = TRUE WHERE sender_id = $1 AND receiver_id = $2", [targetId, userId]);
+                }
+            } catch (chatErr) {
+                console.error("Erro ao carregar mensagens:", chatErr);
             }
         }
 
         res.render('pages/chat', { 
             title: 'Mensagens', 
             user: req.session.user, 
-            chatUsers: contacts,
+            chatUsers: contacts || [],
             activeChat: activeChat,
-            messages: messages,
+            messages: messages || [],
             csrfToken: res.locals.csrfToken
         });
 
     } catch (err) {
-        console.error(err);
-        res.render('pages/error', { message: 'Erro ao carregar chat' });
+        console.error('Erro crítico no chat:', err);
+        res.status(500).render('pages/error', { message: 'Erro ao carregar o sistema de mensagens.' });
     }
 });
 
-// Autenticação para Upload Client-Side (Vercel Blob)
+// Autenticação Upload Vercel
 router.post('/upload/authorize', requireAuth, async (req, res) => {
   try {
     const jsonResponse = await handleUpload({
@@ -87,40 +99,30 @@ router.post('/upload/authorize', requireAuth, async (req, res) => {
   }
 });
 
-// Envio de Mensagem (Com tratamento de erro Multer)
+// Enviar Mensagem
 router.post('/send', requireAuth, (req, res, next) => {
     upload.single('file')(req, res, (err) => {
-        if (err instanceof multer.MulterError) {
-            // Erro do Multer (ex: arquivo muito grande)
-            req.flash('error_msg', 'Arquivo muito grande. O limite é 4.5MB.');
-            return res.redirect('back');
-        } else if (err) {
-            console.error('Erro de upload:', err);
-            req.flash('error_msg', 'Erro no envio do arquivo.');
+        if (err) {
+            console.error('Erro Multer:', err);
+            req.flash('error_msg', 'Erro no upload.');
             return res.redirect('back');
         }
-        // Se passou, chama o processador
         next();
     });
 }, async (req, res) => {
     try {
-        const recipient_id = req.body.recipient_id;
-        const textContent = req.body.content;
-        const fileUrl = req.body.fileUrl;
+        const { recipient_id, content, fileUrl } = req.body;
         const senderId = req.session.user.id;
-
-        let finalContent = textContent;
+        
+        let finalContent = content;
         let messageType = 'text';
 
-        // Lógica de prioridade de conteúdo
         if (fileUrl) {
             finalContent = fileUrl;
             if (/\.(jpg|jpeg|png|gif|webp)$/i.test(finalContent)) messageType = 'image';
             else if (/\.(mp4|mov)$/i.test(finalContent)) messageType = 'video';
             else messageType = 'file';
-        } 
-        else if (req.file) {
-            // Fallback: Upload Servidor
+        } else if (req.file) {
             const filename = `chat/${Date.now()}-${req.file.originalname}`;
             const blob = await put(filename, req.file.buffer, { access: 'public', contentType: req.file.mimetype });
             finalContent = blob.url;
@@ -134,7 +136,7 @@ router.post('/send', requireAuth, (req, res, next) => {
             [senderId, recipient_id, finalContent, messageType]
         );
 
-        // Notificação email (assíncrona)
+        // Notificação email
         const userRes = await pool.query("SELECT email FROM users WHERE id = $1", [recipient_id]);
         if (userRes.rows.length) {
              const preview = messageType === 'text' ? finalContent : 'Enviou um anexo';
@@ -143,7 +145,7 @@ router.post('/send', requireAuth, (req, res, next) => {
 
         res.redirect(`/chat?user_id=${recipient_id}`);
     } catch (err) {
-        console.error("Erro ao salvar mensagem:", err);
+        console.error("Erro ao enviar msg:", err);
         res.redirect(`/chat?user_id=${req.body.recipient_id}`);
     }
 });
