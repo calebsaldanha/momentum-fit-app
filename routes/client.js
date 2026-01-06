@@ -57,7 +57,7 @@ router.get('/initial-form', requireClient, async (req, res) => {
         res.render('pages/initial-form', {
             title: 'Ficha de Anamnese',
             user: req.session.user,
-            data: currentData,
+            profile: currentData, // CORREÇÃO: Enviando 'profile' em vez de 'data' para corresponder ao EJS
             currentPage: 'initial-form'
         });
     } catch(err) {
