@@ -1,5 +1,3 @@
-const { format } = require('date-fns');
-
 const baseStyle = `
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     line-height: 1.6;
