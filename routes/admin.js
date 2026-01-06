@@ -70,7 +70,7 @@ router.get('/clients/:id', requireAdmin, async (req, res) => {
             pageContext = 'superadmin_users';
             showAdminOptions = true;
         } else {
-            if (client.trainer_id !== trainerId && req.session.user.role !== 'superadmin') {
+            if (client.trainer_id != trainerId && req.session.user.role !== 'superadmin') {
                  return res.status(403).render('pages/error', { message: 'Sem permissão.', user: req.session.user });
             }
         }
@@ -79,8 +79,13 @@ router.get('/clients/:id', requireAdmin, async (req, res) => {
         const stats = await db.getUserStats(clientId); 
         
         // Anamnese
-        const profileRes = await db.query("SELECT * FROM client_profiles WHERE user_id = $1", [clientId]);
-        const detailedProfile = profileRes.rows[0] || {};
+        let detailedProfile = {};
+        try {
+             const profileRes = await db.query("SELECT * FROM client_profiles WHERE user_id = $1", [clientId]);
+             detailedProfile = profileRes.rows[0] || {};
+        } catch (e) {
+             console.warn("Erro ao buscar perfil:", e.message);
+        }
 
         let trainersList = [];
         if (showAdminOptions) { 
@@ -122,7 +127,7 @@ router.get('/trainers', requireAdmin, async (req, res) => {
     }
 });
 
-// NOVA ROTA: Detalhes do Treinador (Superadmin)
+// --- ROTA ADICIONADA: Detalhes do Treinador ---
 router.get('/trainers/:id', requireAdmin, async (req, res) => {
     if(req.session.user.role !== 'superadmin') return res.redirect('/admin/dashboard');
     

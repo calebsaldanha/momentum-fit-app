@@ -98,7 +98,7 @@ async function getClients() {
 }
 
 async function getUserStats(userId) {
-    // Retorna estrutura compatível com a view client-details
+    // Retorna estrutura compatível com as views
     return {
         completed_workouts: 0,
         current_streak: 0, 
@@ -136,15 +136,12 @@ async function getTrainerStats(trainerId) {
     const stats = { totalClients: 0, totalWorkouts: 0, weeklyCheckins: 0 };
     
     try {
-        // 1. Total de Alunos
         const clientsRes = await query("SELECT COUNT(*) FROM users WHERE role = 'client' AND trainer_id = $1", [trainerId]);
         stats.totalClients = parseInt(clientsRes.rows[0].count || 0);
 
-        // 2. Total de Treinos
         const workoutsRes = await query("SELECT COUNT(*) FROM workouts WHERE trainer_id = $1", [trainerId]);
         stats.totalWorkouts = parseInt(workoutsRes.rows[0].count || 0);
 
-        // 3. Checkins (com tratamento de erro caso a tabela não exista)
         try {
             const checkinsRes = await query(`
                 SELECT COUNT(*) 
