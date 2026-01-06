@@ -1,18 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../database/db'); 
-
-// Desestrutura para facilitar uso e manter consistência
-const { 
-    getUserById, 
-    getTrainerStats, 
-    getRecentClientsByTrainer, 
-    getClientsByTrainer, 
-    getWorkoutsByUserId, 
-    getUserStats, 
-    getAllTrainers,
-    query 
-} = db;
+const db = require('../database/db');
 
 // Middleware Admin
 const requireAdmin = (req, res, next) => {
@@ -25,8 +13,8 @@ const requireAdmin = (req, res, next) => {
 router.get('/dashboard', requireAdmin, async (req, res) => {
     try {
         const trainerId = req.session.user.id;
-        const stats = await getTrainerStats(trainerId);
-        const recentClients = await getRecentClientsByTrainer(trainerId);
+        const stats = await db.getTrainerStats(trainerId);
+        const recentClients = await db.getRecentClientsByTrainer(trainerId);
 
         res.render('pages/admin-dashboard', {
             title: 'Painel do Treinador',
@@ -46,7 +34,7 @@ router.get('/dashboard', requireAdmin, async (req, res) => {
 router.get('/clients', requireAdmin, async (req, res) => {
     try {
         const trainerId = req.session.user.id;
-        const clients = await getClientsByTrainer(trainerId);
+        const clients = await db.getClientsByTrainer(trainerId);
 
         res.render('pages/admin-clients', {
             title: 'Meus Alunos',
@@ -68,12 +56,7 @@ router.get('/clients/:id', requireAdmin, async (req, res) => {
         const clientId = req.params.id;
         const source = req.query.source;
 
-        // Verifica se ID é válido
-        if (!clientId) {
-             return res.status(404).render('pages/error', { message: 'ID do aluno inválido.', user: req.session.user });
-        }
-
-        const client = await getUserById(clientId);
+        const client = await db.getUserById(clientId);
         
         if (!client) {
             return res.status(404).render('pages/error', { message: 'Aluno não encontrado.', user: req.session.user });
@@ -87,27 +70,21 @@ router.get('/clients/:id', requireAdmin, async (req, res) => {
             pageContext = 'superadmin_users';
             showAdminOptions = true;
         } else {
-            // Uso de != (não estrito) para permitir comparação entre string e int
-            if (client.trainer_id != trainerId && req.session.user.role !== 'superadmin') {
-                 return res.status(403).render('pages/error', { message: 'Sem permissão para visualizar este aluno.', user: req.session.user });
+            if (client.trainer_id !== trainerId && req.session.user.role !== 'superadmin') {
+                 return res.status(403).render('pages/error', { message: 'Sem permissão.', user: req.session.user });
             }
         }
 
-        const workouts = await getWorkoutsByUserId(clientId);
-        const stats = await getUserStats(clientId); 
+        const workouts = await db.getWorkoutsByUserId(clientId);
+        const stats = await db.getUserStats(clientId); 
         
-        // Anamnese - Try/Catch específico para evitar quebra se a tabela não existir
-        let detailedProfile = {};
-        try {
-            const profileRes = await query("SELECT * FROM client_profiles WHERE user_id = $1", [clientId]);
-            detailedProfile = profileRes.rows[0] || {};
-        } catch (e) {
-            console.warn("Aviso: Tabela client_profiles pode não existir ou erro na query.", e.message);
-        }
+        // Anamnese
+        const profileRes = await db.query("SELECT * FROM client_profiles WHERE user_id = $1", [clientId]);
+        const detailedProfile = profileRes.rows[0] || {};
 
         let trainersList = [];
         if (showAdminOptions) { 
-            trainersList = await getAllTrainers(); 
+            trainersList = await db.getAllTrainers(); 
         }
 
         res.render('pages/client-details', {
@@ -124,7 +101,7 @@ router.get('/clients/:id', requireAdmin, async (req, res) => {
         });
     } catch (err) {
         console.error('Erro client details:', err);
-        res.status(500).render('pages/error', { message: 'Erro ao carregar detalhes do aluno.', user: req.session.user });
+        res.status(500).render('pages/error', { message: 'Erro ao carregar detalhes.', user: req.session.user });
     }
 });
 
@@ -132,7 +109,7 @@ router.get('/clients/:id', requireAdmin, async (req, res) => {
 router.get('/trainers', requireAdmin, async (req, res) => {
     if(req.session.user.role !== 'superadmin') return res.redirect('/admin/dashboard');
     try {
-        const trainers = await getAllTrainers();
+        const trainers = await db.getAllTrainers();
         res.render('pages/admin-trainers', { 
             title: 'Treinadores',
             bodyClass: 'dashboard-body',
@@ -142,6 +119,35 @@ router.get('/trainers', requireAdmin, async (req, res) => {
         });
     } catch(err) {
         res.redirect('/admin/dashboard');
+    }
+});
+
+// NOVA ROTA: Detalhes do Treinador (Superadmin)
+router.get('/trainers/:id', requireAdmin, async (req, res) => {
+    if(req.session.user.role !== 'superadmin') return res.redirect('/admin/dashboard');
+    
+    try {
+        const trainerId = req.params.id;
+        const trainer = await db.getUserById(trainerId);
+        
+        if (!trainer) {
+            return res.status(404).render('pages/error', { message: 'Treinador não encontrado.', user: req.session.user });
+        }
+        
+        // Busca alunos deste treinador para exibir na lista
+        const clients = await db.getClientsByTrainer(trainerId);
+        
+        res.render('pages/trainer-details', { 
+            title: 'Detalhes do Treinador',
+            bodyClass: 'dashboard-body',
+            currentPage: 'trainers',
+            user: req.session.user,
+            trainer: trainer,
+            clients: clients
+        });
+    } catch(err) {
+        console.error("Erro ao carregar detalhes do treinador:", err);
+        res.status(500).render('pages/error', { message: 'Erro ao carregar detalhes.', user: req.session.user });
     }
 });
 
