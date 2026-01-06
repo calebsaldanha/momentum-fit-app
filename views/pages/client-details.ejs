@@ -182,10 +182,25 @@
                         </thead>
                         <tbody>
                             <% workouts.forEach(workout => { %>
+                                <% 
+                                    let exCount = 0;
+                                    if (workout.exercises) {
+                                        if (typeof workout.exercises === 'string') {
+                                            try {
+                                                const parsed = JSON.parse(workout.exercises);
+                                                exCount = Array.isArray(parsed) ? parsed.length : 0;
+                                            } catch(e) { exCount = 0; }
+                                        } else if (Array.isArray(workout.exercises)) {
+                                            exCount = workout.exercises.length;
+                                        }
+                                    } else {
+                                        exCount = workout.exercise_count || 0;
+                                    }
+                                %>
                                 <tr>
                                     <td><%= workout.title || workout.name || 'Sem título' %></td>
                                     <td><%= workout.day_of_week || '--' %></td>
-                                    <td><%= workout.exercises ? workout.exercises.length : (workout.exercise_count || 0) %></td>
+                                    <td><%= exCount %></td>
                                     <td>
                                         <div class="action-buttons">
                                             <a href="/workouts/edit/<%= workout.id %>" class="btn-icon" title="Editar"><i class="fas fa-edit"></i></a>

@@ -98,10 +98,11 @@ async function getClients() {
 }
 
 async function getUserStats(userId) {
-    // Implementação básica para evitar erro
+    // Retorna estrutura compatível com a view client-details
     return {
         completed_workouts: 0,
-        streak: 0,
+        current_streak: 0, 
+        total_checkins: 0,
         last_workout: null
     };
 }
