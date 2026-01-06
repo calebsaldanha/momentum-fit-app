@@ -1,208 +1,318 @@
 <%- include('../partials/header.ejs', { title: 'Chat', bodyClass: 'dashboard-body' }) %>
 
 <style>
-/* --- CHAT LAYOUT FIX --- */
+    /* --- Layout Chat - Otimização de Espaço --- */
 
-/* Forçamos variáveis de altura para evitar problemas de cálculo */
-:root {
-    --header-height: 70px;
-}
+    /* Garante que o body não trave, mas que o app tente ocupar 100% da viewport */
+    body, html {
+        height: 100%;
+        overflow-x: hidden; /* Evita rolagem lateral indesejada */
+    }
 
-/* Container Principal - Sobrescreve estilo padrão do dashboard */
-.dashboard-container {
-    display: grid !important;
-    grid-template-columns: 260px 1fr !important; /* Sidebar Fixa | Conteúdo Flex */
-    grid-template-rows: 1fr !important;
-    
-    width: 100vw !important;
-    height: calc(100vh - 60px) !important; /* Altura total menos header */
-    margin-top: 60px !important; /* Compensa header fixo */
-    
-    padding: 0 !important;
-    overflow: hidden !important;
-    position: fixed;
-    top: 0;
-    left: 0;
-}
-
-/* Ajuste da Sidebar do Menu (Esquerda) */
-.dashboard-sidebar {
-    grid-column: 1;
-    background: #111;
-    border-right: 1px solid #333;
-    height: 100% !important;
-    position: relative !important;
-    top: 0 !important;
-    display: flex;
-    flex-direction: column;
-}
-
-/* Área Principal do Chat (Direita) */
-.chat-page-container {
-    grid-column: 2;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    background: #000;
-    position: relative;
-    min-width: 0; /* Evita que flex child estoure a largura */
-}
-
-/* Sidebar interna de contatos */
-.chat-contacts-panel {
-    width: 300px;
-    background: #0a0a0a;
-    border-right: 1px solid #222;
-    display: flex;
-    flex-direction: column;
-    flex-shrink: 0;
-}
-
-/* Layout Interno do Chat */
-.chat-layout {
-    display: flex;
-    height: 100%;
-    width: 100%;
-    overflow: hidden;
-}
-
-/* --- MOBILE --- */
-@media (max-width: 768px) {
+    /* Container Principal: Organiza Sidebar (Menu) e Conteúdo lado a lado */
     .dashboard-container {
-        display: flex !important;
-        flex-direction: column;
-        height: 100vh !important;
-        margin-top: 0 !important;
-        padding-top: 60px !important;
-    }
-    
-    .dashboard-sidebar {
-        display: none !important; /* Esconde sidebar do menu no mobile no chat */
-    }
-
-    .chat-layout {
-        flex-direction: column;
-    }
-
-    .chat-contacts-panel {
-        width: 100%;
-        height: 80px;
+        display: flex;
         flex-direction: row;
-        overflow-x: auto;
-        border-bottom: 1px solid #333;
-        border-right: none;
+        height: 100vh; /* Ocupa exatamente a altura da tela */
+        padding-top: 60px; /* Compensa o Header Fixo (ajuste se seu header for maior) */
+        box-sizing: border-box;
+        overflow: hidden; /* O scroll será gerenciado internamente pelos painéis */
     }
-}
 
-/* --- ESTILOS VISUAIS --- */
-.user-list { list-style: none; padding: 0; margin: 0; overflow-y: auto; flex: 1; }
-.user-item { padding: 15px; display: flex; align-items: center; gap: 15px; border-bottom: 1px solid #222; cursor: pointer; transition: 0.2s; }
-.user-item:hover, .user-item.active { background: #1a1a1a; }
-.user-item.active { border-left: 3px solid var(--c-accent-primary); }
-.user-avatar { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; background: #333; }
+    /* --- Wrapper da Página de Chat (Área Direita) --- */
+    .chat-page-wrapper {
+        flex: 1; /* Cresce para ocupar toda a largura disponível */
+        display: flex;
+        flex-direction: column; /* Coloca titulo/aviso em cima e chat em baixo */
+        height: 100%;
+        background: #000;
+        position: relative;
+        min-width: 0; /* Correção para flexbox não estourar */
+    }
 
-.chat-main { flex: 1; display: flex; flex-direction: column; background: #000; position: relative; min-width: 0; }
-.chat-header { height: 60px; padding: 0 20px; border-bottom: 1px solid #222; display: flex; align-items: center; justify-content: space-between; background: #0a0a0a; flex-shrink: 0; }
-.chat-messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; scroll-behavior: smooth; }
+    /* O Chat Box em si (Sidebar Contatos + Mensagens) */
+    .chat-box-container {
+        flex: 1; /* Ocupa todo o espaço vertical restante */
+        display: flex;
+        border-top: 1px solid #333;
+        overflow: hidden; /* Impede que o container principal role, forçando scroll interno */
+    }
 
-.message { max-width: 70%; padding: 10px 15px; border-radius: 12px; color: #fff; font-size: 0.95rem; line-height: 1.4; position: relative; }
-.message.sent { align-self: flex-end; background: var(--c-accent-primary); color: #000; border-bottom-right-radius: 2px; }
-.message.received { align-self: flex-start; background: #222; border-bottom-left-radius: 2px; }
+    /* --- Sidebar de Contatos (Esquerda do Chat) --- */
+    .chat-contacts-sidebar {
+        width: 280px;
+        background: #111;
+        border-right: 1px solid #333;
+        display: flex;
+        flex-direction: column;
+        flex-shrink: 0; /* Não deixa espremer */
+        height: 100%;
+    }
 
-.chat-input-wrapper { padding: 15px; border-top: 1px solid #222; background: #0a0a0a; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-.chat-input-field { flex: 1; padding: 12px 15px; border-radius: 25px; border: 1px solid #333; background: #151515; color: white; outline: none; }
-.chat-input-field:focus { border-color: var(--c-accent-primary); }
+    .contacts-header {
+        padding: 15px;
+        background: #151515;
+        border-bottom: 1px solid #333;
+        color: #888;
+        font-weight: 600;
+        font-size: 0.85rem;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        flex-shrink: 0;
+    }
 
+    .contacts-list {
+        flex: 1;
+        overflow-y: auto; /* Scroll independente para a lista de contatos */
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .contact-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 15px;
+        border-bottom: 1px solid #222;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .contact-item:hover { background: #1a1a1a; }
+    .contact-item.active { background: #222; border-left: 3px solid var(--c-accent-primary); }
+
+    .contact-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+        background: #333;
+        flex-shrink: 0;
+    }
+
+    /* --- Área Principal de Mensagens (Direita do Chat) --- */
+    .chat-main-area {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background: #000;
+        position: relative;
+        min-width: 0;
+        height: 100%;
+    }
+
+    .chat-header-bar {
+        height: 60px;
+        padding: 0 20px;
+        background: #111;
+        border-bottom: 1px solid #333;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-shrink: 0; /* Altura fixa */
+    }
+
+    /* Área de rolagem das mensagens */
+    .messages-scroll-area {
+        flex: 1; /* Ocupa todo o espaço entre o header e o input */
+        padding: 20px;
+        overflow-y: auto; /* AQUI é o scroll das mensagens */
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        scroll-behavior: smooth;
+    }
+
+    .msg-bubble {
+        max-width: 75%;
+        padding: 10px 16px;
+        border-radius: 12px;
+        font-size: 0.95rem;
+        line-height: 1.4;
+        color: white;
+        position: relative;
+        word-wrap: break-word;
+    }
+
+    .msg-bubble.sent {
+        align-self: flex-end;
+        background: var(--c-accent-primary);
+        color: black;
+        border-bottom-right-radius: 2px;
+    }
+
+    .msg-bubble.received {
+        align-self: flex-start;
+        background: #222;
+        border-bottom-left-radius: 2px;
+        border: 1px solid #333;
+    }
+
+    /* Área de Input (Rodapé) */
+    .input-area-wrapper {
+        padding: 15px 20px;
+        background: #111;
+        border-top: 1px solid #333;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        flex-shrink: 0; /* Altura fixa baseada no conteúdo */
+    }
+
+    .main-input {
+        flex: 1;
+        padding: 12px 20px;
+        border-radius: 25px;
+        border: 1px solid #444;
+        background: #222;
+        color: white;
+        outline: none;
+        font-size: 0.95rem;
+    }
+    .main-input:focus { border-color: var(--c-accent-primary); }
+
+    /* --- Mobile --- */
+    @media (max-width: 768px) {
+        .dashboard-container {
+            display: block; /* Remove o flex row no mobile */
+            padding-top: 60px;
+            height: auto; /* Deixa altura livre no mobile */
+            min-height: 100vh;
+            overflow: visible; /* Permite scroll da página no mobile */
+        }
+        
+        .chat-page-wrapper {
+            height: calc(100vh - 60px); /* Tenta preencher a tela no mobile */
+        }
+
+        .chat-box-container {
+            flex-direction: column; /* Empilha contatos e chat */
+        }
+
+        .chat-contacts-sidebar {
+            width: 100%;
+            height: 70px; /* Lista horizontal pequena */
+            flex-direction: row;
+            overflow-x: auto;
+            border-right: none;
+            border-bottom: 1px solid #333;
+        }
+        
+        .contacts-header { display: none; }
+        .contacts-list { display: flex; flex-direction: row; }
+        .contact-item { border-bottom: none; border-right: 1px solid #333; min-width: 70px; justify-content: center; padding: 10px; }
+        .contact-info { display: none; } /* Esconde nomes na lista horizontal */
+        .contact-avatar { margin: 0; }
+
+        .chat-main-area {
+            height: calc(100% - 70px); /* Resto da altura */
+        }
+    }
 </style>
 
 <div class="dashboard-container">
     <%- include('../partials/sidebar.ejs', { currentPage: 'chat' }) %>
 
-    <div class="chat-page-container">
-        
-        <div id="uploadOverlay" style="display:none; position:absolute; inset:0; background:rgba(0,0,0,0.8); z-index:100; align-items:center; justify-content:center; flex-direction:column; color:white;">
-            <i class="fas fa-spinner fa-spin" style="font-size:2rem; margin-bottom:10px; color:var(--c-accent-primary);"></i>
-            <p id="uploadStatusText">Enviando...</p>
+    <div class="chat-page-wrapper">
+        <div id="uploadOverlay" style="display:none; position:absolute; inset:0; background:rgba(0,0,0,0.85); z-index:999; align-items:center; justify-content:center; flex-direction:column; color:white;">
+            <i class="fas fa-spinner fa-spin" style="font-size:2.5rem; margin-bottom:15px; color:var(--c-accent-primary);"></i>
+            <p id="uploadStatusText">Processando envio...</p>
         </div>
 
-        <div class="chat-layout">
+        <div class="chat-box-container">
             
-            <aside class="chat-contacts-panel">
-                <div style="padding:15px; font-weight:bold; color:#666; font-size:0.8rem; letter-spacing:1px; border-bottom:1px solid #222;">
-                    CONTATOS
+            <aside class="chat-contacts-sidebar">
+                <div class="contacts-header">
+                    <i class="far fa-address-book"></i> Contatos
                 </div>
-                <ul class="user-list">
+                <ul class="contacts-list">
                     <% if (typeof chatUsers !== 'undefined' && chatUsers.length > 0) { %>
                         <% chatUsers.forEach(u => { %>
-                            <li class="user-item <%= typeof activeChat !== 'undefined' && activeChat && activeChat.id === u.id ? 'active' : '' %>" 
+                            <li class="contact-item <%= typeof activeChat !== 'undefined' && activeChat && activeChat.id === u.id ? 'active' : '' %>" 
                                 onclick="window.location.href='/chat?user_id=<%= u.id %>'">
-                                <img src="<%= u.profile_image || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(u.name) %>" class="user-avatar">
-                                <div style="overflow: hidden;">
-                                    <div style="font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><%= u.name %></div>
-                                    <small style="color:#666;"><%= u.role === 'trainer' ? 'Treinador' : 'Aluno' %></small>
+                                <img src="<%= u.profile_image || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(u.name) %>" class="contact-avatar">
+                                <div class="contact-info" style="margin-left: 10px; overflow: hidden;">
+                                    <div style="font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><%= u.name %></div>
+                                    <small style="color: #666;"><%= u.role === 'trainer' ? 'Personal' : 'Aluno' %></small>
                                 </div>
                             </li>
                         <% }); %>
                     <% } else { %>
-                        <div style="padding:20px; text-align:center; color:#444;">Nenhum contato encontrado.</div>
+                        <div style="padding:20px; text-align:center; color:#555; font-size:0.9rem;">
+                            Sem contatos.
+                        </div>
                     <% } %>
                 </ul>
             </aside>
 
-            <section class="chat-main">
+            <main class="chat-main-area">
                 <% if (typeof activeChat !== 'undefined' && activeChat) { %>
-                    <div class="chat-header">
-                        <div style="display:flex; align-items:center; gap:10px;">
+                    <div class="chat-header-bar">
+                        <div style="display:flex; align-items:center; gap:12px;">
                             <img src="<%= activeChat.profile_image || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(activeChat.name) %>" 
-                                 style="width:35px; height:35px; border-radius:50%;">
-                            <strong><%= activeChat.name %></strong>
+                                 style="width:36px; height:36px; border-radius:50%;">
+                            <span style="font-weight: 700; font-size: 1.1rem; color: #fff;"><%= activeChat.name %></span>
                         </div>
+                        <a href="/admin/clients/<%= activeChat.id %>" style="color: #666; font-size: 1.2rem;"><i class="far fa-user-circle"></i></a>
                     </div>
 
-                    <div class="chat-messages" id="messagesList">
+                    <div class="messages-scroll-area" id="messagesList">
                         <% if (typeof messages !== 'undefined' && messages.length > 0) { %>
                             <% messages.forEach(msg => { %>
-                                <div class="message <%= msg.sender_id === user.id ? 'sent' : 'received' %>">
+                                <div class="msg-bubble <%= msg.sender_id === user.id ? 'sent' : 'received' %>">
                                     <% if (msg.message_type === 'image') { %>
-                                        <a href="<%= msg.content %>" target="_blank"><img src="<%= msg.content %>" style="max-width:250px; border-radius:8px;"></a>
+                                        <a href="<%= msg.content %>" target="_blank">
+                                            <img src="<%= msg.content %>" style="max-width:100%; border-radius:8px; max-height:300px; display:block;">
+                                        </a>
+                                    <% } else if (msg.message_type === 'video') { %>
+                                        <video src="<%= msg.content %>" controls style="max-width:100%; border-radius:8px;"></video>
                                     <% } else if (msg.message_type === 'file') { %>
-                                        <a href="<%= msg.content %>" target="_blank" style="color:inherit; text-decoration:none;">
-                                            <i class="fas fa-file-download"></i> Baixar Arquivo
+                                        <a href="<%= msg.content %>" target="_blank" style="color:inherit; text-decoration:underline; display:flex; align-items:center; gap:8px;">
+                                            <i class="fas fa-paperclip"></i> Ver Anexo
                                         </a>
                                     <% } else { %>
                                         <%= msg.content %>
                                     <% } %>
-                                    <div style="font-size:0.7em; opacity:0.6; text-align:right; margin-top:4px;">
+                                    
+                                    <div style="text-align:right; font-size:0.7rem; margin-top:5px; opacity:0.6;">
                                         <%= new Date(msg.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) %>
                                     </div>
                                 </div>
                             <% }); %>
                         <% } else { %>
-                            <div style="text-align:center; margin-top:50px; color:#444;">
-                                <p>Inicie a conversa!</p>
+                            <div style="flex:1; display:flex; align-items:center; justify-content:center; color:#333; flex-direction:column;">
+                                <i class="far fa-comment-dots" style="font-size:3rem; margin-bottom:10px;"></i>
+                                <p>Nenhuma mensagem ainda.</p>
                             </div>
                         <% } %>
                     </div>
 
-                    <form action="/chat/send?_csrf=<%= csrfToken %>" method="POST" class="chat-input-wrapper" onsubmit="handleChatSubmit(event)">
+                    <form action="/chat/send?_csrf=<%= csrfToken %>" method="POST" class="input-area-wrapper" onsubmit="handleChatSubmit(event)">
                         <input type="hidden" name="recipient_id" value="<%= activeChat.id %>">
                         <input type="hidden" name="fileUrl" id="hiddenFileUrl">
                         
-                        <label for="file-upload" style="cursor:pointer; color:#888; padding:5px;"><i class="fas fa-paperclip"></i></label>
-                        <input type="file" id="file-upload" name="file" style="display:none;" onchange="document.getElementById('fileNamePreview').innerText = this.files[0].name">
-                        <span id="fileNamePreview" style="font-size:0.8rem; color:var(--c-accent-primary);"></span>
+                        <label for="file-upload" style="cursor:pointer; color:#888; padding:5px; transition:color 0.2s;" title="Enviar arquivo">
+                            <i class="fas fa-plus-circle" style="font-size:1.3rem;"></i>
+                        </label>
+                        <input type="file" id="file-upload" name="file" style="display:none;" onchange="updateFilePreview(this)">
+                        
+                        <span id="fileNameDisplay" style="display:none; background:var(--c-accent-primary); color:black; font-size:0.75rem; padding:2px 8px; border-radius:4px;"></span>
 
-                        <input type="text" name="content" class="chat-input-field" placeholder="Digite..." autocomplete="off">
-                        <button type="submit" class="btn btn-primary" style="border-radius:50%; width:40px; height:40px; padding:0; display:flex; align-items:center; justify-content:center;"><i class="fas fa-paper-plane"></i></button>
+                        <input type="text" name="content" class="main-input" placeholder="Digite sua mensagem..." autocomplete="off">
+                        
+                        <button type="submit" class="btn btn-primary" style="width:45px; height:45px; border-radius:50%; padding:0; display:flex; align-items:center; justify-content:center;">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
                     </form>
                 <% } else { %>
-                    <div style="flex:1; display:flex; align-items:center; justify-content:center; color:#333; flex-direction:column;">
-                        <i class="far fa-comments" style="font-size:4rem; margin-bottom:15px;"></i>
-                        <p>Selecione um contato para conversar.</p>
+                    <div style="flex:1; display:flex; align-items:center; justify-content:center; flex-direction:column; color:#444;">
+                        <i class="far fa-comments" style="font-size:4rem; margin-bottom:20px; opacity:0.3;"></i>
+                        <h3>Momentum Chat</h3>
+                        <p>Selecione um contato para iniciar.</p>
                     </div>
                 <% } %>
-            </section>
-
+            </main>
         </div>
     </div>
 </div>
@@ -212,8 +322,19 @@
 </script>
 
 <script>
+    // Scroll para baixo ao carregar
     const msgList = document.getElementById('messagesList');
-    if(msgList) msgList.scrollTop = msgList.scrollHeight;
+    if(msgList) setTimeout(() => msgList.scrollTop = msgList.scrollHeight, 100);
+
+    function updateFilePreview(input) {
+        const display = document.getElementById('fileNameDisplay');
+        if (input.files && input.files[0]) {
+            display.innerText = input.files[0].name;
+            display.style.display = 'inline-block';
+        } else {
+            display.style.display = 'none';
+        }
+    }
 
     async function handleChatSubmit(e) {
         e.preventDefault();
@@ -223,21 +344,25 @@
         const statusText = document.getElementById('uploadStatusText');
         const overlay = document.getElementById('uploadOverlay');
 
+        // Validação: não envia se vazio
         if(!file && !form.content.value.trim()) return;
 
+        // Se for só texto, envia direto (Formulário Normal)
         if(!file) {
             form.enctype = "application/x-www-form-urlencoded";
-            fileInput.removeAttribute('name');
+            fileInput.removeAttribute('name'); // Remove input file para não bugar o parser
             form.submit();
-            form.content.value = '';
+            form.content.value = ''; // Limpa input visualmente
             return;
         }
 
-        overlay.style.display = 'flex';
+        // Se tem arquivo, mostra overlay
+        if(overlay) overlay.style.display = 'flex';
         
+        // Tenta Upload Vercel Blob (Client Side)
         if(window.vercelUpload) {
             try {
-                statusText.innerText = "Enviando arquivo...";
+                if(statusText) statusText.innerText = "Enviando arquivo...";
                 const newBlob = await window.vercelUpload(file.name, file, {
                     access: 'public',
                     handleUploadUrl: '/chat/upload/authorize',
@@ -248,12 +373,14 @@
                 form.enctype = "application/x-www-form-urlencoded";
                 form.submit();
                 return;
-            } catch(e) { console.warn(e); }
+            } catch(e) { console.warn("Vercel Blob falhou, tentando fallback", e); }
         }
 
-        statusText.innerText = "Enviando via Servidor...";
+        // Fallback: Upload tradicional via servidor
+        if(statusText) statusText.innerText = "Enviando via Servidor...";
         form.enctype = "multipart/form-data";
-        form.removeEventListener('submit', handleChatSubmit);
+        fileInput.setAttribute('name', 'file'); // Garante que o nome seja 'file'
+        form.removeEventListener('submit', handleChatSubmit); // Remove este listener para evitar loop
         form.submit();
     }
 </script>
