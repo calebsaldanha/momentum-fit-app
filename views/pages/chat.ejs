@@ -1,21 +1,21 @@
 <%- include('../partials/header.ejs', { title: 'Chat', bodyClass: 'dashboard-body' }) %>
 
 <style>
-    /* --- Layout Chat - Otimização de Espaço --- */
-
+    /* --- Layout Global e Reset --- */
     body, html {
         height: 100%;
-        overflow-x: hidden;
+        overflow-x: hidden; /* Evita rolagem lateral */
+        /* overflow-y: auto; Permite scroll da página se necessário */
     }
 
     /* Container Principal */
     .dashboard-container {
         display: flex;
         flex-direction: row;
-        height: 100vh;
-        padding-top: 60px; /* Header Fixo */
+        height: 100vh; /* Altura total da viewport */
+        padding-top: 60px; /* Espaço para o Header Fixo do site */
         box-sizing: border-box;
-        overflow: hidden;
+        overflow: hidden; /* O scroll será interno dos painéis */
     }
 
     /* --- Wrapper da Página de Chat --- */
@@ -27,21 +27,45 @@
         background: #000;
         position: relative;
         min-width: 0;
+        padding: 0 !important; /* Garante zero padding extra */
+        margin: 0 !important;
     }
 
-    /* O Chat Box em si */
+    /* O Chat Box (Container Flex) */
     .chat-box-container {
         flex: 1;
         display: flex;
-        /* Borda superior removida para limpar o visual, já que o header define a linha */
-        /* border-top: 1px solid #333; */ 
-        overflow: hidden;
+        overflow: hidden; /* Contém as barras de rolagem internas */
+        position: relative;
+        align-items: stretch; /* Garante que as colunas tenham a mesma altura */
+    }
+
+    /* --- CLASSE COMPARTILHADA PARA CABEÇALHOS (GARANTE ALINHAMENTO) --- */
+    .chat-header-shared {
+        height: 60px; /* Altura fixa idêntica para ambos */
+        min-height: 60px;
+        display: flex;
+        align-items: center; /* Centraliza verticalmente */
+        padding: 0 20px;
+        border-bottom: 1px solid #333;
+        background: #111;
+        box-sizing: border-box; /* Garante que padding não aumente a altura */
+        flex-shrink: 0;
+    }
+    
+    /* Remove margens padrão de textos dentro dos headers para evitar desalinhamento */
+    .chat-header-shared h3, 
+    .chat-header-shared span, 
+    .chat-header-shared div {
+        margin: 0 !important;
+        padding: 0;
+        line-height: 1;
     }
 
     /* --- Sidebar de Contatos (Esquerda) --- */
     .chat-contacts-sidebar {
         width: 280px;
-        background: #111;
+        background: #0e0e0e;
         border-right: 1px solid #333;
         display: flex;
         flex-direction: column;
@@ -49,22 +73,15 @@
         height: 100%;
     }
 
-    /* CORREÇÃO DE ALINHAMENTO: Cabeçalho da Sidebar */
-    .contacts-header {
-        height: 60px; /* Mesma altura fixa do chat header */
-        padding: 0 20px; /* Mesmo padding lateral */
-        background: #151515;
-        border-bottom: 1px solid #333;
+    .contacts-title {
         color: #888;
-        font-weight: 600;
-        font-size: 0.85rem;
+        font-weight: 700;
+        font-size: 0.8rem;
         letter-spacing: 1px;
         text-transform: uppercase;
-        flex-shrink: 0;
-        
-        /* Centralização Vertical igual ao lado direito */
-        display: flex; 
-        align-items: center; 
+        display: flex;
+        align-items: center;
+        gap: 8px;
     }
 
     .contacts-list {
@@ -79,14 +96,14 @@
         display: flex;
         align-items: center;
         gap: 12px;
-        padding: 12px 15px;
+        padding: 15px 20px;
         border-bottom: 1px solid #222;
         cursor: pointer;
         transition: background 0.2s;
     }
 
     .contact-item:hover { background: #1a1a1a; }
-    .contact-item.active { background: #222; border-left: 3px solid var(--c-accent-primary); }
+    .contact-item.active { background: #1f1f1f; border-left: 3px solid var(--c-accent-primary); }
 
     .contact-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #333; flex-shrink: 0; }
 
@@ -95,29 +112,30 @@
         flex: 1;
         display: flex;
         flex-direction: column;
-        background: #050505;
+        background: #000;
         position: relative;
         min-width: 0;
         height: 100%;
+        margin-top: 0 !important; /* Garante topo colado */
     }
 
-    /* CORREÇÃO DE ALINHAMENTO: Cabeçalho do Chat */
-    .chat-header-bar {
-        height: 60px; /* Altura fixa idêntica à esquerda */
-        padding: 0 20px;
-        background: #111;
-        border-bottom: 1px solid #333;
+    .chat-user-info {
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        flex-shrink: 0;
+        gap: 12px;
     }
 
-    /* Área de rolagem das mensagens */
+    .chat-user-name {
+        font-weight: 700;
+        font-size: 1rem;
+        color: #fff;
+    }
+
+    /* Área de Scroll das Mensagens */
     .messages-scroll-area {
         flex: 1;
         padding: 20px;
-        overflow-y: auto;
+        overflow-y: auto; /* Scroll apenas aqui dentro */
         display: flex;
         flex-direction: column;
         gap: 15px;
@@ -163,16 +181,27 @@
 
     /* --- Mobile --- */
     @media (max-width: 768px) {
-        .dashboard-container { display: block; padding-top: 60px; height: auto; min-height: 100vh; overflow: visible; }
+        .dashboard-container { display: block; height: auto; min-height: 100vh; overflow: visible; padding-top: 60px; }
         .chat-page-wrapper { height: calc(100vh - 60px); }
         .chat-box-container { flex-direction: column; }
-        .chat-contacts-sidebar { width: 100%; height: 70px; flex-direction: row; overflow-x: auto; border-right: none; border-bottom: 1px solid #333; }
-        .contacts-header { display: none; } /* Esconde header contatos no mobile */
+        
+        .chat-contacts-sidebar { 
+            width: 100%; 
+            height: 65px; 
+            flex-direction: row; 
+            overflow-x: auto; 
+            border-right: none; 
+            border-bottom: 1px solid #333; 
+        }
+        
+        /* No mobile, removemos o cabeçalho da sidebar para economizar espaço */
+        .chat-header-shared.sidebar-header-mobile { display: none; }
+        
         .contacts-list { display: flex; flex-direction: row; }
         .contact-item { border-bottom: none; border-right: 1px solid #333; min-width: 70px; justify-content: center; padding: 10px; }
         .contact-info { display: none; }
         .contact-avatar { margin: 0; }
-        .chat-main-area { height: calc(100% - 70px); }
+        .chat-main-area { height: calc(100% - 65px); }
     }
 </style>
 
@@ -188,9 +217,12 @@
         <div class="chat-box-container">
             
             <aside class="chat-contacts-sidebar">
-                <div class="contacts-header">
-                    <i class="far fa-address-book" style="margin-right: 8px;"></i> Contatos
+                <div class="chat-header-shared sidebar-header-mobile">
+                    <div class="contacts-title">
+                        <i class="far fa-address-book"></i> Contatos
+                    </div>
                 </div>
+
                 <ul class="contacts-list">
                     <% if (typeof chatUsers !== 'undefined' && chatUsers.length > 0) { %>
                         <% chatUsers.forEach(u => { %>
@@ -198,8 +230,8 @@
                                 onclick="window.location.href='/chat?user_id=<%= u.id %>'">
                                 <img src="<%= u.profile_image || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(u.name) %>" class="contact-avatar">
                                 <div class="contact-info" style="margin-left: 10px; overflow: hidden;">
-                                    <div style="font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><%= u.name %></div>
-                                    <small style="color: #666;"><%= u.role === 'trainer' ? 'Personal' : 'Aluno' %></small>
+                                    <div style="font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.95rem;"><%= u.name %></div>
+                                    <small style="color: #666; font-size: 0.75rem;"><%= u.role === 'trainer' ? 'Personal' : 'Aluno' %></small>
                                 </div>
                             </li>
                         <% }); %>
@@ -211,13 +243,16 @@
 
             <main class="chat-main-area">
                 <% if (typeof activeChat !== 'undefined' && activeChat) { %>
-                    <div class="chat-header-bar">
-                        <div style="display:flex; align-items:center; gap:12px;">
+                    
+                    <div class="chat-header-shared" style="justify-content: space-between;">
+                        <div class="chat-user-info">
                             <img src="<%= activeChat.profile_image || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(activeChat.name) %>" 
-                                 style="width:36px; height:36px; border-radius:50%;">
-                            <span style="font-weight: 700; font-size: 1.1rem; color: #fff;"><%= activeChat.name %></span>
+                                 style="width:34px; height:34px; border-radius:50%;">
+                            <span class="chat-user-name"><%= activeChat.name %></span>
                         </div>
-                        <a href="/admin/clients/<%= activeChat.id %>" style="color: #666; font-size: 1.2rem;"><i class="far fa-user-circle"></i></a>
+                        <a href="/admin/clients/<%= activeChat.id %>" style="color: #666; font-size: 1.2rem; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#666'">
+                            <i class="far fa-user-circle"></i>
+                        </a>
                     </div>
 
                     <div class="messages-scroll-area" id="messagesList">
@@ -285,6 +320,7 @@
 </script>
 
 <script>
+    // Scroll para baixo ao carregar
     const msgList = document.getElementById('messagesList');
     if(msgList) setTimeout(() => msgList.scrollTop = msgList.scrollHeight, 100);
 
