@@ -19,81 +19,43 @@ router.get('/create', requireTrainer, async (req, res) => {
     const clientId = req.query.client_id;
     try {
         let selectedClient = null;
-        
-        // 1. Se houver ID na URL, busca os dados desse aluno especificamente
         if (clientId) {
             const clientRes = await pool.query("SELECT id, name FROM users WHERE id = $1", [clientId]);
             selectedClient = clientRes.rows[0];
         }
 
-        // 2. Busca TODOS os alunos para preencher o dropdown (Essencial)
         const allClientsRes = await pool.query("SELECT id, name FROM users WHERE role = 'client' ORDER BY name ASC");
-
-        // 3. Busca biblioteca de exercícios
         const exercisesRes = await pool.query("SELECT * FROM exercise_library ORDER BY name ASC");
         
         res.render('pages/create-workout', { 
             title: 'Novo Treino', 
             user: req.session.user, 
-            
-            // CORREÇÃO: Usamos 'currentClient' ou apenas enviamos o ID e a lista.
-            // Evitamos o nome 'client' que conflita com o EJS.
             selectedClient: selectedClient, 
-            clients: allClientsRes.rows, // Lista para o <select>
-            selectedClientId: clientId,  // ID pré-selecionado
-            
+            clients: allClientsRes.rows,
+            selectedClientId: clientId,
             exerciseLibrary: exercisesRes.rows, 
             csrfToken: res.locals.csrfToken,
             currentPage: 'workouts'
         });
     } catch (err) {
-        console.error("Erro ao carregar página de treino:", err);
-        res.status(500).render('pages/error', { message: 'Erro ao carregar página de treino.' });
+        console.error("Erro create workout:", err);
+        res.status(500).render('pages/error', { message: 'Erro ao carregar página.' });
     }
 });
 
-// POST: Salvar Treino
+// POST: Salvar Novo Treino
 router.post('/create', requireTrainer, async (req, res) => {
     const { client_id, title, day_of_week, description, exercises } = req.body; 
     
     try {
-        // Cria o Treino
         const result = await pool.query(
             "INSERT INTO workouts (user_id, trainer_id, title, day_of_week, description, created_at) VALUES ($1, $2, $3, $4, $5, NOW()) RETURNING id",
             [client_id, req.session.user.id, title, day_of_week, description]
         );
         const workoutId = result.rows[0].id;
 
-        // Processa os Exercícios
-        let exList = [];
-        if (typeof exercises === 'string') {
-             try { exList = JSON.parse(exercises); } catch(e) {}
-        } else if (Array.isArray(exercises)) {
-            exList = exercises;
-        }
+        await saveExercises(workoutId, exercises);
 
-        for (let ex of exList) {
-            let libraryId = ex.id || null; // ID vindo do front (pode ser null se for manual)
-            let exerciseName = ex.name;
-
-            // Se tem ID da biblioteca, garantimos o nome oficial
-            if (libraryId) {
-                const libRes = await pool.query("SELECT name FROM exercise_library WHERE id = $1", [libraryId]);
-                if (libRes.rows[0]) {
-                    exerciseName = libRes.rows[0].name;
-                }
-            } else {
-                // Se não tem ID, é um exercício manual ou personalizado
-                exerciseName = ex.name || 'Exercício Personalizado';
-            }
-
-             await pool.query(
-                 "INSERT INTO workout_exercises (workout_id, library_id, name, sets, reps, weight, notes, video_url, image_url, order_index) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)",
-                 [workoutId, libraryId, exerciseName, ex.sets, ex.reps, ex.weight, ex.notes, ex.video_url, ex.image_url, ex.order_index]
-             );
-        }
-
-        // Notificação por Email
         const clientRes = await pool.query("SELECT name, email FROM users WHERE id = $1", [client_id]);
         if (clientRes.rows[0]) {
             sendNewWorkoutEmail(clientRes.rows[0].email, title, clientRes.rows[0].name, req.headers.host).catch(console.error);
@@ -101,8 +63,79 @@ router.post('/create', requireTrainer, async (req, res) => {
 
         res.json({ success: true, clientId: client_id });
     } catch (err) {
-        console.error("Erro ao salvar treino:", err);
-        res.status(500).json({ success: false, message: 'Erro ao salvar treino.' });
+        console.error("Erro save workout:", err);
+        res.status(500).json({ success: false, message: 'Erro ao salvar.' });
+    }
+});
+
+// --- NOVAS ROTAS DE EDIÇÃO ---
+
+// GET: Página de Edição
+router.get('/edit/:id', requireTrainer, async (req, res) => {
+    try {
+        const workoutId = req.params.id;
+        
+        // 1. Busca o Treino
+        const workoutRes = await pool.query("SELECT * FROM workouts WHERE id = $1", [workoutId]);
+        const workout = workoutRes.rows[0];
+
+        if (!workout) return res.status(404).render('pages/error', { message: 'Treino não encontrado.' });
+
+        // 2. Busca o Aluno (Owner) - Para o botão voltar e contexto
+        // O campo no banco pode ser client_id ou user_id dependendo da sua versão, o código de create usa user_id como client_id
+        const userId = workout.client_id || workout.user_id;
+        const clientRes = await pool.query("SELECT id, name FROM users WHERE id = $1", [userId]);
+        const selectedClient = clientRes.rows[0];
+
+        // 3. Busca os Exercícios Existentes
+        const currentExercisesRes = await pool.query("SELECT * FROM workout_exercises WHERE workout_id = $1 ORDER BY order_index ASC", [workoutId]);
+
+        // 4. Busca Biblioteca e Lista de Alunos (para manter padrão, embora não mude o aluno na edição geralmente)
+        const exercisesRes = await pool.query("SELECT * FROM exercise_library ORDER BY name ASC");
+        
+        res.render('pages/edit-workout', { 
+            title: 'Editar Treino', 
+            user: req.session.user,
+            workout: workout,
+            currentExercises: currentExercisesRes.rows,
+            selectedClient: selectedClient, // Importante: nome seguro para EJS
+            selectedClientId: userId,
+            exerciseLibrary: exercisesRes.rows,
+            csrfToken: res.locals.csrfToken,
+            currentPage: 'workouts'
+        });
+    } catch (err) {
+        console.error("Erro edit workout:", err);
+        res.status(500).render('pages/error', { message: 'Erro ao carregar edição.' });
+    }
+});
+
+// POST: Atualizar Treino
+router.post('/edit/:id', requireTrainer, async (req, res) => {
+    const workoutId = req.params.id;
+    const { title, day_of_week, description, exercises } = req.body;
+
+    try {
+        // 1. Atualiza dados básicos do treino
+        await pool.query(
+            "UPDATE workouts SET title = $1, day_of_week = $2, description = $3 WHERE id = $4",
+            [title, day_of_week, description, workoutId]
+        );
+
+        // 2. Remove exercícios antigos (estratégia mais segura para evitar conflitos de ordem)
+        await pool.query("DELETE FROM workout_exercises WHERE workout_id = $1", [workoutId]);
+
+        // 3. Insere os novos exercícios
+        await saveExercises(workoutId, exercises);
+
+        // Recupera ID do aluno para redirecionamento
+        const workoutRes = await pool.query("SELECT client_id, user_id FROM workouts WHERE id = $1", [workoutId]);
+        const clientId = workoutRes.rows[0].client_id || workoutRes.rows[0].user_id;
+
+        res.json({ success: true, clientId: clientId });
+    } catch (err) {
+        console.error("Erro update workout:", err);
+        res.status(500).json({ success: false, message: 'Erro ao atualizar treino.' });
     }
 });
 
@@ -112,5 +145,38 @@ router.post('/delete/:id', requireTrainer, async (req, res) => {
         res.redirect(req.get('referer'));
     } catch (err) { res.status(500).send("Erro ao excluir"); }
 });
+
+// Função auxiliar para salvar exercícios (DRY)
+async function saveExercises(workoutId, exercises) {
+    let exList = [];
+    if (typeof exercises === 'string') {
+            try { exList = JSON.parse(exercises); } catch(e) {}
+    } else if (Array.isArray(exercises)) {
+        exList = exercises;
+    }
+
+    for (let ex of exList) {
+        let libraryId = ex.id || null; 
+        // Se libraryId for string vazia, converte para null
+        if (libraryId === '') libraryId = null;
+
+        let exerciseName = ex.name;
+
+        // Se tem ID da biblioteca, garantimos o nome oficial
+        if (libraryId) {
+            const libRes = await pool.query("SELECT name FROM exercise_library WHERE id = $1", [libraryId]);
+            if (libRes.rows[0]) {
+                exerciseName = libRes.rows[0].name;
+            }
+        } else {
+            exerciseName = ex.name || 'Exercício Personalizado';
+        }
+
+        await pool.query(
+            "INSERT INTO workout_exercises (workout_id, library_id, name, sets, reps, weight, notes, video_url, image_url, order_index) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)",
+            [workoutId, libraryId, exerciseName, ex.sets, ex.reps, ex.weight, ex.notes, ex.video_url, ex.image_url, ex.order_index]
+        );
+    }
+}
 
 module.exports = router;

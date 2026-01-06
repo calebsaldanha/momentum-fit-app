@@ -7,21 +7,28 @@
         <div class="section">
             <div class="section-header">
                 <h1>Editar Treino</h1>
-                <a href="/admin/clients/<%= workout.client_id %>" class="btn btn-outline btn-sm">
+                <a href="/admin/clients<%= typeof selectedClientId !== 'undefined' && selectedClientId ? '/' + selectedClientId : '' %>" class="btn btn-outline btn-sm">
                     <i class="fas fa-arrow-left"></i> Voltar
                 </a>
             </div>
 
             <form id="editWorkoutForm" class="dashboard-form" style="max-width: 100%;">
                 
-                <div class="form-group">
-                    <label for="title">Título do Treino</label>
-                    <input type="text" id="title" name="title" value="<%= workout.title %>" placeholder="Ex: Treino A - Superiores" required>
+                <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 20px; margin-bottom: 20px;">
+                    <div class="form-group">
+                        <label>Aluno</label>
+                        <input type="text" value="<%= typeof selectedClient !== 'undefined' ? selectedClient.name : 'Aluno' %>" disabled 
+                               style="width: 100%; padding: 10px; border-radius: 6px; background: #333; color: #aaa; border: 1px solid #444;">
+                    </div>
+                    <div class="form-group">
+                        <label for="title">Título do Treino</label>
+                        <input type="text" id="title" name="title" value="<%= workout.title %>" required>
+                    </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="description">Descrição / Foco</label>
-                    <textarea id="description" name="description" rows="2" placeholder="Objetivo deste treino..."><%= workout.description %></textarea>
+                   <label for="description">Descrição / Foco</label>
+                    <textarea id="description" name="description" rows="2"><%= workout.description %></textarea>
                 </div>
 
                 <div style="margin-top: 30px; border-top: 1px solid var(--c-border); padding-top: 20px;">
@@ -42,7 +49,7 @@
 
                 <div class="form-actions" style="margin-top: 30px;">
                     <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">
-                        <i class="fas fa-save"></i> Salvar Alterações
+                        <i class="fas fa-save"></i> Atualizar Treino
                     </button>
                 </div>
             </form>
@@ -52,38 +59,26 @@
 
 <div id="libraryModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; padding: 20px; overflow-y: auto;">
     <div style="max-width: 1000px; margin: 0 auto; background: #111; border-radius: 12px; display: flex; flex-direction: column; height: 90vh; border: 1px solid #333;">
-        
         <div style="padding: 20px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; background: #1a1a1a; border-radius: 12px 12px 0 0;">
             <div>
                 <h2 style="margin: 0; color: white;">Biblioteca de Exercícios</h2>
-                <p style="margin: 5px 0 0; color: #888; font-size: 0.9rem;">Selecione os exercícios para adicionar.</p>
             </div>
             <button onclick="closeLibraryModal()" style="background: none; border: none; color: #fff; font-size: 2rem; cursor: pointer;">&times;</button>
         </div>
-        
         <div style="padding: 20px; background: #111;">
-            <div style="position: relative;">
-                <i class="fas fa-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #666;"></i>
-                <input type="text" id="searchLibrary" placeholder="Buscar..." style="width: 100%; padding: 15px 15px 15px 45px; background: #000; border: 1px solid #444; color: white; border-radius: 8px; font-size: 1rem;">
-            </div>
+             <input type="text" id="searchLibrary" placeholder="Buscar..." style="width: 100%; padding: 15px; background: #000; border: 1px solid #444; color: white; border-radius: 8px;">
         </div>
-        
-        <div id="libraryGrid" style="flex: 1; overflow-y: auto; padding: 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; align-content: start;">
-        </div>
-
+        <div id="libraryGrid" style="flex: 1; overflow-y: auto; padding: 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; align-content: start;"></div>
         <div style="padding: 20px; border-top: 1px solid #333; background: #1a1a1a; border-radius: 0 0 12px 12px; display: flex; justify-content: space-between; align-items: center;">
-            <div style="color: #ccc;">
-                <span id="selectedCount" style="color: var(--c-accent-primary); font-weight: bold; font-size: 1.2rem;">0</span> selecionados
-            </div>
-            <button onclick="addSelectedExercises()" class="btn btn-primary" style="padding: 10px 30px;">
-                Adicionar ao Treino <i class="fas fa-check-circle" style="margin-left: 5px;"></i>
-            </button>
+            <div style="color: #ccc;"><span id="selectedCount" style="color: var(--c-accent-primary); font-weight: bold;">0</span> selecionados</div>
+            <button onclick="addSelectedExercises()" class="btn btn-primary">Adicionar ao Treino</button>
         </div>
     </div>
 </div>
 
 <template id="exerciseTemplate">
     <div class="exercise-card" style="background: var(--c-bg-card); border: 1px solid var(--c-border); padding: 20px; border-radius: 8px; margin-bottom: 15px; position: relative; display: grid; grid-template-columns: 100px 1fr; gap: 20px; align-items: start;">
+        <input type="hidden" class="ex-id"> 
         <div class="ex-image-preview" style="width: 100px; height: 100px; background: #000; border-radius: 6px; overflow: hidden; display: flex; align-items: center; justify-content: center; border: 1px solid #333;">
             <i class="fas fa-dumbbell" style="color: #444; font-size: 1.5rem;"></i>
         </div>
@@ -92,9 +87,7 @@
         <div style="width: 100%;">
             <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
                 <span class="exercise-number" style="background: var(--c-accent-primary); color: #000; padding: 2px 8px; border-radius: 4px; font-weight: bold;">#1</span>
-                <button type="button" class="remove-exercise" style="background: none; border: none; color: var(--c-error); cursor: pointer;">
-                    <i class="fas fa-trash"></i>
-                </button>
+                <button type="button" class="remove-exercise" style="background: none; border: none; color: var(--c-error); cursor: pointer;"><i class="fas fa-trash"></i></button>
             </div>
             
             <div class="form-group">
@@ -104,7 +97,7 @@
             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 15px;">
                 <input type="text" class="ex-sets" required placeholder="Séries" style="background:#111; border:1px solid #333; color:white; padding:8px; border-radius:4px;">
                 <input type="text" class="ex-reps" required placeholder="Reps" style="background:#111; border:1px solid #333; color:white; padding:8px; border-radius:4px;">
-                <input type="text" class="ex-rest" placeholder="Descanso" style="background:#111; border:1px solid #333; color:white; padding:8px; border-radius:4px;">
+                <input type="text" class="ex-weight" placeholder="Carga (kg)" style="background:#111; border:1px solid #333; color:white; padding:8px; border-radius:4px;">
             </div>
             
             <input type="text" class="ex-notes" placeholder="Observações..." style="margin-top: 10px; width: 100%; background:#111; border:1px solid #333; color:white; padding:8px; border-radius:4px;">
@@ -126,14 +119,14 @@
 </style>
 
 <script>
-    // Dados injetados pelo EJS
-    let rawLibrary = <%- JSON.stringify(typeof exerciseLibrary !== 'undefined' ? exerciseLibrary : []) %>;
+    // 1. Dados Iniciais
+    const rawLibrary = <%- JSON.stringify(typeof exerciseLibrary !== 'undefined' ? exerciseLibrary : []) %>;
     const libraryData = Array.isArray(rawLibrary) ? rawLibrary : [];
     
-    const existingExercises = <%- JSON.stringify(typeof exercises !== 'undefined' ? exercises : []) %>;
-    const workoutId = '<%= workout.id %>';
+    // Dados existentes do treino (para popular a tela)
+    const existingExercises = <%- JSON.stringify(typeof currentExercises !== 'undefined' ? currentExercises : []) %>;
 
-    // Elementos DOM
+    // 2. Elementos DOM
     const exercisesList = document.getElementById('exercisesList');
     const template = document.getElementById('exerciseTemplate');
     const libraryModal = document.getElementById('libraryModal');
@@ -142,20 +135,22 @@
     const selectedCountSpan = document.getElementById('selectedCount');
     let selectedExercises = new Set(); 
 
-    // Função para criar card de exercício
+    // 3. Função para adicionar card (adaptada para suportar dados do banco)
     function addExerciseCard(data = null) {
         const clone = template.content.cloneNode(true);
         const index = exercisesList.children.length + 1;
         
         clone.querySelector('.exercise-number').textContent = '#' + index;
         if(data) {
+            // Se data.library_id existir, usamos ele, senão data.id (se vier do modal)
+            clone.querySelector('.ex-id').value = data.library_id || data.id || ''; 
+            
             clone.querySelector('.ex-name').value = data.name || '';
             clone.querySelector('.ex-sets').value = data.sets || '';
             clone.querySelector('.ex-reps').value = data.reps || '';
-            clone.querySelector('.ex-video').value = data.video_url || '';
-            
-            // Lógica para preencher notas/descrição corretamente
+            clone.querySelector('.ex-weight').value = data.weight || '';
             clone.querySelector('.ex-notes').value = data.notes || data.description || '';
+            clone.querySelector('.ex-video').value = data.video_url || '';
             
             if(data.image_url) {
                 clone.querySelector('.ex-image-url').value = data.image_url;
@@ -177,29 +172,23 @@
         });
     }
 
-    // Inicialização: carrega exercícios existentes
-    document.addEventListener('DOMContentLoaded', () => {
-        if(existingExercises && existingExercises.length > 0) {
-            existingExercises.forEach(ex => addExerciseCard(ex));
-        }
-    });
+    // 4. Inicialização: Popula exercícios existentes
+    if (existingExercises && existingExercises.length > 0) {
+        existingExercises.forEach(ex => addExerciseCard(ex));
+    }
 
-    // Botão Adicionar Manual
     document.getElementById('addExerciseBtn').addEventListener('click', () => addExerciseCard());
 
-    // --- Lógica do Modal ---
+    // 5. Lógica do Modal
     window.openLibraryModal = function() {
         selectedExercises.clear();
         updateSelectedCount();
         renderLibrary(libraryData);
         libraryModal.style.display = 'block';
-        searchInput.value = '';
         searchInput.focus();
     }
 
-    window.closeLibraryModal = function() {
-        libraryModal.style.display = 'none';
-    }
+    window.closeLibraryModal = function() { libraryModal.style.display = 'none'; }
 
     function renderLibrary(items) {
         libraryGrid.innerHTML = '';
@@ -207,13 +196,10 @@
             libraryGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #666; padding: 40px;">Nenhum exercício encontrado.</div>';
             return;
         }
-
         items.forEach(item => {
             const div = document.createElement('div');
-            // Template string JS padrão
             div.className = `lib-item ${selectedExercises.has(item.id) ? 'selected' : ''}`;
             div.onclick = () => toggleSelection(div, item.id);
-
             const imgHtml = item.image_url 
                 ? `<img src="${item.image_url}" class="lib-img" loading="lazy">`
                 : `<div class="lib-img" style="display: flex; align-items: center; justify-content: center;"><i class="fas fa-dumbbell" style="font-size: 2rem; color: #444;"></i></div>`;
@@ -233,7 +219,6 @@
     function toggleSelection(el, id) {
         const idStr = String(id);
         const exists = Array.from(selectedExercises).some(x => String(x) === idStr);
-
         if (exists) {
             selectedExercises.forEach(x => { if(String(x) === idStr) selectedExercises.delete(x); });
             el.classList.remove('selected');
@@ -244,9 +229,7 @@
         updateSelectedCount();
     }
 
-    function updateSelectedCount() {
-        selectedCountSpan.textContent = selectedExercises.size;
-    }
+    function updateSelectedCount() { selectedCountSpan.textContent = selectedExercises.size; }
 
     searchInput.addEventListener('input', (e) => {
         const term = e.target.value.toLowerCase();
@@ -259,24 +242,15 @@
 
     window.addSelectedExercises = function() {
         const selectedIds = Array.from(selectedExercises);
-        if(selectedIds.length === 0) {
-            alert("Selecione pelo menos um exercício.");
-            return;
-        }
+        if(selectedIds.length === 0) { alert("Selecione pelo menos um exercício."); return; }
         selectedIds.forEach(id => {
             const exerciseData = libraryData.find(x => x.id == id);
-            if(exerciseData) {
-                addExerciseCard(exerciseData);
-            }
+            if(exerciseData) addExerciseCard(exerciseData);
         });
         closeLibraryModal();
-        // Scroll suave para o final
-        setTimeout(() => {
-            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-        }, 100);
     }
 
-    // --- Salvar (Submit) ---
+    // 6. Submissão do Formulário
     document.getElementById('editWorkoutForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const btn = e.target.querySelector('button[type="submit"]');
@@ -286,11 +260,12 @@
 
         try {
             const exercises = Array.from(document.querySelectorAll('.exercise-card')).map((card, index) => ({
+                id: card.querySelector('.ex-id').value || null, // ID da biblioteca
                 name: card.querySelector('.ex-name').value,
                 sets: card.querySelector('.ex-sets').value,
                 reps: card.querySelector('.ex-reps').value,
-                // Concatena Descanso às notas se houver
-                notes: card.querySelector('.ex-notes').value + (card.querySelector('.ex-rest').value ? ` | Descanso: ${card.querySelector('.ex-rest').value}` : ''),
+                weight: card.querySelector('.ex-weight').value,
+                notes: card.querySelector('.ex-notes').value,
                 video_url: card.querySelector('.ex-video').value,
                 image_url: card.querySelector('.ex-image-url').value,
                 order_index: index
@@ -298,7 +273,7 @@
 
             if (exercises.length === 0) throw new Error('Adicione exercícios.');
 
-            const res = await fetch('/workouts/edit/' + workoutId, {
+            const res = await fetch(window.location.pathname, { // Usa o path atual (/edit/:id)
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'CSRF-Token': '<%= csrfToken %>' },
                 body: JSON.stringify({
