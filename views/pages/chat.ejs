@@ -3,54 +3,56 @@
 <style>
     /* --- Layout Chat - Otimização de Espaço --- */
 
-    /* Garante que o body não trave, mas que o app tente ocupar 100% da viewport */
     body, html {
         height: 100%;
-        overflow-x: hidden; /* Evita rolagem lateral indesejada */
+        overflow-x: hidden;
     }
 
-    /* Container Principal: Organiza Sidebar (Menu) e Conteúdo lado a lado */
+    /* Container Principal */
     .dashboard-container {
         display: flex;
         flex-direction: row;
-        height: 100vh; /* Ocupa exatamente a altura da tela */
-        padding-top: 60px; /* Compensa o Header Fixo (ajuste se seu header for maior) */
+        height: 100vh;
+        padding-top: 60px; /* Header Fixo */
         box-sizing: border-box;
-        overflow: hidden; /* O scroll será gerenciado internamente pelos painéis */
+        overflow: hidden;
     }
 
-    /* --- Wrapper da Página de Chat (Área Direita) --- */
+    /* --- Wrapper da Página de Chat --- */
     .chat-page-wrapper {
-        flex: 1; /* Cresce para ocupar toda a largura disponível */
+        flex: 1;
         display: flex;
-        flex-direction: column; /* Coloca titulo/aviso em cima e chat em baixo */
+        flex-direction: column;
         height: 100%;
         background: #000;
         position: relative;
-        min-width: 0; /* Correção para flexbox não estourar */
+        min-width: 0;
     }
 
-    /* O Chat Box em si (Sidebar Contatos + Mensagens) */
+    /* O Chat Box em si */
     .chat-box-container {
-        flex: 1; /* Ocupa todo o espaço vertical restante */
+        flex: 1;
         display: flex;
-        border-top: 1px solid #333;
-        overflow: hidden; /* Impede que o container principal role, forçando scroll interno */
+        /* Borda superior removida para limpar o visual, já que o header define a linha */
+        /* border-top: 1px solid #333; */ 
+        overflow: hidden;
     }
 
-    /* --- Sidebar de Contatos (Esquerda do Chat) --- */
+    /* --- Sidebar de Contatos (Esquerda) --- */
     .chat-contacts-sidebar {
         width: 280px;
         background: #111;
         border-right: 1px solid #333;
         display: flex;
         flex-direction: column;
-        flex-shrink: 0; /* Não deixa espremer */
+        flex-shrink: 0;
         height: 100%;
     }
 
+    /* CORREÇÃO DE ALINHAMENTO: Cabeçalho da Sidebar */
     .contacts-header {
-        padding: 15px;
+        height: 60px; /* Mesma altura fixa do chat header */
+        padding: 0 20px; /* Mesmo padding lateral */
         background: #151515;
         border-bottom: 1px solid #333;
         color: #888;
@@ -59,11 +61,15 @@
         letter-spacing: 1px;
         text-transform: uppercase;
         flex-shrink: 0;
+        
+        /* Centralização Vertical igual ao lado direito */
+        display: flex; 
+        align-items: center; 
     }
 
     .contacts-list {
         flex: 1;
-        overflow-y: auto; /* Scroll independente para a lista de contatos */
+        overflow-y: auto;
         list-style: none;
         padding: 0;
         margin: 0;
@@ -82,42 +88,36 @@
     .contact-item:hover { background: #1a1a1a; }
     .contact-item.active { background: #222; border-left: 3px solid var(--c-accent-primary); }
 
-    .contact-avatar {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        object-fit: cover;
-        background: #333;
-        flex-shrink: 0;
-    }
+    .contact-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #333; flex-shrink: 0; }
 
-    /* --- Área Principal de Mensagens (Direita do Chat) --- */
+    /* --- Área Principal de Mensagens (Direita) --- */
     .chat-main-area {
         flex: 1;
         display: flex;
         flex-direction: column;
-        background: #000;
+        background: #050505;
         position: relative;
         min-width: 0;
         height: 100%;
     }
 
+    /* CORREÇÃO DE ALINHAMENTO: Cabeçalho do Chat */
     .chat-header-bar {
-        height: 60px;
+        height: 60px; /* Altura fixa idêntica à esquerda */
         padding: 0 20px;
         background: #111;
         border-bottom: 1px solid #333;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        flex-shrink: 0; /* Altura fixa */
+        flex-shrink: 0;
     }
 
     /* Área de rolagem das mensagens */
     .messages-scroll-area {
-        flex: 1; /* Ocupa todo o espaço entre o header e o input */
+        flex: 1;
         padding: 20px;
-        overflow-y: auto; /* AQUI é o scroll das mensagens */
+        overflow-y: auto;
         display: flex;
         flex-direction: column;
         gap: 15px;
@@ -135,21 +135,10 @@
         word-wrap: break-word;
     }
 
-    .msg-bubble.sent {
-        align-self: flex-end;
-        background: var(--c-accent-primary);
-        color: black;
-        border-bottom-right-radius: 2px;
-    }
+    .msg-bubble.sent { align-self: flex-end; background: var(--c-accent-primary); color: black; border-bottom-right-radius: 2px; }
+    .msg-bubble.received { align-self: flex-start; background: #222; border-bottom-left-radius: 2px; border: 1px solid #333; }
 
-    .msg-bubble.received {
-        align-self: flex-start;
-        background: #222;
-        border-bottom-left-radius: 2px;
-        border: 1px solid #333;
-    }
-
-    /* Área de Input (Rodapé) */
+    /* Área de Input */
     .input-area-wrapper {
         padding: 15px 20px;
         background: #111;
@@ -157,7 +146,7 @@
         display: flex;
         align-items: center;
         gap: 15px;
-        flex-shrink: 0; /* Altura fixa baseada no conteúdo */
+        flex-shrink: 0;
     }
 
     .main-input {
@@ -174,40 +163,16 @@
 
     /* --- Mobile --- */
     @media (max-width: 768px) {
-        .dashboard-container {
-            display: block; /* Remove o flex row no mobile */
-            padding-top: 60px;
-            height: auto; /* Deixa altura livre no mobile */
-            min-height: 100vh;
-            overflow: visible; /* Permite scroll da página no mobile */
-        }
-        
-        .chat-page-wrapper {
-            height: calc(100vh - 60px); /* Tenta preencher a tela no mobile */
-        }
-
-        .chat-box-container {
-            flex-direction: column; /* Empilha contatos e chat */
-        }
-
-        .chat-contacts-sidebar {
-            width: 100%;
-            height: 70px; /* Lista horizontal pequena */
-            flex-direction: row;
-            overflow-x: auto;
-            border-right: none;
-            border-bottom: 1px solid #333;
-        }
-        
-        .contacts-header { display: none; }
+        .dashboard-container { display: block; padding-top: 60px; height: auto; min-height: 100vh; overflow: visible; }
+        .chat-page-wrapper { height: calc(100vh - 60px); }
+        .chat-box-container { flex-direction: column; }
+        .chat-contacts-sidebar { width: 100%; height: 70px; flex-direction: row; overflow-x: auto; border-right: none; border-bottom: 1px solid #333; }
+        .contacts-header { display: none; } /* Esconde header contatos no mobile */
         .contacts-list { display: flex; flex-direction: row; }
         .contact-item { border-bottom: none; border-right: 1px solid #333; min-width: 70px; justify-content: center; padding: 10px; }
-        .contact-info { display: none; } /* Esconde nomes na lista horizontal */
+        .contact-info { display: none; }
         .contact-avatar { margin: 0; }
-
-        .chat-main-area {
-            height: calc(100% - 70px); /* Resto da altura */
-        }
+        .chat-main-area { height: calc(100% - 70px); }
     }
 </style>
 
@@ -217,14 +182,14 @@
     <div class="chat-page-wrapper">
         <div id="uploadOverlay" style="display:none; position:absolute; inset:0; background:rgba(0,0,0,0.85); z-index:999; align-items:center; justify-content:center; flex-direction:column; color:white;">
             <i class="fas fa-spinner fa-spin" style="font-size:2.5rem; margin-bottom:15px; color:var(--c-accent-primary);"></i>
-            <p id="uploadStatusText">Processando envio...</p>
+            <p id="uploadStatusText">Enviando...</p>
         </div>
 
         <div class="chat-box-container">
             
             <aside class="chat-contacts-sidebar">
                 <div class="contacts-header">
-                    <i class="far fa-address-book"></i> Contatos
+                    <i class="far fa-address-book" style="margin-right: 8px;"></i> Contatos
                 </div>
                 <ul class="contacts-list">
                     <% if (typeof chatUsers !== 'undefined' && chatUsers.length > 0) { %>
@@ -239,9 +204,7 @@
                             </li>
                         <% }); %>
                     <% } else { %>
-                        <div style="padding:20px; text-align:center; color:#555; font-size:0.9rem;">
-                            Sem contatos.
-                        </div>
+                        <div style="padding:20px; text-align:center; color:#555; font-size:0.9rem;">Sem contatos.</div>
                     <% } %>
                 </ul>
             </aside>
@@ -322,7 +285,6 @@
 </script>
 
 <script>
-    // Scroll para baixo ao carregar
     const msgList = document.getElementById('messagesList');
     if(msgList) setTimeout(() => msgList.scrollTop = msgList.scrollHeight, 100);
 
@@ -344,22 +306,18 @@
         const statusText = document.getElementById('uploadStatusText');
         const overlay = document.getElementById('uploadOverlay');
 
-        // Validação: não envia se vazio
         if(!file && !form.content.value.trim()) return;
 
-        // Se for só texto, envia direto (Formulário Normal)
         if(!file) {
             form.enctype = "application/x-www-form-urlencoded";
-            fileInput.removeAttribute('name'); // Remove input file para não bugar o parser
+            fileInput.removeAttribute('name');
             form.submit();
-            form.content.value = ''; // Limpa input visualmente
+            form.content.value = '';
             return;
         }
 
-        // Se tem arquivo, mostra overlay
         if(overlay) overlay.style.display = 'flex';
         
-        // Tenta Upload Vercel Blob (Client Side)
         if(window.vercelUpload) {
             try {
                 if(statusText) statusText.innerText = "Enviando arquivo...";
@@ -373,14 +331,13 @@
                 form.enctype = "application/x-www-form-urlencoded";
                 form.submit();
                 return;
-            } catch(e) { console.warn("Vercel Blob falhou, tentando fallback", e); }
+            } catch(e) { console.warn("Erro Vercel", e); }
         }
 
-        // Fallback: Upload tradicional via servidor
         if(statusText) statusText.innerText = "Enviando via Servidor...";
         form.enctype = "multipart/form-data";
-        fileInput.setAttribute('name', 'file'); // Garante que o nome seja 'file'
-        form.removeEventListener('submit', handleChatSubmit); // Remove este listener para evitar loop
+        fileInput.setAttribute('name', 'file');
+        form.removeEventListener('submit', handleChatSubmit);
         form.submit();
     }
 </script>
