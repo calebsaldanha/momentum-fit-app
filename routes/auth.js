@@ -89,9 +89,20 @@ router.post('/register', async (req, res) => {
 });
 
 // --- LOGOUT ---
+// Adicionado suporte a POST para funcionar com os formulários de logout (recomendado para segurança/CSRF)
+router.post('/logout', (req, res) => {
+    req.session.destroy((err) => {
+        if (err) console.error('Erro ao destruir sessão:', err);
+        res.redirect('/auth/login');
+    });
+});
+
+// Mantemos o GET como fallback, mas redirecionando para login também
 router.get('/logout', (req, res) => {
-    req.session.destroy();
-    res.redirect('/');
+    req.session.destroy((err) => {
+        if (err) console.error('Erro ao destruir sessão:', err);
+        res.redirect('/auth/login');
+    });
 });
 
 // --- RECUPERAÇÃO DE SENHA ---
