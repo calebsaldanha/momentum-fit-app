@@ -19,19 +19,19 @@ router.get('/create', requireTrainer, async (req, res) => {
     const clientId = req.query.client_id;
     try {
         const clientRes = await pool.query("SELECT id, name FROM users WHERE id = $1", [clientId]);
-        // Correção: Busca TODOS os exercícios para preencher o dropdown
-        const exercisesRes = await pool.query("SELECT * FROM exercises ORDER BY name ASC");
+        // CORREÇÃO: Nome da tabela alterado de 'exercises' para 'exercise_library'
+        const exercisesRes = await pool.query("SELECT * FROM exercise_library ORDER BY name ASC");
         
         res.render('pages/create-workout', { 
             title: 'Novo Treino', 
             user: req.session.user, 
             client: clientRes.rows[0],
-            exerciseLibrary: exercisesRes.rows, // Envia para o EJS
+            exerciseLibrary: exercisesRes.rows, 
             csrfToken: res.locals.csrfToken,
             currentPage: 'workouts'
         });
     } catch (err) {
-        console.error(err);
+        console.error("Erro ao carregar página de treino:", err);
         res.status(500).render('pages/error', { message: 'Erro ao carregar página de treino.' });
     }
 });
@@ -55,9 +55,14 @@ router.post('/create', requireTrainer, async (req, res) => {
         }
 
         for (let ex of exList) {
+            // CORREÇÃO: Busca o nome do exercício na biblioteca para preencher o campo 'name' obrigatório
+            // e usa 'library_id' em vez de 'exercise_id'
+            const libRes = await pool.query("SELECT name FROM exercise_library WHERE id = $1", [ex.id]);
+            const exerciseName = libRes.rows[0] ? libRes.rows[0].name : 'Exercício Personalizado';
+
              await pool.query(
-                 "INSERT INTO workout_exercises (workout_id, exercise_id, sets, reps, weight, notes) VALUES ($1, $2, $3, $4, $5, $6)",
-                 [workoutId, ex.id, ex.sets, ex.reps, ex.weight, ex.notes]
+                 "INSERT INTO workout_exercises (workout_id, library_id, name, sets, reps, weight, notes) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+                 [workoutId, ex.id, exerciseName, ex.sets, ex.reps, ex.weight, ex.notes]
              );
         }
 
@@ -69,7 +74,7 @@ router.post('/create', requireTrainer, async (req, res) => {
 
         res.json({ success: true, clientId: client_id });
     } catch (err) {
-        console.error(err);
+        console.error("Erro ao salvar treino:", err);
         res.status(500).json({ success: false, message: 'Erro ao salvar treino.' });
     }
 });
