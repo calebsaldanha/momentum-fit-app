@@ -1,77 +1,97 @@
 const nodemailer = require('nodemailer');
-const templates = require('./emailTemplates');
+const { 
+    welcomeClientTemplate, 
+    newClientNotificationTemplate, 
+    newWorkoutTemplate, 
+    newMessageTemplate, 
+    resetPasswordTemplate 
+} = require('./emailTemplates');
 require('dotenv').config();
 
+// Configuração do Transporter (Gmail, Outlook, etc ou Ethereal para teste)
 const transporter = nodemailer.createTransport({
-    service: process.env.EMAIL_SERVICE || 'gmail',
+    service: 'gmail', // Ou outro serviço SMTP definido no .env
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
     }
 });
 
-const sendEmail = async (to, subject, htmlContent) => {
-    if (!to) return false;
-    
-    // Simulação se não houver credenciais (para não travar em dev)
+// Wrapper genérico de envio
+async function sendEmail(to, subject, htmlContent) {
     if (!process.env.EMAIL_USER) {
-        console.log(`\n��� [SIMULAÇÃO DE EMAIL]`);
-        console.log(`Para: ${to}`);
-        console.log(`Assunto: ${subject}`);
-        return true;
+        console.log('⚠️  Email não configurado no .env (EMAIL_USER). Simulação de envio:', subject);
+        return;
     }
-
     try {
         await transporter.sendMail({
-            from: '"Momentum Fit" <no-reply@momentumfit.com>',
+            from: `"Momentum Fit" <${process.env.EMAIL_USER}>`,
             to,
             subject,
             html: htmlContent
         });
-        console.log(`✅ Email enviado para ${to}`);
-        return true;
+        console.log(`��� Email enviado para ${to}: ${subject}`);
     } catch (error) {
-        console.error("❌ Erro ao enviar email:", error);
-        return false;
+        console.error('❌ Erro ao enviar email:', error);
     }
-};
+}
+
+// 1. Email de Boas-vindas para o Cliente
+async function sendWelcomeEmail(email, name, host) {
+    const profileLink = `https://${host}/client/profile`; // Link direto para o perfil/questionário
+    const html = welcomeClientTemplate(name, profileLink);
+    await sendEmail(email, 'Bem-vindo ao Momentum Fit! ���', html);
+}
+
+// 2. Notificação para o Treinador/Admin
+async function sendNewClientNotification(clientName, clientEmail) {
+    // Tenta enviar para o email admin definido no .env ou para o próprio email de envio como fallback
+    const adminEmail = process.env.ADMIN_EMAIL || process.env.EMAIL_USER;
+    if(adminEmail) {
+        const html = newClientNotificationTemplate(clientName, clientEmail);
+        await sendEmail(adminEmail, '�� Novo Aluno Cadastrado', html);
+    }
+}
+
+// 3. Notificação de Novo Treino
+async function sendNewWorkoutEmail(email, workoutTitle, userName, host) {
+    const link = `https://${host}/client/workouts`;
+    const html = newWorkoutTemplate(userName, workoutTitle, link);
+    await sendEmail(email, 'Novo Treino Liberado! ���', html);
+}
+
+// 4. Notificação de Mensagem
+async function sendNewMessageEmail(email, senderName, contentPreview, host) {
+    const link = `https://${host}/chat`;
+    const html = newMessageTemplate(senderName, contentPreview, link);
+    await sendEmail(email, `Nova mensagem de ${senderName}`, html);
+}
+
+// 5. Recuperação de Senha (Admin)
+async function sendAdminPasswordResetEmail(email, name, newPassword) {
+    const html = `<p>Olá ${name}, sua senha foi alterada pelo administrador.</p><p>Nova senha: <strong>${newPassword}</strong></p>`;
+    await sendEmail(email, 'Sua senha foi alterada', html);
+}
+
+// 6. Token de Recuperação
+async function sendPasswordResetEmail(email, token, host) {
+    const link = `https://${host}/auth/reset-password/${token}`;
+    const html = resetPasswordTemplate(link);
+    await sendEmail(email, 'Redefinição de Senha', html);
+}
+
+// Email simples para novo usuário criado pelo admin
+async function sendNewUserEmail(adminEmail, name, email, role) {
+    const html = `<p>O usuário ${name} (${email}) foi criado como ${role}.</p>`;
+    await sendEmail(adminEmail, 'Novo Usuário Criado', html);
+}
 
 module.exports = {
-    sendPasswordResetEmail: async (email, token, host) => {
-        const link = `http://${host}/auth/reset/${token}`;
-        return sendEmail(email, 'Redefinição de Senha', templates.resetPassword(link));
-    },
-
-    sendPasswordChangedEmail: async (email, name) => {
-        return sendEmail(email, 'Sua senha foi alterada', templates.passwordChanged(name));
-    },
-
-    sendAdminPasswordResetEmail: async (email, name, newPassword) => {
-        return sendEmail(email, 'Nova Senha de Acesso', templates.adminPasswordReset(name, newPassword));
-    },
-
-    sendNewMessageEmail: async (email, senderName, messageText, host) => {
-        const link = `http://${host}/chat`;
-        return sendEmail(email, 'Você tem uma nova mensagem', templates.newMessage(senderName, messageText.substring(0, 50), link));
-    },
-
-    sendArticlePublishedEmail: async (emails, title, authorName, host) => {
-        const link = `http://${host}/articles`;
-        // Envia como lista de BCC ou individualmente (aqui simplificado para string separada por virgula)
-        return sendEmail(emails, 'Novo Artigo Publicado!', templates.articlePublished(title, authorName, link));
-    },
-
-    sendNewArticlePendingEmail: async (adminEmail, title, authorName, host) => {
-        const link = `http://${host}/articles/manage`;
-        return sendEmail(adminEmail, 'Novo Artigo Pendente', templates.articlePending(title, authorName, link));
-    },
-
-    sendNewWorkoutEmail: async (email, workoutTitle, clientName, host) => {
-        const link = `http://${host}/client/workouts`;
-        return sendEmail(email, 'Novo Treino Adicionado', templates.newWorkout(workoutTitle, clientName, link));
-    },
-
-    sendNewUserEmail: async (adminEmail, name, email, role) => {
-        return sendEmail(adminEmail, 'Novo Registro no Sistema', templates.newUser(name, email, role));
-    }
+    sendWelcomeEmail,
+    sendNewClientNotification,
+    sendNewWorkoutEmail,
+    sendNewMessageEmail,
+    sendAdminPasswordResetEmail,
+    sendPasswordResetEmail,
+    sendNewUserEmail
 };
