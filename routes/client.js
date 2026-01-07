@@ -97,6 +97,15 @@ router.post('/initial-form', requireClient, async (req, res) => {
     measure_hip = toNull(measure_hip); 
     measure_arm = toNull(measure_arm); 
     measure_leg = toNull(measure_leg);
+    const toNull = (v) => v === "" ? null : v; 
+    age = toNull(age); 
+    weight = toNull(weight); 
+    height = toNull(height); 
+    body_fat = toNull(body_fat); 
+    measure_waist = toNull(measure_waist); 
+    measure_hip = toNull(measure_hip); 
+    measure_arm = toNull(measure_arm); 
+    measure_leg = toNull(measure_leg);
 
     try {
         const check = await pool.query("SELECT id FROM client_profiles WHERE user_id = $1", [userId]);
