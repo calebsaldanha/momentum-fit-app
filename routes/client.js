@@ -27,7 +27,7 @@ router.get('/dashboard', requireClient, async (req, res) => {
         
         // Verifica treinos completados
         const completedRes = await pool.query(
-            "SELECT COUNT(*) FROM user_workout_history WHERE user_id = $1", 
+            "SELECT COUNT(*) FROM workout_logs WHERE user_id = $1", 
             [userId]
         );
 
