@@ -11,9 +11,8 @@
     
     <link rel="stylesheet" href="/css/styles.css">
     <% 
-       // CORREÇÃO: Carrega o CSS do Dashboard se a classe do body indicar que é um painel
        if ((typeof bodyClass !== 'undefined' && bodyClass.includes('dashboard')) || 
-           (typeof currentPage !== 'undefined' && (currentPage === 'dashboard' || currentPage === 'admin'))) { 
+           (typeof currentPage !== 'undefined' && (currentPage === 'dashboard' || currentPage === 'admin' || currentPage === 'client'))) { 
     %>
         <link rel="stylesheet" href="/css/dashboard.css">
     <% } %>
@@ -29,7 +28,7 @@
                     </a>
                 </div>
                 
-                <nav class="nav-menu">
+                <nav class="nav-menu" id="navWrapper">
                     <a href="/" class="nav-link">Início</a>
                     <a href="/about" class="nav-link">Sobre</a>
                     <a href="/articles" class="nav-link">Artigos</a>
@@ -66,7 +65,17 @@
                         <a href="/auth/register" class="btn btn-sm btn-primary">Cadastrar</a>
                     <% } %>
                     
-                    <div class="hamburger">
+                    <% 
+                       // Botão de Menu exclusivo para o Dashboard (visível apenas no mobile)
+                       if ((typeof bodyClass !== 'undefined' && bodyClass.includes('dashboard')) || 
+                           (typeof currentPage !== 'undefined' && (currentPage === 'dashboard' || currentPage === 'admin' || currentPage === 'client'))) { 
+                    %>
+                        <button id="dashboardSidebarBtn" class="dashboard-toggle-btn" style="margin-left: 10px;" title="Menu do Painel">
+                            <i class="fas fa-bars-staggered"></i>
+                        </button>
+                    <% } %>
+
+                    <div class="hamburger" id="mobileMenuBtn">
                         <span class="bar"></span>
                         <span class="bar"></span>
                         <span class="bar"></span>
