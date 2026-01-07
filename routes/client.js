@@ -78,7 +78,7 @@ router.get('/initial-form', requireClient, async (req, res) => {
 // POST: Salvar Formulário Inicial
 router.post('/initial-form', requireClient, async (req, res) => {
     const userId = req.session.user.id;
-    const {
+    let {
         age, phone, gender_identity, sex_assigned_at_birth,
         hormonal_treatment, hormonal_details,
         weight, height, body_fat,
@@ -88,6 +88,15 @@ router.post('/initial-form', requireClient, async (req, res) => {
         fitness_level, training_days, workout_preference, availability, equipment,
         sleep_hours, diet_description, challenges
     } = req.body;
+    const toNull = (v) => v === "" ? null : v; 
+    age = toNull(age); 
+    weight = toNull(weight); 
+    height = toNull(height); 
+    body_fat = toNull(body_fat); 
+    measure_waist = toNull(measure_waist); 
+    measure_hip = toNull(measure_hip); 
+    measure_arm = toNull(measure_arm); 
+    measure_leg = toNull(measure_leg);
 
     try {
         const check = await pool.query("SELECT id FROM client_profiles WHERE user_id = $1", [userId]);
