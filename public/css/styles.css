@@ -1406,3 +1406,64 @@ body {
     from { transform: translateX(100%); opacity: 0; }
     to { transform: translateX(0); opacity: 1; }
 }
+
+/* --- Correções Mobile Header e Menu --- */
+.mobile-only { display: none !important; }
+.desktop-only { display: flex !important; }
+
+@media (max-width: 992px) {
+    .mobile-only { display: flex !important; }
+    .desktop-only { display: none !important; }
+    
+    /* Ajuste do Header para evitar quebra */
+    .header-content {
+        justify-content: space-between;
+        padding: 0 1rem;
+    }
+
+    /* Menu Gaveta (NavWrapper) */
+    .nav-menu {
+        display: flex; /* Garante que o flex funcione */
+        flex-direction: column;
+        position: fixed;
+        top: 80px; /* Altura do header */
+        left: -100%;
+        width: 100%;
+        height: calc(100vh - 80px);
+        background-color: #121212; /* Cor de fundo sólida */
+        padding: 2rem;
+        transition: 0.3s;
+        z-index: 1000;
+        overflow-y: auto;
+        border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .nav-menu.active {
+        left: 0;
+    }
+
+    .nav-link {
+        font-size: 1.1rem;
+        padding: 15px 0;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        width: 100%;
+        text-align: left;
+    }
+
+    /* Links de Ação Mobile dentro do Menu */
+    .mobile-nav-actions {
+        display: flex !important;
+        flex-direction: column;
+        width: 100%;
+        margin-top: 10px;
+    }
+    
+    .mobile-nav-actions .nav-link {
+        color: #ccc;
+    }
+    
+    .mobile-nav-actions .highlight-link {
+        color: var(--primary-color, #bef202);
+        font-weight: bold;
+    }
+}

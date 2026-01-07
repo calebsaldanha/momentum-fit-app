@@ -21,60 +21,94 @@
     <div class="app-container">
         <header class="main-header">
             <div class="header-content">
-                <div class="brand">
-                    <a href="/">
-                        <img src="/images/momentum-fit-logo-completo.png" alt="Momentum Fit" class="header-logo-img" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
-                        <span style="display:none; font-weight:bold; font-size:1.5rem; color:#2563eb;">Momentum Fit</span>
-                    </a>
+                <div class="brand-wrapper" style="display: flex; align-items: center; gap: 10px;">
+                    <% 
+                       // Botão de Menu do Dashboard (Apenas Mobile e em páginas de dashboard)
+                       if ((typeof bodyClass !== 'undefined' && bodyClass.includes('dashboard')) || 
+                           (typeof currentPage !== 'undefined' && (currentPage === 'dashboard' || currentPage === 'admin' || currentPage === 'client'))) { 
+                    %>
+                        <button id="dashboardSidebarBtn" class="dashboard-toggle-btn mobile-only" title="Menu do Painel">
+                            <i class="fas fa-bars-staggered"></i>
+                        </button>
+                    <% } %>
+
+                    <div class="brand">
+                        <a href="/">
+                            <img src="/images/momentum-fit-logo-completo.png" alt="Momentum Fit" class="header-logo-img" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+                            <span style="display:none; font-weight:bold; font-size:1.5rem; color:#2563eb;">Momentum Fit</span>
+                        </a>
+                    </div>
                 </div>
                 
                 <nav class="nav-menu" id="navWrapper">
                     <a href="/" class="nav-link">Início</a>
                     <a href="/about" class="nav-link">Sobre</a>
                     <a href="/articles" class="nav-link">Artigos</a>
+
+                    <div class="mobile-nav-actions mobile-only">
+                        <hr style="border-color: rgba(255,255,255,0.1); margin: 10px 0;">
+                        <% if (typeof user !== 'undefined' && user) { %>
+                            <div class="mobile-user-info" style="color: #888; padding: 10px 20px; font-size: 0.9rem;">
+                                Olá, <strong><%= user.name.split(' ')[0] %></strong>
+                            </div>
+                            
+                            <% 
+                                let dashboardLink = '/client/dashboard';
+                                if (user.role === 'superadmin') dashboardLink = '/superadmin/dashboard';
+                                else if (user.role === 'trainer') dashboardLink = '/admin/dashboard';
+                            %>
+                            <a href="<%= dashboardLink %>" class="nav-link"><i class="fas fa-columns"></i> Ir para o Painel</a>
+                            <a href="/notifications" class="nav-link"><i class="fas fa-bell"></i> Notificações</a>
+                            <a href="/auth/logout" class="nav-link" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                <i class="fas fa-sign-out-alt"></i> Sair
+                            </a>
+                        <% } else { %>
+                            <a href="/auth/login" class="nav-link highlight-link">Entrar</a>
+                            <a href="/auth/register" class="nav-link">Cadastrar</a>
+                        <% } %>
+                    </div>
                 </nav>
                 
                 <div class="user-actions">
                     <% if (typeof user !== 'undefined' && user) { %>
-                        <div class="user-info">
+                        <div class="user-info desktop-only">
                             <span class="greeting">Olá, <strong><%= user.name.split(' ')[0] %></strong></span>
                             <span class="badge-role"><%= user.role === 'superadmin' ? 'Admin' : (user.role === 'trainer' ? 'Personal' : 'Aluno') %></span>
                         </div>
                         
-                        <% 
-                            let dashboardLink = '/client/dashboard';
-                            if (user.role === 'superadmin') dashboardLink = '/superadmin/dashboard';
-                            else if (user.role === 'trainer') dashboardLink = '/admin/dashboard';
-                        %>
-                        <a href="<%= dashboardLink %>" class="btn btn-sm btn-primary" style="margin-right: 10px;">
-                            <i class="fas fa-columns"></i> Painel
-                        </a>
+                        <div class="desktop-only" style="display: flex; align-items: center; gap: 10px;">
+                            <% 
+                                let dashboardLink = '/client/dashboard';
+                                if (user.role === 'superadmin') dashboardLink = '/superadmin/dashboard';
+                                else if (user.role === 'trainer') dashboardLink = '/admin/dashboard';
+                            %>
+                            <a href="<%= dashboardLink %>" class="btn btn-sm btn-primary">
+                                <i class="fas fa-columns"></i> Painel
+                            </a>
 
-                        <a href="/notifications" class="btn-icon" title="Notificações">
+                            <a href="/notifications" class="btn-icon" title="Notificações">
+                                <i class="fas fa-bell"></i>
+                            </a>
+                            
+                            <a href="/auth/logout" class="btn-logout" title="Sair" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                <i class="fas fa-sign-out-alt"></i>
+                            </a>
+                        </div>
+                        
+                        <a href="/notifications" class="btn-icon mobile-only" style="margin-right: 10px;">
                             <i class="fas fa-bell"></i>
                         </a>
-                        
-                        <a href="/auth/logout" class="btn-logout" title="Sair" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                            <i class="fas fa-sign-out-alt"></i>
-                        </a>
+
                         <form id="logout-form" action="/auth/logout" method="POST" style="display: none;">
                             <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
                         </form>
                     <% } else { %>
-                        <a href="/auth/login" class="btn btn-sm btn-outline">Entrar</a>
-                        <a href="/auth/register" class="btn btn-sm btn-primary">Cadastrar</a>
+                        <div class="auth-buttons desktop-only">
+                            <a href="/auth/login" class="btn btn-sm btn-outline">Entrar</a>
+                            <a href="/auth/register" class="btn btn-sm btn-primary">Cadastrar</a>
+                        </div>
                     <% } %>
                     
-                    <% 
-                       // Botão de Menu exclusivo para o Dashboard (visível apenas no mobile)
-                       if ((typeof bodyClass !== 'undefined' && bodyClass.includes('dashboard')) || 
-                           (typeof currentPage !== 'undefined' && (currentPage === 'dashboard' || currentPage === 'admin' || currentPage === 'client'))) { 
-                    %>
-                        <button id="dashboardSidebarBtn" class="dashboard-toggle-btn" style="margin-left: 10px;" title="Menu do Painel">
-                            <i class="fas fa-bars-staggered"></i>
-                        </button>
-                    <% } %>
-
                     <div class="hamburger" id="mobileMenuBtn">
                         <span class="bar"></span>
                         <span class="bar"></span>

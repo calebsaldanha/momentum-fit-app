@@ -186,3 +186,23 @@ body.dashboard-body {
     .chat-container { flex-direction: column; height: calc(100vh - 100px); }
     .chat-sidebar { width: 100%; height: 150px; border-right: none; border-bottom: 1px solid #333; }
 }
+
+/* --- Ajustes Mobile Específicos do Dashboard --- */
+@media (max-width: 992px) {
+    /* Garante que o botão de toggle do dashboard não cole no logo */
+    .dashboard-toggle-btn {
+        margin-right: 10px;
+        font-size: 1.2rem;
+        background: transparent;
+        border: none;
+        color: white;
+    }
+    
+    /* Esconde o menu principal hambúrguer SE estivermos no dashboard e quisermos focar no sidebar? 
+       Geralmente mantemos os dois, mas visualmente separados. 
+       O código do header já cuida dos botões duplicados via classes .mobile-only */
+       
+    .dashboard-container {
+        padding-top: 80px; /* Ajuste fino */
+    }
+}
