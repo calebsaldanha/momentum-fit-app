@@ -86,7 +86,7 @@ router.post('/initial-form', requireClient, async (req, res) => {
         main_goal, secondary_goals, specific_event,
         medical_conditions, medications, injuries, surgeries, allergies,
         fitness_level, training_days, workout_preference, availability, equipment,
-        sleep_hours, diet_description, challenges
+        sleep_hours, diet_description, challenges, past_activity, liked_activities, disliked_activities
     } = req.body;
     const toNull = (v) => v === "" ? null : v; 
     age = toNull(age); 
@@ -135,8 +135,8 @@ router.post('/initial-form', requireClient, async (req, res) => {
                     main_goal=$14, secondary_goals=$15, specific_event=$16,
                     medical_conditions=$17, medications=$18, injuries=$19, surgeries=$20, allergies=$21,
                     fitness_level=$22, training_days=$23, workout_preference=$24, availability=$25, equipment=$26,
-                    sleep_hours=$27, diet_description=$28, challenges=$29, updated_at=NOW()
-                WHERE user_id=$30
+                    sleep_hours=$27, diet_description=$28, challenges, past_activity, liked_activities, disliked_activities=$29, updated_at=NOW()
+                WHERE user_id=$33
             `;
             await pool.query(sql, [
                 age, phone, gender_identity, sex_assigned_at_birth,
@@ -146,8 +146,8 @@ router.post('/initial-form', requireClient, async (req, res) => {
                 main_goal, secondary_goals, specific_event,
                 medical_conditions, medications, injuries, surgeries, allergies,
                 fitness_level, training_days, workout_preference, availability, equipment,
-                sleep_hours, diet_description, challenges,
-                userId
+                sleep_hours, diet_description, challenges, past_activity, liked_activities, disliked_activities,
+                past_activity, liked_activities, disliked_activities, userId
             ]);
         } else {
             // Insert
@@ -160,9 +160,9 @@ router.post('/initial-form', requireClient, async (req, res) => {
                     main_goal, secondary_goals, specific_event,
                     medical_conditions, medications, injuries, surgeries, allergies,
                     fitness_level, training_days, workout_preference, availability, equipment,
-                    sleep_hours, diet_description, challenges
+                    sleep_hours, diet_description, challenges, past_activity, liked_activities, disliked_activities
                 ) VALUES (
-                    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30
+                    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33
                 )
             `;
             await pool.query(sql, [
@@ -173,7 +173,7 @@ router.post('/initial-form', requireClient, async (req, res) => {
                 main_goal, secondary_goals, specific_event,
                 medical_conditions, medications, injuries, surgeries, allergies,
                 fitness_level, training_days, workout_preference, availability, equipment,
-                sleep_hours, diet_description, challenges
+                sleep_hours, diet_description, challenges, past_activity, liked_activities, disliked_activities
             ]);
         }
 

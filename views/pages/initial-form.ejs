@@ -223,6 +223,20 @@
                     <input type="text" name="equipment" placeholder="Halteres, Barra, Banco...">
                 </div>
             </div>
+                <div class="form-group" style="margin-top: 15px;">
+                    <label>O que você já fez de atividade física antes?</label>
+                    <textarea name="past_activity" rows="2" placeholder="Musculação, Crossfit, Natação..."><%= profile && profile.past_activity %></textarea>
+                </div>
+                <div class="form-grid" style="margin-top: 15px;">
+                    <div class="form-group">
+                        <label>Atividades que GOSTA</label>
+                        <input type="text" name="liked_activities" placeholder="Ex: Correr, Supino..." value="<%= profile && profile.liked_activities %>">
+                    </div>
+                    <div class="form-group">
+                        <label>Atividades que NÃO GOSTA</label>
+                        <input type="text" name="disliked_activities" placeholder="Ex: Agachamento, Burpees..." value="<%= profile && profile.disliked_activities %>">
+                    </div>
+                </div>
 
             <div class="section-card">
                 <h3 class="section-title">6. Estilo de Vida</h3>
