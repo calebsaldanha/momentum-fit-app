@@ -46,7 +46,7 @@ router.get('/dashboard', requireClient, async (req, res) => {
                 weeklyCheckins: checkinsRes.rows[0].count,
                 completedWorkouts: completedRes.rows[0].count
             },
-            nextWorkout: nextWorkout,
+            nextWorkout: nextWorkout, workouts: workouts,
             profile: profileData,
             missingProfile: !hasProfile, // Flag para a view
             currentPage: 'dashboard'
