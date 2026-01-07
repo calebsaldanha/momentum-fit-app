@@ -1,42 +1,34 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- Lógica do Menu Principal (Header) ---
+    
+    // --- MENU PRINCIPAL (Site) ---
     const mobileBtn = document.getElementById('mobileMenuBtn');
     const navWrapper = document.getElementById('navWrapper');
 
     if (mobileBtn && navWrapper) {
         mobileBtn.addEventListener('click', (e) => {
             e.stopPropagation();
+            // Toggle classes
+            mobileBtn.classList.toggle('active');
             navWrapper.classList.toggle('active');
-            
-            const icon = mobileBtn.querySelector('i');
-            if (icon) { // Caso use ícone font-awesome dentro da div hamburger (opcional)
-                if (navWrapper.classList.contains('active')) {
-                    icon.classList.remove('fa-bars');
-                    icon.classList.add('fa-times');
-                } else {
-                    icon.classList.remove('fa-times');
-                    icon.classList.add('fa-bars');
-                }
-            } else {
-                // Animação padrão do Hamburger CSS (transformando as barras)
-                mobileBtn.classList.toggle('active');
-            }
         });
 
+        // Fechar ao clicar fora ou em um link
         document.addEventListener('click', (e) => {
-            if (navWrapper.classList.contains('active') && !navWrapper.contains(e.target) && !mobileBtn.contains(e.target)) {
+            const isClickInside = navWrapper.contains(e.target) || mobileBtn.contains(e.target);
+            
+            if (!isClickInside && navWrapper.classList.contains('active')) {
                 navWrapper.classList.remove('active');
-                if (mobileBtn.classList.contains('active')) mobileBtn.classList.remove('active');
+                mobileBtn.classList.remove('active');
             }
         });
     }
 
-    // --- Lógica da Sidebar do Dashboard (Mobile) ---
+    // --- SIDEBAR DO DASHBOARD (Apenas Páginas de Painel) ---
     const dashBtn = document.getElementById('dashboardSidebarBtn');
     const dashSidebar = document.querySelector('.dashboard-sidebar');
-
+    
     if (dashBtn && dashSidebar) {
-        // Criar Overlay dinamicamente se não existir
+        // Criar overlay se não existir
         let overlay = document.querySelector('.dashboard-overlay');
         if (!overlay) {
             overlay = document.createElement('div');
@@ -44,32 +36,37 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.appendChild(overlay);
         }
 
-        function toggleDashboardSidebar() {
-            dashSidebar.classList.toggle('active');
-            overlay.classList.toggle('active');
-            
-            // Alternar ícone
+        function closeSidebar() {
+            dashSidebar.classList.remove('active');
+            overlay.classList.remove('active');
+            // Reset ícone para menu
             const icon = dashBtn.querySelector('i');
-            if (icon) {
-                if (dashSidebar.classList.contains('active')) {
-                    icon.classList.remove('fa-bars-staggered');
-                    icon.classList.add('fa-arrow-left');
-                } else {
-                    icon.classList.remove('fa-arrow-left');
-                    icon.classList.add('fa-bars-staggered');
-                }
+            if(icon) {
+                icon.classList.remove('fa-arrow-left');
+                icon.classList.add('fa-bars-staggered');
+            }
+        }
+
+        function openSidebar() {
+            dashSidebar.classList.add('active');
+            overlay.classList.add('active');
+            // Muda ícone para voltar
+            const icon = dashBtn.querySelector('i');
+            if(icon) {
+                icon.classList.remove('fa-bars-staggered');
+                icon.classList.add('fa-arrow-left');
             }
         }
 
         dashBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            toggleDashboardSidebar();
-        });
-
-        overlay.addEventListener('click', () => {
             if (dashSidebar.classList.contains('active')) {
-                toggleDashboardSidebar();
+                closeSidebar();
+            } else {
+                openSidebar();
             }
         });
+
+        overlay.addEventListener('click', closeSidebar);
     }
 });
