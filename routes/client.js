@@ -16,7 +16,7 @@ router.get('/dashboard', requireClient, async (req, res) => {
         const userId = req.session.user.id;
         
         // Verifica se tem perfil preenchido (para o aviso)
-        const profileCheck = await pool.query("SELECT id FROM client_profiles WHERE user_id = $1", [userId]);
+        const profileCheck = await pool.query("SELECT * FROM client_profiles WHERE user_id = $1", [userId]);
         const hasProfile = profileCheck.rows.length > 0;
 
         // Verifica checkins da semana
@@ -99,9 +99,32 @@ router.post('/initial-form', requireClient, async (req, res) => {
     measure_leg = toNull(measure_leg);
 
     try {
-        const check = await pool.query("SELECT id FROM client_profiles WHERE user_id = $1", [userId]);
+        const check = await pool.query("SELECT * FROM client_profiles WHERE user_id = $1", [userId]);
 
         if (check.rows.length > 0) {
+            /* --- INÍCIO LÓGICA DE HISTÓRICO E NOTIFICAÇÃO --- */ 
+            try { 
+                /* 1. Salvar Histórico */ 
+                const currentData = check.rows[0]; 
+                await pool.query("INSERT INTO client_profile_history (user_id, profile_snapshot) VALUES ($1, $2)", [userId, currentData]); 
+                 
+                /* 2. Preparar Notificação */ 
+                const userQuery = await pool.query("SELECT name, trainer_id FROM users WHERE id = $1", [userId]); 
+                const { name, trainer_id } = userQuery.rows[0]; 
+                const msg = `O aluno ${name} atualizou a ficha de anamnese.`; 
+                 
+                /* 3. Notificar Treinador */ 
+                if (trainer_id) { 
+                    await pool.query("INSERT INTO notifications (user_id, type, message, is_read) VALUES ($1, 'info', $2, false)", [trainer_id, msg]); 
+                } 
+                 
+                /* 4. Notificar Admins */ 
+                const admins = await pool.query("SELECT id FROM users WHERE role IN ('admin', 'superadmin')"); 
+                for (let admin of admins.rows) { 
+                    await pool.query("INSERT INTO notifications (user_id, type, message, is_read) VALUES ($1, 'info', $2, false)", [admin.id, msg]); 
+                } 
+            } catch (histErr) { console.error("Erro ao salvar histórico/notificação:", histErr); } 
+            /* --- FIM LÓGICA --- */
             // Update
             const sql = `
                 UPDATE client_profiles SET 
