@@ -282,3 +282,17 @@ footer {
     }
     .mobile-btn { width: 100%; text-align: center; }
 }
+
+/* =========================================
+   CORREÇÃO: IMAGEM DE FUNDO (HERO)
+   ========================================= */
+.hero {
+    /* Mantém o gradiente escuro para leitura do texto, mas adiciona a imagem atrás */
+    background: linear-gradient(to bottom, rgba(5, 5, 5, 0.5), rgba(18, 18, 18, 1)),
+                url('/images/hero-bg.png');
+    
+    /* Garante que a imagem cubra toda a área sem distorcer */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
