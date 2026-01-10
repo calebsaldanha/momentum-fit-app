@@ -1,238 +1,137 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../database/db');
-const { pool } = require('../database/db');
 
-const requireClient = (req, res, next) => {
-    if (req.session.user && req.session.user.role === 'client') {
+// Middleware de autenticação
+function isAuthenticated(req, res, next) {
+    if (req.session.user) {
         return next();
     }
     res.redirect('/auth/login');
-};
+}
 
 // Dashboard do Cliente
-router.get('/dashboard', requireClient, async (req, res) => {
-    try {
-        const userId = req.session.user.id;
+router.get('/dashboard', isAuthenticated, (req, res) => {
+    // Busca dados do usuário e do cliente
+    db.get(`SELECT u.name, u.email, u.profile_image, c.* FROM users u 
+            LEFT JOIN clients c ON u.id = c.user_id 
+            WHERE u.id = ?`, [req.session.user.id], (err, client) => {
         
-        // Verifica se tem perfil preenchido (para o aviso)
-        const profileCheck = await pool.query("SELECT * FROM client_profiles WHERE user_id = $1", [userId]);
-        const hasProfile = profileCheck.rows.length > 0;
-
-        // Verifica checkins da semana
-        const checkinsRes = await pool.query(
-            "SELECT COUNT(*) FROM checkins WHERE user_id = $1 AND created_at >= date_trunc('week', CURRENT_DATE)", 
-            [userId]
-        );
-        
-        // Verifica treinos completados
-        const completedRes = await pool.query(
-            "SELECT COUNT(*) FROM workout_logs WHERE user_id = $1", 
-            [userId]
-        );
-
-        // Busca o próximo treino
-        const workouts = await db.getWorkoutsByUserId(userId);
-        const nextWorkout = workouts.length > 0 ? workouts[0] : null;
-
-        // Busca perfil completo se existir, para mostrar dados no dashboard
-        const profileRes = await pool.query("SELECT * FROM client_profiles WHERE user_id = $1", [userId]);
-        const profileData = profileRes.rows[0] || {};
-
-        res.render('pages/client-dashboard', {
-            title: 'Meu Painel',
-            user: req.session.user,
-            stats: {
-                weeklyCheckins: checkinsRes.rows[0].count,
-                completedWorkouts: completedRes.rows[0].count
-            },
-            nextWorkout: nextWorkout, workouts: workouts,
-            profile: profileData,
-            missingProfile: !hasProfile, // Flag para a view
-            currentPage: 'dashboard'
-        });
-    } catch (err) {
-        console.error(err);
-        res.status(500).render('pages/error', { message: 'Erro ao carregar dashboard.' });
-    }
-});
-
-// GET: Formulário Inicial (Anamnese)
-router.get('/initial-form', requireClient, async (req, res) => {
-    try {
-        const profileRes = await pool.query("SELECT * FROM client_profiles WHERE user_id = $1", [req.session.user.id]);
-        const currentData = profileRes.rows[0] || {};
-
-        res.render('pages/initial-form', {
-            title: 'Ficha de Anamnese',
-            user: req.session.user,
-            profile: currentData,
-            currentPage: 'initial-form'
-        });
-    } catch(err) {
-        console.error(err);
-        res.redirect('/client/dashboard');
-    }
-});
-
-// POST: Salvar Formulário Inicial
-router.post('/initial-form', requireClient, async (req, res) => {
-    const userId = req.session.user.id;
-    let {
-        age, phone, gender_identity, sex_assigned_at_birth,
-        hormonal_treatment, hormonal_details,
-        weight, height, body_fat,
-        measure_waist, measure_hip, measure_arm, measure_leg,
-        main_goal, secondary_goals, specific_event,
-        medical_conditions, medications, injuries, surgeries, allergies,
-        fitness_level, training_days, workout_preference, availability, equipment,
-        sleep_hours, diet_description, challenges, past_activity, liked_activities, disliked_activities
-    } = req.body;
-    const toNull = (v) => v === "" ? null : v; 
-    age = toNull(age); 
-    weight = toNull(weight); 
-    height = toNull(height); 
-    body_fat = toNull(body_fat); 
-    measure_waist = toNull(measure_waist); 
-    measure_hip = toNull(measure_hip); 
-    measure_arm = toNull(measure_arm); 
-    measure_leg = toNull(measure_leg);
-
-    try {
-        const check = await pool.query("SELECT * FROM client_profiles WHERE user_id = $1", [userId]);
-
-        if (check.rows.length > 0) {
-            /* --- INÍCIO LÓGICA DE HISTÓRICO E NOTIFICAÇÃO --- */ 
-            try { 
-                /* 1. Salvar Histórico */ 
-                const currentData = check.rows[0]; 
-                await pool.query("INSERT INTO client_profile_history (user_id, profile_snapshot) VALUES ($1, $2)", [userId, currentData]); 
-                 
-                /* 2. Preparar Notificação */ 
-                const userQuery = await pool.query("SELECT name, trainer_id FROM users WHERE id = $1", [userId]); 
-                const { name, trainer_id } = userQuery.rows[0]; 
-                const msg = `O aluno ${name} atualizou a ficha de anamnese.`; 
-                 
-                /* 3. Notificar Treinador */ 
-                if (trainer_id) { 
-                    await pool.query("INSERT INTO notifications (user_id, type, message, is_read) VALUES ($1, 'info', $2, false)", [trainer_id, msg]); 
-                } 
-                 
-                /* 4. Notificar Admins */ 
-                const admins = await pool.query("SELECT id FROM users WHERE role IN ('admin', 'superadmin')"); 
-                for (let admin of admins.rows) { 
-                    await pool.query("INSERT INTO notifications (user_id, type, message, is_read) VALUES ($1, 'info', $2, false)", [admin.id, msg]); 
-                } 
-            } catch (histErr) { console.error("Erro ao salvar histórico/notificação:", histErr); } 
-            /* --- FIM LÓGICA --- */
-            // Update
-            const sql = `
-                UPDATE client_profiles SET 
-                    age=$1, phone=$2, gender_identity=$3, sex_assigned_at_birth=$4,
-                    hormonal_treatment=$5, hormonal_details=$6,
-                    weight=$7, height=$8, body_fat=$9,
-                    measure_waist=$10, measure_hip=$11, measure_arm=$12, measure_leg=$13,
-                    main_goal=$14, secondary_goals=$15, specific_event=$16,
-                    medical_conditions=$17, medications=$18, injuries=$19, surgeries=$20, allergies=$21,
-                    fitness_level=$22, training_days=$23, workout_preference=$24, availability=$25, equipment=$26,
-                    sleep_hours=$27, diet_description=$28, challenges, past_activity, liked_activities, disliked_activities=$29, updated_at=NOW()
-                WHERE user_id=$33
-            `;
-            await pool.query(sql, [
-                age, phone, gender_identity, sex_assigned_at_birth,
-                hormonal_treatment === 'true', hormonal_details,
-                weight, height, body_fat,
-                measure_waist, measure_hip, measure_arm, measure_leg,
-                main_goal, secondary_goals, specific_event,
-                medical_conditions, medications, injuries, surgeries, allergies,
-                fitness_level, training_days, workout_preference, availability, equipment,
-                sleep_hours, diet_description, challenges, past_activity, liked_activities, disliked_activities,
-                past_activity, liked_activities, disliked_activities, userId
-            ]);
-        } else {
-            // Insert
-            const sql = `
-                INSERT INTO client_profiles (
-                    user_id, age, phone, gender_identity, sex_assigned_at_birth,
-                    hormonal_treatment, hormonal_details,
-                    weight, height, body_fat,
-                    measure_waist, measure_hip, measure_arm, measure_leg,
-                    main_goal, secondary_goals, specific_event,
-                    medical_conditions, medications, injuries, surgeries, allergies,
-                    fitness_level, training_days, workout_preference, availability, equipment,
-                    sleep_hours, diet_description, challenges, past_activity, liked_activities, disliked_activities
-                ) VALUES (
-                    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33
-                )
-            `;
-            await pool.query(sql, [
-                userId, age, phone, gender_identity, sex_assigned_at_birth,
-                hormonal_treatment === 'true', hormonal_details,
-                weight, height, body_fat,
-                measure_waist, measure_hip, measure_arm, measure_leg,
-                main_goal, secondary_goals, specific_event,
-                medical_conditions, medications, injuries, surgeries, allergies,
-                fitness_level, training_days, workout_preference, availability, equipment,
-                sleep_hours, diet_description, challenges, past_activity, liked_activities, disliked_activities
-            ]);
+        if (err) {
+            console.error(err);
+            return res.render('pages/error', { message: "Erro ao carregar dashboard" });
         }
 
-        await pool.query("UPDATE users SET height = $1, weight = $2, goal = $3 WHERE id = $4", [height, weight, main_goal, userId]);
-
-        res.redirect('/client/dashboard');
-    } catch (err) {
-        console.error("Erro ao salvar perfil:", err);
-        res.redirect('/client/initial-form?error=save_failed');
-    }
+        // Busca próximos treinos
+        db.all(`SELECT * FROM workouts WHERE client_id = ? AND status = 'pending' ORDER BY date ASC LIMIT 3`, 
+            [client.id], (err, workouts) => {
+            
+            res.render('pages/client-dashboard', { 
+                user: req.session.user,
+                client: client,
+                workouts: workouts || []
+            });
+        });
+    });
 });
 
-router.get('/profile', requireClient, async (req, res) => {
-    try {
-        const profileRes = await pool.query("SELECT * FROM client_profiles WHERE user_id = $1", [req.session.user.id]);
-        const profile = profileRes.rows[0] || {};
+// Visualizar Perfil
+router.get('/profile', isAuthenticated, (req, res) => {
+    db.get(`SELECT u.name, u.email, u.profile_image, c.* FROM users u 
+            LEFT JOIN clients c ON u.id = c.user_id 
+            WHERE u.id = ?`, [req.session.user.id], (err, client) => {
+        if (err) console.error(err);
         
-        res.render('pages/client-profile', {
-            title: 'Meu Perfil',
+        res.render('pages/client-profile', { 
             user: req.session.user,
-            detailedProfile: profile,
-            currentPage: 'profile'
+            client: client || {} // Garante que não quebre se client for null
         });
-    } catch(err) {
-        res.redirect('/client/dashboard');
-    }
+    });
 });
 
-router.get('/workouts', requireClient, async (req, res) => {
-    try {
-        const workouts = await db.getWorkoutsByUserId(req.session.user.id);
-        res.render('pages/client-workouts', {
-            title: 'Meus Treinos',
-            user: req.session.user,
-            workouts: workouts,
-            currentPage: 'workouts'
-        });
-    } catch(err) {
-        res.redirect('/client/dashboard');
-    }
+// ATUALIZAR Perfil (A Correção Principal)
+router.post('/profile', isAuthenticated, (req, res) => {
+    const userId = req.session.user.id;
+    const { 
+        name, phone, birth_date, gender,
+        height, current_weight, fitness_goals,
+        injuries, medications, lifestyle, availability 
+    } = req.body;
+
+    // 1. Atualiza tabela USERS (Nome base)
+    db.run(`UPDATE users SET name = ? WHERE id = ?`, [name, userId], (err) => {
+        if (err) console.error("Erro ao atualizar user:", err);
+    });
+
+    // 2. Atualiza ou Cria tabela CLIENTS (Dados completos)
+    // Primeiro verificamos se já existe o registro em clients
+    db.get(`SELECT id FROM clients WHERE user_id = ?`, [userId], (err, row) => {
+        if (err) {
+            console.error(err);
+            return res.redirect('/client/profile?error=db_error');
+        }
+
+        if (row) {
+            // UPDATE
+            const sql = `UPDATE clients SET 
+                phone = ?, birth_date = ?, gender = ?,
+                height = ?, current_weight = ?, fitness_goals = ?,
+                injuries = ?, medications = ?, lifestyle = ?, availability = ?
+                WHERE user_id = ?`;
+            
+            const params = [
+                phone, birth_date, gender,
+                height, current_weight, fitness_goals,
+                injuries, medications, lifestyle, availability,
+                userId
+            ];
+
+            db.run(sql, params, (err) => {
+                if (err) {
+                    console.error("Erro no Update Clients:", err);
+                    return res.redirect('/client/profile?error=update_failed');
+                }
+                // Atualiza sessão se o nome mudou
+                req.session.user.name = name;
+                res.redirect('/client/profile?success=true');
+            });
+        } else {
+            // INSERT (Caso raro onde o user existe mas não tem client vinculado)
+            const sql = `INSERT INTO clients (
+                user_id, phone, birth_date, gender,
+                height, current_weight, fitness_goals,
+                injuries, medications, lifestyle, availability
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+            const params = [
+                userId, phone, birth_date, gender,
+                height, current_weight, fitness_goals,
+                injuries, medications, lifestyle, availability
+            ];
+
+            db.run(sql, params, (err) => {
+                if (err) {
+                    console.error("Erro no Insert Clients:", err);
+                    return res.redirect('/client/profile?error=insert_failed');
+                }
+                res.redirect('/client/profile?success=created');
+            });
+        }
+    });
 });
 
-router.get('/workouts/:id', requireClient, async (req, res) => {
-    try {
-        const workoutRes = await pool.query("SELECT * FROM workouts WHERE id = $1 AND (client_id = $2 OR user_id = $2)", [req.params.id, req.session.user.id]);
-        if(workoutRes.rows.length === 0) return res.redirect('/client/workouts');
-        
-        const exercisesRes = await pool.query("SELECT * FROM workout_exercises WHERE workout_id = $1 ORDER BY order_index ASC", [req.params.id]);
-        
-        res.render('pages/workout-details', {
-            title: workoutRes.rows[0].title,
-            user: req.session.user,
-            workout: workoutRes.rows[0],
-            exercises: exercisesRes.rows,
-            currentPage: 'workouts'
+// Meus Treinos
+router.get('/workouts', isAuthenticated, (req, res) => {
+    db.get("SELECT id FROM clients WHERE user_id = ?", [req.session.user.id], (err, client) => {
+        if (!client) return res.redirect('/client/dashboard');
+
+        db.all(`SELECT * FROM workouts WHERE client_id = ? ORDER BY date DESC`, [client.id], (err, workouts) => {
+            res.render('pages/client-workouts', { 
+                user: req.session.user,
+                workouts: workouts 
+            });
         });
-    } catch(err) {
-        res.redirect('/client/workouts');
-    }
+    });
 });
 
 module.exports = router;
