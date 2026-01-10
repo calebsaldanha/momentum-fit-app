@@ -175,3 +175,88 @@
     .mobile-btn-primary { background: var(--primary-color); color: black; }
     .mobile-btn-outline { border: 1px solid rgba(255,255,255,0.2); color: white; }
 }
+    width: 25px;
+    height: 3px;
+    margin: 5px auto;
+    transition: all 0.3s ease-in-out;
+    background-color: var(--c-text-primary, #ffffff);
+    border-radius: 2px;
+}
+
+/* --- MEDIA QUERY (Aplica apenas em telas menores que 992px) --- */
+@media (max-width: 992px) {
+    
+    /* Inverte a visibilidade: Mostra mobile, esconde desktop */
+    .mobile-only { display: flex !important; align-items: center; }
+    .desktop-only { display: none !important; }
+
+    /* Ajuste do Header */
+    .main-header {
+        padding: 0 15px;
+        min-height: 60px;
+        position: relative;
+        z-index: 1060; /* Garante que fique acima da sidebar */
+    }
+    
+    .header-content {
+        justify-content: space-between;
+        padding: 10px 0;
+    }
+
+    /* Hamburger Visível */
+    .hamburger { display: block; margin-left: 15px; }
+    
+    /* Animação do Hamburger */
+    .hamburger.active .bar:nth-child(2) { opacity: 0; }
+    .hamburger.active .bar:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+    .hamburger.active .bar:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+    /* MENU GAVETA (Drawer) */
+    .nav-menu {
+        position: fixed;
+        left: -100%;
+        top: 0;
+        flex-direction: column;
+        background-color: var(--c-bg-main, #121212);
+        width: 85%;
+        max-width: 300px;
+        height: 100vh;
+        padding: 80px 20px 20px;
+        transition: 0.3s ease-in-out;
+        box-shadow: 2px 0 10px rgba(0,0,0,0.5);
+        z-index: 1050;
+        display: flex;
+        gap: 0;
+        border-right: 1px solid var(--c-border, #333);
+    }
+
+    .nav-menu.active {
+        left: 0;
+    }
+
+    .nav-link {
+        display: block;
+        padding: 15px 0;
+        font-size: 1.1rem;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        width: 100%;
+    }
+    
+    .mobile-nav-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        margin-top: 20px;
+    }
+    
+    .mobile-btn {
+        display: block;
+        text-align: center;
+        padding: 12px;
+        border-radius: var(--radius, 8px);
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+    .mobile-btn-primary { background: var(--c-accent-primary, #2563eb); color: white; }
+    .mobile-btn-outline { border: 1px solid var(--c-border, #333); color: white; }
+}
