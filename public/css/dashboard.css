@@ -206,3 +206,18 @@ body.dashboard-body {
         padding-top: 80px; /* Ajuste fino */
     }
 }
+
+/* Correção de sobreposição mobile */
+@media (max-width: 992px) {
+    .dashboard-sidebar {
+        z-index: 1040; /* Abaixo do menu principal (1050) mas acima do conteúdo */
+        top: 70px; /* Altura segura abaixo do header */
+        height: calc(100vh - 70px);
+        padding-bottom: 80px; /* Espaço para scroll */
+    }
+    
+    .dashboard-toggle-btn {
+        margin-right: 15px;
+        font-size: 1.4rem;
+    }
+}
