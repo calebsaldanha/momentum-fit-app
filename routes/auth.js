@@ -91,8 +91,8 @@ router.post('/register', async (req, res) => {
     }
 });
 
-// Logout
-router.get('/logout', (req, res) => {
+// Logout (CORRIGIDO: Alterado de GET para POST para bater com os formulários do frontend)
+router.post('/logout', (req, res) => {
     req.session.destroy();
     res.redirect('/auth/login');
 });
