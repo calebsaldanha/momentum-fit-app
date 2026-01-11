@@ -14,38 +14,22 @@ router.get('/dashboard', isTrainer, async (req, res) => {
         const stats = await db.getTrainerStats(req.session.user.id);
         const recentClients = await db.getRecentClientsByTrainer(req.session.user.id);
         res.render('pages/trainer-dashboard', { 
-            title: 'Painel do Treinador', 
-            user: req.session.user, 
-            stats, 
-            recentClients,
-            currentPage: 'dashboard' // Adicionado
+            title: 'Painel', user: req.session.user, stats, recentClients, currentPage: 'dashboard'
         });
     } catch (err) {
-        console.error(err);
-        res.render('pages/error', { title: 'Erro', message: "Erro ao carregar dashboard" });
+        res.render('pages/error', { title: 'Erro', message: "Erro dashboard" });
     }
 });
 
 router.get('/clients', isTrainer, async (req, res) => {
-    try {
-        const clients = await db.getClientsByTrainer(req.session.user.id);
-        res.render('pages/trainer-clients', { 
-            title: 'Meus Alunos', 
-            user: req.session.user, 
-            clients,
-            currentPage: 'clients' // Adicionado
-        });
-    } catch (err) {
-        console.error(err);
-        res.redirect('/trainer/dashboard');
-    }
+    const clients = await db.getClientsByTrainer(req.session.user.id);
+    res.render('pages/trainer-clients', { title: 'Alunos', user: req.session.user, clients, currentPage: 'clients' });
 });
 
-// Detalhes do Cliente
+// Detalhes do Cliente (Aponta para a mesma view unificada do Admin)
 router.get('/clients/:id', isTrainer, async (req, res) => {
     try {
-        const userId = req.params.id;
-        
+        const clientId = req.params.id;
         const clientQuery = `
             SELECT u.name, u.email, u.profile_image, u.created_at as joined_at,
                    c.*, c.id as client_real_id
@@ -53,39 +37,33 @@ router.get('/clients/:id', isTrainer, async (req, res) => {
             LEFT JOIN clients c ON u.id = c.user_id
             WHERE u.id = $1
         `;
-        const clientRes = await db.query(clientQuery, [userId]);
+        const clientRes = await db.query(clientQuery, [clientId]);
         const clientData = clientRes.rows[0];
 
         if (!clientData) return res.redirect('/trainer/clients');
 
         let workouts = [];
         if (clientData.client_real_id) {
-            const workoutsRes = await db.query("SELECT * FROM workouts WHERE client_id = $1 ORDER BY created_at DESC", [clientData.client_real_id]);
-            workouts = workoutsRes.rows;
+            const wRes = await db.query("SELECT * FROM workouts WHERE client_id = $1 ORDER BY created_at DESC", [clientData.client_real_id]);
+            workouts = wRes.rows;
         }
         
-        res.render('pages/trainer-details', { 
+        res.render('pages/client-details', { 
             title: 'Detalhes do Aluno', 
             user: req.session.user, 
             student: clientData,
             workouts: workouts,
-            currentPage: 'clients' // Adicionado para manter o menu ativo
+            currentPage: 'clients'
         });
 
     } catch (err) {
-        console.error(err);
         res.redirect('/trainer/clients');
     }
 });
 
 router.get('/create-workout', isTrainer, async (req, res) => {
-    const clientId = req.query.client_id;
     res.render('pages/create-workout', { 
-        title: 'Criar Treino', 
-        user: req.session.user, 
-        clientId, 
-        exercises: [],
-        currentPage: 'clients'
+        title: 'Criar Treino', user: req.session.user, clientId: req.query.client_id, exercises: [], currentPage: 'clients'
     }); 
 });
 
