@@ -13,7 +13,7 @@ function isAuthenticated(req, res, next) {
 // Rota auxiliar para verificar se o perfil está completo
 function checkMissingProfile(client) {
     if (!client) return true;
-    // Consideramos incompleto se faltar peso ou altura, que são críticos
+    // Consideramos incompleto se faltar peso ou altura
     if (!client.height || !client.current_weight) return true;
     return false;
 }
@@ -32,7 +32,7 @@ router.get('/dashboard', isAuthenticated, async (req, res) => {
         const clientData = clientRes.rows[0];
 
         let workouts = [];
-        let missingProfile = true; // Default true se não achar cliente
+        let missingProfile = true; 
 
         // Se o cliente existe e tem ID vinculado
         if (clientData && clientData.client_real_id) {
@@ -82,7 +82,8 @@ router.get('/initial-form', isAuthenticated, async (req, res) => {
             user: req.session.user,
             profile: rows[0] || {},
             error: null,
-            csrfToken: '' // Se usar CSRF futuramente
+            // CORREÇÃO CSRF: Gera o token e envia para a view
+            csrfToken: req.csrfToken() 
         });
     } catch (err) {
         console.error(err);
@@ -93,21 +94,17 @@ router.get('/initial-form', isAuthenticated, async (req, res) => {
 // POST - Processar Formulário Inicial
 router.post('/initial-form', isAuthenticated, async (req, res) => {
     const userId = req.session.user.id;
-    // Extrai campos do form. Nota: mapeamos 'age' para logica de backend se necessario, 
-    // mas o schema atual usa 'birth_date'. Vamos focar nos campos que batem com o schema.
     const { 
         phone, weight, height, main_goal, 
         injuries, medications, diet_description, 
         training_days, availability, fitness_level 
     } = req.body;
 
-    // Concatena informações extras para não perder dados do form rico
     const lifestyleConcat = `Dieta: ${diet_description || ''}. Sono: ${req.body.sleep_hours || ''}h. Desafios: ${req.body.challenges || ''}`;
     const availabilityConcat = `Dias: ${training_days}. Tempo: ${availability}. Local: ${req.body.workout_preference}`;
     const medicalConcat = `Condições: ${req.body.medical_conditions || ''}. Cirurgias: ${req.body.surgeries || ''}. Alergias: ${req.body.allergies || ''}`;
 
     try {
-        // Verifica se cliente existe
         const check = await db.query('SELECT id FROM clients WHERE user_id = $1', [userId]);
         
         if (check.rows.length > 0) {
@@ -123,7 +120,7 @@ router.post('/initial-form', isAuthenticated, async (req, res) => {
                 userId
             ]);
         } else {
-            // INSERT (caso raro se o registro falhou antes)
+            // INSERT
             await db.query(`
                 INSERT INTO clients (user_id, phone, current_weight, height, fitness_goals, injuries, medications, lifestyle, availability)
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
@@ -133,6 +130,7 @@ router.post('/initial-form', isAuthenticated, async (req, res) => {
             ]);
         }
 
+        // REDIRECIONAMENTO: Vai para o painel após sucesso
         res.redirect('/client/dashboard?onboarding=success');
 
     } catch (err) {
@@ -140,9 +138,9 @@ router.post('/initial-form', isAuthenticated, async (req, res) => {
         res.render('pages/initial-form', { 
             title: 'Anamnese',
             user: req.session.user,
-            profile: req.body, // Devolve o que o usuário digitou
+            profile: req.body,
             error: 'Erro ao salvar dados. Tente novamente.',
-            csrfToken: ''
+            csrfToken: req.csrfToken() // Necessário gerar novo token em caso de erro
         });
     }
 });
@@ -168,7 +166,7 @@ router.get('/profile', isAuthenticated, async (req, res) => {
     }
 });
 
-// ATUALIZAR Perfil (Rota existente mantida)
+// ATUALIZAR Perfil
 router.post('/profile', isAuthenticated, async (req, res) => {
     const userId = req.session.user.id;
     const { 
@@ -180,7 +178,6 @@ router.post('/profile', isAuthenticated, async (req, res) => {
     try {
         await db.query('UPDATE users SET name = $1 WHERE id = $2', [name, userId]);
         
-        // Upsert simplificado via check
         const check = await db.query('SELECT id FROM clients WHERE user_id = $1', [userId]);
         
         if (check.rows.length > 0) {
