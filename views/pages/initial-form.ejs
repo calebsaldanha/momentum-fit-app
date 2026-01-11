@@ -32,7 +32,8 @@
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
         gap: 1.5rem;
     }
-    .form-group label { color: #ccc; font-weight: 500; }
+    .form-group label { color: #ccc; font-weight: 500;
+    }
     .form-group input, .form-group select, .form-group textarea {
         width: 100%;
         padding: 10px; background: #222; border: 1px solid #444; 
@@ -42,7 +43,8 @@
         border-color: var(--c-accent-primary);
         outline: none;
     }
-    .help-text { color: #666; font-size: 0.8rem; margin-top: 4px; display: block; }
+    .help-text { color: #666; font-size: 0.8rem; margin-top: 4px; display: block;
+    }
 </style>
 
 <div class="onboarding-container">
@@ -50,7 +52,8 @@
         
         <div class="section-header" style="text-align: center; margin-bottom: 3rem;">
             <h1 style="font-size: 2rem; color: var(--c-accent-primary);">Ficha de Anamnese</h1>
-            <p style="color: #888;">Responda com calma. Essas informações são a base do seu planejamento.</p>
+            <p style="color: #888;">Responda com calma.
+            Essas informações são a base do seu planejamento.</p>
         </div>
 
         <% if (typeof error !== 'undefined' && error && error.length > 0) { %>
@@ -77,18 +80,18 @@
                         <label>Identidade de Gênero</label>
                         <select name="gender_identity">
                             <option value="">Selecione...</option>
-                            <option value="M">Masculino</option>
-                            <option value="F">Feminino</option>
-                            <option value="NB">Não-binário</option>
-                            <option value="O">Outro</option>
+                            <option value="M" <%= profile && profile.gender_identity === 'M' ? 'selected' : '' %>>Masculino</option>
+                            <option value="F" <%= profile && profile.gender_identity === 'F' ? 'selected' : '' %>>Feminino</option>
+                            <option value="NB" <%= profile && profile.gender_identity === 'NB' ? 'selected' : '' %>>Não-binário</option>
+                            <option value="O" <%= profile && profile.gender_identity === 'O' ? 'selected' : '' %>>Outro</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label>Sexo Biológico</label>
                         <select name="sex_assigned_at_birth">
                             <option value="">Selecione...</option>
-                            <option value="M">Masculino</option>
-                            <option value="F">Feminino</option>
+                            <option value="M" <%= profile && profile.sex_assigned_at_birth === 'M' ? 'selected' : '' %>>Masculino</option>
+                            <option value="F" <%= profile && profile.sex_assigned_at_birth === 'F' ? 'selected' : '' %>>Feminino</option>
                         </select>
                         <span class="help-text">Importante para cálculos fisiológicos.</span>
                     </div>
@@ -97,13 +100,13 @@
                 <div class="form-group" style="margin-top: 15px;">
                     <label>Faz uso de hormônios? (TRT, Anticoncepcional, etc)</label>
                     <select name="hormonal_treatment" onchange="document.getElementById('hormonal_details_div').style.display = this.value === 'true' ? 'block' : 'none'">
-                        <option value="false">Não</option>
-                        <option value="true">Sim</option>
+                        <option value="false" <%= (!profile || profile.hormonal_treatment === false) ? 'selected' : '' %>>Não</option>
+                        <option value="true" <%= (profile && profile.hormonal_treatment === true) ? 'selected' : '' %>>Sim</option>
                     </select>
                 </div>
-                <div class="form-group" id="hormonal_details_div" style="display: none; margin-top: 10px;">
+                <div class="form-group" id="hormonal_details_div" style="display: <%= (profile && profile.hormonal_treatment === true) ? 'block' : 'none' %>; margin-top: 10px;">
                     <label>Quais e dosagens?</label>
-                    <input type="text" name="hormonal_details" placeholder="Ex: Testosterona 100mg/sem...">
+                    <input type="text" name="hormonal_details" placeholder="Ex: Testosterona 100mg/sem..." value="<%= profile && profile.hormonal_details %>">
                 </div>
             </div>
 
@@ -112,7 +115,7 @@
                 <div class="form-grid">
                     <div class="form-group">
                         <label>Peso (kg) *</label>
-                        <input type="text" name="weight" required placeholder="Ex: 70.5" value="<%= profile && profile.weight %>">
+                        <input type="text" name="weight" required placeholder="Ex: 70.5" value="<%= profile && (profile.current_weight || profile.weight) %>">
                     </div>
                     <div class="form-group">
                         <label>Altura (m) *</label>
@@ -120,16 +123,16 @@
                     </div>
                     <div class="form-group">
                         <label>Gordura Corporal (%)</label>
-                        <input type="text" name="body_fat" placeholder="Se souber (Opcional)">
+                        <input type="text" name="body_fat" placeholder="Se souber (Opcional)" value="<%= profile && profile.body_fat %>">
                     </div>
                 </div>
                 
                 <h4 style="color: #888; margin-top: 20px; margin-bottom: 10px; font-size: 0.9rem;">Circunferências (cm) - Opcional mas recomendado</h4>
                 <div class="form-grid">
-                    <div class="form-group"><label>Cintura (Umbigo)</label><input type="text" name="measure_waist"></div>
-                    <div class="form-group"><label>Quadril</label><input type="text" name="measure_hip"></div>
-                    <div class="form-group"><label>Braço (Relaxado)</label><input type="text" name="measure_arm"></div>
-                    <div class="form-group"><label>Perna (Coxa)</label><input type="text" name="measure_leg"></div>
+                    <div class="form-group"><label>Cintura (Umbigo)</label><input type="text" name="measure_waist" value="<%= profile && profile.measure_waist %>"></div>
+                    <div class="form-group"><label>Quadril</label><input type="text" name="measure_hip" value="<%= profile && profile.measure_hip %>"></div>
+                    <div class="form-group"><label>Braço (Relaxado)</label><input type="text" name="measure_arm" value="<%= profile && profile.measure_arm %>"></div>
+                    <div class="form-group"><label>Perna (Coxa)</label><input type="text" name="measure_leg" value="<%= profile && profile.measure_leg %>"></div>
                 </div>
             </div>
 
@@ -137,15 +140,16 @@
                 <h3 class="section-title">3. Objetivos</h3>
                 <div class="form-group">
                     <label>Objetivo Principal *</label>
-                    <input type="text" name="main_goal" required placeholder="Ex: Hipertrofia, Emagrecimento..." value="<%= profile && profile.main_goal %>">
+                    <input type="text" name="main_goal" required placeholder="Ex: Hipertrofia, Emagrecimento..." value="<%= profile && (profile.fitness_goals || profile.main_goal) %>">
                 </div>
+              
                 <div class="form-group" style="margin-top: 15px;">
                     <label>Objetivos Secundários</label>
-                    <input type="text" name="secondary_goals" placeholder="Ex: Melhorar postura, correr 5km...">
+                    <input type="text" name="secondary_goals" placeholder="Ex: Melhorar postura, correr 5km..." value="<%= profile && profile.secondary_goals %>">
                 </div>
                 <div class="form-group" style="margin-top: 15px;">
                     <label>Evento ou Prazo Específico?</label>
-                    <input type="text" name="specific_event" placeholder="Ex: Casamento em 3 meses, Verão...">
+                    <input type="text" name="specific_event" placeholder="Ex: Casamento em 3 meses, Verão..." value="<%= profile && profile.specific_event %>">
                 </div>
             </div>
 
@@ -154,26 +158,26 @@
                 <div class="form-grid">
                     <div class="form-group">
                         <label>Condições Médicas</label>
-                        <textarea name="medical_conditions" rows="2" placeholder="Diabetes, Hipertensão, Asma..."></textarea>
+                        <textarea name="medical_conditions" rows="2" placeholder="Diabetes, Hipertensão, Asma..."><%= profile && profile.medical_conditions %></textarea>
                     </div>
                     <div class="form-group">
                         <label>Medicamentos de uso contínuo</label>
-                        <textarea name="medications" rows="2" placeholder="Nome e horários"></textarea>
+                        <textarea name="medications" rows="2" placeholder="Nome e horários"><%= profile && profile.medications %></textarea>
                     </div>
                 </div>
                 <div class="form-grid" style="margin-top: 15px;">
                     <div class="form-group">
                         <label>Lesões ou Dores Articulares</label>
-                        <textarea name="injuries" rows="2" placeholder="Joelhos, Ombros, Lombar..."></textarea>
+                        <textarea name="injuries" rows="2" placeholder="Joelhos, Ombros, Lombar..."><%= profile && profile.injuries %></textarea>
                     </div>
                     <div class="form-group">
                         <label>Cirurgias Prévias</label>
-                        <textarea name="surgeries" rows="2" placeholder="O que e quando"></textarea>
+                        <textarea name="surgeries" rows="2" placeholder="O que e quando"><%= profile && profile.surgeries %></textarea>
                     </div>
                 </div>
                 <div class="form-group" style="margin-top: 15px;">
                     <label>Alergias</label>
-                    <input type="text" name="allergies" placeholder="Alimentos ou medicamentos">
+                    <input type="text" name="allergies" placeholder="Alimentos ou medicamentos" value="<%= profile && profile.allergies %>">
                 </div>
             </div>
 
@@ -183,21 +187,21 @@
                     <div class="form-group">
                         <label>Nível de Experiência *</label>
                         <select name="fitness_level" required>
-                            <option value="sedentary">Sedentário (Parado há +3 meses)</option>
-                            <option value="beginner">Iniciante (Treino irregular)</option>
-                            <option value="intermediate">Intermediário (Treino regular)</option>
-                            <option value="advanced">Avançado (Atleta)</option>
+                            <option value="sedentary" <%= profile && profile.fitness_level === 'sedentary' ? 'selected' : '' %>>Sedentário (Parado há +3 meses)</option>
+                            <option value="beginner" <%= profile && profile.fitness_level === 'beginner' ? 'selected' : '' %>>Iniciante (Treino irregular)</option>
+                            <option value="intermediate" <%= profile && profile.fitness_level === 'intermediate' ? 'selected' : '' %>>Intermediário (Treino regular)</option>
+                            <option value="advanced" <%= profile && profile.fitness_level === 'advanced' ? 'selected' : '' %>>Avançado (Atleta)</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label>Dias Disponíveis p/ Treino</label>
                         <select name="training_days">
-                            <option value="2">2 dias</option>
-                            <option value="3" selected>3 dias</option>
-                            <option value="4">4 dias</option>
-                            <option value="5">5 dias</option>
-                            <option value="6">6 dias</option>
-                            <option value="7">Todos os dias</option>
+                            <option value="2" <%= profile && profile.training_days_frequency == 2 ? 'selected' : '' %>>2 dias</option>
+                            <option value="3" <%= (!profile || profile.training_days_frequency == 3) ? 'selected' : '' %>>3 dias</option>
+                            <option value="4" <%= profile && profile.training_days_frequency == 4 ? 'selected' : '' %>>4 dias</option>
+                            <option value="5" <%= profile && profile.training_days_frequency == 5 ? 'selected' : '' %>>5 dias</option>
+                            <option value="6" <%= profile && profile.training_days_frequency == 6 ? 'selected' : '' %>>6 dias</option>
+                            <option value="7" <%= profile && profile.training_days_frequency == 7 ? 'selected' : '' %>>Todos os dias</option>
                         </select>
                     </div>
                 </div>
@@ -206,21 +210,21 @@
                     <div class="form-group">
                         <label>Onde vai treinar?</label>
                         <select name="workout_preference">
-                            <option value="gym">Academia Completa</option>
-                            <option value="home_basic">Em Casa (Pesos livres/Elásticos)</option>
-                            <option value="home_bodyweight">Em Casa (Peso do corpo)</option>
-                            <option value="park">Ao Ar Livre / Parque</option>
+                            <option value="gym" <%= profile && profile.workout_preference === 'gym' ? 'selected' : '' %>>Academia Completa</option>
+                            <option value="home_basic" <%= profile && profile.workout_preference === 'home_basic' ? 'selected' : '' %>>Em Casa (Pesos livres/Elásticos)</option>
+                            <option value="home_bodyweight" <%= profile && profile.workout_preference === 'home_bodyweight' ? 'selected' : '' %>>Em Casa (Peso do corpo)</option>
+                            <option value="park" <%= profile && profile.workout_preference === 'park' ? 'selected' : '' %>>Ao Ar Livre / Parque</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label>Tempo Disponível por dia</label>
-                        <input type="text" name="availability" placeholder="Ex: 45 min, 1 hora...">
+                        <input type="text" name="availability" placeholder="Ex: 45 min, 1 hora..." value="<%= profile && (profile.time_availability || profile.availability) %>">
                     </div>
                 </div>
 
                 <div class="form-group" style="margin-top: 15px;">
                     <label>Equipamentos Disponíveis (Se treinar em casa)</label>
-                    <input type="text" name="equipment" placeholder="Halteres, Barra, Banco...">
+                    <input type="text" name="equipment" placeholder="Halteres, Barra, Banco..." value="<%= profile && profile.equipment %>">
                 </div>
             </div>
                 <div class="form-group" style="margin-top: 15px;">
@@ -243,16 +247,16 @@
                 <div class="form-grid">
                     <div class="form-group">
                         <label>Horas de Sono (Média)</label>
-                        <input type="text" name="sleep_hours" placeholder="Ex: 6-7 horas">
+                        <input type="text" name="sleep_hours" placeholder="Ex: 6-7 horas" value="<%= profile && profile.sleep_hours %>">
                     </div>
                     <div class="form-group">
                         <label>Como é sua dieta hoje?</label>
-                        <textarea name="diet_description" rows="2" placeholder="Come de tudo? Faz restrição? Usa suplementos?"></textarea>
+                        <textarea name="diet_description" rows="2" placeholder="Come de tudo? Faz restrição? Usa suplementos?"><%= profile && profile.diet_description %></textarea>
                     </div>
                 </div>
                 <div class="form-group" style="margin-top: 15px;">
                     <label>Maiores Dificuldades/Desafios</label>
-                    <textarea name="challenges" rows="2" placeholder="Falta de tempo, ansiedade, doces..."></textarea>
+                    <textarea name="challenges" rows="2" placeholder="Falta de tempo, ansiedade, doces..."><%= profile && profile.challenges %></textarea>
                 </div>
             </div>
 
