@@ -1,54 +1,85 @@
 const express = require('express');
 const router = express.Router();
-const { pool } = require('../database/db');
+const db = require('../database/db');
 
-const requireTrainerAuth = (req, res, next) => {
+function isTrainer(req, res, next) {
     if (req.session.user && (req.session.user.role === 'trainer' || req.session.user.role === 'superadmin')) {
         return next();
     }
     res.redirect('/auth/login');
-};
+}
 
-router.use(requireTrainerAuth);
-
-router.get('/profile', async (req, res) => {
+router.get('/dashboard', isTrainer, async (req, res) => {
     try {
-        const userId = req.session.user.id;
-        const userResult = await pool.query("SELECT status FROM users WHERE id = $1", [userId]);
-        const profileResult = await pool.query("SELECT * FROM trainer_profiles WHERE user_id = $1", [userId]);
-        
-        res.render('pages/pending-trainer', {
-            title: 'Complete seu Perfil Profissional - Momentum Fit',
-            userStatus: userResult.rows[0].status,
-            profile: profileResult.rows[0] || {}
+        const stats = await db.getTrainerStats(req.session.user.id);
+        const recentClients = await db.getRecentClientsByTrainer(req.session.user.id);
+        res.render('pages/trainer-dashboard', { 
+            title: 'Painel do Treinador', user: req.session.user, stats, recentClients 
         });
     } catch (err) {
-        console.error("Erro ao carregar perfil do treinador:", err);
-        res.status(500).render('pages/error', { message: 'Não foi possível carregar seu perfil.' });
+        console.error(err);
+        res.render('pages/error', { title: 'Erro', message: "Erro ao carregar dashboard" });
     }
 });
 
-router.post('/profile', async (req, res) => {
-    const userId = req.session.user.id;
-    const { certifications, experience, bio } = req.body;
-
+router.get('/clients', isTrainer, async (req, res) => {
     try {
-        await pool.query(`
-            INSERT INTO trainer_profiles (user_id, certifications, experience, bio, profile_submitted)
-            VALUES ($1, $2, $3, $4, true)
-            ON CONFLICT (user_id) DO UPDATE SET
-                certifications = EXCLUDED.certifications,
-                experience = EXCLUDED.experience,
-                bio = EXCLUDED.bio,
-                profile_submitted = true;
-        `, [userId, certifications, experience, bio]);
-
-        await pool.query("UPDATE users SET status = 'pending_approval' WHERE id = $1", [userId]);
-        
-        res.redirect('/trainer/profile');
+        const clients = await db.getClientsByTrainer(req.session.user.id);
+        res.render('pages/trainer-clients', { 
+            title: 'Meus Alunos', user: req.session.user, clients 
+        });
     } catch (err) {
-        console.error("Erro ao salvar perfil do treinador:", err);
-        res.status(500).render('pages/error', { message: 'Ocorreu um erro ao salvar suas informações.' });
+        console.error(err);
+        res.redirect('/trainer/dashboard');
+    }
+});
+
+// Detalhes do Cliente (VISÃO COMPLETA DA ANAMNESE)
+router.get('/clients/:id', isTrainer, async (req, res) => {
+    try {
+        const userId = req.params.id; // user_id do cliente
+        
+        // Busca TODOS os dados do cliente (Anamnese completa)
+        const clientQuery = `
+            SELECT u.name, u.email, u.profile_image, u.created_at as joined_at,
+                   c.*, c.id as client_real_id
+            FROM users u
+            LEFT JOIN clients c ON u.id = c.user_id
+            WHERE u.id = $1
+        `;
+        const clientRes = await db.query(clientQuery, [userId]);
+        const clientData = clientRes.rows[0];
+
+        if (!clientData) return res.redirect('/trainer/clients');
+
+        const workoutsRes = await db.query("SELECT * FROM workouts WHERE client_id = $1 ORDER BY created_at DESC", [clientData.client_real_id]);
+        
+        // Renderiza a view de detalhes com todos os dados
+        res.render('pages/trainer-details', { 
+            title: 'Detalhes do Aluno', 
+            user: req.session.user, 
+            client: clientData,
+            workouts: workoutsRes.rows 
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.redirect('/trainer/clients');
+    }
+});
+
+// Outras rotas do treinador (criar treino, etc) mantidas...
+router.get('/create-workout', isTrainer, async (req, res) => {
+    const clientId = req.query.client_id;
+    res.render('pages/create-workout', { title: 'Criar Treino', user: req.session.user, clientId, exercises: [] }); 
+});
+
+router.post('/create-workout', isTrainer, async (req, res) => {
+    try {
+        await db.createWorkout({ ...req.body, trainer_id: req.session.user.id });
+        res.redirect('/trainer/clients/' + req.body.client_user_id); // Redireciona para detalhes usando user_id
+    } catch (err) {
+        res.redirect('/trainer/dashboard');
     }
 });
 

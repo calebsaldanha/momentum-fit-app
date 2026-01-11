@@ -1,78 +1,103 @@
-<%- include('../partials/header.ejs', { title: 'Detalhes do Personal', bodyClass: 'dashboard-body' }) %>
+<%- include('../partials/header.ejs', { title: 'Detalhes do Aluno', bodyClass: 'dashboard-body' }) %>
 
-<div class="dashboard-container">
-    <%- include('../partials/sidebar.ejs', { currentPage: 'trainers' }) %>
+<style>
+    .details-container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+    .profile-header { background: #111; padding: 2rem; border-radius: 12px; border: 1px solid #333; display: flex; align-items: center; gap: 2rem; margin-bottom: 2rem; }
+    .profile-img { width: 100px; height: 100px; background: #333; border-radius: 50%; object-fit: cover; }
+    .data-card { background: #111; border: 1px solid #333; border-radius: 12px; padding: 1.5rem; height: 100%; }
+    .data-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+    .data-row { margin-bottom: 10px; border-bottom: 1px solid #222; padding-bottom: 5px; }
+    .data-label { color: #888; font-size: 0.9rem; }
+    .data-value { color: #fff; font-weight: 500; }
+    .section-title { color: var(--c-accent-primary); margin-bottom: 1rem; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 1px; }
+    .btn-action { background: var(--c-accent-primary); color: #000; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold; }
+</style>
 
-    <main class="dashboard-main">
-        <div class="container">
-            <div style="margin-bottom: 2rem;">
-                <a href="/superadmin/manage" style="color: #888; font-size: 0.9rem;">&larr; Voltar para Lista</a>
-                
-                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 10px;">
-                    <div>
-                        <h1 style="margin-bottom: 5px;"><%= trainer.name %></h1>
-                        <span class="user-badge" style="font-size: 1rem;"><%= trainer.email %></span>
-                        <% if (trainer.status === 'pending_approval') { %>
-                             <span style="background: #f59e0b; color: black; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; margin-left: 10px;">AGUARDANDO APROVAÇÃO</span>
-                        <% } else if (trainer.status === 'rejected') { %>
-                             <span style="background: var(--c-error); color: white; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; margin-left: 10px;">SUSPENSO</span>
-                        <% } else { %>
-                             <span style="background: var(--c-success); color: black; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; margin-left: 10px;">ATIVO</span>
-                        <% } %>
-                    </div>
-
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <% if (trainer.status === 'pending_approval' || trainer.status === 'rejected') { %>
-                            <form action="/superadmin/users/<%= trainer.id %>/status" method="POST" style="margin: 0;">
-                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                <input type="hidden" name="action" value="approve">
-                                <input type="hidden" name="role" value="trainer">
-                                <button type="submit" class="btn btn-primary btn-sm">Aprovar Cadastro</button>
-                            </form>
-                        <% } %>
-
-                        <% if (trainer.status === 'active') { %>
-                            <form action="/superadmin/users/<%= trainer.id %>/status" method="POST" style="margin: 0;">
-                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                <input type="hidden" name="action" value="suspend">
-                                <button type="submit" class="btn btn-secondary btn-sm" style="border-color: #f59e0b; color: #f59e0b;">Suspender</button>
-                            </form>
-                        <% } %>
-                        
-                        <form action="/superadmin/users/<%= trainer.id %>/delete" method="POST" onsubmit="return confirm('Tem certeza? Isso removerá o treinador e desvinculará seus alunos.');" style="margin: 0;">
-                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                            <button type="submit" class="btn btn-secondary btn-sm" style="color: var(--c-error); border-color: var(--c-error);">Excluir</button>
-                        </form>
-                    </div>
-                </div>
+<div class="details-container">
+    
+    <div class="profile-header">
+        <img src="<%= client.profile_image || '/images/default-user.png' %>" class="profile-img" alt="Foto">
+        <div style="flex: 1;">
+            <h1 style="color: white; margin: 0;"><%= client.name %></h1>
+            <p style="color: #888; margin: 5px 0;"><%= client.email %></p>
+            <div style="margin-top: 10px;">
+                <span class="badge" style="background: #222; color: #ccc; padding: 5px 10px; border-radius: 4px;">Aluno desde: <%= new Date(client.joined_at).toLocaleDateString() %></span>
             </div>
-
-            <div class="client-info-grid">
-                <div class="info-card">
-                    <h4>Informações da Conta</h4>
-                    <p><strong>Nome:</strong> <%= trainer.name %></p>
-                    <p><strong>Email:</strong> <%= trainer.email %></p>
-                    <p><strong>Data de Cadastro:</strong> <%= new Date(trainer.created_at).toLocaleDateString('pt-BR') %></p>
-                </div>
-
-                <div class="info-card">
-                    <h4>Alunos Vinculados (<%= clients.length %>)</h4>
-                    <% if (clients.length > 0) { %>
-                        <ul style="padding-left: 20px; color: #ccc; margin-top: 10px;">
-                            <% clients.forEach(c => { %>
-                                <li style="margin-bottom: 5px;">
-                                    <strong><%= c.name %></strong> 
-                                    <span style="color:#666; font-size:0.85rem;">(<%= c.email %>)</span>
-                                </li>
-                            <% }) %>
-                        </ul>
-                    <% } else { %>
-                        <p style="color: #888; font-style: italic;">Nenhum aluno atribuído a este personal.</p>
-                    <% } %>
-                </div>
-            </div>
-
         </div>
-    </main>
+        <div>
+            <a href="/trainer/create-workout?client_id=<%= client.client_real_id %>&client_user_id=<%= client.user_id %>" class="btn-action">+ Novo Treino</a>
+        </div>
+    </div>
+
+    <div class="data-grid">
+        
+        <div class="data-card">
+            <h3 class="section-title">��� Corpo & Medidas</h3>
+            <div class="data-row"><span class="data-label">Idade:</span> <span class="data-value"><%= client.age || '-' %> anos</span></div>
+            <div class="data-row"><span class="data-label">Peso Atual:</span> <span class="data-value"><%= client.current_weight || '-' %> kg</span></div>
+            <div class="data-row"><span class="data-label">Altura:</span> <span class="data-value"><%= client.height || '-' %> m</span></div>
+            <div class="data-row"><span class="data-label">Gordura Corporal:</span> <span class="data-value"><%= client.body_fat || '-' %>%</span></div>
+            <div class="data-row"><span class="data-label">Sexo Biológico:</span> <span class="data-value"><%= client.sex_assigned_at_birth || '-' %></span></div>
+            
+            <h4 style="color: #666; margin-top: 15px; font-size: 0.9rem;">Circunferências</h4>
+            <div class="data-row"><span class="data-label">Cintura:</span> <span class="data-value"><%= client.measure_waist || '-' %> cm</span></div>
+            <div class="data-row"><span class="data-label">Quadril:</span> <span class="data-value"><%= client.measure_hip || '-' %> cm</span></div>
+            <div class="data-row"><span class="data-label">Braço:</span> <span class="data-value"><%= client.measure_arm || '-' %> cm</span></div>
+        </div>
+
+        <div class="data-card">
+            <h3 class="section-title">��� Objetivos & Rotina</h3>
+            <div class="data-row"><span class="data-label">Objetivo Principal:</span> <span class="data-value"><%= client.fitness_goals %></span></div>
+            <div class="data-row"><span class="data-label">Obj. Secundários:</span> <span class="data-value"><%= client.secondary_goals || '-' %></span></div>
+            <div class="data-row"><span class="data-label">Nível Fitness:</span> <span class="data-value"><%= client.fitness_level %></span></div>
+            <div class="data-row"><span class="data-label">Frequência:</span> <span class="data-value"><%= client.training_days_frequency || client.training_days %> dias/sem</span></div>
+            <div class="data-row"><span class="data-label">Local:</span> <span class="data-value"><%= client.workout_preference %></span></div>
+            <div class="data-row"><span class="data-label">Disponibilidade:</span> <span class="data-value"><%= client.time_availability || client.availability %></span></div>
+            <div class="data-row"><span class="data-label">Equipamentos:</span> <span class="data-value"><%= client.equipment || 'Nenhum' %></span></div>
+        </div>
+
+        <div class="data-card">
+            <h3 class="section-title">��� Saúde & Lifestyle</h3>
+            <div class="data-row">
+                <span class="data-label">Condições Médicas:</span><br>
+                <span class="data-value" style="color: #fca5a5;"><%= client.medical_conditions || 'Nenhuma' %></span>
+            </div>
+            <div class="data-row">
+                <span class="data-label">Lesões:</span><br>
+                <span class="data-value" style="color: #fca5a5;"><%= client.injuries || 'Nenhuma' %></span>
+            </div>
+            <div class="data-row"><span class="data-label">Medicamentos:</span> <span class="data-value"><%= client.medications || '-' %></span></div>
+            <div class="data-row"><span class="data-label">Alergias:</span> <span class="data-value"><%= client.allergies || '-' %></span></div>
+            <div class="data-row" style="margin-top: 10px;">
+                <span class="data-label">Dieta:</span><br>
+                <p class="data-value" style="font-size: 0.9rem;"><%= client.diet_description || '-' %></p>
+            </div>
+            <div class="data-row">
+                <span class="data-label">Sono:</span> <span class="data-value"><%= client.sleep_hours || '-' %> horas</span>
+            </div>
+        </div>
+    </div>
+
+    <h3 style="color: white; margin-bottom: 1rem;">Histórico de Treinos</h3>
+    <% if (workouts && workouts.length > 0) { %>
+        <div style="display: grid; gap: 1rem;">
+            <% workouts.forEach(w => { %>
+                <div style="background: #1a1a1a; padding: 1rem; border-radius: 8px; border-left: 4px solid var(--c-accent-primary); display: flex; justify-content: space-between;">
+                    <div>
+                        <strong style="color: white;"><%= w.title %></strong>
+                        <p style="color: #666; margin: 0; font-size: 0.9rem;"><%= w.description %></p>
+                    </div>
+                    <div style="text-align: right;">
+                        <span style="color: #888; font-size: 0.8rem;"><%= new Date(w.created_at).toLocaleDateString() %></span><br>
+                        <span style="color: <%= w.status === 'completed' ? '#4ade80' : '#facc15' %>"><%= w.status %></span>
+                    </div>
+                </div>
+            <% }) %>
+        </div>
+    <% } else { %>
+        <p style="color: #666;">Nenhum treino prescrito ainda.</p>
+    <% } %>
+
 </div>
+
 <%- include('../partials/footer.ejs') %>

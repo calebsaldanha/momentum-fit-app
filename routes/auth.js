@@ -16,12 +16,14 @@ router.post('/login', async (req, res) => {
         if (user && await bcrypt.compare(password, user.password)) {
             req.session.user = user;
             
-            // Atualizar last_login se a coluna existir (opcional)
+            // Atualizar last_login
             try { await db.query('UPDATE users SET last_login = NOW() WHERE id = $1', [user.id]); } catch (e) {}
 
             if (user.role === 'admin' || user.role === 'superadmin') return res.redirect('/admin/dashboard');
             if (user.role === 'trainer') return res.redirect('/trainer/dashboard');
-            return res.redirect('/client/dashboard');
+            
+            // Se for cliente, verificar se precisa preencher anamnese
+            return res.redirect('/client/dashboard'); 
         } else {
             res.render('pages/login', { title: 'Login', error: 'Email ou senha incorretos.', success: null });
         }
@@ -41,7 +43,7 @@ router.get('/register', async (req, res) => {
     }
 });
 
-// Processar Registro
+// Processar Registro com LOGIN AUTOMÁTICO e REDIRECIONAMENTO
 router.post('/register', async (req, res) => {
     const { name, email, password, trainer_id, role, height, weight, goal, fitness_level } = req.body;
     
@@ -52,37 +54,38 @@ router.post('/register', async (req, res) => {
             return res.render('pages/register', { title: 'Criar Conta', trainers, error: 'Email já cadastrado.' });
         }
 
-        // 1. Criar Usuário (Dados de Auth apenas)
+        // 1. Criar Usuário
         const newUser = await db.createUser({
-            name, 
-            email, 
-            password, 
-            role: role || 'client', // Default para client
+            name, email, password, 
+            role: role || 'client',
             trainer_id: trainer_id || null,
             profile_image: null
         });
 
-        // 2. Se for Cliente, criar entrada na tabela clients imediatamente
+        // 2. Criar entrada na tabela clients ou trainers
         if (newUser.role === 'client') {
             await db.query(`
                 INSERT INTO clients (user_id, height, current_weight, fitness_goals, fitness_level)
                 VALUES ($1, $2, $3, $4, $5)
-            `, [
-                newUser.id, 
-                height || null, 
-                weight || null, 
-                goal || null, 
-                fitness_level || null
-            ]);
-        }
-        // 2b. Se for Treinador, criar entrada na tabela trainers
-        else if (newUser.role === 'trainer') {
-             await db.query(`
-                INSERT INTO trainers (user_id) VALUES ($1)
-            `, [newUser.id]);
-        }
+            `, [newUser.id, height || null, weight || null, goal || null, fitness_level || null]);
 
-        res.render('pages/login', { title: 'Login', error: null, success: 'Conta criada com sucesso! Faça login.' });
+            // === LÓGICA DE LOGIN AUTOMÁTICO ===
+            req.session.user = newUser;
+            req.session.save((err) => {
+                if (err) {
+                    console.error("Erro ao salvar sessão:", err);
+                    return res.redirect('/auth/login');
+                }
+                // === REDIRECIONAR PARA O FORMULÁRIO INICIAL ===
+                return res.redirect('/client/initial-form');
+            });
+
+        } else if (newUser.role === 'trainer') {
+             await db.query(`INSERT INTO trainers (user_id) VALUES ($1)`, [newUser.id]);
+             res.render('pages/login', { title: 'Login', error: null, success: 'Conta de treinador criada. Aguarde aprovação ou faça login.' });
+        } else {
+            res.render('pages/login', { title: 'Login', error: null, success: 'Conta criada com sucesso.' });
+        }
 
     } catch (err) {
         console.error("Erro no registro:", err);
@@ -91,7 +94,7 @@ router.post('/register', async (req, res) => {
     }
 });
 
-// Logout (CORRIGIDO: Alterado de GET para POST para bater com os formulários do frontend)
+// Logout
 router.post('/logout', (req, res) => {
     req.session.destroy();
     res.redirect('/auth/login');
