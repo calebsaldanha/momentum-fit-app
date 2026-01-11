@@ -23,47 +23,39 @@ router.post('/register', async (req, res) => {
     }
 
     try {
-        const hashedPassword = await bcrypt.hash(password, 10);
+        // A função createUser do db.js já faz o hash da senha
+        const newUser = await db.createUser({ name, email, password, role });
 
-        // Inserir Usuário
-        db.run(`INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)`, 
-            [name, email, hashedPassword, role], 
-            function(err) {
-                if (err) {
-                    console.error("Erro registro user:", err.message);
-                    return res.render('pages/register', { error: 'Email já cadastrado.', user: null });
-                }
-                
-                const newUserId = this.lastID;
-
-                // Se for Cliente, cria entrada na tabela clients imediatamente
-                if (role === 'client') {
-                    db.run(`INSERT INTO clients (user_id) VALUES (?)`, [newUserId], (err) => {
-                        if (err) console.error("Erro ao criar vinculo client:", err);
-                    });
-                } 
-                // Se for Treinador, cria entrada na tabela trainers
-                else if (role === 'trainer') {
-                    db.run(`INSERT INTO trainers (user_id) VALUES (?)`, [newUserId], (err) => {
-                        if (err) console.error("Erro ao criar vinculo trainer:", err);
-                    });
-                }
-
-                res.redirect('/auth/login?registered=true');
+        if (newUser) {
+            // Se for Cliente, cria entrada na tabela clients
+            if (role === 'client') {
+                await db.query('INSERT INTO clients (user_id) VALUES ($1)', [newUser.id]);
+            } 
+            // Se for Treinador, cria entrada na tabela trainers
+            else if (role === 'trainer') {
+                await db.query('INSERT INTO trainers (user_id) VALUES ($1)', [newUser.id]);
             }
-        );
+
+            res.redirect('/auth/login?registered=true');
+        }
     } catch (error) {
-        console.error(error);
+        console.error("Erro registro user:", error);
+        // Código de erro Postgres para violação de unicidade (email duplicado)
+        if (error.code === '23505') {
+            return res.render('pages/register', { error: 'Email já cadastrado.', user: null });
+        }
         res.render('pages/register', { error: 'Erro no servidor.', user: null });
     }
 });
 
 // POST Login
-router.post('/login', (req, res) => {
+router.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
-    db.get(`SELECT * FROM users WHERE email = ?`, [email], async (err, user) => {
-        if (err || !user) {
+    try {
+        const user = await db.getUserByEmail(email);
+
+        if (!user) {
             return res.render('pages/login', { error: 'Usuário não encontrado.', user: null });
         }
 
@@ -72,7 +64,7 @@ router.post('/login', (req, res) => {
             req.session.user = { id: user.id, name: user.name, role: user.role, email: user.email };
             
             // Atualiza last_login
-            db.run(`UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?`, [user.id]);
+            await db.query('UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = $1', [user.id]);
 
             if (user.role === 'admin') return res.redirect('/admin/dashboard');
             if (user.role === 'trainer') return res.redirect('/trainer/dashboard');
@@ -80,7 +72,10 @@ router.post('/login', (req, res) => {
         } else {
             res.render('pages/login', { error: 'Senha incorreta.', user: null });
         }
-    });
+    } catch (err) {
+        console.error(err);
+        res.render('pages/login', { error: 'Erro ao realizar login.', user: null });
+    }
 });
 
 // Logout
