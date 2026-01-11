@@ -11,6 +11,9 @@ const requireTrainer = (req, res, next) => {
 };
 
 router.get('/', requireTrainer, async (req, res) => {
+    if (req.session.user.role === 'trainer') {
+        return res.redirect('/trainer/dashboard');
+    }
     res.redirect('/admin/dashboard');
 });
 
@@ -32,10 +35,10 @@ router.get('/create', requireTrainer, async (req, res) => {
             user: req.session.user, 
             selectedClient: selectedClient, 
             clients: allClientsRes.rows,
-            selectedClientId: clientId,
+            selectedClientId: clientId, 
             exerciseLibrary: exercisesRes.rows, 
             csrfToken: res.locals.csrfToken,
-            currentPage: 'workouts'
+            currentPage: 'create-workout' 
         });
     } catch (err) {
         console.error("Erro create workout:", err);
@@ -68,29 +71,21 @@ router.post('/create', requireTrainer, async (req, res) => {
     }
 });
 
-// --- NOVAS ROTAS DE EDIÇÃO ---
-
 // GET: Página de Edição
 router.get('/edit/:id', requireTrainer, async (req, res) => {
     try {
         const workoutId = req.params.id;
         
-        // 1. Busca o Treino
         const workoutRes = await pool.query("SELECT * FROM workouts WHERE id = $1", [workoutId]);
         const workout = workoutRes.rows[0];
 
         if (!workout) return res.status(404).render('pages/error', { message: 'Treino não encontrado.' });
 
-        // 2. Busca o Aluno (Owner) - Para o botão voltar e contexto
-        // O campo no banco pode ser client_id ou user_id dependendo da sua versão, o código de create usa user_id como client_id
         const userId = workout.client_id || workout.user_id;
         const clientRes = await pool.query("SELECT id, name FROM users WHERE id = $1", [userId]);
         const selectedClient = clientRes.rows[0];
 
-        // 3. Busca os Exercícios Existentes
         const currentExercisesRes = await pool.query("SELECT * FROM workout_exercises WHERE workout_id = $1 ORDER BY order_index ASC", [workoutId]);
-
-        // 4. Busca Biblioteca e Lista de Alunos (para manter padrão, embora não mude o aluno na edição geralmente)
         const exercisesRes = await pool.query("SELECT * FROM exercise_library ORDER BY name ASC");
         
         res.render('pages/edit-workout', { 
@@ -98,11 +93,11 @@ router.get('/edit/:id', requireTrainer, async (req, res) => {
             user: req.session.user,
             workout: workout,
             currentExercises: currentExercisesRes.rows,
-            selectedClient: selectedClient, // Importante: nome seguro para EJS
+            selectedClient: selectedClient,
             selectedClientId: userId,
             exerciseLibrary: exercisesRes.rows,
             csrfToken: res.locals.csrfToken,
-            currentPage: 'workouts'
+            currentPage: 'create-workout' 
         });
     } catch (err) {
         console.error("Erro edit workout:", err);
@@ -116,19 +111,14 @@ router.post('/edit/:id', requireTrainer, async (req, res) => {
     const { title, day_of_week, description, exercises } = req.body;
 
     try {
-        // 1. Atualiza dados básicos do treino
         await pool.query(
             "UPDATE workouts SET title = $1, day_of_week = $2, description = $3 WHERE id = $4",
             [title, day_of_week, description, workoutId]
         );
 
-        // 2. Remove exercícios antigos (estratégia mais segura para evitar conflitos de ordem)
         await pool.query("DELETE FROM workout_exercises WHERE workout_id = $1", [workoutId]);
-
-        // 3. Insere os novos exercícios
         await saveExercises(workoutId, exercises);
 
-        // Recupera ID do aluno para redirecionamento
         const workoutRes = await pool.query("SELECT client_id, user_id FROM workouts WHERE id = $1", [workoutId]);
         const clientId = workoutRes.rows[0].client_id || workoutRes.rows[0].user_id;
 
@@ -146,7 +136,6 @@ router.post('/delete/:id', requireTrainer, async (req, res) => {
     } catch (err) { res.status(500).send("Erro ao excluir"); }
 });
 
-// Função auxiliar para salvar exercícios (DRY)
 async function saveExercises(workoutId, exercises) {
     let exList = [];
     if (typeof exercises === 'string') {
@@ -157,12 +146,10 @@ async function saveExercises(workoutId, exercises) {
 
     for (let ex of exList) {
         let libraryId = ex.id || null; 
-        // Se libraryId for string vazia, converte para null
         if (libraryId === '') libraryId = null;
 
         let exerciseName = ex.name;
 
-        // Se tem ID da biblioteca, garantimos o nome oficial
         if (libraryId) {
             const libRes = await pool.query("SELECT name FROM exercise_library WHERE id = $1", [libraryId]);
             if (libRes.rows[0]) {

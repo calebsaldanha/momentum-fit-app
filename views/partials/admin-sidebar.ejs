@@ -4,13 +4,13 @@
             <i class="fas fa-user-shield"></i>
         </div>
         <h3 class="user-name"><%= user.name.split(' ')[0] %></h3>
-        <span class="user-role-badge">Treinador</span>
+        <span class="user-role-badge"><%= user.role === 'admin' ? 'Administrador' : 'Treinador' %></span>
     </div>
     
     <nav class="sidebar-nav">
         <div class="nav-section-label">Menu Principal</div>
 
-        <a href="/admin/dashboard" class="nav-item <%= typeof currentPage !== 'undefined' && currentPage === 'dashboard' ? 'active' : '' %>">
+        <a href="<%= user.role === 'trainer' ? '/trainer/dashboard' : '/admin/dashboard' %>" class="nav-item <%= typeof currentPage !== 'undefined' && currentPage === 'dashboard' ? 'active' : '' %>">
             <i class="fas fa-tachometer-alt"></i> <span>Visão Geral</span>
         </a>
         <a href="/admin/clients" class="nav-item <%= typeof currentPage !== 'undefined' && currentPage === 'clients' ? 'active' : '' %>">
