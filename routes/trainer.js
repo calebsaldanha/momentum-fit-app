@@ -14,7 +14,11 @@ router.get('/dashboard', isTrainer, async (req, res) => {
         const stats = await db.getTrainerStats(req.session.user.id);
         const recentClients = await db.getRecentClientsByTrainer(req.session.user.id);
         res.render('pages/trainer-dashboard', { 
-            title: 'Painel do Treinador', user: req.session.user, stats, recentClients 
+            title: 'Painel do Treinador', 
+            user: req.session.user, 
+            stats, 
+            recentClients,
+            currentPage: 'dashboard' // Adicionado
         });
     } catch (err) {
         console.error(err);
@@ -26,7 +30,10 @@ router.get('/clients', isTrainer, async (req, res) => {
     try {
         const clients = await db.getClientsByTrainer(req.session.user.id);
         res.render('pages/trainer-clients', { 
-            title: 'Meus Alunos', user: req.session.user, clients 
+            title: 'Meus Alunos', 
+            user: req.session.user, 
+            clients,
+            currentPage: 'clients' // Adicionado
         });
     } catch (err) {
         console.error(err);
@@ -57,12 +64,12 @@ router.get('/clients/:id', isTrainer, async (req, res) => {
             workouts = workoutsRes.rows;
         }
         
-        // CORREÇÃO: Passando como 'student' em vez de 'client' para evitar erro do EJS
         res.render('pages/trainer-details', { 
             title: 'Detalhes do Aluno', 
             user: req.session.user, 
             student: clientData,
-            workouts: workouts 
+            workouts: workouts,
+            currentPage: 'clients' // Adicionado para manter o menu ativo
         });
 
     } catch (err) {
@@ -73,7 +80,13 @@ router.get('/clients/:id', isTrainer, async (req, res) => {
 
 router.get('/create-workout', isTrainer, async (req, res) => {
     const clientId = req.query.client_id;
-    res.render('pages/create-workout', { title: 'Criar Treino', user: req.session.user, clientId, exercises: [] }); 
+    res.render('pages/create-workout', { 
+        title: 'Criar Treino', 
+        user: req.session.user, 
+        clientId, 
+        exercises: [],
+        currentPage: 'clients'
+    }); 
 });
 
 router.post('/create-workout', isTrainer, async (req, res) => {

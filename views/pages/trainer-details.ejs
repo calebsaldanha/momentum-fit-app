@@ -1,7 +1,34 @@
 <%- include('../partials/header.ejs', { title: 'Detalhes do Aluno', bodyClass: 'dashboard-body' }) %>
 
 <style>
-    .details-container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+    .dashboard-wrapper {
+        display: flex;
+        min-height: calc(100vh - 80px); /* Ajuste conforme altura do header */
+    }
+    
+    /* Sidebar √°rea */
+    .sidebar-pane {
+        width: 260px;
+        background: #000;
+        border-right: 1px solid #222;
+        flex-shrink: 0;
+        display: none; /* Mobile first hidden, ou ajuste conforme media queries do seu CSS global */
+    }
+
+    /* Conte√∫do Principal */
+    .main-pane {
+        flex: 1;
+        padding: 2rem;
+        background: #050505;
+        overflow-y: auto;
+    }
+
+    /* Responsividade */
+    @media (min-width: 768px) {
+        .sidebar-pane { display: block; }
+    }
+
+    /* Estilos internos da ficha */
     .profile-header { background: #111; padding: 2rem; border-radius: 12px; border: 1px solid #333; display: flex; align-items: center; gap: 2rem; margin-bottom: 2rem; }
     .profile-img { width: 100px; height: 100px; background: #333; border-radius: 50%; object-fit: cover; }
     .data-card { background: #111; border: 1px solid #333; border-radius: 12px; padding: 1.5rem; height: 100%; }
@@ -13,93 +40,112 @@
     .btn-action { background: var(--c-accent-primary); color: #000; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold; }
 </style>
 
-<div class="details-container">
+<div class="dashboard-wrapper">
     
-    <div class="profile-header">
-        <img src="<%= student.profile_image || '/images/default-user.png' %>" class="profile-img" alt="Foto">
-        <div style="flex: 1;">
-            <h1 style="color: white; margin: 0;"><%= student.name %></h1>
-            <p style="color: #888; margin: 5px 0;"><%= student.email %></p>
-            <div style="margin-top: 10px;">
-                <span class="badge" style="background: #222; color: #ccc; padding: 5px 10px; border-radius: 4px;">Aluno desde: <%= student.joined_at ? new Date(student.joined_at).toLocaleDateString() : '-' %></span>
-            </div>
-        </div>
-        <div>
-            <% if (student.client_real_id) { %>
-                <a href="/trainer/create-workout?client_id=<%= student.client_real_id %>&client_user_id=<%= student.user_id %>" class="btn-action">+ Novo Treino</a>
-            <% } %>
-        </div>
+    <div class="sidebar-pane">
+        <% if (user.role === 'admin' || user.role === 'superadmin') { %>
+            <%- include('../partials/admin-sidebar.ejs', { currentPage: typeof currentPage !== 'undefined' ? currentPage : 'clients' }) %>
+        <% } else { %>
+            <%- include('../partials/sidebar.ejs', { currentPage: typeof currentPage !== 'undefined' ? currentPage : 'clients' }) %>
+        <% } %>
     </div>
 
-    <div class="data-grid">
-        
-        <div class="data-card">
-            <h3 class="section-title">Ì±§ Corpo & Medidas</h3>
-            <div class="data-row"><span class="data-label">Idade:</span> <span class="data-value"><%= student.age || '-' %> anos</span></div>
-            <div class="data-row"><span class="data-label">Peso Atual:</span> <span class="data-value"><%= student.current_weight || '-' %> kg</span></div>
-            <div class="data-row"><span class="data-label">Altura:</span> <span class="data-value"><%= student.height || '-' %> m</span></div>
-            <div class="data-row"><span class="data-label">Gordura Corporal:</span> <span class="data-value"><%= student.body_fat || '-' %>%</span></div>
-            <div class="data-row"><span class="data-label">Sexo Biol√≥gico:</span> <span class="data-value"><%= student.sex_assigned_at_birth || '-' %></span></div>
+    <div class="main-pane">
+        <div style="max-width: 1200px; margin: 0 auto;">
             
-            <h4 style="color: #666; margin-top: 15px; font-size: 0.9rem;">Circunfer√™ncias</h4>
-            <div class="data-row"><span class="data-label">Cintura:</span> <span class="data-value"><%= student.measure_waist || '-' %> cm</span></div>
-            <div class="data-row"><span class="data-label">Quadril:</span> <span class="data-value"><%= student.measure_hip || '-' %> cm</span></div>
-            <div class="data-row"><span class="data-label">Bra√ßo:</span> <span class="data-value"><%= student.measure_arm || '-' %> cm</span></div>
-        </div>
+            <div style="margin-bottom: 1rem;">
+                <a href="<%= (user.role === 'admin' || user.role === 'superadmin') ? '/admin/clients' : '/trainer/clients' %>" style="color: #888; text-decoration: none; display: inline-flex; align-items: center; gap: 5px;">
+                    &larr; Voltar para lista
+                </a>
+            </div>
 
-        <div class="data-card">
-            <h3 class="section-title">ÌæØ Objetivos & Rotina</h3>
-            <div class="data-row"><span class="data-label">Objetivo Principal:</span> <span class="data-value"><%= student.fitness_goals || student.goal || '-' %></span></div>
-            <div class="data-row"><span class="data-label">Obj. Secund√°rios:</span> <span class="data-value"><%= student.secondary_goals || '-' %></span></div>
-            <div class="data-row"><span class="data-label">N√≠vel Fitness:</span> <span class="data-value"><%= student.fitness_level || '-' %></span></div>
-            <div class="data-row"><span class="data-label">Frequ√™ncia:</span> <span class="data-value"><%= student.training_days_frequency || student.training_days || '-' %> dias/sem</span></div>
-            <div class="data-row"><span class="data-label">Local:</span> <span class="data-value"><%= student.workout_preference || '-' %></span></div>
-            <div class="data-row"><span class="data-label">Disponibilidade:</span> <span class="data-value"><%= student.time_availability || student.availability || '-' %></span></div>
-            <div class="data-row"><span class="data-label">Equipamentos:</span> <span class="data-value"><%= student.equipment || 'Nenhum' %></span></div>
-        </div>
-
-        <div class="data-card">
-            <h3 class="section-title">Ìø• Sa√∫de & Lifestyle</h3>
-            <div class="data-row">
-                <span class="data-label">Condi√ß√µes M√©dicas:</span><br>
-                <span class="data-value" style="color: #fca5a5;"><%= student.medical_conditions || 'Nenhuma' %></span>
-            </div>
-            <div class="data-row">
-                <span class="data-label">Les√µes:</span><br>
-                <span class="data-value" style="color: #fca5a5;"><%= student.injuries || 'Nenhuma' %></span>
-            </div>
-            <div class="data-row"><span class="data-label">Medicamentos:</span> <span class="data-value"><%= student.medications || '-' %></span></div>
-            <div class="data-row"><span class="data-label">Alergias:</span> <span class="data-value"><%= student.allergies || '-' %></span></div>
-            <div class="data-row" style="margin-top: 10px;">
-                <span class="data-label">Dieta:</span><br>
-                <p class="data-value" style="font-size: 0.9rem;"><%= student.diet_description || '-' %></p>
-            </div>
-            <div class="data-row">
-                <span class="data-label">Sono:</span> <span class="data-value"><%= student.sleep_hours || '-' %> horas</span>
-            </div>
-        </div>
-    </div>
-
-    <h3 style="color: white; margin-bottom: 1rem;">Hist√≥rico de Treinos</h3>
-    <% if (workouts && workouts.length > 0) { %>
-        <div style="display: grid; gap: 1rem;">
-            <% workouts.forEach(w => { %>
-                <div style="background: #1a1a1a; padding: 1rem; border-radius: 8px; border-left: 4px solid var(--c-accent-primary); display: flex; justify-content: space-between;">
-                    <div>
-                        <strong style="color: white;"><%= w.title %></strong>
-                        <p style="color: #666; margin: 0; font-size: 0.9rem;"><%= w.description %></p>
-                    </div>
-                    <div style="text-align: right;">
-                        <span style="color: #888; font-size: 0.8rem;"><%= new Date(w.created_at).toLocaleDateString() %></span><br>
-                        <span style="color: <%= w.status === 'completed' ? '#4ade80' : '#facc15' %>"><%= w.status %></span>
+            <div class="profile-header">
+                <img src="<%= student.profile_image || '/images/default-user.png' %>" class="profile-img" alt="Foto">
+                <div style="flex: 1;">
+                    <h1 style="color: white; margin: 0;"><%= student.name %></h1>
+                    <p style="color: #888; margin: 5px 0;"><%= student.email %></p>
+                    <div style="margin-top: 10px;">
+                        <span class="badge" style="background: #222; color: #ccc; padding: 5px 10px; border-radius: 4px;">Aluno desde: <%= student.joined_at ? new Date(student.joined_at).toLocaleDateString() : '-' %></span>
                     </div>
                 </div>
-            <% }) %>
-        </div>
-    <% } else { %>
-        <p style="color: #666;">Nenhum treino prescrito ainda.</p>
-    <% } %>
+                <div>
+                    <% if (student.client_real_id) { %>
+                        <a href="/trainer/create-workout?client_id=<%= student.client_real_id %>&client_user_id=<%= student.user_id %>" class="btn-action">+ Novo Treino</a>
+                    <% } %>
+                </div>
+            </div>
 
+            <div class="data-grid">
+                
+                <div class="data-card">
+                    <h3 class="section-title">Ì±§ Corpo & Medidas</h3>
+                    <div class="data-row"><span class="data-label">Idade:</span> <span class="data-value"><%= student.age || '-' %> anos</span></div>
+                    <div class="data-row"><span class="data-label">Peso Atual:</span> <span class="data-value"><%= student.current_weight || '-' %> kg</span></div>
+                    <div class="data-row"><span class="data-label">Altura:</span> <span class="data-value"><%= student.height || '-' %> m</span></div>
+                    <div class="data-row"><span class="data-label">Gordura Corporal:</span> <span class="data-value"><%= student.body_fat || '-' %>%</span></div>
+                    <div class="data-row"><span class="data-label">Sexo Biol√≥gico:</span> <span class="data-value"><%= student.sex_assigned_at_birth || '-' %></span></div>
+                    
+                    <h4 style="color: #666; margin-top: 15px; font-size: 0.9rem;">Circunfer√™ncias</h4>
+                    <div class="data-row"><span class="data-label">Cintura:</span> <span class="data-value"><%= student.measure_waist || '-' %> cm</span></div>
+                    <div class="data-row"><span class="data-label">Quadril:</span> <span class="data-value"><%= student.measure_hip || '-' %> cm</span></div>
+                    <div class="data-row"><span class="data-label">Bra√ßo:</span> <span class="data-value"><%= student.measure_arm || '-' %> cm</span></div>
+                </div>
+
+                <div class="data-card">
+                    <h3 class="section-title">ÌæØ Objetivos & Rotina</h3>
+                    <div class="data-row"><span class="data-label">Objetivo Principal:</span> <span class="data-value"><%= student.fitness_goals || student.goal || '-' %></span></div>
+                    <div class="data-row"><span class="data-label">Obj. Secund√°rios:</span> <span class="data-value"><%= student.secondary_goals || '-' %></span></div>
+                    <div class="data-row"><span class="data-label">N√≠vel Fitness:</span> <span class="data-value"><%= student.fitness_level || '-' %></span></div>
+                    <div class="data-row"><span class="data-label">Frequ√™ncia:</span> <span class="data-value"><%= student.training_days_frequency || student.training_days || '-' %> dias/sem</span></div>
+                    <div class="data-row"><span class="data-label">Local:</span> <span class="data-value"><%= student.workout_preference || '-' %></span></div>
+                    <div class="data-row"><span class="data-label">Disponibilidade:</span> <span class="data-value"><%= student.time_availability || student.availability || '-' %></span></div>
+                    <div class="data-row"><span class="data-label">Equipamentos:</span> <span class="data-value"><%= student.equipment || 'Nenhum' %></span></div>
+                </div>
+
+                <div class="data-card">
+                    <h3 class="section-title">Ìø• Sa√∫de & Lifestyle</h3>
+                    <div class="data-row">
+                        <span class="data-label">Condi√ß√µes M√©dicas:</span><br>
+                        <span class="data-value" style="color: #fca5a5;"><%= student.medical_conditions || 'Nenhuma' %></span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">Les√µes:</span><br>
+                        <span class="data-value" style="color: #fca5a5;"><%= student.injuries || 'Nenhuma' %></span>
+                    </div>
+                    <div class="data-row"><span class="data-label">Medicamentos:</span> <span class="data-value"><%= student.medications || '-' %></span></div>
+                    <div class="data-row"><span class="data-label">Alergias:</span> <span class="data-value"><%= student.allergies || '-' %></span></div>
+                    <div class="data-row" style="margin-top: 10px;">
+                        <span class="data-label">Dieta:</span><br>
+                        <p class="data-value" style="font-size: 0.9rem;"><%= student.diet_description || '-' %></p>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">Sono:</span> <span class="data-value"><%= student.sleep_hours || '-' %> horas</span>
+                    </div>
+                </div>
+            </div>
+
+            <h3 style="color: white; margin-bottom: 1rem;">Hist√≥rico de Treinos</h3>
+            <% if (workouts && workouts.length > 0) { %>
+                <div style="display: grid; gap: 1rem;">
+                    <% workouts.forEach(w => { %>
+                        <div style="background: #1a1a1a; padding: 1rem; border-radius: 8px; border-left: 4px solid var(--c-accent-primary); display: flex; justify-content: space-between;">
+                            <div>
+                                <strong style="color: white;"><%= w.title %></strong>
+                                <p style="color: #666; margin: 0; font-size: 0.9rem;"><%= w.description %></p>
+                            </div>
+                            <div style="text-align: right;">
+                                <span style="color: #888; font-size: 0.8rem;"><%= new Date(w.created_at).toLocaleDateString() %></span><br>
+                                <span style="color: <%= w.status === 'completed' ? '#4ade80' : '#facc15' %>"><%= w.status %></span>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+            <% } else { %>
+                <p style="color: #666;">Nenhum treino prescrito ainda.</p>
+            <% } %>
+            
+        </div>
+    </div>
 </div>
 
 <%- include('../partials/footer.ejs') %>
