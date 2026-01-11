@@ -45,9 +45,16 @@ router.get('/register', async (req, res) => {
 
 // Processar Registro com LOGIN AUTOMÁTICO e REDIRECIONAMENTO
 router.post('/register', async (req, res) => {
-    const { name, email, password, trainer_id, role, height, weight, goal, fitness_level } = req.body;
+    // Adicionado confirmPassword na desestruturação
+    const { name, email, password, confirmPassword, trainer_id, role, height, weight, goal, fitness_level } = req.body;
     
     try {
+        // Validação de Senha (Correção Senior)
+        if (password !== confirmPassword) {
+            const trainers = await db.getAllTrainers();
+            return res.render('pages/register', { title: 'Criar Conta', trainers, error: 'As senhas não coincidem.' });
+        }
+
         const existingUser = await db.getUserByEmail(email);
         if (existingUser) {
             const trainers = await db.getAllTrainers();
