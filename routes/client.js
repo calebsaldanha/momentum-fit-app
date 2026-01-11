@@ -14,7 +14,6 @@ function isAuthenticated(req, res, next) {
 router.get('/dashboard', isAuthenticated, async (req, res) => {
     try {
         // Busca dados do usuário e do cliente
-        // Usamos alias "client_real_id" para evitar conflito de IDs no JOIN
         const clientQuery = `
             SELECT u.name, u.email, u.profile_image, c.id as client_real_id, c.* FROM users u 
             LEFT JOIN clients c ON u.id = c.user_id 
@@ -38,6 +37,7 @@ router.get('/dashboard', isAuthenticated, async (req, res) => {
         }
 
         res.render('pages/client-dashboard', { 
+            title: 'Painel do Aluno',
             user: req.session.user,
             client: client || {},
             workouts: workouts || []
@@ -45,7 +45,10 @@ router.get('/dashboard', isAuthenticated, async (req, res) => {
 
     } catch (err) {
         console.error("Erro dashboard:", err);
-        return res.render('pages/error', { message: "Erro ao carregar dashboard" });
+        return res.render('pages/error', { 
+            title: 'Erro',
+            message: "Erro ao carregar dashboard" 
+        });
     }
 });
 
@@ -60,12 +63,16 @@ router.get('/profile', isAuthenticated, async (req, res) => {
         const { rows } = await db.query(query, [req.session.user.id]);
         
         res.render('pages/client-profile', { 
+            title: 'Meu Perfil',
             user: req.session.user,
             client: rows[0] || {} 
         });
     } catch (err) {
         console.error(err);
-        res.render('pages/error', { message: "Erro ao carregar perfil" });
+        res.render('pages/error', { 
+            title: 'Erro',
+            message: "Erro ao carregar perfil" 
+        });
     }
 });
 
@@ -79,7 +86,7 @@ router.post('/profile', isAuthenticated, async (req, res) => {
     } = req.body;
 
     try {
-        // 1. Atualiza tabela USERS (Nome base)
+        // 1. Atualiza tabela USERS
         await db.query('UPDATE users SET name = $1 WHERE id = $2', [name, userId]);
 
         // 2. Verifica se já existe o registro em clients
@@ -141,6 +148,7 @@ router.get('/workouts', isAuthenticated, async (req, res) => {
         const workoutsRes = await db.query("SELECT * FROM workouts WHERE client_id = $1 ORDER BY date DESC", [client.id]);
         
         res.render('pages/client-workouts', { 
+            title: 'Meus Treinos',
             user: req.session.user,
             workouts: workoutsRes.rows 
         });
