@@ -78,10 +78,12 @@ router.post('/login', async (req, res) => {
     }
 });
 
-// Logout
-router.get('/logout', (req, res) => {
-    req.session.destroy();
-    res.redirect('/');
+// Logout (POST)
+router.post('/logout', (req, res) => {
+    req.session.destroy((err) => {
+        if (err) console.error("Erro ao destruir sessão:", err);
+        res.redirect('/');
+    });
 });
 
 module.exports = router;
