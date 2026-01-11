@@ -41,7 +41,6 @@ async function updateClientsSchema() {
     } catch (error) {
         console.error("Erro ao atualizar tabela clients:", error);
     } finally {
-        // Encerra o processo (necessário se rodado via node direto)
         process.exit();
     }
 }

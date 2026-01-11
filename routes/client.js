@@ -20,11 +20,11 @@ function checkMissingProfile(client) {
 // Dashboard do Cliente
 router.get('/dashboard', isAuthenticated, async (req, res) => {
     try {
-        const clientQuery = \`
+        const clientQuery = `
             SELECT u.name, u.email, u.profile_image, c.id as client_real_id, c.* FROM users u 
             LEFT JOIN clients c ON u.id = c.user_id 
-            WHERE u.id = \$1
-        \`;
+            WHERE u.id = $1
+        `;
         
         const clientRes = await db.query(clientQuery, [req.session.user.id]);
         const clientData = clientRes.rows[0];
@@ -35,14 +35,14 @@ router.get('/dashboard', isAuthenticated, async (req, res) => {
         if (clientData && clientData.client_real_id) {
             missingProfile = checkMissingProfile(clientData);
 
-            const workoutsQuery = \`
+            const workoutsQuery = `
                 SELECT w.*, u.name as trainer_name 
                 FROM workouts w
                 LEFT JOIN trainers t ON w.trainer_id = t.id
                 LEFT JOIN users u ON t.user_id = u.id
-                WHERE w.client_id = \$1 AND w.status = 'pending' 
+                WHERE w.client_id = $1 AND w.status = 'pending' 
                 ORDER BY w.created_at DESC LIMIT 3
-            \`;
+            `;
             const workoutsRes = await db.query(workoutsQuery, [clientData.client_real_id]);
             workouts = workoutsRes.rows;
         }
@@ -67,11 +67,11 @@ router.get('/dashboard', isAuthenticated, async (req, res) => {
 // GET - Exibir Formulário Inicial
 router.get('/initial-form', isAuthenticated, async (req, res) => {
     try {
-        const query = \`
+        const query = `
             SELECT u.name, u.email, c.* FROM users u 
             LEFT JOIN clients c ON u.id = c.user_id 
-            WHERE u.id = \$1
-        \`;
+            WHERE u.id = $1
+        `;
         const { rows } = await db.query(query, [req.session.user.id]);
         
         res.render('pages/initial-form', { 
@@ -104,34 +104,34 @@ router.post('/initial-form', isAuthenticated, async (req, res) => {
         sleep_hours, diet_description, challenges
     } = req.body;
 
-    // Manter concatenação para retrocompatibilidade com dashboard do treinador (se necessário)
-    const lifestyleConcat = \`Dieta: \${diet_description || ''}. Sono: \${sleep_hours || ''}h.\`;
-    const availabilityConcat = \`Dias: \${training_days}. Tempo: \${availability}.\`;
-    const medicalConcat = \`Condições: \${medical_conditions || ''}. Lesões: \${injuries || ''}\`;
+    // Manter concatenação para retrocompatibilidade
+    const lifestyleConcat = `Dieta: ${diet_description || ''}. Sono: ${sleep_hours || ''}h.`;
+    const availabilityConcat = `Dias: ${training_days}. Tempo: ${availability}.`;
+    const medicalConcat = `Condições: ${medical_conditions || ''}. Lesões: ${injuries || ''}`;
 
     try {
-        const check = await db.query('SELECT id FROM clients WHERE user_id = \$1', [userId]);
+        const check = await db.query('SELECT id FROM clients WHERE user_id = $1', [userId]);
         
         if (check.rows.length > 0) {
             // UPDATE
-            const updateQuery = \`
+            const updateQuery = `
                 UPDATE clients SET 
-                phone = \$1, current_weight = \$2, height = \$3, fitness_goals = \$4,
-                injuries = \$5, medications = \$6, lifestyle = \$7, availability = \$8,
-                age = \$9, gender_identity = \$10, sex_assigned_at_birth = \$11,
-                hormonal_treatment = \$12, hormonal_details = \$13, body_fat = \$14,
-                measure_waist = \$15, measure_hip = \$16, measure_arm = \$17, measure_leg = \$18,
-                secondary_goals = \$19, specific_event = \$20, medical_conditions = \$21,
-                surgeries = \$22, allergies = \$23, fitness_level = \$24,
-                training_days_frequency = \$25, workout_preference = \$26, equipment = \$27,
-                time_availability = \$28, sleep_hours = \$29, diet_description = \$30,
-                challenges = \$31, liked_activities = \$32, disliked_activities = \$33, past_activity = \$34
-                WHERE user_id = \$35
-            \`;
+                phone = $1, current_weight = $2, height = $3, fitness_goals = $4,
+                injuries = $5, medications = $6, lifestyle = $7, availability = $8,
+                age = $9, gender_identity = $10, sex_assigned_at_birth = $11,
+                hormonal_treatment = $12, hormonal_details = $13, body_fat = $14,
+                measure_waist = $15, measure_hip = $16, measure_arm = $17, measure_leg = $18,
+                secondary_goals = $19, specific_event = $20, medical_conditions = $21,
+                surgeries = $22, allergies = $23, fitness_level = $24,
+                training_days_frequency = $25, workout_preference = $26, equipment = $27,
+                time_availability = $28, sleep_hours = $29, diet_description = $30,
+                challenges = $31, liked_activities = $32, disliked_activities = $33, past_activity = $34
+                WHERE user_id = $35
+            `;
 
             await db.query(updateQuery, [
                 phone, weight, height, main_goal, 
-                injuries, medications, lifestyleConcat, availabilityConcat, // Campos legados/concatenados
+                injuries, medications, lifestyleConcat, availabilityConcat, // Campos legados
                 age, gender_identity, sex_assigned_at_birth,
                 hormonal_treatment === 'true', hormonal_details, body_fat,
                 measure_waist, measure_hip, measure_arm, measure_leg,
@@ -145,7 +145,7 @@ router.post('/initial-form', isAuthenticated, async (req, res) => {
 
         } else {
             // INSERT
-            const insertQuery = \`
+            const insertQuery = `
                 INSERT INTO clients (
                     user_id, phone, current_weight, height, fitness_goals, injuries, medications, lifestyle, availability,
                     age, gender_identity, sex_assigned_at_birth, hormonal_treatment, hormonal_details, body_fat,
@@ -155,14 +155,14 @@ router.post('/initial-form', isAuthenticated, async (req, res) => {
                     liked_activities, disliked_activities, past_activity
                 )
                 VALUES (
-                    \$1, \$2, \$3, \$4, \$5, \$6, \$7, \$8, \$9,
-                    \$10, \$11, \$12, \$13, \$14, \$15,
-                    \$16, \$17, \$18, \$19, \$20, \$21,
-                    \$22, \$23, \$24, \$25, \$26,
-                    \$27, \$28, \$29, \$30, \$31, \$32,
-                    \$33, \$34, \$35
+                    $1, $2, $3, $4, $5, $6, $7, $8, $9,
+                    $10, $11, $12, $13, $14, $15,
+                    $16, $17, $18, $19, $20, $21,
+                    $22, $23, $24, $25, $26,
+                    $27, $28, $29, $30, $31, $32,
+                    $33, $34, $35
                 )
-            \`;
+            `;
 
             await db.query(insertQuery, [
                 userId, phone, weight, height, main_goal, injuries, medications, lifestyleConcat, availabilityConcat,
@@ -181,21 +181,21 @@ router.post('/initial-form', isAuthenticated, async (req, res) => {
         res.render('pages/initial-form', { 
             title: 'Anamnese',
             user: req.session.user,
-            profile: req.body, // Retorna o body para preencher caso falhe
+            profile: req.body,
             error: 'Erro ao salvar dados. Tente novamente.',
             csrfToken: req.csrfToken()
         });
     }
 });
 
-// Visualizar Perfil (Rota Profile existente, mantida igual mas importada corretamente)
+// Visualizar Perfil
 router.get('/profile', isAuthenticated, async (req, res) => {
     try {
-        const query = \`
+        const query = `
             SELECT u.name, u.email, u.profile_image, c.* FROM users u 
             LEFT JOIN clients c ON u.id = c.user_id 
-            WHERE u.id = \$1
-        \`;
+            WHERE u.id = $1
+        `;
         const { rows } = await db.query(query, [req.session.user.id]);
         
         res.render('pages/client-profile', { 
@@ -212,20 +212,18 @@ router.get('/profile', isAuthenticated, async (req, res) => {
 // ATUALIZAR Perfil
 router.post('/profile', isAuthenticated, async (req, res) => {
     const userId = req.session.user.id;
-    // Extraindo apenas campos básicos que existiam na rota original, 
-    // idealmente deve ser expandido no futuro para bater com o initial-form
     const { name, phone, birth_date, gender, height, current_weight, fitness_goals, injuries, medications, lifestyle, availability } = req.body;
 
     try {
-        await db.query('UPDATE users SET name = \$1 WHERE id = \$2', [name, userId]);
+        await db.query('UPDATE users SET name = $1 WHERE id = $2', [name, userId]);
         
-        const check = await db.query('SELECT id FROM clients WHERE user_id = \$1', [userId]);
+        const check = await db.query('SELECT id FROM clients WHERE user_id = $1', [userId]);
         
         if (check.rows.length > 0) {
-            await db.query(\`UPDATE clients SET phone=\$1, birth_date=\$2, gender=\$3, height=\$4, current_weight=\$5, fitness_goals=\$6, injuries=\$7, medications=\$8, lifestyle=\$9, availability=\$10 WHERE user_id=\$11\`, 
+            await db.query(`UPDATE clients SET phone=$1, birth_date=$2, gender=$3, height=$4, current_weight=$5, fitness_goals=$6, injuries=$7, medications=$8, lifestyle=$9, availability=$10 WHERE user_id=$11`, 
                 [phone, birth_date, gender, height, current_weight, fitness_goals, injuries, medications, lifestyle, availability, userId]);
         } else {
-            await db.query(\`INSERT INTO clients (user_id, phone, birth_date, gender, height, current_weight, fitness_goals, injuries, medications, lifestyle, availability) VALUES (\$1, \$2, \$3, \$4, \$5, \$6, \$7, \$8, \$9, \$10, \$11)\`,
+            await db.query(`INSERT INTO clients (user_id, phone, birth_date, gender, height, current_weight, fitness_goals, injuries, medications, lifestyle, availability) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
                 [userId, phone, birth_date, gender, height, current_weight, fitness_goals, injuries, medications, lifestyle, availability]);
         }
 
@@ -241,13 +239,13 @@ router.post('/profile', isAuthenticated, async (req, res) => {
 // Meus Treinos
 router.get('/workouts', isAuthenticated, async (req, res) => {
     try {
-        const clientRes = await db.query("SELECT id FROM clients WHERE user_id = \$1", [req.session.user.id]);
+        const clientRes = await db.query("SELECT id FROM clients WHERE user_id = $1", [req.session.user.id]);
         const clientData = clientRes.rows[0];
 
         if (!clientData) return res.redirect('/client/dashboard');
 
         // Busca treinos do cliente
-        const workoutsRes = await db.query("SELECT * FROM workouts WHERE client_id = \$1 ORDER BY created_at DESC", [clientData.id]);
+        const workoutsRes = await db.query("SELECT * FROM workouts WHERE client_id = $1 ORDER BY created_at DESC", [clientData.id]);
         
         res.render('pages/client-workouts', { 
             title: 'Meus Treinos',
@@ -263,8 +261,8 @@ router.get('/workouts', isAuthenticated, async (req, res) => {
 router.get('/workouts/:id', isAuthenticated, async (req, res) => {
     try {
         const workoutId = req.params.id;
-        const workoutRes = await db.query("SELECT * FROM workouts WHERE id = \$1", [workoutId]);
-        const exercisesRes = await db.query("SELECT * FROM workout_exercises WHERE workout_id = \$1 ORDER BY order_index ASC", [workoutId]);
+        const workoutRes = await db.query("SELECT * FROM workouts WHERE id = $1", [workoutId]);
+        const exercisesRes = await db.query("SELECT * FROM workout_exercises WHERE workout_id = $1 ORDER BY order_index ASC", [workoutId]);
 
         if (workoutRes.rows.length === 0) return res.redirect('/client/workouts');
 
