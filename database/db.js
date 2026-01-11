@@ -32,18 +32,21 @@ async function getUserById(id) {
 }
 
 async function createUser(user) {
-    const { name, email, password, role, trainer_id, profile_image, goal, fitness_level, height, weight } = user;
+    // CORREÇÃO: Removemos height, weight, goal, fitness_level daqui.
+    // Eles devem ser salvos na tabela específica (clients/trainers) após criar o user.
+    const { name, email, password, role, trainer_id, profile_image } = user;
+    
     let hashedPassword = null;
     if (password) {
          hashedPassword = await bcrypt.hash(password, 10);
     }
 
     const sql = `
-        INSERT INTO users (name, email, password, role, trainer_id, profile_image, goal, fitness_level, height, weight) 
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) 
+        INSERT INTO users (name, email, password, role, trainer_id, profile_image) 
+        VALUES ($1, $2, $3, $4, $5, $6) 
         RETURNING *`;
     
-    const res = await query(sql, [name, email, hashedPassword, role, trainer_id, profile_image, goal, fitness_level, height, weight]);
+    const res = await query(sql, [name, email, hashedPassword, role, trainer_id, profile_image]);
     return res.rows[0];
 }
 
@@ -52,7 +55,12 @@ async function updateUser(id, updates) {
     const values = [];
     let idx = 1;
 
+    // Lista de campos permitidos na tabela users (segurança contra campos removidos)
+    const allowedFields = ['name', 'email', 'password', 'role', 'trainer_id', 'profile_image'];
+
     for (const key in updates) {
+        if (!allowedFields.includes(key)) continue; // Ignora campos que não existem mais em users (ex: weight)
+
         if (key === 'password') {
             const hashedPassword = await bcrypt.hash(updates[key], 10);
             fields.push(`${key} = $${idx}`);
@@ -64,6 +72,8 @@ async function updateUser(id, updates) {
         idx++;
     }
     
+    if (fields.length === 0) return getUserById(id); // Nada para atualizar
+
     values.push(id);
     const sql = `UPDATE users SET ${fields.join(', ')} WHERE id = $${idx} RETURNING *`;
 
@@ -93,12 +103,12 @@ async function getAllTrainers() {
 }
 
 async function getClients() {
+    // CORREÇÃO: Join para pegar dados completos se necessário, mas a lista básica vem de users
     const res = await query("SELECT * FROM users WHERE role = 'client'", []);
     return res.rows;
 }
 
 async function getUserStats(userId) {
-    // Retorna estrutura compatível com as views
     return {
         completed_workouts: 0,
         current_streak: 0, 
@@ -107,14 +117,17 @@ async function getUserStats(userId) {
     };
 }
 
-// --- FUNÇÕES EXCLUSIVAS DO PAINEL DO TREINADOR (FILTRADAS POR ID) ---
+// --- FUNÇÕES EXCLUSIVAS DO PAINEL DO TREINADOR ---
 
 async function getClientsByTrainer(trainerId) {
+    // CORREÇÃO: Agora buscamos goal da tabela clients, não users
     const sql = `
-        SELECT id, name, email, profile_image, goal, status, created_at 
-        FROM users 
-        WHERE role = 'client' AND trainer_id = $1 
-        ORDER BY name ASC
+        SELECT u.id, u.name, u.email, u.profile_image, u.created_at, 
+               c.fitness_goals as goal, c.id as client_real_id
+        FROM users u
+        LEFT JOIN clients c ON u.id = c.user_id
+        WHERE u.role = 'client' AND u.trainer_id = $1 
+        ORDER BY u.name ASC
     `;
     const res = await query(sql, [trainerId]);
     return res.rows;
