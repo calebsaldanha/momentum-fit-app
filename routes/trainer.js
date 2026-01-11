@@ -34,12 +34,11 @@ router.get('/clients', isTrainer, async (req, res) => {
     }
 });
 
-// Detalhes do Cliente (VISÃO COMPLETA DA ANAMNESE)
+// Detalhes do Cliente
 router.get('/clients/:id', isTrainer, async (req, res) => {
     try {
-        const userId = req.params.id; // user_id do cliente
+        const userId = req.params.id;
         
-        // Busca TODOS os dados do cliente (Anamnese completa)
         const clientQuery = `
             SELECT u.name, u.email, u.profile_image, u.created_at as joined_at,
                    c.*, c.id as client_real_id
@@ -52,14 +51,18 @@ router.get('/clients/:id', isTrainer, async (req, res) => {
 
         if (!clientData) return res.redirect('/trainer/clients');
 
-        const workoutsRes = await db.query("SELECT * FROM workouts WHERE client_id = $1 ORDER BY created_at DESC", [clientData.client_real_id]);
+        let workouts = [];
+        if (clientData.client_real_id) {
+            const workoutsRes = await db.query("SELECT * FROM workouts WHERE client_id = $1 ORDER BY created_at DESC", [clientData.client_real_id]);
+            workouts = workoutsRes.rows;
+        }
         
-        // Renderiza a view de detalhes com todos os dados
+        // CORREÇÃO: Passando como 'student' em vez de 'client' para evitar erro do EJS
         res.render('pages/trainer-details', { 
             title: 'Detalhes do Aluno', 
             user: req.session.user, 
-            client: clientData,
-            workouts: workoutsRes.rows 
+            student: clientData,
+            workouts: workouts 
         });
 
     } catch (err) {
@@ -68,7 +71,6 @@ router.get('/clients/:id', isTrainer, async (req, res) => {
     }
 });
 
-// Outras rotas do treinador (criar treino, etc) mantidas...
 router.get('/create-workout', isTrainer, async (req, res) => {
     const clientId = req.query.client_id;
     res.render('pages/create-workout', { title: 'Criar Treino', user: req.session.user, clientId, exercises: [] }); 
@@ -77,7 +79,7 @@ router.get('/create-workout', isTrainer, async (req, res) => {
 router.post('/create-workout', isTrainer, async (req, res) => {
     try {
         await db.createWorkout({ ...req.body, trainer_id: req.session.user.id });
-        res.redirect('/trainer/clients/' + req.body.client_user_id); // Redireciona para detalhes usando user_id
+        res.redirect('/trainer/clients/' + req.body.client_user_id); 
     } catch (err) {
         res.redirect('/trainer/dashboard');
     }

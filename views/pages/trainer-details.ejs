@@ -16,16 +16,18 @@
 <div class="details-container">
     
     <div class="profile-header">
-        <img src="<%= client.profile_image || '/images/default-user.png' %>" class="profile-img" alt="Foto">
+        <img src="<%= student.profile_image || '/images/default-user.png' %>" class="profile-img" alt="Foto">
         <div style="flex: 1;">
-            <h1 style="color: white; margin: 0;"><%= client.name %></h1>
-            <p style="color: #888; margin: 5px 0;"><%= client.email %></p>
+            <h1 style="color: white; margin: 0;"><%= student.name %></h1>
+            <p style="color: #888; margin: 5px 0;"><%= student.email %></p>
             <div style="margin-top: 10px;">
-                <span class="badge" style="background: #222; color: #ccc; padding: 5px 10px; border-radius: 4px;">Aluno desde: <%= new Date(client.joined_at).toLocaleDateString() %></span>
+                <span class="badge" style="background: #222; color: #ccc; padding: 5px 10px; border-radius: 4px;">Aluno desde: <%= student.joined_at ? new Date(student.joined_at).toLocaleDateString() : '-' %></span>
             </div>
         </div>
         <div>
-            <a href="/trainer/create-workout?client_id=<%= client.client_real_id %>&client_user_id=<%= client.user_id %>" class="btn-action">+ Novo Treino</a>
+            <% if (student.client_real_id) { %>
+                <a href="/trainer/create-workout?client_id=<%= student.client_real_id %>&client_user_id=<%= student.user_id %>" class="btn-action">+ Novo Treino</a>
+            <% } %>
         </div>
     </div>
 
@@ -33,47 +35,47 @@
         
         <div class="data-card">
             <h3 class="section-title">Ì±§ Corpo & Medidas</h3>
-            <div class="data-row"><span class="data-label">Idade:</span> <span class="data-value"><%= client.age || '-' %> anos</span></div>
-            <div class="data-row"><span class="data-label">Peso Atual:</span> <span class="data-value"><%= client.current_weight || '-' %> kg</span></div>
-            <div class="data-row"><span class="data-label">Altura:</span> <span class="data-value"><%= client.height || '-' %> m</span></div>
-            <div class="data-row"><span class="data-label">Gordura Corporal:</span> <span class="data-value"><%= client.body_fat || '-' %>%</span></div>
-            <div class="data-row"><span class="data-label">Sexo Biol√≥gico:</span> <span class="data-value"><%= client.sex_assigned_at_birth || '-' %></span></div>
+            <div class="data-row"><span class="data-label">Idade:</span> <span class="data-value"><%= student.age || '-' %> anos</span></div>
+            <div class="data-row"><span class="data-label">Peso Atual:</span> <span class="data-value"><%= student.current_weight || '-' %> kg</span></div>
+            <div class="data-row"><span class="data-label">Altura:</span> <span class="data-value"><%= student.height || '-' %> m</span></div>
+            <div class="data-row"><span class="data-label">Gordura Corporal:</span> <span class="data-value"><%= student.body_fat || '-' %>%</span></div>
+            <div class="data-row"><span class="data-label">Sexo Biol√≥gico:</span> <span class="data-value"><%= student.sex_assigned_at_birth || '-' %></span></div>
             
             <h4 style="color: #666; margin-top: 15px; font-size: 0.9rem;">Circunfer√™ncias</h4>
-            <div class="data-row"><span class="data-label">Cintura:</span> <span class="data-value"><%= client.measure_waist || '-' %> cm</span></div>
-            <div class="data-row"><span class="data-label">Quadril:</span> <span class="data-value"><%= client.measure_hip || '-' %> cm</span></div>
-            <div class="data-row"><span class="data-label">Bra√ßo:</span> <span class="data-value"><%= client.measure_arm || '-' %> cm</span></div>
+            <div class="data-row"><span class="data-label">Cintura:</span> <span class="data-value"><%= student.measure_waist || '-' %> cm</span></div>
+            <div class="data-row"><span class="data-label">Quadril:</span> <span class="data-value"><%= student.measure_hip || '-' %> cm</span></div>
+            <div class="data-row"><span class="data-label">Bra√ßo:</span> <span class="data-value"><%= student.measure_arm || '-' %> cm</span></div>
         </div>
 
         <div class="data-card">
             <h3 class="section-title">ÌæØ Objetivos & Rotina</h3>
-            <div class="data-row"><span class="data-label">Objetivo Principal:</span> <span class="data-value"><%= client.fitness_goals %></span></div>
-            <div class="data-row"><span class="data-label">Obj. Secund√°rios:</span> <span class="data-value"><%= client.secondary_goals || '-' %></span></div>
-            <div class="data-row"><span class="data-label">N√≠vel Fitness:</span> <span class="data-value"><%= client.fitness_level %></span></div>
-            <div class="data-row"><span class="data-label">Frequ√™ncia:</span> <span class="data-value"><%= client.training_days_frequency || client.training_days %> dias/sem</span></div>
-            <div class="data-row"><span class="data-label">Local:</span> <span class="data-value"><%= client.workout_preference %></span></div>
-            <div class="data-row"><span class="data-label">Disponibilidade:</span> <span class="data-value"><%= client.time_availability || client.availability %></span></div>
-            <div class="data-row"><span class="data-label">Equipamentos:</span> <span class="data-value"><%= client.equipment || 'Nenhum' %></span></div>
+            <div class="data-row"><span class="data-label">Objetivo Principal:</span> <span class="data-value"><%= student.fitness_goals || student.goal || '-' %></span></div>
+            <div class="data-row"><span class="data-label">Obj. Secund√°rios:</span> <span class="data-value"><%= student.secondary_goals || '-' %></span></div>
+            <div class="data-row"><span class="data-label">N√≠vel Fitness:</span> <span class="data-value"><%= student.fitness_level || '-' %></span></div>
+            <div class="data-row"><span class="data-label">Frequ√™ncia:</span> <span class="data-value"><%= student.training_days_frequency || student.training_days || '-' %> dias/sem</span></div>
+            <div class="data-row"><span class="data-label">Local:</span> <span class="data-value"><%= student.workout_preference || '-' %></span></div>
+            <div class="data-row"><span class="data-label">Disponibilidade:</span> <span class="data-value"><%= student.time_availability || student.availability || '-' %></span></div>
+            <div class="data-row"><span class="data-label">Equipamentos:</span> <span class="data-value"><%= student.equipment || 'Nenhum' %></span></div>
         </div>
 
         <div class="data-card">
             <h3 class="section-title">Ìø• Sa√∫de & Lifestyle</h3>
             <div class="data-row">
                 <span class="data-label">Condi√ß√µes M√©dicas:</span><br>
-                <span class="data-value" style="color: #fca5a5;"><%= client.medical_conditions || 'Nenhuma' %></span>
+                <span class="data-value" style="color: #fca5a5;"><%= student.medical_conditions || 'Nenhuma' %></span>
             </div>
             <div class="data-row">
                 <span class="data-label">Les√µes:</span><br>
-                <span class="data-value" style="color: #fca5a5;"><%= client.injuries || 'Nenhuma' %></span>
+                <span class="data-value" style="color: #fca5a5;"><%= student.injuries || 'Nenhuma' %></span>
             </div>
-            <div class="data-row"><span class="data-label">Medicamentos:</span> <span class="data-value"><%= client.medications || '-' %></span></div>
-            <div class="data-row"><span class="data-label">Alergias:</span> <span class="data-value"><%= client.allergies || '-' %></span></div>
+            <div class="data-row"><span class="data-label">Medicamentos:</span> <span class="data-value"><%= student.medications || '-' %></span></div>
+            <div class="data-row"><span class="data-label">Alergias:</span> <span class="data-value"><%= student.allergies || '-' %></span></div>
             <div class="data-row" style="margin-top: 10px;">
                 <span class="data-label">Dieta:</span><br>
-                <p class="data-value" style="font-size: 0.9rem;"><%= client.diet_description || '-' %></p>
+                <p class="data-value" style="font-size: 0.9rem;"><%= student.diet_description || '-' %></p>
             </div>
             <div class="data-row">
-                <span class="data-label">Sono:</span> <span class="data-value"><%= client.sleep_hours || '-' %> horas</span>
+                <span class="data-label">Sono:</span> <span class="data-value"><%= student.sleep_hours || '-' %> horas</span>
             </div>
         </div>
     </div>
