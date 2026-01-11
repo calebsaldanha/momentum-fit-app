@@ -26,7 +26,6 @@ router.get('/clients', isTrainer, async (req, res) => {
     res.render('pages/trainer-clients', { title: 'Alunos', user: req.session.user, clients, currentPage: 'clients' });
 });
 
-// Detalhes do Cliente (Aponta para a mesma view unificada do Admin)
 router.get('/clients/:id', isTrainer, async (req, res) => {
     try {
         const clientId = req.params.id;
@@ -61,19 +60,13 @@ router.get('/clients/:id', isTrainer, async (req, res) => {
     }
 });
 
-router.get('/create-workout', isTrainer, async (req, res) => {
-    res.render('pages/create-workout', { 
-        title: 'Criar Treino', user: req.session.user, clientId: req.query.client_id, exercises: [], currentPage: 'clients'
-    }); 
-});
-
-router.post('/create-workout', isTrainer, async (req, res) => {
-    try {
-        await db.createWorkout({ ...req.body, trainer_id: req.session.user.id });
-        res.redirect('/trainer/clients/' + req.body.client_user_id); 
-    } catch (err) {
-        res.redirect('/trainer/dashboard');
+// --- CORREÇÃO: Redirecionamento para o controller correto ---
+router.get('/create-workout', isTrainer, (req, res) => {
+    const clientId = req.query.client_id;
+    if (clientId) {
+        return res.redirect(`/workouts/create?client_id=${clientId}`);
     }
+    res.redirect('/workouts/create');
 });
 
 module.exports = router;
