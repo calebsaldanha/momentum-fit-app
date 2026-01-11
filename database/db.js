@@ -6,7 +6,7 @@ require('dotenv').config();
 const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL;
 
 if (!connectionString) {
-  console.error("❌ ERRO CRÍTICO: Nenhuma string de conexão encontrada. Verifique suas variáveis de ambiente.");
+  console.error("❌ ERRO CRÍTICO: Nenhuma string de conexão encontrada.");
 }
 
 const isProduction = process.env.NODE_ENV === 'production';
@@ -32,8 +32,8 @@ async function getUserById(id) {
 }
 
 async function createUser(user) {
-    // CORREÇÃO: Removemos height, weight, goal, fitness_level daqui.
-    // Eles devem ser salvos na tabela específica (clients/trainers) após criar o user.
+    // CORREÇÃO: Removemos height, weight, goal, etc da tabela users.
+    // Esses dados devem ser inseridos na tabela 'clients' pelo controller.
     const { name, email, password, role, trainer_id, profile_image } = user;
     
     let hashedPassword = null;
@@ -55,11 +55,11 @@ async function updateUser(id, updates) {
     const values = [];
     let idx = 1;
 
-    // Lista de campos permitidos na tabela users (segurança contra campos removidos)
+    // Filtra apenas campos que existem na tabela users
     const allowedFields = ['name', 'email', 'password', 'role', 'trainer_id', 'profile_image'];
 
     for (const key in updates) {
-        if (!allowedFields.includes(key)) continue; // Ignora campos que não existem mais em users (ex: weight)
+        if (!allowedFields.includes(key)) continue;
 
         if (key === 'password') {
             const hashedPassword = await bcrypt.hash(updates[key], 10);
@@ -72,7 +72,7 @@ async function updateUser(id, updates) {
         idx++;
     }
     
-    if (fields.length === 0) return getUserById(id); // Nada para atualizar
+    if (fields.length === 0) return getUserById(id);
 
     values.push(id);
     const sql = `UPDATE users SET ${fields.join(', ')} WHERE id = $${idx} RETURNING *`;
@@ -89,7 +89,8 @@ async function getWorkoutsByUserId(userId) {
 }
 
 async function createWorkout(workout) {
-    const client_id = workout.client_id || workout.user_id; const { trainer_id, title, description, exercises } = workout;
+    const client_id = workout.client_id || workout.user_id; 
+    const { trainer_id, title, description, exercises } = workout;
     const exercisesJson = typeof exercises === 'string' ? exercises : JSON.stringify(exercises);
     
     const sql = "INSERT INTO workouts (client_id, trainer_id, title, description, exercises) VALUES ($1, $2, $3, $4, $5) RETURNING *";
@@ -103,7 +104,7 @@ async function getAllTrainers() {
 }
 
 async function getClients() {
-    // CORREÇÃO: Join para pegar dados completos se necessário, mas a lista básica vem de users
+    // Retorna todos os usuários que são clientes
     const res = await query("SELECT * FROM users WHERE role = 'client'", []);
     return res.rows;
 }
@@ -117,14 +118,14 @@ async function getUserStats(userId) {
     };
 }
 
-// --- FUNÇÕES EXCLUSIVAS DO PAINEL DO TREINADOR ---
+// --- FUNÇÕES DE TREINADOR ---
 
 async function getClientsByTrainer(trainerId) {
-    // CORREÇÃO: Agora buscamos goal da tabela clients, não users
+    // CORRIGIDO: Busca dados físicos na tabela clients, não users
     const sql = `
-        SELECT u.id, u.name, u.email, u.profile_image, u.created_at, 
+        SELECT u.id, u.name, u.email, u.profile_image, u.created_at,
                c.fitness_goals as goal, c.id as client_real_id
-        FROM users u
+        FROM users u 
         LEFT JOIN clients c ON u.id = c.user_id
         WHERE u.role = 'client' AND u.trainer_id = $1 
         ORDER BY u.name ASC
@@ -167,9 +168,8 @@ async function getTrainerStats(trainerId) {
             stats.weeklyCheckins = 0;
         }
     } catch (err) {
-        console.error("Erro ao calcular estatísticas do treinador:", err);
+        console.error("Erro estatisticas:", err);
     }
-    
     return stats;
 }
 
