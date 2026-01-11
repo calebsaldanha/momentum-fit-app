@@ -21,25 +21,25 @@ router.get('/dashboard', isAuthenticated, async (req, res) => {
         `;
         
         const clientRes = await db.query(clientQuery, [req.session.user.id]);
-        const client = clientRes.rows[0];
+        const clientData = clientRes.rows[0];
 
         let workouts = [];
         
         // Se o cliente existe e tem ID vinculado
-        if (client && client.client_real_id) {
+        if (clientData && clientData.client_real_id) {
             const workoutsQuery = `
                 SELECT * FROM workouts 
                 WHERE client_id = $1 AND status = 'pending' 
                 ORDER BY date ASC LIMIT 3
             `;
-            const workoutsRes = await db.query(workoutsQuery, [client.client_real_id]);
+            const workoutsRes = await db.query(workoutsQuery, [clientData.client_real_id]);
             workouts = workoutsRes.rows;
         }
 
         res.render('pages/client-dashboard', { 
             title: 'Painel do Aluno',
             user: req.session.user,
-            client: client || {},
+            clientProfile: clientData || {}, // Renomeado para evitar conflito
             workouts: workouts || []
         });
 
@@ -65,7 +65,7 @@ router.get('/profile', isAuthenticated, async (req, res) => {
         res.render('pages/client-profile', { 
             title: 'Meu Perfil',
             user: req.session.user,
-            client: rows[0] || {} 
+            clientProfile: rows[0] || {} // Renomeado
         });
     } catch (err) {
         console.error(err);
@@ -140,12 +140,12 @@ router.post('/profile', isAuthenticated, async (req, res) => {
 router.get('/workouts', isAuthenticated, async (req, res) => {
     try {
         const clientRes = await db.query("SELECT id FROM clients WHERE user_id = $1", [req.session.user.id]);
-        const client = clientRes.rows[0];
+        const clientData = clientRes.rows[0];
 
-        if (!client) return res.redirect('/client/dashboard');
+        if (!clientData) return res.redirect('/client/dashboard');
 
         // Busca treinos do cliente
-        const workoutsRes = await db.query("SELECT * FROM workouts WHERE client_id = $1 ORDER BY date DESC", [client.id]);
+        const workoutsRes = await db.query("SELECT * FROM workouts WHERE client_id = $1 ORDER BY date DESC", [clientData.id]);
         
         res.render('pages/client-workouts', { 
             title: 'Meus Treinos',
