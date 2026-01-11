@@ -2,71 +2,153 @@ const express = require('express');
 const router = express.Router();
 const db = require('../database/db');
 
-function isAdmin(req, res, next) {
-    if (req.session.user && (req.session.user.role === 'admin' || req.session.user.role === 'superadmin')) {
+// Middleware de verificação de permissão
+const requireAdmin = (req, res, next) => {
+    if (!req.session.user) return res.redirect('/auth/login');
+    // Permite 'trainer', 'admin' e 'superadmin'
+    if (['trainer', 'admin', 'superadmin'].includes(req.session.user.role)) {
         return next();
     }
-    res.redirect('/auth/login');
-}
+    return res.status(403).render('pages/error', { message: 'Acesso negado.', user: req.session.user });
+};
 
-router.get('/dashboard', isAdmin, async (req, res) => {
+// Dashboard
+router.get('/dashboard', requireAdmin, async (req, res) => {
     try {
-        res.render('pages/admin-dashboard', { title: 'Admin', user: req.session.user });
+        const trainerId = req.session.user.id;
+        
+        // RECUPERADO: Busca estatísticas e alunos recentes
+        const stats = await db.getTrainerStats(trainerId);
+        const recentClients = await db.getRecentClientsByTrainer(trainerId);
+
+        res.render('pages/admin-dashboard', {
+            title: 'Painel do Treinador',
+            bodyClass: 'dashboard-body',
+            currentPage: 'dashboard',
+            user: req.session.user,
+            stats: stats || { totalClients: 0, totalWorkouts: 0, weeklyCheckins: 0 },
+            recentClients: recentClients || []
+        });
     } catch (err) {
-        console.error(err);
-        res.render('pages/error', { title: 'Erro', message: 'Erro ao carregar dashboard' });
+        console.error("Erro dashboard:", err);
+        res.status(500).render('pages/error', { message: 'Erro ao carregar dashboard.', user: req.session.user });
     }
 });
 
-router.get('/clients', isAdmin, async (req, res) => {
+// Meus Alunos
+router.get('/clients', requireAdmin, async (req, res) => {
     try {
-        const clients = await db.query("SELECT * FROM users WHERE role = 'client'");
-        res.render('pages/admin-clients', { title: 'Gerenciar Alunos', user: req.session.user, clients: clients.rows });
+        const trainerId = req.session.user.id;
+        const clients = await db.getClientsByTrainer(trainerId);
+
+        res.render('pages/admin-clients', {
+            title: 'Meus Alunos',
+            bodyClass: 'dashboard-body',
+            currentPage: 'clients',
+            user: req.session.user,
+            clients: clients
+        });
     } catch (err) {
         console.error(err);
-        res.render('pages/error', { title: 'Erro', message: 'Erro ao carregar lista de alunos' });
+        res.status(500).render('pages/error', { message: 'Erro ao listar alunos.', user: req.session.user });
     }
 });
 
-// Detalhes do Cliente para Admin (Visualização Completa)
-router.get('/clients/:id', isAdmin, async (req, res) => {
-    const userId = req.params.id;
-    
-    // Query correta sem escapes inválidos
-    const clientQuery = `
-        SELECT u.name, u.email, u.profile_image, u.created_at as joined_at,
-               c.*, c.id as client_real_id
-        FROM users u
-        LEFT JOIN clients c ON u.id = c.user_id
-        WHERE u.id = $1
-    `; 
-    
+// Detalhes do Aluno
+router.get('/clients/:id', requireAdmin, async (req, res) => {
     try {
-        const clientRes = await db.query(clientQuery, [userId]);
-        const clientData = clientRes.rows[0];
+        const trainerId = req.session.user.id;
+        const clientId = req.params.id;
+        const source = req.query.source;
+
+        // Busca dados do usuário (aluno)
+        const client = await db.getUserById(clientId);
         
-        if (!clientData) {
-            return res.redirect('/admin/clients');
+        if (!client) {
+            return res.status(404).render('pages/error', { message: 'Aluno não encontrado.', user: req.session.user });
+        }
+        
+        // Verificação de segurança: O aluno pertence a este treinador? (Exceto Superadmin)
+        let showAdminOptions = false;
+        let pageContext = 'clients';
+
+        if (req.session.user.role === 'superadmin') {
+            if (source === 'admin_manage') pageContext = 'superadmin_users';
+            showAdminOptions = true;
+        } else {
+            // Se for treinador comum, só pode ver seus próprios alunos
+            if (client.trainer_id != trainerId) {
+                 return res.status(403).render('pages/error', { message: 'Você não tem permissão para ver este aluno.', user: req.session.user });
+            }
         }
 
-        // Busca treinos para exibir na ficha completa
-        let workouts = [];
-        if (clientData.client_real_id) {
-            const workoutsRes = await db.query("SELECT * FROM workouts WHERE client_id = $1 ORDER BY created_at DESC", [clientData.client_real_id]);
-            workouts = workoutsRes.rows;
-        }
+        // Busca dados complementares
+        const workouts = await db.getWorkoutsByUserId(clientId);
+        const stats = await db.getUserStats(clientId);
         
-        // Reutiliza a view detalhada criada para o treinador
-        res.render('pages/trainer-details', { 
-            title: 'Admin - Detalhes do Aluno', 
-            user: req.session.user, 
-            client: clientData || {},
-            workouts: workouts
+        // Tenta buscar o perfil detalhado (tabela clients)
+        // Usamos uma query direta auxiliar ou reutilizamos a lógica do db.js se disponível
+        // Aqui vamos usar uma query direta para garantir
+        let detailedProfile = {};
+        try {
+            const profileRes = await db.query(`
+                SELECT c.*, u.name, u.email, u.profile_image 
+                FROM clients c 
+                JOIN users u ON c.user_id = u.id 
+                WHERE u.id = $1
+            `, [clientId]);
+            if (profileRes.rows.length > 0) {
+                detailedProfile = profileRes.rows[0];
+            } else {
+                // Fallback: usa dados básicos de user se não tiver na tabela clients
+                detailedProfile = client;
+            }
+        } catch (e) {
+            console.warn("Erro ao buscar perfil detalhado:", e.message);
+            detailedProfile = client;
+        }
+
+        let trainersList = [];
+        if (showAdminOptions) { 
+            trainersList = await db.getAllTrainers(); 
+        }
+
+        // Renderiza a view (usando trainer-details.ejs que criamos anteriormente ou client-details.ejs existente)
+        // Como o arquivo client-details.ejs foi mencionado, vamos garantir que ele receba tudo.
+        // Se você estiver usando trainer-details.ejs para essa view, altere abaixo.
+        // Vou apontar para trainer-details pois é o mais completo que criamos.
+        res.render('pages/trainer-details', {
+            title: 'Detalhes do Aluno',
+            bodyClass: 'dashboard-body',
+            currentPage: pageContext,
+            user: req.session.user,
+            client: detailedProfile, // Passamos o perfil completo como 'client'
+            workouts: workouts || [],
+            stats: stats || {},
+            trainers: trainersList,
+            showAdminOptions: showAdminOptions
         });
 
-    } catch(e) {
-        console.error("Erro ao carregar detalhes do cliente:", e);
-        res.redirect('/admin/clients');
+    } catch (err) {
+        console.error('Erro client details:', err);
+        res.status(500).render('pages/error', { message: 'Erro ao carregar detalhes.', user: req.session.user });
+    }
+});
+
+// Lista de Treinadores (Superadmin)
+router.get('/trainers', requireAdmin, async (req, res) => {
+    if(req.session.user.role !== 'superadmin') return res.redirect('/admin/dashboard');
+    try {
+        const trainers = await db.getAllTrainers();
+        res.render('pages/admin-trainers', { 
+            title: 'Treinadores',
+            bodyClass: 'dashboard-body',
+            currentPage: 'trainers',
+            user: req.session.user,
+            trainers: trainers
+        });
+    } catch(err) {
+        res.redirect('/admin/dashboard');
     }
 });
 
