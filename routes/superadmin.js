@@ -162,3 +162,42 @@ router.post('/assign-trainer', requireSuperAdmin, async (req, res) => {
 });
 
 module.exports = router;
+
+// ROTA: Detalhes do Usuário (Client) com opção de atribuir treinador
+router.get('/users/:id', requireSuperAdmin, async (req, res) => {
+    const userId = req.params.id;
+    try {
+        // 1. Busca dados básicos do usuário
+        const userRes = await pool.query("SELECT * FROM users WHERE id = $1", [userId]);
+        const targetUser = userRes.rows[0];
+        
+        if (!targetUser) {
+            return res.redirect('/superadmin/manage');
+        }
+
+        // 2. Se for treinador, redireciona para a página de detalhes de treinador existente
+        if (targetUser.role === 'trainer') {
+            return res.redirect(`/superadmin/trainers/${targetUser.id}`);
+        }
+
+        // 3. Busca perfil físico (Anamnese)
+        const clientRes = await pool.query("SELECT * FROM clients WHERE user_id = $1", [userId]);
+        const clientProfile = clientRes.rows[0] || {};
+
+        // 4. Busca lista de todos os treinadores para o Dropdown
+        const trainersRes = await pool.query("SELECT id, name FROM users WHERE role = 'trainer' AND status = 'active' ORDER BY name ASC");
+        
+        res.render('pages/superadmin-client-details', {
+            title: `Detalhes: ${targetUser.name}`,
+            user: req.session.user,      // Admin logado
+            targetUser: targetUser,      // Usuário sendo visualizado
+            clientProfile: clientProfile,
+            trainers: trainersRes.rows,
+            currentPage: 'superadmin-manage'
+        });
+
+    } catch (err) {
+        console.error("Erro ao carregar detalhes do usuário:", err);
+        res.status(500).render('pages/error', { message: 'Erro ao carregar detalhes.' });
+    }
+});
