@@ -1,51 +1,65 @@
-<%- include('../partials/header.ejs', { title, bodyClass: 'dashboard-body' }) %>
-<div class="dashboard-container">
-    <%- include('../partials/sidebar.ejs', { currentPage: 'clients' }) %>
-    <main class="dashboard-main">
-        <div class="section">
-            <div class="section-header">
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <%- include('../partials/header', { title: 'Meus Alunos', bodyClass: 'dashboard-body' }) %>
+    <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <%- include('../partials/sidebar', { currentPage: 'clients' }) %>
+        
+        <main class="dashboard-main">
+            <header class="mb-4">
                 <h1>Meus Alunos</h1>
-                <p>Gerencie o progresso e os treinos.</p>
-            </div>
+                <p class="text-muted">Acompanhe o progresso e prescreva treinos.</p>
+            </header>
             
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Nome</th>
-                            <th>Status</th>
-                            <th>Nível</th>
-                            <th style="text-align: right;">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% if (clients.length > 0) { %>
-                            <% clients.forEach(c => { %>
+            <div class="dashboard-card">
+                <% if (clients && clients.length > 0) { %>
+                    <div class="table-responsive">
+                        <table class="modern-table">
+                            <thead>
                                 <tr>
-                                    <td>
-                                        <div style="font-weight: bold;"><%= c.name %></div>
-                                        <div style="font-size: 0.8rem; color: #888;"><%= c.email %></div>
-                                    </td>
-                                    <td>
-                                        <% if (c.status === 'active') { %>
-                                            <span style="color: var(--c-success);">Ativo</span>
-                                        <% } else { %>
-                                            <span style="color: #f59e0b;">Pendente</span>
-                                        <% } %>
-                                    </td>
-                                    <td><%= c.fitness_level || '-' %></td>
-                                    <td style="text-align: right;">
-                                        <a href="/admin/clients/<%= c.id %>" class="btn btn-secondary btn-sm" style="background: var(--c-accent-primary); color: black; border: none;">Ver Perfil</a>
-                                    </td>
+                                    <th>Nome</th>
+                                    <th>Status</th>
+                                    <th>Nível</th>
+                                    <th class="text-end">Ações</th>
                                 </tr>
-                            <% }) %>
-                        <% } else { %>
-                            <tr><td colspan="4" style="text-align: center;">Nenhum aluno atribuído.</td></tr>
-                        <% } %>
-                    </tbody>
-                </table>
+                            </thead>
+                            <tbody>
+                                <% clients.forEach(c => { %>
+                                    <tr>
+                                        <td>
+                                            <div class="user-info-flex">
+                                                <img src="<%= c.profile_image || '/images/default-profile.png' %>" class="user-avatar-sm">
+                                                <div>
+                                                    <div class="fw-bold"><%= c.name %></div>
+                                                    <small class="text-muted"><%= c.email %></small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge badge-<%= c.status === 'active' ? 'active' : 'pending' %>">
+                                                <%= c.status === 'active' ? 'Ativo' : 'Pendente' %>
+                                            </span>
+                                        </td>
+                                        <td><%= c.fitness_level || '-' %></td>
+                                        <td class="text-end">
+                                            <a href="/workouts/create?client_id=<%= c.id %>" class="btn btn-sm btn-primary"><i class="fas fa-plus"></i> Treino</a>
+                                            <a href="/admin/clients/<%= c.id %>" class="btn btn-sm btn-secondary"><i class="fas fa-user"></i> Perfil</a>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                <% } else { %>
+                    <div class="text-center py-5">
+                        <p class="text-muted">Você ainda não tem alunos atribuídos.</p>
+                    </div>
+                <% } %>
             </div>
-        </div>
-    </main>
-</div>
-<%- include('../partials/footer.ejs') %>
+        </main>
+    </div>
+</body>
+</html>

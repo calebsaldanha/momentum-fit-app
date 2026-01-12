@@ -3,139 +3,74 @@
 <head>
     <%- include('../partials/header') %>
     <link rel="stylesheet" href="/css/dashboard.css">
-    <style>
-        /* Estilos específicos para remover o visual "quadrado branco" */
-        .stat-card-modern {
-            background: linear-gradient(145deg, #1e1e1e, #252525);
-            border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 16px;
-            padding: 2rem;
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-        }
-        .stat-card-modern:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
-            border-color: var(--primary-color);
-        }
-        .stat-icon-wrapper {
-            width: 60px;
-            height: 60px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8rem;
-            background: rgba(var(--primary-rgb), 0.1);
-            color: var(--primary-color);
-        }
-        .stat-content h3 {
-            font-size: 2.5rem;
-            margin: 0;
-            color: #fff;
-            font-weight: 700;
-        }
-        .stat-content p {
-            margin: 0;
-            color: #a0a0a0;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        
-        .quick-actions-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin-top: 2rem;
-        }
-        .action-card {
-            background: #2a2a2a;
-            padding: 1.5rem;
-            border-radius: 12px;
-            text-align: center;
-            text-decoration: none;
-            color: #fff;
-            border: 1px solid rgba(255,255,255,0.05);
-            transition: all 0.2s;
-        }
-        .action-card:hover {
-            background: #333;
-            border-color: var(--primary-color);
-            color: var(--primary-color);
-        }
-        .action-card i {
-            font-size: 2rem;
-            margin-bottom: 1rem;
-            display: block;
-        }
-    </style>
 </head>
 <body>
     <div class="dashboard-container">
         <%- include('../partials/sidebar', { user: user, currentPage: 'superadmin-dashboard' }) %>
 
         <main class="dashboard-main">
-            <header class="dashboard-header">
-                <div class="header-welcome">
-                    <h1>Visão Geral</h1>
-                    <p class="text-muted">Monitoramento em tempo real da plataforma.</p>
-                </div>
+            <header class="mb-4">
+                <h1>Visão Global</h1>
+                <p class="text-muted">Monitoramento em tempo real da plataforma.</p>
             </header>
 
-            <div class="dashboard-grid mb-5">
-                <div class="stat-card-modern">
-                    <div class="stat-icon-wrapper">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <div class="stat-content">
-                        <h3><%= stats.users %></h3>
-                        <p>Total de Usuários</p>
-                    </div>
-                </div>
-
-                <div class="stat-card-modern">
-                    <div class="stat-icon-wrapper">
-                        <i class="fas fa-dumbbell"></i>
-                    </div>
-                    <div class="stat-content">
-                        <h3><%= stats.trainers %></h3>
-                        <p>Treinadores</p>
+            <% if (stats.pendingTrainers > 0 || stats.pendingClients > 0) { %>
+                <div class="dashboard-card" style="border-left: 4px solid var(--warning-color);">
+                    <h4 class="text-warning mb-3"><i class="fas fa-exclamation-triangle"></i> Atenção Necessária</h4>
+                    <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
+                        <% if (stats.pendingTrainers > 0) { %>
+                            <div>
+                                <strong class="text-white"><%= stats.pendingTrainers %></strong> treinadores aguardando.
+                                <a href="/superadmin/manage" class="text-warning ms-2">Verificar</a>
+                            </div>
+                        <% } %>
+                        <% if (stats.pendingClients > 0) { %>
+                            <div>
+                                <strong class="text-white"><%= stats.pendingClients %></strong> alunos aguardando.
+                                <a href="/superadmin/manage" class="text-warning ms-2">Verificar</a>
+                            </div>
+                        <% } %>
                     </div>
                 </div>
+            <% } %>
 
+            <div class="stats-grid-modern">
                 <div class="stat-card-modern">
-                    <div class="stat-icon-wrapper">
-                        <i class="fas fa-user-friends"></i>
+                    <div class="stat-icon"><i class="fas fa-users"></i></div>
+                    <div>
+                        <h3 class="m-0"><%= stats.users %></h3>
+                        <small class="text-muted">Usuários Totais</small>
                     </div>
-                    <div class="stat-content">
-                        <h3><%= stats.clients %></h3>
-                        <p>Alunos Ativos</p>
+                </div>
+                <div class="stat-card-modern">
+                    <div class="stat-icon"><i class="fas fa-dumbbell"></i></div>
+                    <div>
+                        <h3 class="m-0"><%= stats.trainers %></h3>
+                        <small class="text-muted">Treinadores</small>
+                    </div>
+                </div>
+                <div class="stat-card-modern">
+                    <div class="stat-icon"><i class="fas fa-user-check"></i></div>
+                    <div>
+                        <h3 class="m-0"><%= stats.clients %></h3>
+                        <small class="text-muted">Alunos Ativos</small>
                     </div>
                 </div>
             </div>
 
-            <h3 class="section-title mb-3">Acesso Rápido</h3>
-            <div class="quick-actions-grid">
-                <a href="/superadmin/manage" class="action-card">
-                    <i class="fas fa-users-cog"></i>
-                    <span>Gerenciar Usuários</span>
-                </a>
-                <a href="/superadmin/create-trainer" class="action-card">
-                    <i class="fas fa-user-plus"></i>
-                    <span>Novo Treinador</span>
-                </a>
-                <a href="/articles/manage" class="action-card">
-                    <i class="fas fa-newspaper"></i>
-                    <span>Gerenciar Artigos</span>
-                </a>
-                <a href="/superadmin/settings" class="action-card">
-                    <i class="fas fa-cogs"></i>
-                    <span>Configurações</span>
-                </a>
+            <div class="dashboard-card">
+                <h3 class="mb-3">Acesso Rápido</h3>
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <a href="/superadmin/manage" class="btn btn-secondary">
+                        <i class="fas fa-users-cog"></i> Gerenciar Usuários
+                    </a>
+                    <a href="/superadmin/create-trainer" class="btn btn-secondary">
+                        <i class="fas fa-user-plus"></i> Novo Treinador
+                    </a>
+                    <a href="/articles/manage" class="btn btn-secondary">
+                        <i class="fas fa-newspaper"></i> Gerenciar Artigos
+                    </a>
+                </div>
             </div>
         </main>
     </div>
