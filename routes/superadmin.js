@@ -148,15 +148,12 @@ router.post('/users/:id/change-password', requireSuperAdmin, async (req, res) =>
     }
 });
 
+// CORRIGIDO: Atualiza diretamente na tabela USERS
 router.post('/assign-trainer', requireSuperAdmin, async (req, res) => {
     const { user_id, trainer_id } = req.body;
     try {
-        const check = await pool.query("SELECT * FROM client_profiles WHERE user_id = $1", [user_id]);
-        if (check.rows.length === 0) {
-            await pool.query("INSERT INTO client_profiles (user_id, trainer_id) VALUES ($1, $2)", [user_id, trainer_id || null]);
-        } else {
-            await pool.query("UPDATE client_profiles SET trainer_id = $1 WHERE user_id = $2", [trainer_id || null, user_id]);
-        }
+        // Atualiza a coluna trainer_id na tabela users (Fonte da Verdade)
+        await pool.query("UPDATE users SET trainer_id = $1 WHERE id = $2", [trainer_id || null, user_id]);
         res.redirect(req.get('referer'));
     } catch(err) {
         console.error(err);

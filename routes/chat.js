@@ -23,11 +23,19 @@ router.get('/', requireAuth, async (req, res) => {
         const role = req.session.user.role;
         let contacts = [];
 
-        // Lógica de contatos
+        // Lógica de contatos CORRIGIDA (Baseada na tabela users)
         try {
             if (role === 'client') {
-                const trainerRes = await pool.query("SELECT u.id, u.name, u.role, u.profile_image FROM users u JOIN client_profiles cp ON cp.trainer_id = u.id WHERE cp.user_id = $1", [userId]);
+                // Aluno vê seu treinador (via users.trainer_id)
+                const trainerRes = await pool.query(`
+                    SELECT t.id, t.name, t.role, t.profile_image 
+                    FROM users u 
+                    JOIN users t ON u.trainer_id = t.id 
+                    WHERE u.id = $1`, 
+                    [userId]
+                );
                 contacts = trainerRes.rows;
+                
                 // Se não tiver treinador, mostra admin
                 if (contacts.length === 0) {
                     const adminRes = await pool.query("SELECT id, name, role, profile_image FROM users WHERE role = 'superadmin'");
@@ -37,8 +45,11 @@ router.get('/', requireAuth, async (req, res) => {
                 const allUsers = await pool.query("SELECT id, name, role, profile_image FROM users WHERE id != $1 ORDER BY name ASC", [userId]);
                 contacts = allUsers.rows;
             } else {
-                // Treinador vê seus alunos
-                const clientsRes = await pool.query("SELECT u.id, u.name, u.role, u.profile_image FROM users u JOIN client_profiles cp ON cp.user_id = u.id WHERE cp.trainer_id = $1 ORDER BY u.name ASC", [userId]);
+                // Treinador vê seus alunos (via users.trainer_id)
+                const clientsRes = await pool.query(
+                    "SELECT id, name, role, profile_image FROM users WHERE trainer_id = $1 AND role = 'client' ORDER BY name ASC", 
+                    [userId]
+                );
                 contacts = clientsRes.rows;
             }
         } catch (dbErr) {
