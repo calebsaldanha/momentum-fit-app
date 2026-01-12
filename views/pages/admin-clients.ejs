@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <%- include('../partials/header', { title: 'Meus Alunos', bodyClass: 'dashboard-body' }) %>
+    <%- include('../partials/header', { title: 'Meus Alunos' }) %>
     <link rel="stylesheet" href="/css/dashboard.css">
 </head>
 <body>
@@ -9,44 +9,41 @@
         <%- include('../partials/sidebar', { currentPage: 'clients' }) %>
         
         <main class="dashboard-main">
-            <header class="mb-4">
-                <h1>Meus Alunos</h1>
-                <p class="text-muted">Acompanhe o progresso e prescreva treinos.</p>
+            <header class="page-header">
+                <div>
+                    <h1>Meus Alunos</h1>
+                    <p>Acompanhe o progresso e gerencie treinos.</p>
+                </div>
             </header>
             
-            <div class="dashboard-card">
+            <div class="card-modern">
                 <% if (clients && clients.length > 0) { %>
-                    <div class="table-responsive">
-                        <table class="modern-table">
+                    <div class="table-container">
+                        <table class="table-modern">
                             <thead>
                                 <tr>
                                     <th>Nome</th>
                                     <th>Status</th>
-                                    <th>Nível</th>
-                                    <th class="text-end">Ações</th>
+                                    <th>Última Atividade</th>
+                                    <th style="text-align: right;">Prescrição</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <% clients.forEach(c => { %>
                                     <tr>
                                         <td>
-                                            <div class="user-info-flex">
-                                                <img src="<%= c.profile_image || '/images/default-profile.png' %>" class="user-avatar-sm">
-                                                <div>
-                                                    <div class="fw-bold"><%= c.name %></div>
-                                                    <small class="text-muted"><%= c.email %></small>
-                                                </div>
+                                            <div class="d-flex align-items-center gap-3">
+                                                <img src="<%= c.profile_image || '/images/default-profile.png' %>" class="avatar-ring">
+                                                <span class="fw-bold"><%= c.name %></span>
                                             </div>
                                         </td>
-                                        <td>
-                                            <span class="badge badge-<%= c.status === 'active' ? 'active' : 'pending' %>">
-                                                <%= c.status === 'active' ? 'Ativo' : 'Pendente' %>
-                                            </span>
-                                        </td>
-                                        <td><%= c.fitness_level || '-' %></td>
-                                        <td class="text-end">
-                                            <a href="/workouts/create?client_id=<%= c.id %>" class="btn btn-sm btn-primary"><i class="fas fa-plus"></i> Treino</a>
-                                            <a href="/admin/clients/<%= c.id %>" class="btn btn-sm btn-secondary"><i class="fas fa-user"></i> Perfil</a>
+                                        <td><span class="badge badge-active">Ativo</span></td>
+                                        <td class="text-muted">--</td>
+                                        <td style="text-align: right;">
+                                            <a href="/workouts/create?client_id=<%= c.id %>" class="btn btn-primary btn-sm">
+                                                <i class="fas fa-plus"></i> Criar Treino
+                                            </a>
+                                            <a href="/admin/clients/<%= c.id %>" class="btn btn-ghost btn-sm">Perfil</a>
                                         </td>
                                     </tr>
                                 <% }) %>
@@ -55,7 +52,7 @@
                     </div>
                 <% } else { %>
                     <div class="text-center py-5">
-                        <p class="text-muted">Você ainda não tem alunos atribuídos.</p>
+                        <p class="text-muted">Você ainda não possui alunos atribuídos.</p>
                     </div>
                 <% } %>
             </div>

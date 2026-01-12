@@ -3,82 +3,53 @@
 <head>
     <%- include('../partials/header') %>
     <link rel="stylesheet" href="/css/dashboard.css">
+    <style>
+        .article-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
+        .article-card-img { height: 160px; width: 100%; object-fit: cover; border-bottom: 1px solid var(--border-subtle); }
+        .article-content { padding: 1.5rem; }
+    </style>
 </head>
 <body>
     <div class="dashboard-container">
         <%- include('../partials/sidebar', { user: user, currentPage: 'articles-manage' }) %>
 
         <main class="dashboard-main">
-            <header class="d-flex justify-content-between align-items-center mb-4">
-                <h1>Gerenciar Artigos</h1>
-                <a href="/articles/create" class="btn btn-primary"><i class="fas fa-plus"></i> Novo Artigo</a>
+            <header class="page-header">
+                <div>
+                    <h1>Gerenciar Artigos</h1>
+                    <p>Conteúdo educativo para a comunidade.</p>
+                </div>
+                <a href="/articles/create" class="btn btn-primary"><i class="fas fa-plus"></i> Escrever Artigo</a>
             </header>
 
-            <div class="dashboard-card">
-                <% if (!articles || articles.length === 0) { %>
-                    <div class="text-center py-5">
-                        <i class="fas fa-newspaper fa-3x text-muted mb-3 opacity-25"></i>
-                        <p class="text-muted">Nenhum artigo encontrado.</p>
-                    </div>
-                <% } else { %>
-                    <div class="table-responsive">
-                        <table class="modern-table">
-                            <thead>
-                                <tr>
-                                    <th>Capa</th>
-                                    <th>Título</th>
-                                    <th>Status</th>
-                                    <% if (user.role === 'superadmin') { %> <th>Autor</th> <% } %>
-                                    <th>Data</th>
-                                    <th class="text-end">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <% articles.forEach(article => { %>
-                                    <tr>
-                                        <td style="width: 80px;">
-                                            <% if(article.image_url) { %>
-                                                <img src="<%= article.image_url %>" style="width: 60px; height: 40px; object-fit: cover; border-radius: 6px;">
-                                            <% } else { %>
-                                                <div style="width: 60px; height: 40px; background: #333; border-radius: 6px; display: flex; align-items: center; justify-content: center;"><i class="fas fa-image text-muted"></i></div>
-                                            <% } %>
-                                        </td>
-                                        <td><strong><%= article.title %></strong></td>
-                                        <td>
-                                            <span class="badge badge-<%= article.status %>">
-                                                <%= article.status === 'published' ? 'Publicado' : (article.status === 'pending' ? 'Pendente' : 'Rejeitado') %>
-                                            </span>
-                                        </td>
-                                        <% if (user.role === 'superadmin') { %>
-                                            <td><small class="text-muted"><%= article.author_name || 'Desconhecido' %></small></td>
-                                        <% } %>
-                                        <td><small class="text-muted"><%= new Date(article.created_at).toLocaleDateString('pt-BR') %></small></td>
-                                        <td class="text-end">
-                                            <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
-                                                <a href="/articles/<%= article.id %>" target="_blank" class="btn btn-sm btn-secondary" title="Ver"><i class="fas fa-eye"></i></a>
-                                                
-                                                <% if (user.role === 'superadmin' && article.status === 'pending') { %>
-                                                    <form action="/articles/approve/<%= article.id %>" method="POST" class="d-inline">
-                                                        <button class="btn btn-sm btn-primary" title="Aprovar"><i class="fas fa-check"></i></button>
-                                                    </form>
-                                                    <form action="/articles/reject/<%= article.id %>" method="POST" class="d-inline">
-                                                        <button class="btn btn-sm btn-danger" title="Rejeitar"><i class="fas fa-times"></i></button>
-                                                    </form>
-                                                <% } %>
-
-                                                <a href="/articles/edit/<%= article.id %>" class="btn btn-sm btn-secondary" title="Editar"><i class="fas fa-edit"></i></a>
-                                                <form action="/articles/delete/<%= article.id %>" method="POST" class="d-inline" onsubmit="return confirm('Excluir?');">
-                                                    <button class="btn btn-sm btn-danger" title="Excluir"><i class="fas fa-trash"></i></button>
-                                                </form>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                <% }) %>
-                            </tbody>
-                        </table>
-                    </div>
-                <% } %>
-            </div>
+            <% if (!articles || articles.length === 0) { %>
+                <div class="card-modern text-center py-5">
+                    <p class="text-muted">Nenhum artigo publicado ainda.</p>
+                </div>
+            <% } else { %>
+                <div class="article-grid">
+                    <% articles.forEach(article => { %>
+                        <div class="card-modern p-0 overflow-hidden d-flex flex-column">
+                            <img src="<%= article.image_url || '/images/hero-bg.png' %>" class="article-card-img">
+                            <div class="article-content flex-grow-1">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="badge badge-<%= article.status === 'published' ? 'active' : 'inactive' %>">
+                                        <%= article.status === 'published' ? 'Publicado' : 'Pendente' %>
+                                    </span>
+                                    <small class="text-muted"><%= new Date(article.created_at).toLocaleDateString() %></small>
+                                </div>
+                                <h3 class="h5 mb-3 text-truncate"><%= article.title %></h3>
+                                <div class="d-flex gap-2 mt-auto">
+                                    <a href="/articles/edit/<%= article.id %>" class="btn btn-ghost btn-sm w-100">Editar</a>
+                                    <form action="/articles/delete/<%= article.id %>" method="POST" class="w-100" onsubmit="return confirm('Excluir?');">
+                                        <button class="btn btn-danger btn-sm w-100"><i class="fas fa-trash"></i></button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+            <% } %>
         </main>
     </div>
 </body>
