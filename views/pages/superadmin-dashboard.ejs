@@ -1,45 +1,143 @@
-<%- include('../partials/header', { title: 'Gestão Global', bodyClass: 'dashboard-body' }) %>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <%- include('../partials/header') %>
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <style>
+        /* Estilos específicos para remover o visual "quadrado branco" */
+        .stat-card-modern {
+            background: linear-gradient(145deg, #1e1e1e, #252525);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+        .stat-card-modern:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+            border-color: var(--primary-color);
+        }
+        .stat-icon-wrapper {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            background: rgba(var(--primary-rgb), 0.1);
+            color: var(--primary-color);
+        }
+        .stat-content h3 {
+            font-size: 2.5rem;
+            margin: 0;
+            color: #fff;
+            font-weight: 700;
+        }
+        .stat-content p {
+            margin: 0;
+            color: #a0a0a0;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .quick-actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        .action-card {
+            background: #2a2a2a;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            text-decoration: none;
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: all 0.2s;
+        }
+        .action-card:hover {
+            background: #333;
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+        .action-card i {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <%- include('../partials/sidebar', { user: user, currentPage: 'superadmin-dashboard' }) %>
 
-<div class="dashboard-container">
-    <%- include('../partials/sidebar.ejs', { currentPage: 'superadmin-dashboard' }) %>
-
-    <main class="dashboard-main">
-        <div class="container">
-            <h1 style="margin-bottom: 2rem;">Visão Global (Super Admin)</h1>
-
-            <% if (stats.pendingTrainers > 0) { %>
-                <div class="alert alert-warning" style="border-left: 4px solid #f59e0b; display: flex; justify-content: space-between; align-items: center;">
-                    <span><strong><%= stats.pendingTrainers %></strong> personal(is) aguardando aprovação.</span>
-                    <a href="/superadmin/manage" class="btn btn-sm btn-primary">Ver</a>
+        <main class="dashboard-main">
+            <header class="dashboard-header">
+                <div class="header-welcome">
+                    <h1>Visão Geral</h1>
+                    <p class="text-muted">Monitoramento em tempo real da plataforma.</p>
                 </div>
-            <% } %>
-            
-            <% if (stats.pendingClients > 0) { %>
-                <div class="alert alert-warning" style="border-left: 4px solid #f59e0b; display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-                    <span><strong><%= stats.pendingClients %></strong> cliente(s) aguardando aprovação.</span>
-                    <a href="/superadmin/manage" class="btn btn-sm btn-primary">Ver</a>
-                </div>
-            <% } %>
+            </header>
 
-            <div class="stats-grid" style="margin-top: 2rem;">
-                <div class="stat-card">
-                    <h3>Total Clientes</h3>
-                    <div class="number"><%= stats.clients %></div>
+            <div class="dashboard-grid mb-5">
+                <div class="stat-card-modern">
+                    <div class="stat-icon-wrapper">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3><%= stats.users %></h3>
+                        <p>Total de Usuários</p>
+                    </div>
                 </div>
-                <div class="stat-card">
-                    <h3>Total Personais</h3>
-                    <div class="number"><%= stats.trainers %></div>
+
+                <div class="stat-card-modern">
+                    <div class="stat-icon-wrapper">
+                        <i class="fas fa-dumbbell"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3><%= stats.trainers %></h3>
+                        <p>Treinadores</p>
+                    </div>
+                </div>
+
+                <div class="stat-card-modern">
+                    <div class="stat-icon-wrapper">
+                        <i class="fas fa-user-friends"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3><%= stats.clients %></h3>
+                        <p>Alunos Ativos</p>
+                    </div>
                 </div>
             </div>
-            
-            <div style="margin-top: 3rem;">
-                <h3>Acesso Rápido</h3>
-                <div style="display: flex; gap: 10px; margin-top: 10px;">
-                    <a href="/superadmin/manage" class="btn btn-secondary">Gerenciar Todos Usuários</a>
-                    <a href="/articles/create" class="btn btn-secondary">Publicar Artigo</a>
-                </div>
+
+            <h3 class="section-title mb-3">Acesso Rápido</h3>
+            <div class="quick-actions-grid">
+                <a href="/superadmin/manage" class="action-card">
+                    <i class="fas fa-users-cog"></i>
+                    <span>Gerenciar Usuários</span>
+                </a>
+                <a href="/superadmin/create-trainer" class="action-card">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Novo Treinador</span>
+                </a>
+                <a href="/articles/manage" class="action-card">
+                    <i class="fas fa-newspaper"></i>
+                    <span>Gerenciar Artigos</span>
+                </a>
+                <a href="/superadmin/settings" class="action-card">
+                    <i class="fas fa-cogs"></i>
+                    <span>Configurações</span>
+                </a>
             </div>
-        </div>
-    </main>
-</div>
-<%- include('../partials/footer') %>
+        </main>
+    </div>
+</body>
+</html>
