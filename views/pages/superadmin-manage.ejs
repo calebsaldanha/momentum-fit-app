@@ -1,71 +1,226 @@
-<%- include('../partials/header.ejs', { title: 'Gerenciar Usuários', bodyClass: 'dashboard-body' }) %>
-<div class="dashboard-container">
-    <%- include('../partials/sidebar.ejs', { currentPage: 'superadmin-manage' }) %>
-    <main class="dashboard-main">
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <%- include('../partials/header') %>
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <style>
+        .manage-grid {
+            display: grid;
+            gap: 2rem;
+        }
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        .user-table th {
+            text-align: left;
+            padding: 1rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .user-table td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            vertical-align: middle;
+        }
+        .user-table tr:last-child td { border-bottom: none; }
         
-        <div class="section">
-            <div class="section-header"><h1>Gerenciar Treinadores</h1></div>
-            <div class="table-container">
-                <table>
-                    <thead><tr><th>Nome</th><th>Email</th><th>Status</th><th style="text-align: right;">Ações</th></tr></thead>
-                    <tbody>
-                        <% trainers.forEach(user => { %>
-                        <tr>
-                            <td><strong><%= user.name %></strong></td>
-                            <td><%= user.email %></td>
-                            <td>
-                                <% if (user.status === 'pending_approval') { %> <span style="color:#f59e0b; font-weight:bold;">[Pendente]</span>
-                                <% } else if (user.status === 'active') { %> <span style="color:var(--c-success);">[Ativo]</span>
-                                <% } else { %> <span style="color:var(--c-error);">[Inativo]</span> <% } %>
-                            </td>
-                            <td style="text-align: right;">
-                                <div style="display: flex; justify-content: flex-end; gap: 10px;">
-                                    <a href="<%= user.role === "trainer" ? "/superadmin/trainers/" + user.id : "/superadmin/users/" + user.id %>" class="btn btn-secondary btn-sm" style="background: var(--c-accent-primary); color: black; border: none;">Detalhes</a>
-                                    <form action="/superadmin/users/<%= user.id %>/delete" method="POST" onsubmit="return confirm('Excluir este personal?');" style="margin:0;">
-                                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                        <button type="submit" class="btn btn-secondary btn-sm" style="color: var(--c-error); border-color: var(--c-error);">Excluir</button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                        <% }); %>
-                        <% if (trainers.length === 0) { %> <tr><td colspan="4" style="text-align: center;">Nenhum treinador.</td></tr> <% } %>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .user-avatar-sm {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #333;
+        }
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        .badge-active { background: rgba(var(--primary-rgb), 0.2); color: var(--primary-color); }
+        .badge-inactive { background: rgba(255, 99, 71, 0.2); color: tomato; }
+        
+        .action-btn-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        /* Abas simplificadas para visual */
+        .role-badge {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: #333;
+            color: #aaa;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <%- include('../partials/sidebar', { user: user, currentPage: 'superadmin-manage' }) %>
 
-        <div class="section">
-            <div class="section-header"><h1>Gerenciar Alunos</h1></div>
-            <div class="table-container">
-                <table>
-                    <thead><tr><th>Nome</th><th>Email</th><th>Status</th><th style="text-align: right;">Ações</th></tr></thead>
-                    <tbody>
-                        <% clients.forEach(user => { %>
-                        <tr>
-                            <td><strong><%= user.name %></strong></td>
-                            <td><%= user.email %></td>
-                            <td>
-                                <% if (user.status === 'pending_approval') { %> <span style="color:#f59e0b; font-weight:bold;">[Pendente]</span>
-                                <% } else if (user.status === 'active') { %> <span style="color:var(--c-success);">[Ativo]</span>
-                                <% } else { %> <span style="color:var(--c-error);">[Inativo]</span> <% } %>
-                            </td>
-                            <td style="text-align: right;">
-                                <div style="display: flex; justify-content: flex-end; gap: 10px;">
-                                    <a href="/admin/clients/<%= user.id %>?source=admin_manage" class="btn btn-secondary btn-sm" style="background: var(--c-accent-primary); color: black; border: none;">Detalhes</a>
-                                    <form action="/superadmin/users/<%= user.id %>/delete" method="POST" onsubmit="return confirm('Excluir este aluno?');" style="margin:0;">
-                                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                        <button type="submit" class="btn btn-secondary btn-sm" style="color: var(--c-error); border-color: var(--c-error);">Excluir</button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                        <% }); %>
-                        <% if (clients.length === 0) { %> <tr><td colspan="4" style="text-align: center;">Nenhum aluno.</td></tr> <% } %>
-                    </tbody>
-                </table>
+        <main class="dashboard-main">
+            <header class="dashboard-header">
+                <div class="header-welcome">
+                    <h1>Gerenciar Usuários</h1>
+                    <p class="text-muted">Administre treinadores, alunos e permissões do sistema.</p>
+                </div>
+            </header>
+
+            <div class="manage-grid">
+                
+                <div class="dashboard-card">
+                    <div class="section-header">
+                        <div class="d-flex align-items-center gap-2">
+                            <h3 class="m-0"><i class="fas fa-chalkboard-teacher text-primary"></i> Treinadores</h3>
+                            <span class="badge badge-active"><%= trainers.length %> Ativos</span>
+                        </div>
+                        <a href="/superadmin/create-trainer" class="btn-primary btn-sm">
+                            <i class="fas fa-plus"></i> Novo Treinador
+                        </a>
+                    </div>
+
+                    <% if (trainers.length > 0) { %>
+                        <div class="table-responsive">
+                            <table class="user-table">
+                                <thead>
+                                    <tr>
+                                        <th>Profissional</th>
+                                        <th>Email</th>
+                                        <th>Status</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% trainers.forEach(trainer => { %>
+                                        <tr>
+                                            <td>
+                                                <div class="user-info">
+                                                    <img src="<%= trainer.profile_image || '/images/default-profile.png' %>" class="user-avatar-sm" alt="Avatar">
+                                                    <div>
+                                                        <div class="fw-bold"><%= trainer.name %></div>
+                                                        <small class="text-muted">Cadastrado em <%= new Date(trainer.created_at).toLocaleDateString() %></small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="text-muted"><%= trainer.email %></td>
+                                            <td>
+                                                <span class="badge badge-<%= trainer.status === 'active' ? 'active' : 'inactive' %>">
+                                                    <%= trainer.status === 'active' ? 'Ativo' : 'Inativo' %>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="action-btn-group">
+                                                    <a href="/superadmin/trainers/<%= trainer.id %>" class="btn-secondary btn-sm" title="Ver Detalhes">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <form action="/superadmin/users/<%= trainer.id %>/status" method="POST" style="display:inline;">
+                                                        <input type="hidden" name="status" value="<%= trainer.status === 'active' ? 'inactive' : 'active' %>">
+                                                        <button type="submit" class="btn-outline btn-sm" title="<%= trainer.status === 'active' ? 'Bloquear' : 'Ativar' %>">
+                                                            <i class="fas fa-<%= trainer.status === 'active' ? 'ban' : 'check' %>"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    <% }) %>
+                                </tbody>
+                            </table>
+                        </div>
+                    <% } else { %>
+                        <div class="empty-state text-center py-4">
+                            <p class="text-muted">Nenhum treinador cadastrado.</p>
+                        </div>
+                    <% } %>
+                </div>
+
+                <div class="dashboard-card">
+                    <div class="section-header">
+                        <div class="d-flex align-items-center gap-2">
+                            <h3 class="m-0"><i class="fas fa-users text-primary"></i> Alunos (Clients)</h3>
+                            <span class="badge badge-active"><%= clients.length %> Cadastrados</span>
+                        </div>
+                    </div>
+
+                    <% if (clients.length > 0) { %>
+                        <div class="table-responsive">
+                            <table class="user-table">
+                                <thead>
+                                    <tr>
+                                        <th>Aluno</th>
+                                        <th>Email</th>
+                                        <th>Status</th>
+                                        <th>Treinador</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% clients.forEach(client => { %>
+                                        <tr>
+                                            <td>
+                                                <div class="user-info">
+                                                    <img src="<%= client.profile_image || '/images/default-profile.png' %>" class="user-avatar-sm" alt="Avatar">
+                                                    <div>
+                                                        <div class="fw-bold"><%= client.name %></div>
+                                                        <small class="text-muted">ID: #<%= client.id %></small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="text-muted"><%= client.email %></td>
+                                            <td>
+                                                <span class="badge badge-<%= client.status === 'active' ? 'active' : 'inactive' %>">
+                                                    <%= client.status === 'active' ? 'Ativo' : 'Inativo' %>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <% 
+                                                    // Encontra o nome do treinador se existir na lista de treinadores
+                                                    const myTrainer = trainers.find(t => t.id === client.trainer_id);
+                                                %>
+                                                <% if (myTrainer) { %>
+                                                    <span class="text-primary small"><i class="fas fa-dumbbell"></i> <%= myTrainer.name %></span>
+                                                <% } else { %>
+                                                    <span class="text-muted small">-- Sem Treinador --</span>
+                                                <% } %>
+                                            </td>
+                                            <td>
+                                                <div class="action-btn-group">
+                                                    <a href="/superadmin/users/<%= client.id %>" class="btn-secondary btn-sm" title="Gerenciar Aluno">
+                                                        <i class="fas fa-cog"></i> Gerenciar
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    <% }) %>
+                                </tbody>
+                            </table>
+                        </div>
+                    <% } else { %>
+                        <div class="empty-state text-center py-4">
+                            <p class="text-muted">Nenhum aluno cadastrado na plataforma.</p>
+                        </div>
+                    <% } %>
+                </div>
+
             </div>
-        </div>
-    </main>
-</div>
-<%- include('../partials/footer.ejs') %>
+        </main>
+    </div>
+</body>
+</html>
