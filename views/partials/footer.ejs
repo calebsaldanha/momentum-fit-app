@@ -1,31 +1,128 @@
 <% if (typeof bodyClass === 'undefined' || !bodyClass.includes('auth-body')) { %>
-        <footer class="footer">
-            <div class="container">
-                <div class="footer-content">
-                    <div class="footer-section">
-                        <h4>Momentum Fit</h4>
-                        <p>Impulsione o seu progresso. Sua jornada fitness, simplificada e personalizada.</p>
-                    </div>
-                    <div class="footer-section">
-                        <h4>Navegue</h4>
-                        <ul>
-                             <li><a href="/">Início</a></li>
-                             <li><a href="/about">Sobre</a></li>
-                             <li><a href="/articles">Artigos</a></li>
-                             <li><a href="/auth/login">Login</a></li>
-                        </ul>
-                    </div>
-                    <div class="footer-section">
-                        <h4>Contato</h4>
-                        <p>admin@momentumfitness.com.br</p>
-                    </div>
-                </div>
-                <div class="footer-bottom">
-                    <p>&copy; <%= new Date().getFullYear() %> Momentum Fit. Todos os direitos reservados.</p>
-                </div>
+    <style>
+        .main-footer {
+            background-color: #1a1a1a; /* Fundo escuro consistente */
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 4rem 0 2rem;
+            margin-top: auto;
+            color: #a0a0a0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr; /* Layout assimétrico profissional */
+            gap: 4rem;
+        }
+
+        .footer-brand h3 {
+            color: #ffffff;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .footer-brand h3 i {
+            color: var(--primary-color, #d4ff00); /* Usa a cor primária ou fallback */
+        }
+
+        .footer-brand p {
+            line-height: 1.6;
+            max-width: 300px;
+        }
+
+        .footer-col h4 {
+            color: #ffffff;
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+        }
+
+        .footer-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.8rem;
+        }
+
+        .footer-links a {
+            color: #a0a0a0;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary-color, #d4ff00);
+            transform: translateX(5px); /* Efeito sutil de movimento */
+        }
+
+        .footer-bottom {
+            max-width: 1200px;
+            margin: 3rem auto 0;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            text-align: center;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .footer-container {
+                grid-template-columns: 1fr; /* Empilha no mobile */
+                gap: 2rem;
+                text-align: center;
+            }
+            .footer-brand p { margin: 0 auto; }
+            .footer-links a { justify-content: center; }
+        }
+    </style>
+
+    <footer class="main-footer">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <h3><i class="fas fa-bolt"></i> Momentum Fit</h3>
+                <p>Transforme seu potencial em resultados. Sua jornada fitness personalizada, simplificada e eficiente.</p>
             </div>
-        </footer>
-    <% } %>
-    <script src="/js/main.js"></script>
+
+            <div class="footer-col">
+                <h4>Navegação</h4>
+                <ul class="footer-links">
+                    <li><a href="/"><i class="fas fa-home"></i> Início</a></li>
+                    <li><a href="/about"><i class="fas fa-info-circle"></i> Sobre Nós</a></li>
+                    <li><a href="/articles"><i class="fas fa-newspaper"></i> Artigos e Dicas</a></li>
+                    <% if (!user) { %>
+                        <li><a href="/auth/login"><i class="fas fa-sign-in-alt"></i> Área do Cliente</a></li>
+                    <% } %>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h4>Fale Conosco</h4>
+                <ul class="footer-links">
+                    <li><a href="mailto:suporte@momentumfit.com"><i class="fas fa-envelope"></i> suporte@momentumfit.com</a></li>
+                    <li><a href="#"><i class="fab fa-instagram"></i> @momentumfit</a></li>
+                    <li><a href="#"><i class="fab fa-whatsapp"></i> Suporte via WhatsApp</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; <%= new Date().getFullYear() %> Momentum Fit. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+<% } %>
+
+<script src="/js/main.js"></script>
 </body>
 </html>
