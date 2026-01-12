@@ -1,7 +1,7 @@
 <% if (typeof bodyClass === 'undefined' || !bodyClass.includes('auth-body')) { %>
     <style>
         .main-footer {
-            background-color: #1a1a1a; /* Fundo escuro consistente */
+            background-color: #1a1a1a;
             border-top: 1px solid rgba(255, 255, 255, 0.05);
             padding: 4rem 0 2rem;
             margin-top: auto;
@@ -14,11 +14,11 @@
             margin: 0 auto;
             padding: 0 2rem;
             display: grid;
-            grid-template-columns: 2fr 1fr 1fr; /* Layout assimétrico profissional */
+            grid-template-columns: 2fr 1fr 1fr;
             gap: 4rem;
         }
 
-        .footer-brand h3 {
+        .footer-brand h4 {
             color: #ffffff;
             font-size: 1.5rem;
             margin-bottom: 1rem;
@@ -27,8 +27,8 @@
             gap: 0.5rem;
         }
         
-        .footer-brand h3 i {
-            color: var(--primary-color, #d4ff00); /* Usa a cor primária ou fallback */
+        .footer-brand h4 i {
+            color: var(--primary-color, #d4ff00);
         }
 
         .footer-brand p {
@@ -64,7 +64,7 @@
 
         .footer-links a:hover {
             color: var(--primary-color, #d4ff00);
-            transform: translateX(5px); /* Efeito sutil de movimento */
+            transform: translateX(5px);
         }
 
         .footer-bottom {
@@ -79,7 +79,7 @@
 
         @media (max-width: 768px) {
             .footer-container {
-                grid-template-columns: 1fr; /* Empilha no mobile */
+                grid-template-columns: 1fr;
                 gap: 2rem;
                 text-align: center;
             }
@@ -91,28 +91,28 @@
     <footer class="main-footer">
         <div class="footer-container">
             <div class="footer-brand">
-                <h3><i class="fas fa-bolt"></i> Momentum Fit</h3>
-                <p>Transforme seu potencial em resultados. Sua jornada fitness personalizada, simplificada e eficiente.</p>
+                <h4><i class="fas fa-bolt"></i> Momentum Fit</h4>
+                <p>Impulsione o seu progresso. Sua jornada fitness, simplificada e personalizada.</p>
             </div>
 
             <div class="footer-col">
-                <h4>Navegação</h4>
+                <h4>Navegue</h4>
                 <ul class="footer-links">
-                    <li><a href="/"><i class="fas fa-home"></i> Início</a></li>
-                    <li><a href="/about"><i class="fas fa-info-circle"></i> Sobre Nós</a></li>
-                    <li><a href="/articles"><i class="fas fa-newspaper"></i> Artigos e Dicas</a></li>
-                    <% if (!user) { %>
-                        <li><a href="/auth/login"><i class="fas fa-sign-in-alt"></i> Área do Cliente</a></li>
-                    <% } %>
+                    <li><a href="/"><i class="fas fa-chevron-right"></i> Início</a></li>
+                    <li><a href="/about"><i class="fas fa-chevron-right"></i> Sobre</a></li>
+                    <li><a href="/articles"><i class="fas fa-chevron-right"></i> Artigos</a></li>
+                    <li><a href="/auth/login"><i class="fas fa-sign-in-alt"></i> Login</a></li>
                 </ul>
             </div>
 
             <div class="footer-col">
-                <h4>Fale Conosco</h4>
+                <h4>Contato</h4>
                 <ul class="footer-links">
-                    <li><a href="mailto:suporte@momentumfit.com"><i class="fas fa-envelope"></i> suporte@momentumfit.com</a></li>
-                    <li><a href="#"><i class="fab fa-instagram"></i> @momentumfit</a></li>
-                    <li><a href="#"><i class="fab fa-whatsapp"></i> Suporte via WhatsApp</a></li>
+                    <li>
+                        <a href="mailto:admin@momentumfitness.com.br">
+                            <i class="fas fa-envelope"></i> admin@momentumfitness.com.br
+                        </a>
+                    </li>
                 </ul>
             </div>
         </div>
