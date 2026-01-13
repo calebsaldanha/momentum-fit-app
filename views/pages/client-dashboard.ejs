@@ -1,49 +1,69 @@
-<%- include('../partials/header.ejs', { title, bodyClass: 'dashboard-body' }) %>
+<%- include('../partials/header.ejs', { title: 'Dashboard', currentPage: 'dashboard' }) %>
 <div class="dashboard-container">
     <%- include('../partials/sidebar.ejs', { currentPage: 'dashboard' }) %>
 
     <main class="dashboard-main">
+        <div class="page-header">
+            <h1 class="page-title">Olá, <span class="text-neon"><%= user.name.split(' ')[0] %></span>!</h1>
+            <p class="text-muted">Aqui está o resumo do seu progresso hoje.</p>
+        </div>
+
         <% if (typeof missingProfile !== 'undefined' && missingProfile) { %>
-            <div class="alert alert-error" style="background: rgba(245, 158, 11, 0.2); border-color: rgba(245, 158, 11, 0.4); color: #fbbf24;">
-                <i class="fas fa-exclamation-triangle"></i>
-                <span>Complete sua <a href="/client/initial-form" style="color: inherit; text-decoration: underline;">Ficha de Anamnese</a> para receber seu treino.</span>
+            <div class="alert alert-error" style="border-color: var(--primary); background: rgba(212,255,0,0.1); color: var(--text-main);">
+                <i class="fas fa-exclamation-circle text-neon"></i>
+                <div>
+                    <strong>Ação Necessária:</strong> Sua ficha de anamnese está incompleta.
+                    <a href="/client/initial-form" style="color: var(--primary); text-decoration: underline; margin-left: 10px;">Preencher Agora</a>
+                </div>
             </div>
         <% } %>
 
-        <div style="margin-bottom: 2rem;">
-            <h1>Olá, <span class="text-neon"><%= user.name.split(' ')[0] %></span>!</h1>
-            <p class="text-muted">Seu progresso hoje.</p>
+        <div class="grid-cols-3" style="margin-bottom: 2rem;">
+            <div class="card-modern card-stat">
+                <i class="fas fa-weight text-muted" style="font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
+                <h3><%= (clientProfile && clientProfile.weight) ? clientProfile.weight : '--' %> <small style="font-size: 1rem;">kg</small></h3>
+                <span>Peso Atual</span>
+            </div>
+            <div class="card-modern card-stat">
+                <i class="fas fa-clipboard-check text-muted" style="font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
+                <h3><%= workouts ? workouts.length : 0 %></h3>
+                <span>Planos Ativos</span>
+            </div>
+            <div class="card-modern card-stat">
+                <i class="fas fa-fire text-muted" style="font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
+                <h3 style="text-transform: capitalize;"><%= (clientProfile && clientProfile.fitness_level) ? clientProfile.fitness_level : 'Iniciante' %></h3>
+                <span>Nível</span>
+            </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
-            <div class="card-modern" style="text-align: center;">
-                <h3 style="font-size: 2rem; margin: 0;"><%= (clientProfile && clientProfile.weight) ? clientProfile.weight : '--' %>kg</h3>
-                <span class="text-muted">Peso Atual</span>
-            </div>
-            <div class="card-modern" style="text-align: center;">
-                <h3 style="font-size: 2rem; margin: 0;"><%= workouts ? workouts.length : 0 %></h3>
-                <span class="text-muted">Planos Ativos</span>
-            </div>
-        </div>
-
-        <h3 class="text-neon" style="margin-bottom: 1rem;"><i class="fas fa-dumbbell"></i> Seus Treinos</h3>
-        <% if (workouts && workouts.length > 0) { %>
-            <div style="display: grid; gap: 1rem;">
-                <% workouts.forEach(workout => { %>
-                    <div class="card-modern" style="display: flex; justify-content: space-between; align-items: center;">
+        <h3 class="text-neon" style="margin-bottom: 1.5rem;"><i class="fas fa-play-circle"></i> Próximo Treino</h3>
+        
+        <div class="grid-cols-2">
+            <% if (workouts && workouts.length > 0) { %>
+                <% workouts.slice(0, 2).forEach(workout => { %>
+                    <div class="card-modern" style="justify-content: space-between;">
                         <div>
-                            <h4 style="margin: 0;"><%= workout.title %></h4>
-                            <small class="text-muted">Instrutor: <%= workout.trainer_name %></small>
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 1rem;">
+                                <div style="width: 40px; height: 40px; background: rgba(212,255,0,0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-dumbbell text-neon"></i>
+                                </div>
+                                <h3 style="margin: 0; font-size: 1.2rem;"><%= workout.title %></h3>
+                            </div>
+                            <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 1.5rem;">
+                                <%= workout.description ? workout.description.substring(0, 100) + '...' : 'Treino personalizado para seus objetivos.' %>
+                            </p>
                         </div>
-                        <a href="/client/workouts/<%= workout.id %>" class="btn btn-primary btn-sm">Abrir</a>
+                        <a href="/client/workouts/<%= workout.id %>" class="btn btn-primary btn-full">Começar Treino</a>
                     </div>
                 <% }) %>
-            </div>
-        <% } else { %>
-            <div class="card-modern text-center text-muted" style="padding: 3rem;">
-                <p>Nenhum treino disponível.</p>
-            </div>
-        <% } %>
+            <% } else { %>
+                <div class="card-modern" style="grid-column: 1/-1; text-align: center; padding: 3rem;">
+                    <i class="fas fa-calendar-times text-muted" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                    <p class="text-muted">Você ainda não tem treinos atribuídos.</p>
+                    <a href="/chat" class="btn btn-primary" style="margin-top: 1rem;">Solicitar ao Coach</a>
+                </div>
+            <% } %>
+        </div>
     </main>
 </div>
 <%- include('../partials/footer.ejs') %>

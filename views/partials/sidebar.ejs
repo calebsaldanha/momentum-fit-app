@@ -1,10 +1,29 @@
-<% 
-   const current = typeof currentPage !== 'undefined' ? currentPage : ''; 
-%>
-<% if (typeof user !== 'undefined' && user.role === 'superadmin') { %>
-    <%- include('./superadmin-sidebar', { currentPage: current }) %>
-<% } else if (typeof user !== 'undefined' && user.role === 'client') { %>
-    <%- include('./client-sidebar', { currentPage: current }) %>
-<% } else { %>
-    <%- include('./admin-sidebar', { currentPage: current }) %>
-<% } %>
+<div class="dashboard-sidebar-wrapper desktop-only">
+    <div class="sidebar-nav">
+        <a href="/client/dashboard" class="sidebar-link <%= currentPage === 'dashboard' ? 'active' : '' %>">
+            <i class="fas fa-home"></i> <span>Visão Geral</span>
+        </a>
+        <a href="/client/workouts" class="sidebar-link <%= currentPage === 'workouts' ? 'active' : '' %>">
+            <i class="fas fa-dumbbell"></i> <span>Meus Treinos</span>
+        </a>
+        <a href="/chat" class="sidebar-link <%= currentPage === 'chat' ? 'active' : '' %>">
+            <i class="fas fa-comments"></i> <span>Chat com Coach</span>
+        </a>
+        <a href="/client/profile" class="sidebar-link <%= currentPage === 'profile' ? 'active' : '' %>">
+            <i class="fas fa-user"></i> <span>Meu Perfil</span>
+        </a>
+        
+        <div style="margin: 1rem 0; border-top: 1px solid var(--border);"></div>
+        
+        <a href="/auth/logout" onclick="event.preventDefault(); document.getElementById('logout-form-sidebar').submit();" class="sidebar-link" style="color: var(--danger);">
+            <i class="fas fa-sign-out-alt"></i> <span>Sair</span>
+        </a>
+        <form id="logout-form-sidebar" action="/auth/logout" method="POST" style="display: none;">
+            <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+        </form>
+    </div>
+    
+    <div style="position: absolute; bottom: 20px; left: 0; width: 100%; padding: 0 1rem; text-align: center;">
+        <small class="text-muted" style="font-size: 0.7rem;">Momentum Fit v1.0</small>
+    </div>
+</div>

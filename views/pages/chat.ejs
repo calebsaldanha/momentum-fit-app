@@ -1,363 +1,43 @@
-<%- include('../partials/header.ejs', { title: 'Chat', bodyClass: 'dashboard-body' }) %>
-
-<style>
-    /* --- CONFIGURAÇÕES DE LAYOUT --- */
-    :root {
-        --chat-header-height: 65px; /* Altura exata para ambos os cabeçalhos */
-        --chat-bg-sidebar: #0e0e0e;
-        --chat-bg-main: #000;
-        --chat-bg-header: #111;
-        --chat-border: 1px solid #333;
-    }
-
-    body, html {
-        height: 100%;
-        overflow-x: hidden;
-    }
-
-    /* Container Principal */
-    .dashboard-container {
-        display: flex;
-        flex-direction: row;
-        height: 100vh;
-        padding-top: 60px; /* Header Fixo */
-        box-sizing: border-box;
-        overflow: hidden;
-    }
-
-    /* Wrapper Geral da Página */
-    .chat-page-wrapper {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        background: var(--chat-bg-main);
-        position: relative;
-        min-width: 0;
-        /* Reseta paddings globais que possam existir */
-        padding: 0 !important;
-        margin: 0 !important;
-    }
-
-    /* Container Flex do Chat (Sidebar + Main) */
-    .chat-box-container {
-        flex: 1;
-        display: flex;
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
-        position: relative;
-    }
-
-    /* --- SIDEBAR DE CONTATOS (ESQUERDA) --- */
-    .chat-contacts-sidebar {
-        width: 280px;
-        background: var(--chat-bg-sidebar);
-        border-right: var(--chat-border);
-        display: flex;
-        flex-direction: column;
-        flex-shrink: 0;
-        height: 100%;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-
-    /* --- ÁREA PRINCIPAL (DIREITA) --- */
-    /* CRUCIAL: padding: 0 !important anula estilos globais de 'main' */
-    .chat-main-area {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        background: var(--chat-bg-main);
-        position: relative;
-        min-width: 0;
-        height: 100%;
-        padding: 0 !important; 
-        margin: 0 !important;
-    }
-
-    /* --- CABEÇALHO UNIFICADO (GARANTE ALINHAMENTO) --- */
-    .chat-header-unified {
-        height: var(--chat-header-height);
-        min-height: var(--chat-header-height);
-        display: flex;
-        align-items: center; /* Centraliza verticalmente */
-        padding: 0 20px;
-        background-color: var(--chat-bg-header);
-        border-bottom: var(--chat-border);
-        box-sizing: border-box;
-        flex-shrink: 0;
-        width: 100%;
-    }
-
-    /* Conteúdo do Header da Esquerda */
-    .contacts-title {
-        color: #888;
-        font-weight: 700;
-        font-size: 0.8rem;
-        letter-spacing: 1px;
-        text-transform: uppercase;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        height: 100%; /* Garante altura total */
-    }
-
-    /* Conteúdo do Header da Direita */
-    .chat-user-header-content {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        width: 100%;
-        height: 100%;
-    }
-
-    .chat-user-info {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-
-    .chat-user-name {
-        font-weight: 700;
-        font-size: 1.05rem;
-        color: #fff;
-        margin: 0;
-        line-height: 1;
-    }
-
-    /* --- Listas e Mensagens --- */
-    .contacts-list {
-        flex: 1;
-        overflow-y: auto;
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
-
-    .contact-item {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 15px 20px;
-        border-bottom: 1px solid #222;
-        cursor: pointer;
-        transition: background 0.2s;
-    }
-    .contact-item:hover { background: #1a1a1a; }
-    .contact-item.active { background: #1f1f1f; border-left: 3px solid var(--c-accent-primary); }
-    .contact-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #333; }
-
-    .messages-scroll-area {
-        flex: 1;
-        padding: 20px;
-        overflow-y: auto;
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-    }
-
-    .msg-bubble {
-        max-width: 70%;
-        padding: 10px 16px;
-        border-radius: 12px;
-        font-size: 0.95rem;
-        line-height: 1.4;
-        color: white;
-        word-wrap: break-word;
-    }
-    .msg-bubble.sent { align-self: flex-end; background: var(--c-accent-primary); color: black; border-bottom-right-radius: 2px; }
-    .msg-bubble.received { align-self: flex-start; background: #222; border-bottom-left-radius: 2px; border: 1px solid #333; }
-
-    /* Input */
-    .input-area-wrapper {
-        padding: 15px 20px;
-        background: var(--chat-bg-header);
-        border-top: var(--chat-border);
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        flex-shrink: 0;
-    }
-    .main-input {
-        flex: 1;
-        padding: 12px 20px;
-        border-radius: 30px;
-        border: 1px solid #444;
-        background: #222;
-        color: white;
-        outline: none;
-    }
-    .main-input:focus { border-color: var(--c-accent-primary); }
-
-    /* Mobile */
-    @media (max-width: 768px) {
-        .dashboard-container { display: block; height: auto; min-height: 100vh; overflow: visible; }
-        .chat-page-wrapper { height: calc(100vh - 60px); }
-        .chat-box-container { flex-direction: column; }
-        .chat-contacts-sidebar { width: 100%; height: 70px; flex-direction: row; overflow-x: auto; border-right: none; border-bottom: 1px solid #333; }
-        .chat-header-unified.mobile-hidden { display: none; } /* Esconde titulo contatos no mobile */
-        .contacts-list { display: flex; flex-direction: row; }
-        .contact-item { border-bottom: none; border-right: none; min-width: auto; padding: 10px; }
-        .contact-info { display: none; }
-        .chat-main-area { height: calc(100% - 70px); }
-    }
-</style>
-
+<%- include('../partials/header.ejs', { title: 'Chat', currentPage: 'chat' }) %>
 <div class="dashboard-container">
     <%- include('../partials/sidebar.ejs', { currentPage: 'chat' }) %>
 
-    <div class="chat-page-wrapper">
-        <div id="uploadOverlay" style="display:none; position:absolute; inset:0; background:rgba(0,0,0,0.85); z-index:999; align-items:center; justify-content:center; flex-direction:column; color:white;">
-            <i class="fas fa-spinner fa-spin" style="font-size:2.5rem; margin-bottom:15px; color:var(--c-accent-primary);"></i>
-            <p id="uploadStatusText">Enviando...</p>
+    <main class="dashboard-main" style="display: flex; flex-direction: column;">
+        <div class="page-header" style="margin-bottom: 1rem;">
+            <h1 class="page-title">Mensagens</h1>
         </div>
 
-        <div class="chat-box-container">
-            
-            <aside class="chat-contacts-sidebar">
-                <div class="chat-header-unified mobile-hidden">
-                    <div class="contacts-title">
-                        <i class="far fa-address-book"></i> <span>CONTATOS</span>
-                    </div>
-                </div>
-
-                <ul class="contacts-list">
-                    <% if (typeof chatUsers !== 'undefined' && chatUsers.length > 0) { %>
-                        <% chatUsers.forEach(u => { %>
-                            <li class="contact-item <%= typeof activeChat !== 'undefined' && activeChat && activeChat.id === u.id ? 'active' : '' %>" 
-                                onclick="window.location.href='/chat?user_id=<%= u.id %>'">
-                                <img src="<%= u.profile_image || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(u.name) %>" class="contact-avatar">
-                                <div class="contact-info" style="margin-left: 10px;">
-                                    <div style="font-weight: 600; color: #fff; font-size: 0.95rem;"><%= u.name %></div>
-                                    <small style="color: #666; font-size: 0.75rem;"><%= u.role === 'trainer' ? 'Personal' : 'Aluno' %></small>
-                                </div>
-                            </li>
-                        <% }); %>
-                    <% } else { %>
-                        <div style="padding:20px; text-align:center; color:#555; font-size:0.9rem;">Sem contatos.</div>
-                    <% } %>
-                </ul>
-            </aside>
-
-            <main class="chat-main-area">
-                <% if (typeof activeChat !== 'undefined' && activeChat) { %>
-                    <div class="chat-header-unified">
-                        <div class="chat-user-header-content">
-                            <div class="chat-user-info">
-                                <img src="<%= activeChat.profile_image || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(activeChat.name) %>" 
-                                     style="width:36px; height:36px; border-radius:50%; border: 1px solid #444;">
-                                <h3 class="chat-user-name"><%= activeChat.name %></h3>
+        <div class="chat-container">
+            <div id="chat-messages" class="chat-messages">
+                <% if (typeof messages !== 'undefined' && messages.length > 0) { %>
+                    <% messages.forEach(msg => { %>
+                        <div class="message-bubble <%= msg.sender_id === user.id ? 'message-sent' : 'message-received' %>">
+                            <div><%= msg.content %></div>
+                            <div style="font-size: 0.7rem; opacity: 0.6; margin-top: 5px; text-align: right;">
+                                <%= new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) %>
                             </div>
-                            <a href="/admin/clients/<%= activeChat.id %>" style="color: #666; font-size: 1.2rem; display:flex; align-items:center;">
-                                <i class="far fa-user-circle"></i>
-                            </a>
                         </div>
-                    </div>
-
-                    <div class="messages-scroll-area" id="messagesList">
-                        <% if (typeof messages !== 'undefined' && messages.length > 0) { %>
-                            <% messages.forEach(msg => { %>
-                                <div class="msg-bubble <%= msg.sender_id === user.id ? 'sent' : 'received' %>">
-                                    <% if (msg.message_type === 'image') { %>
-                                        <a href="<%= msg.content %>" target="_blank"><img src="<%= msg.content %>" style="max-width:100%; border-radius:8px;"></a>
-                                    <% } else if (msg.message_type === 'file') { %>
-                                        <a href="<%= msg.content %>" target="_blank" style="color:inherit;"><i class="fas fa-paperclip"></i> Anexo</a>
-                                    <% } else { %>
-                                        <%= msg.content %>
-                                    <% } %>
-                                    <div style="text-align:right; font-size:0.7rem; margin-top:5px; opacity:0.6;">
-                                        <%= new Date(msg.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) %>
-                                    </div>
-                                </div>
-                            <% }); %>
-                        <% } else { %>
-                            <div style="flex:1; display:flex; align-items:center; justify-content:center; color:#333;">
-                                <p>Inicie a conversa!</p>
-                            </div>
-                        <% } %>
-                    </div>
-
-                    <form action="/chat/send?_csrf=<%= csrfToken %>" method="POST" class="input-area-wrapper" onsubmit="handleChatSubmit(event)">
-                        <input type="hidden" name="recipient_id" value="<%= activeChat.id %>">
-                        <input type="hidden" name="fileUrl" id="hiddenFileUrl">
-                        <label for="file-upload" style="cursor:pointer; color:#888;"><i class="fas fa-plus-circle" style="font-size:1.4rem;"></i></label>
-                        <input type="file" id="file-upload" name="file" style="display:none;" onchange="updateFilePreview(this)">
-                        <span id="fileNameDisplay" style="display:none; color:var(--c-accent-primary); font-size:0.8rem; margin:0 5px;"></span>
-                        <input type="text" name="content" class="main-input" placeholder="Digite..." autocomplete="off">
-                        <button type="submit" class="btn btn-primary" style="border-radius:50%; width:45px; height:45px; padding:0; display:flex; align-items:center; justify-content:center;"><i class="fas fa-paper-plane"></i></button>
-                    </form>
+                    <% }) %>
                 <% } else { %>
-                    <div style="flex:1; display:flex; align-items:center; justify-content:center; flex-direction:column; color:#444;">
-                        <i class="far fa-comments" style="font-size:4rem; margin-bottom:15px; opacity:0.3;"></i>
-                        <p>Selecione um contato.</p>
+                    <div style="text-align: center; color: var(--text-secondary); margin-top: 2rem;">
+                        <p>Inicie a conversa com seu treinador.</p>
                     </div>
                 <% } %>
-            </main>
+            </div>
+
+            <form id="chat-form" action="/chat/send" method="POST" class="chat-input-area">
+                <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+                <input type="text" name="message" class="input-modern" placeholder="Digite sua mensagem..." required style="margin: 0; border-radius: 20px;">
+                <button type="submit" class="btn btn-primary" style="border-radius: 50%; width: 45px; height: 45px; padding: 0;">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </form>
         </div>
-    </div>
+    </main>
 </div>
-
-<script type="module">
-    try { import { upload } from 'https://cdn.jsdelivr.net/npm/@vercel/blob@0.22.1/dist/client.js'; window.vercelUpload = upload; } catch(e) {}
-</script>
-
 <script>
-    const msgList = document.getElementById('messagesList');
-    if(msgList) setTimeout(() => msgList.scrollTop = msgList.scrollHeight, 100);
-
-    function updateFilePreview(input) {
-        const display = document.getElementById('fileNameDisplay');
-        if (input.files && input.files[0]) {
-            display.innerText = input.files[0].name;
-            display.style.display = 'inline-block';
-        } else {
-            display.style.display = 'none';
-        }
-    }
-
-    async function handleChatSubmit(e) {
-        e.preventDefault();
-        const form = e.target;
-        const fileInput = document.getElementById('file-upload');
-        let file = fileInput.files[0];
-        const statusText = document.getElementById('uploadStatusText');
-        const overlay = document.getElementById('uploadOverlay');
-
-        if(!file && !form.content.value.trim()) return;
-
-        if(!file) {
-            form.enctype = "application/x-www-form-urlencoded";
-            fileInput.removeAttribute('name');
-            form.submit();
-            form.content.value = '';
-            return;
-        }
-
-        if(overlay) overlay.style.display = 'flex';
-        
-        if(window.vercelUpload) {
-            try {
-                if(statusText) statusText.innerText = "Enviando arquivo...";
-                const newBlob = await window.vercelUpload(file.name, file, {
-                    access: 'public',
-                    handleUploadUrl: '/chat/upload/authorize',
-                });
-                document.getElementById('hiddenFileUrl').value = newBlob.url;
-                fileInput.value = ''; 
-                fileInput.removeAttribute('name');
-                form.enctype = "application/x-www-form-urlencoded";
-                form.submit();
-                return;
-            } catch(e) { console.warn("Erro Vercel", e); }
-        }
-
-        if(statusText) statusText.innerText = "Enviando via Servidor...";
-        form.enctype = "multipart/form-data";
-        fileInput.setAttribute('name', 'file');
-        form.removeEventListener('submit', handleChatSubmit);
-        form.submit();
-    }
+    // Rolar para o fim do chat ao carregar
+    const chatBox = document.getElementById('chat-messages');
+    if(chatBox) chatBox.scrollTop = chatBox.scrollHeight;
 </script>
-
-<%- include('../partials/footer') %>
+<%- include('../partials/footer.ejs') %>
