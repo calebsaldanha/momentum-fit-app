@@ -4,62 +4,68 @@
 
     <main class="dashboard-main">
         <% if (typeof missingProfile !== 'undefined' && missingProfile) { %>
-            <div style="background: rgba(245, 158, 11, 0.2); border: 1px solid rgba(245, 158, 11, 0.5); color: #fbbf24; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                <span>⚠️ Você ainda não preencheu sua Ficha de Anamnese. Isso é essencial para seu treinador montar seu treino.</span>
-                <a href="/client/initial-form" class="btn btn-sm btn-primary" style="white-space: nowrap;">Preencher Agora</a>
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div style="flex: 1">
+                    <strong>Atenção:</strong> Você ainda não preencheu sua Ficha de Anamnese.
+                </div>
+                <a href="/client/initial-form" class="btn btn-sm btn-primary">Preencher Agora</a>
             </div>
         <% } %>
 
-        <section class="section">
-            <div class="section-header">
-                <h1>Bem-vindo, <%= user.name %>!</h1>
-            </div>
+        <div class="page-header">
+            <h1>Olá, <span class="text-neon"><%= user.name.split(' ')[0] %></span>!</h1>
+            <p class="text-muted">Aqui está o resumo do seu progresso.</p>
+        </div>
 
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-info">
-                        <h3><%= (clientProfile && clientProfile.weight) ? clientProfile.weight : '--' %> <small>kg</small></h3>
-                        <p>Peso Atual</p>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-info">
-                        <h3><%= workouts ? workouts.length : 0 %></h3>
-                        <p>Planos Ativos</p>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-info">
-                        <h3><%= (clientProfile && clientProfile.fitness_level) ? clientProfile.fitness_level : 'Definir' %></h3>
-                        <p>Nível</p>
-                    </div>
-                </div>
+        <div class="grid-stats">
+            <div class="card-modern" style="margin-bottom: 0; text-align: center;">
+                <div class="text-muted" style="font-size: 0.9rem; margin-bottom: 0.5rem;">Peso Atual</div>
+                <h3 style="font-size: 2rem; margin: 0;"><%= (clientProfile && clientProfile.weight) ? clientProfile.weight : '--' %> <span style="font-size: 1rem; color: #666;">kg</span></h3>
             </div>
+            <div class="card-modern" style="margin-bottom: 0; text-align: center;">
+                <div class="text-muted" style="font-size: 0.9rem; margin-bottom: 0.5rem;">Planos Ativos</div>
+                <h3 style="font-size: 2rem; margin: 0;"><%= workouts ? workouts.length : 0 %></h3>
+            </div>
+            <div class="card-modern" style="margin-bottom: 0; text-align: center;">
+                <div class="text-muted" style="font-size: 0.9rem; margin-bottom: 0.5rem;">Nível</div>
+                <h3 style="font-size: 2rem; margin: 0; text-transform: capitalize;"><%= (clientProfile && clientProfile.fitness_level) ? clientProfile.fitness_level : 'Definir' %></h3>
+            </div>
+        </div>
 
-            <h2 style="margin-top: 3rem;">Treinos Recentes</h2>
-            
-            <div class="workouts-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1rem;">
-                <% if (workouts && workouts.length > 0) { %>
-                    <% workouts.forEach(workout => { %>
-                        <div class="info-card">
-                            <h3><%= workout.title %></h3>
-                            <p>Instrutor: <%= workout.trainer_name %></p>
-                            <a href="/client/workouts/<%= workout.id %>" class="btn btn-primary btn-sm">Ver Detalhes</a>
+        <h3 style="margin-top: 3rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px;">
+            <i class="fas fa-dumbbell text-neon"></i> Seus Treinos
+        </h3>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+            <% if (workouts && workouts.length > 0) { %>
+                <% workouts.forEach(workout => { %>
+                    <div class="card-modern" style="display: flex; flex-direction: column; height: 100%; margin: 0;">
+                        <div style="flex: 1;">
+                            <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem;"><%= workout.title %></h3>
+                            <p class="text-muted" style="font-size: 0.9rem;">
+                                <i class="fas fa-user-tie"></i> Instrutor: <%= workout.trainer_name %>
+                            </p>
                         </div>
-                    <% }) %>
-                <% } else { %>
-                    <div style="background: #111; padding: 20px; border-radius: 8px; color: #888;">
-                        <p>Sem treinos atribuídos no momento. 
-                        <% if (typeof missingProfile !== 'undefined' && missingProfile) { %>
-                            Complete sua anamnese para receber um treino.
-                        <% } else { %>
-                            <a href="/chat" style="color: var(--c-accent-primary);">Fale com seu treinador.</a>
-                        <% } %>
-                        </p>
+                        <div style="margin-top: 1.5rem;">
+                            <a href="/client/workouts/<%= workout.id %>" class="btn btn-primary btn-full">Ver Treino</a>
+                        </div>
                     </div>
-                <% } %>
-            </div>
-        </section>
+                <% }) %>
+            <% } else { %>
+                <div class="card-modern" style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
+                    <i class="fas fa-clipboard-list" style="font-size: 3rem; color: #333; margin-bottom: 1rem;"></i>
+                    <p class="text-muted">Nenhum treino atribuído no momento.</p>
+                    <% if (typeof missingProfile !== 'undefined' && missingProfile) { %>
+                        <p style="margin-top: 10px;">Complete sua anamnese para receber um treino.</p>
+                        <a href="/client/initial-form" class="btn btn-primary" style="margin-top: 1rem;">Ir para Anamnese</a>
+                    <% } else { %>
+                        <p style="margin-top: 10px;">Solicite um plano ao seu treinador.</p>
+                        <a href="/chat" class="btn btn-ghost" style="margin-top: 1rem;">Falar no Chat</a>
+                    <% } %>
+                </div>
+            <% } %>
+        </div>
     </main>
 </div>
 <%- include('../partials/footer.ejs') %>

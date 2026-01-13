@@ -10,118 +10,65 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <link rel="stylesheet" href="/css/styles.css">
-    <% 
-       if ((typeof bodyClass !== 'undefined' && bodyClass.includes('dashboard')) || 
-           (typeof currentPage !== 'undefined' && (currentPage === 'dashboard' || currentPage === 'admin' || currentPage === 'client'))) { 
-    %>
-        <link rel="stylesheet" href="/css/dashboard.css">
-    <% } %>
+    <link rel="stylesheet" href="/css/dashboard.css">
 </head>
 <body>
     <div class="app-container">
-        <header class="main-header">
-            <div class="header-content">
+        <header class="main-header" style="height: var(--header-height); background: rgba(9,9,11,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border-subtle); position: fixed; width: 100%; top: 0; z-index: 1000;">
+            <div class="header-content" style="max-width: 1400px; margin: 0 auto; height: 100%; display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem;">
                 
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    <% 
-                       // Botão Toggle do Dashboard (Só aparece no mobile e em páginas de dashboard)
-                       if ((typeof bodyClass !== 'undefined' && bodyClass.includes('dashboard')) || 
-                           (typeof currentPage !== 'undefined' && (currentPage === 'dashboard' || currentPage === 'admin' || currentPage === 'client'))) { 
-                    %>
-                        <button id="dashboardSidebarBtn" class="dashboard-toggle-btn mobile-only">
-                            <i class="fas fa-bars-staggered"></i>
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <% if ((typeof bodyClass !== 'undefined' && bodyClass.includes('dashboard')) || 
+                           (typeof currentPage !== 'undefined' && ['dashboard', 'admin', 'client'].includes(currentPage))) { %>
+                        <button id="dashboardSidebarBtn" class="btn-ghost mobile-only" style="font-size: 1.2rem; padding: 0.5rem;">
+                            <i class="fas fa-bars"></i>
                         </button>
                     <% } %>
 
-                    <div class="brand">
-                        <a href="/">
-                            <img src="/images/momentum-fit-logo-completo.png" alt="Momentum Fit" class="header-logo-img" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
-                            <span style="display:none; font-weight:bold; font-size:1.5rem; color:#2563eb;">Momentum Fit</span>
+                    <a href="/" class="brand" style="display: flex; align-items: center; gap: 0.5rem; text-decoration: none;">
+                        <img src="/images/momentum-fit-logo-completo.png" alt="Momentum Fit" style="height: 32px;" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+                        <span style="display:none; font-weight:700; font-size:1.25rem; color:white;">Momentum Fit</span>
+                    </a>
+                </div>
+                
+                <nav class="desktop-only" style="display: flex; align-items: center; gap: 2rem;">
+                    <% if (typeof user !== 'undefined' && user) { %>
+                        <% 
+                            let dashLink = '/client/dashboard';
+                            if (user.role === 'superadmin') dashLink = '/superadmin/dashboard';
+                            else if (user.role === 'trainer') dashLink = '/admin/dashboard';
+                        %>
+                        <a href="<%= dashLink %>" class="btn btn-sm btn-primary">Painel</a>
+                        <a href="/notifications" class="text-muted hover:text-white" title="Notificações"><i class="fas fa-bell"></i></a>
+                        <a href="/auth/logout" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="text-muted hover:text-white" style="text-decoration: none; font-size: 0.9rem;">
+                            Sair
                         </a>
-                    </div>
-                </div>
-                
-                <nav class="nav-menu" id="navWrapper">
-                    <a href="/" class="nav-link">Início</a>
-                    <a href="/about" class="nav-link">Sobre</a>
-                    <a href="/articles" class="nav-link">Artigos</a>
-
-                    <div class="mobile-nav-actions mobile-only">
-                        <% if (typeof user !== 'undefined' && user) { %>
-                            <div style="padding: 10px 0; color: #888; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 10px;">
-                                <small>Logado como:</small><br>
-                                <strong style="color: white; font-size: 1.1rem;"><%= user.name %></strong>
-                            </div>
-
-                            <% 
-                                let dashboardLink = '/client/dashboard';
-                                if (user.role === 'superadmin') dashboardLink = '/superadmin/dashboard';
-                                else if (user.role === 'trainer') dashboardLink = '/admin/dashboard';
-                            %>
-                            <a href="<%= dashboardLink %>" class="mobile-btn mobile-btn-primary">
-                                <i class="fas fa-columns"></i> Acessar Painel
-                            </a>
-                            <a href="/notifications" class="nav-link"><i class="fas fa-bell"></i> Notificações</a>
-                            <a href="/auth/logout" class="nav-link" style="color: #ff6b6b;" onclick="event.preventDefault(); document.getElementById('logout-form-mobile').submit();">
-                                <i class="fas fa-sign-out-alt"></i> Sair
-                            </a>
-                            <form id="logout-form-mobile" action="/auth/logout" method="POST" style="display: none;">
-                                <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
-                            </form>
-                        <% } else { %>
-                            <div style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
-                                <a href="/auth/login" class="mobile-btn mobile-btn-outline">Entrar</a>
-                                <a href="/auth/register" class="mobile-btn mobile-btn-primary">Criar Conta</a>
-                            </div>
-                        <% } %>
-                    </div>
+                        <form id="logout-form" action="/auth/logout" method="POST" style="display: none;">
+                            <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+                        </form>
+                    <% } else { %>
+                        <a href="/auth/login" style="color: var(--text-secondary); text-decoration: none; font-weight: 500;">Entrar</a>
+                        <a href="/auth/register" class="btn btn-sm btn-primary">Criar Conta</a>
+                    <% } %>
                 </nav>
-                
-                <div class="user-actions">
-                    <div class="desktop-only" style="align-items: center; gap: 15px;">
-                        <% if (typeof user !== 'undefined' && user) { %>
-                            <span class="greeting" style="color:white; font-size:0.9rem;">Olá, <strong><%= user.name.split(' ')[0] %></strong></span>
-                            
-                            <% 
-                                let dashboardLink = '/client/dashboard';
-                                if (user.role === 'superadmin') dashboardLink = '/superadmin/dashboard';
-                                else if (user.role === 'trainer') dashboardLink = '/admin/dashboard';
-                            %>
-                            <a href="<%= dashboardLink %>" class="btn btn-primary">Painel</a>
-                            <a href="/notifications" class="btn-icon"><i class="fas fa-bell"></i></a>
-                            <a href="/auth/logout" class="btn-logout" title="Sair" onclick="event.preventDefault(); document.getElementById('logout-form-desktop').submit();">
-                                <i class="fas fa-sign-out-alt"></i>
-                            </a>
-                            <form id="logout-form-desktop" action="/auth/logout" method="POST" style="display: none;">
-                                <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
-                            </form>
-                        <% } else { %>
-                            <a href="/auth/login" class="btn btn-outline">Entrar</a>
-                            <a href="/auth/register" class="btn btn-primary">Cadastrar</a>
-                        <% } %>
-                    </div>
 
-                    <div class="hamburger" id="mobileMenuBtn">
-                        <span class="bar"></span>
-                        <span class="bar"></span>
-                        <span class="bar"></span>
-                    </div>
+                <div class="mobile-only">
+                    <button id="mobileMenuBtn" style="background: none; border: none; color: white; font-size: 1.5rem;"><i class="fas fa-bars"></i></button>
                 </div>
-
             </div>
         </header>
 
-        <div class="flash-messages-container" style="position:fixed; top:90px; right:20px; z-index:1100; max-width: 90%;">
+        <div style="position: fixed; top: 80px; right: 20px; z-index: 1100; max-width: 400px; width: 90%;">
             <% if (typeof messages !== 'undefined' && messages.error) { %>
-                <div class="alert alert-danger global-alert">
-                    <i class="fas fa-exclamation-circle"></i> <%= messages.error %>
-                    <button onclick="this.parentElement.remove()" style="margin-left:10px; background:none; border:none; cursor:pointer;">&times;</button>
+                <div class="alert alert-error">
+                    <i class="fas fa-exclamation-circle"></i> <span><%= messages.error %></span>
+                    <button onclick="this.parentElement.remove()" style="margin-left:auto; background:none; border:none; color:inherit; cursor:pointer;">&times;</button>
                 </div>
             <% } %>
             <% if (typeof messages !== 'undefined' && messages.success) { %>
-                <div class="alert alert-success global-alert">
-                    <i class="fas fa-check-circle"></i> <%= messages.success %>
-                    <button onclick="this.parentElement.remove()" style="margin-left:10px; background:none; border:none; cursor:pointer;">&times;</button>
+                <div class="alert" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);">
+                    <i class="fas fa-check-circle"></i> <span><%= messages.success %></span>
+                    <button onclick="this.parentElement.remove()" style="margin-left:auto; background:none; border:none; color:inherit; cursor:pointer;">&times;</button>
                 </div>
             <% } %>
         </div>
