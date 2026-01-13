@@ -1,223 +1,57 @@
 <%- include('../partials/header.ejs', { title: 'Avaliação Inicial' }) %>
 
-<div class="onboarding-wrapper">
-    <div class="onboarding-content">
-        
-        <div class="text-center" style="margin-bottom: 2.5rem;">
-            <h1 class="text-neon" style="font-size: 2rem; margin-bottom: 0.5rem;">Ficha de Anamnese</h1>
-            <p class="text-muted">Responda com calma. Essas informações são a base do seu planejamento.</p>
+<div class="container-center" style="align-items: flex-start; padding-top: 2rem;">
+    <div style="width: 100%; max-width: 800px;">
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <h1 class="text-neon">Ficha de Anamnese</h1>
+            <p class="text-muted">Vamos personalizar seu plano.</p>
         </div>
 
         <% if (typeof error !== 'undefined' && error && error.length > 0) { %>
-            <div class="alert alert-error">
-                <%= error %>
-            </div>
+            <div class="alert alert-error"><%= error %></div>
         <% } %>
 
         <form action="/client/initial-form" method="POST">
             <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
 
             <div class="card-modern">
-                <h3 style="border-bottom: 1px solid var(--border-subtle); padding-bottom: 1rem; margin-bottom: 1.5rem;">
-                    1. Dados Pessoais
-                </h3>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>Idade *</label>
-                        <input type="number" name="age" class="input-modern" required value="<%= (typeof profile !== 'undefined' && profile && profile.age) || '' %>">
-                    </div>
-                    <div class="form-group">
-                        <label>Telefone (WhatsApp) *</label>
-                        <input type="text" name="phone" class="input-modern" required placeholder="(XX) XXXXX-XXXX" value="<%= (typeof profile !== 'undefined' && profile && profile.phone) || '' %>">
-                    </div>
-                    <div class="form-group">
-                        <label>Identidade de Gênero</label>
-                        <select name="gender_identity" class="select-modern">
-                            <option value="">Selecione...</option>
-                            <option value="M" <%= (typeof profile !== 'undefined' && profile && profile.gender_identity === 'M') ? 'selected' : '' %>>Masculino</option>
-                            <option value="F" <%= (typeof profile !== 'undefined' && profile && profile.gender_identity === 'F') ? 'selected' : '' %>>Feminino</option>
-                            <option value="NB" <%= (typeof profile !== 'undefined' && profile && profile.gender_identity === 'NB') ? 'selected' : '' %>>Não-binário</option>
-                            <option value="O" <%= (typeof profile !== 'undefined' && profile && profile.gender_identity === 'O') ? 'selected' : '' %>>Outro</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Sexo Biológico</label>
-                        <select name="sex_assigned_at_birth" class="select-modern">
-                            <option value="">Selecione...</option>
-                            <option value="M" <%= (typeof profile !== 'undefined' && profile && profile.sex_assigned_at_birth === 'M') ? 'selected' : '' %>>Masculino</option>
-                            <option value="F" <%= (typeof profile !== 'undefined' && profile && profile.sex_assigned_at_birth === 'F') ? 'selected' : '' %>>Feminino</option>
-                        </select>
-                        <span class="help-text">Importante para cálculos fisiológicos.</span>
-                    </div>
+                <h3 style="border-bottom: 1px solid var(--border-subtle); padding-bottom: 10px; margin-bottom: 20px;">1. Dados Pessoais</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div><label class="text-muted">Idade</label><input type="number" name="age" class="input-modern" required value="<%= profile?.age || '' %>"></div>
+                    <div><label class="text-muted">Telefone</label><input type="text" name="phone" class="input-modern" required value="<%= profile?.phone || '' %>"></div>
                 </div>
-                
-                <div class="form-group" style="margin-top: 1rem;">
-                    <label>Faz uso de hormônios? (TRT, Anticoncepcional, etc)</label>
-                    <select name="hormonal_treatment" class="select-modern" onchange="document.getElementById('hormonal_details_div').style.display = this.value === 'true' ? 'block' : 'none'">
-                        <option value="false" <%= (!typeof profile === 'undefined' || !profile || profile.hormonal_treatment === false) ? 'selected' : '' %>>Não</option>
-                        <option value="true" <%= (typeof profile !== 'undefined' && profile && profile.hormonal_treatment === true) ? 'selected' : '' %>>Sim</option>
+                <div><label class="text-muted">Identidade de Gênero</label>
+                    <select name="gender_identity" class="select-modern">
+                        <option value="">Selecione...</option>
+                        <option value="M" <%= profile?.gender_identity === 'M' ? 'selected' : '' %>>Masculino</option>
+                        <option value="F" <%= profile?.gender_identity === 'F' ? 'selected' : '' %>>Feminino</option>
+                        <option value="NB" <%= profile?.gender_identity === 'NB' ? 'selected' : '' %>>Não-binário</option>
                     </select>
                 </div>
-                <div class="form-group" id="hormonal_details_div" style="display: <%= (typeof profile !== 'undefined' && profile && profile.hormonal_treatment === true) ? 'block' : 'none' %>; margin-top: 1rem;">
-                    <label>Quais e dosagens?</label>
-                    <input type="text" name="hormonal_details" class="input-modern" placeholder="Ex: Testosterona 100mg/sem..." value="<%= (typeof profile !== 'undefined' && profile && profile.hormonal_details) || '' %>">
+            </div>
+
+            <div class="card-modern">
+                <h3 style="border-bottom: 1px solid var(--border-subtle); padding-bottom: 10px; margin-bottom: 20px;">2. Corpo</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div><label class="text-muted">Peso (kg)</label><input type="text" name="weight" class="input-modern" required value="<%= profile?.current_weight || profile?.weight || '' %>"></div>
+                    <div><label class="text-muted">Altura (m)</label><input type="text" name="height" class="input-modern" required value="<%= profile?.height || '' %>"></div>
                 </div>
             </div>
 
             <div class="card-modern">
-                <h3 style="border-bottom: 1px solid var(--border-subtle); padding-bottom: 1rem; margin-bottom: 1.5rem;">
-                    2. Medidas & Corpo
-                </h3>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>Peso (kg) *</label>
-                        <input type="text" name="weight" class="input-modern" required placeholder="Ex: 70.5" value="<%= (typeof profile !== 'undefined' && profile && (profile.current_weight || profile.weight)) || '' %>">
-                    </div>
-                    <div class="form-group">
-                        <label>Altura (m) *</label>
-                        <input type="text" name="height" class="input-modern" required placeholder="Ex: 1.75" value="<%= (typeof profile !== 'undefined' && profile && profile.height) || '' %>">
-                    </div>
-                    <div class="form-group">
-                        <label>Gordura Corporal (%)</label>
-                        <input type="text" name="body_fat" class="input-modern" placeholder="Se souber (Opcional)" value="<%= (typeof profile !== 'undefined' && profile && profile.body_fat) || '' %>">
-                    </div>
-                </div>
+                <h3 style="border-bottom: 1px solid var(--border-subtle); padding-bottom: 10px; margin-bottom: 20px;">3. Treino</h3>
+                <label class="text-muted">Objetivo Principal</label>
+                <input type="text" name="main_goal" class="input-modern" required placeholder="Ex: Hipertrofia" value="<%= profile?.fitness_goals || profile?.main_goal || '' %>">
                 
-                <h4 class="text-muted" style="margin-top: 1.5rem; margin-bottom: 1rem; font-size: 0.9rem;">Circunferências (cm) - Opcional mas recomendado</h4>
-                <div class="form-grid">
-                    <div class="form-group"><label>Cintura (Umbigo)</label><input type="text" name="measure_waist" class="input-modern" value="<%= (typeof profile !== 'undefined' && profile && profile.measure_waist) || '' %>"></div>
-                    <div class="form-group"><label>Quadril</label><input type="text" name="measure_hip" class="input-modern" value="<%= (typeof profile !== 'undefined' && profile && profile.measure_hip) || '' %>"></div>
-                    <div class="form-group"><label>Braço (Relaxado)</label><input type="text" name="measure_arm" class="input-modern" value="<%= (typeof profile !== 'undefined' && profile && profile.measure_arm) || '' %>"></div>
-                    <div class="form-group"><label>Perna (Coxa)</label><input type="text" name="measure_leg" class="input-modern" value="<%= (typeof profile !== 'undefined' && profile && profile.measure_leg) || '' %>"></div>
-                </div>
+                <label class="text-muted">Nível de Experiência</label>
+                <select name="fitness_level" class="select-modern" required>
+                    <option value="beginner" <%= profile?.fitness_level === 'beginner' ? 'selected' : '' %>>Iniciante</option>
+                    <option value="intermediate" <%= profile?.fitness_level === 'intermediate' ? 'selected' : '' %>>Intermediário</option>
+                    <option value="advanced" <%= profile?.fitness_level === 'advanced' ? 'selected' : '' %>>Avançado</option>
+                </select>
             </div>
 
-            <div class="card-modern">
-                <h3 style="border-bottom: 1px solid var(--border-subtle); padding-bottom: 1rem; margin-bottom: 1.5rem;">3. Objetivos</h3>
-                <div class="form-group">
-                    <label>Objetivo Principal *</label>
-                    <input type="text" name="main_goal" class="input-modern" required placeholder="Ex: Hipertrofia, Emagrecimento..." value="<%= (typeof profile !== 'undefined' && profile && (profile.fitness_goals || profile.main_goal)) || '' %>">
-                </div>
-                <div class="form-group">
-                    <label>Objetivos Secundários</label>
-                    <input type="text" name="secondary_goals" class="input-modern" placeholder="Ex: Melhorar postura, correr 5km..." value="<%= (typeof profile !== 'undefined' && profile && profile.secondary_goals) || '' %>">
-                </div>
-                <div class="form-group">
-                    <label>Evento ou Prazo Específico?</label>
-                    <input type="text" name="specific_event" class="input-modern" placeholder="Ex: Casamento em 3 meses, Verão..." value="<%= (typeof profile !== 'undefined' && profile && profile.specific_event) || '' %>">
-                </div>
-            </div>
-
-            <div class="card-modern">
-                <h3 style="border-bottom: 1px solid var(--border-subtle); padding-bottom: 1rem; margin-bottom: 1.5rem;">4. Histórico de Saúde</h3>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>Condições Médicas</label>
-                        <textarea name="medical_conditions" class="textarea-modern" rows="2" placeholder="Diabetes, Hipertensão, Asma..."><%= (typeof profile !== 'undefined' && profile && profile.medical_conditions) || '' %></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Medicamentos de uso contínuo</label>
-                        <textarea name="medications" class="textarea-modern" rows="2" placeholder="Nome e horários"><%= (typeof profile !== 'undefined' && profile && profile.medications) || '' %></textarea>
-                    </div>
-                </div>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>Lesões ou Dores Articulares</label>
-                        <textarea name="injuries" class="textarea-modern" rows="2" placeholder="Joelhos, Ombros, Lombar..."><%= (typeof profile !== 'undefined' && profile && profile.injuries) || '' %></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Cirurgias Prévias</label>
-                        <textarea name="surgeries" class="textarea-modern" rows="2" placeholder="O que e quando"><%= (typeof profile !== 'undefined' && profile && profile.surgeries) || '' %></textarea>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Alergias</label>
-                    <input type="text" name="allergies" class="input-modern" placeholder="Alimentos ou medicamentos" value="<%= (typeof profile !== 'undefined' && profile && profile.allergies) || '' %>">
-                </div>
-            </div>
-
-            <div class="card-modern">
-                <h3 style="border-bottom: 1px solid var(--border-subtle); padding-bottom: 1rem; margin-bottom: 1.5rem;">5. Rotina de Treino</h3>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>Nível de Experiência *</label>
-                        <select name="fitness_level" class="select-modern" required>
-                            <option value="sedentary" <%= (typeof profile !== 'undefined' && profile && profile.fitness_level === 'sedentary') ? 'selected' : '' %>>Sedentário (Parado há +3 meses)</option>
-                            <option value="beginner" <%= (typeof profile !== 'undefined' && profile && profile.fitness_level === 'beginner') ? 'selected' : '' %>>Iniciante (Treino irregular)</option>
-                            <option value="intermediate" <%= (typeof profile !== 'undefined' && profile && profile.fitness_level === 'intermediate') ? 'selected' : '' %>>Intermediário (Treino regular)</option>
-                            <option value="advanced" <%= (typeof profile !== 'undefined' && profile && profile.fitness_level === 'advanced') ? 'selected' : '' %>>Avançado (Atleta)</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Dias Disponíveis p/ Treino</label>
-                        <select name="training_days" class="select-modern">
-                            <option value="2" <%= (typeof profile !== 'undefined' && profile && profile.training_days_frequency == 2) ? 'selected' : '' %>>2 dias</option>
-                            <option value="3" <%= (typeof profile === 'undefined' || !profile || profile.training_days_frequency == 3) ? 'selected' : '' %>>3 dias</option>
-                            <option value="4" <%= (typeof profile !== 'undefined' && profile && profile.training_days_frequency == 4) ? 'selected' : '' %>>4 dias</option>
-                            <option value="5" <%= (typeof profile !== 'undefined' && profile && profile.training_days_frequency == 5) ? 'selected' : '' %>>5 dias</option>
-                            <option value="6" <%= (typeof profile !== 'undefined' && profile && profile.training_days_frequency == 6) ? 'selected' : '' %>>6 dias</option>
-                            <option value="7" <%= (typeof profile !== 'undefined' && profile && profile.training_days_frequency == 7) ? 'selected' : '' %>>Todos os dias</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>Onde vai treinar?</label>
-                        <select name="workout_preference" class="select-modern">
-                            <option value="gym" <%= (typeof profile !== 'undefined' && profile && profile.workout_preference === 'gym') ? 'selected' : '' %>>Academia Completa</option>
-                            <option value="home_basic" <%= (typeof profile !== 'undefined' && profile && profile.workout_preference === 'home_basic') ? 'selected' : '' %>>Em Casa (Pesos livres/Elásticos)</option>
-                            <option value="home_bodyweight" <%= (typeof profile !== 'undefined' && profile && profile.workout_preference === 'home_bodyweight') ? 'selected' : '' %>>Em Casa (Peso do corpo)</option>
-                            <option value="park" <%= (typeof profile !== 'undefined' && profile && profile.workout_preference === 'park') ? 'selected' : '' %>>Ao Ar Livre / Parque</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Tempo Disponível por dia</label>
-                        <input type="text" name="availability" class="input-modern" placeholder="Ex: 45 min, 1 hora..." value="<%= (typeof profile !== 'undefined' && profile && (profile.time_availability || profile.availability)) || '' %>">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Equipamentos Disponíveis (Se treinar em casa)</label>
-                    <input type="text" name="equipment" class="input-modern" placeholder="Halteres, Barra, Banco..." value="<%= (typeof profile !== 'undefined' && profile && profile.equipment) || '' %>">
-                </div>
-                <div class="form-group">
-                    <label>O que você já fez de atividade física antes?</label>
-                    <textarea name="past_activity" class="textarea-modern" rows="2" placeholder="Musculação, Crossfit, Natação..."><%= (typeof profile !== 'undefined' && profile && profile.past_activity) || '' %></textarea>
-                </div>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>Atividades que GOSTA</label>
-                        <input type="text" name="liked_activities" class="input-modern" placeholder="Ex: Correr, Supino..." value="<%= (typeof profile !== 'undefined' && profile && profile.liked_activities) || '' %>">
-                    </div>
-                    <div class="form-group">
-                        <label>Atividades que NÃO GOSTA</label>
-                        <input type="text" name="disliked_activities" class="input-modern" placeholder="Ex: Agachamento, Burpees..." value="<%= (typeof profile !== 'undefined' && profile && profile.disliked_activities) || '' %>">
-                    </div>
-                </div>
-            </div>
-
-            <div class="card-modern">
-                <h3 style="border-bottom: 1px solid var(--border-subtle); padding-bottom: 1rem; margin-bottom: 1.5rem;">6. Estilo de Vida</h3>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>Horas de Sono (Média)</label>
-                        <input type="text" name="sleep_hours" class="input-modern" placeholder="Ex: 6-7 horas" value="<%= (typeof profile !== 'undefined' && profile && profile.sleep_hours) || '' %>">
-                    </div>
-                    <div class="form-group">
-                        <label>Como é sua dieta hoje?</label>
-                        <textarea name="diet_description" class="textarea-modern" rows="2" placeholder="Come de tudo? Faz restrição? Usa suplementos?"><%= (typeof profile !== 'undefined' && profile && profile.diet_description) || '' %></textarea>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Maiores Dificuldades/Desafios</label>
-                    <textarea name="challenges" class="textarea-modern" rows="2" placeholder="Falta de tempo, ansiedade, doces..."><%= (typeof profile !== 'undefined' && profile && profile.challenges) || '' %></textarea>
-                </div>
-            </div>
-
-            <button type="submit" class="btn btn-primary btn-full btn-lg">
-                FINALIZAR E ENVIAR
-            </button>
+            <button type="submit" class="btn btn-primary btn-full" style="padding: 1rem; font-size: 1.1rem;">Salvar Ficha</button>
         </form>
     </div>
 </div>

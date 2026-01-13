@@ -14,61 +14,66 @@
 </head>
 <body>
     <div class="app-container">
-        <header class="main-header" style="height: var(--header-height); background: rgba(9,9,11,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border-subtle); position: fixed; width: 100%; top: 0; z-index: 1000;">
-            <div class="header-content" style="max-width: 1400px; margin: 0 auto; height: 100%; display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem;">
-                
+        <header class="main-header">
+            <div class="header-content">
                 <div style="display: flex; align-items: center; gap: 1rem;">
-                    <% if ((typeof bodyClass !== 'undefined' && bodyClass.includes('dashboard')) || 
-                           (typeof currentPage !== 'undefined' && ['dashboard', 'admin', 'client'].includes(currentPage))) { %>
-                        <button id="dashboardSidebarBtn" class="btn-ghost mobile-only" style="font-size: 1.2rem; padding: 0.5rem;">
-                            <i class="fas fa-bars"></i>
-                        </button>
-                    <% } %>
-
-                    <a href="/" class="brand" style="display: flex; align-items: center; gap: 0.5rem; text-decoration: none;">
+                    <a href="/" style="display: flex; align-items: center; gap: 0.5rem; text-decoration: none;">
                         <img src="/images/momentum-fit-logo-completo.png" alt="Momentum Fit" style="height: 32px;" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
                         <span style="display:none; font-weight:700; font-size:1.25rem; color:white;">Momentum Fit</span>
                     </a>
                 </div>
                 
-                <nav class="desktop-only" style="display: flex; align-items: center; gap: 2rem;">
+                <nav class="nav-desktop">
                     <% if (typeof user !== 'undefined' && user) { %>
                         <% 
                             let dashLink = '/client/dashboard';
                             if (user.role === 'superadmin') dashLink = '/superadmin/dashboard';
                             else if (user.role === 'trainer') dashLink = '/admin/dashboard';
                         %>
-                        <a href="<%= dashLink %>" class="btn btn-sm btn-primary">Painel</a>
-                        <a href="/notifications" class="text-muted hover:text-white" title="Notificações"><i class="fas fa-bell"></i></a>
-                        <a href="/auth/logout" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="text-muted hover:text-white" style="text-decoration: none; font-size: 0.9rem;">
-                            Sair
-                        </a>
+                        <a href="<%= dashLink %>" class="btn btn-primary btn-sm">Painel</a>
+                        <a href="/notifications" style="color: var(--text-secondary); font-size: 1.2rem;"><i class="fas fa-bell"></i></a>
+                        <a href="/auth/logout" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" style="color: var(--text-secondary); text-decoration: none;">Sair</a>
                         <form id="logout-form" action="/auth/logout" method="POST" style="display: none;">
                             <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
                         </form>
                     <% } else { %>
-                        <a href="/auth/login" style="color: var(--text-secondary); text-decoration: none; font-weight: 500;">Entrar</a>
-                        <a href="/auth/register" class="btn btn-sm btn-primary">Criar Conta</a>
+                        <a href="/auth/login" style="color: var(--text-secondary); text-decoration: none;">Entrar</a>
+                        <a href="/auth/register" class="btn btn-primary btn-sm">Criar Conta</a>
                     <% } %>
                 </nav>
 
-                <div class="mobile-only">
-                    <button id="mobileMenuBtn" style="background: none; border: none; color: white; font-size: 1.5rem;"><i class="fas fa-bars"></i></button>
+                <button id="mobileMenuBtn" class="mobile-menu-btn">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+
+            <div id="mobileNavWrapper" class="nav-mobile-wrapper">
+                <div class="nav-mobile-content">
+                    <a href="/" class="nav-link-mobile">Início</a>
+                    <% if (typeof user !== 'undefined' && user) { %>
+                        <div style="text-align: center; color: var(--text-secondary); font-size: 0.9rem;">Olá, <%= user.name %></div>
+                        <a href="<%= typeof dashLink !== 'undefined' ? dashLink : '/client/dashboard' %>" class="nav-link-mobile btn-primary">Acessar Painel</a>
+                        <a href="/notifications" class="nav-link-mobile">Notificações</a>
+                        <a href="/auth/logout" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="nav-link-mobile" style="color: var(--danger);">Sair</a>
+                    <% } else { %>
+                        <a href="/auth/login" class="nav-link-mobile">Entrar</a>
+                        <a href="/auth/register" class="nav-link-mobile btn-primary">Criar Conta</a>
+                    <% } %>
                 </div>
             </div>
         </header>
 
-        <div style="position: fixed; top: 80px; right: 20px; z-index: 1100; max-width: 400px; width: 90%;">
+        <div style="position: fixed; top: 90px; right: 20px; z-index: 1100; max-width: 90%;">
             <% if (typeof messages !== 'undefined' && messages.error) { %>
                 <div class="alert alert-error">
                     <i class="fas fa-exclamation-circle"></i> <span><%= messages.error %></span>
-                    <button onclick="this.parentElement.remove()" style="margin-left:auto; background:none; border:none; color:inherit; cursor:pointer;">&times;</button>
+                    <button onclick="this.parentElement.remove()" style="margin-left:auto; background:none; border:none; color:inherit;">&times;</button>
                 </div>
             <% } %>
             <% if (typeof messages !== 'undefined' && messages.success) { %>
                 <div class="alert" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);">
                     <i class="fas fa-check-circle"></i> <span><%= messages.success %></span>
-                    <button onclick="this.parentElement.remove()" style="margin-left:auto; background:none; border:none; color:inherit; cursor:pointer;">&times;</button>
+                    <button onclick="this.parentElement.remove()" style="margin-left:auto; background:none; border:none; color:inherit;">&times;</button>
                 </div>
             <% } %>
         </div>
