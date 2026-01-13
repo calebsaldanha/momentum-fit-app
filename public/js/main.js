@@ -1,25 +1,28 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- MENU MOBILE ---
+    
+    // Elementos do Menu Mobile
     const mobileBtn = document.getElementById('mobileMenuBtn');
-    const mobileNav = document.getElementById('mobileNavWrapper');
+    const mobileDrawer = document.getElementById('mobileDrawer');
+    const icon = mobileBtn ? mobileBtn.querySelector('i') : null;
 
-    if (mobileBtn && mobileNav) {
-        // Função para alternar o menu
+    if (mobileBtn && mobileDrawer) {
+        
+        // Função Toggle
         function toggleMenu(e) {
-            if(e) e.stopPropagation(); // Impede clique fantasma
+            if(e) e.stopPropagation();
             
-            const isActive = mobileNav.classList.contains('active');
+            const isOpen = mobileDrawer.classList.contains('active');
             
-            if (isActive) {
-                mobileNav.classList.remove('active');
-                const icon = mobileBtn.querySelector('i');
+            if (isOpen) {
+                // Fechar
+                mobileDrawer.classList.remove('active');
                 if(icon) {
                     icon.classList.remove('fa-times');
                     icon.classList.add('fa-bars');
                 }
             } else {
-                mobileNav.classList.add('active');
-                const icon = mobileBtn.querySelector('i');
+                // Abrir
+                mobileDrawer.classList.add('active');
                 if(icon) {
                     icon.classList.remove('fa-bars');
                     icon.classList.add('fa-times');
@@ -27,49 +30,32 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // Evento de clique
+        // Event Listeners
         mobileBtn.addEventListener('click', toggleMenu);
 
         // Fechar ao clicar fora
         document.addEventListener('click', (e) => {
-            const isClickInside = mobileNav.contains(e.target) || mobileBtn.contains(e.target);
-            if (!isClickInside && mobileNav.classList.contains('active')) {
-                toggleMenu();
+            const isClickInside = mobileDrawer.contains(e.target) || mobileBtn.contains(e.target);
+            if (!isClickInside && mobileDrawer.classList.contains('active')) {
+                toggleMenu(); // fecha
             }
         });
-        
-        // Fechar ao clicar em um link do menu
-        const mobileLinks = mobileNav.querySelectorAll('a');
-        mobileLinks.forEach(link => {
+
+        // Fechar ao clicar em link (UX)
+        const links = mobileDrawer.querySelectorAll('a');
+        links.forEach(link => {
             link.addEventListener('click', () => {
-                mobileNav.classList.remove('active');
-                const icon = mobileBtn.querySelector('i');
-                if(icon) {
-                    icon.classList.remove('fa-times');
-                    icon.classList.add('fa-bars');
-                }
+                if(mobileDrawer.classList.contains('active')) toggleMenu();
             });
         });
     }
 
-    // --- SIDEBAR DO PAINEL (Se existir) ---
-    const sidebarBtn = document.getElementById('dashboardSidebarBtn');
+    // Sidebar do Dashboard (se existir)
+    const sidebarToggle = document.querySelector('.sidebar-toggle');
     const sidebar = document.querySelector('.dashboard-sidebar');
-    
-    if (sidebarBtn && sidebar) {
-        sidebarBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
+    if (sidebarToggle && sidebar) {
+        sidebarToggle.addEventListener('click', () => {
             sidebar.classList.toggle('active');
-        });
-
-        // Fechar sidebar ao clicar fora (opcional)
-        document.addEventListener('click', (e) => {
-             if (window.innerWidth < 992 && 
-                 sidebar.classList.contains('active') && 
-                 !sidebar.contains(e.target) && 
-                 !sidebarBtn.contains(e.target)) {
-                sidebar.classList.remove('active');
-             }
         });
     }
 });

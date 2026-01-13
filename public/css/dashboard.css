@@ -1,17 +1,14 @@
 :root {
-    --bg-app: #050505;
-    --bg-card: #121212;
-    --bg-card-hover: #1e1e1e;
-    --bg-input: #1a1a1a;
-    --primary: #bef202; /* Cor neon original do tema */
-    --primary-hover: #a3d900;
-    --text-main: #ffffff;
-    --text-secondary: #a0a0a0;
-    --border: #333333;
-    --border-subtle: rgba(255, 255, 255, 0.1);
+    --bg-app: #09090b;
+    --bg-card: #18181b;
+    --bg-input: #27272a;
+    --primary: #d4ff00; /* Neon original */
+    --primary-hover: #b8e600;
+    --text-main: #fafafa;
+    --text-secondary: #a1a1aa;
+    --border: #3f3f46;
     --danger: #ef4444;
-    --success: #10b981;
-    --header-height: 80px; /* Igual ao styles.css */
+    --header-height: 80px;
     --radius: 8px;
 }
 
@@ -20,111 +17,145 @@
 body {
     background-color: var(--bg-app);
     color: var(--text-main);
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: 'Inter', sans-serif;
     margin: 0;
-    line-height: 1.6;
-    /* Remove padding-top fixo pois o header.ejs já tem posição fixa e o main lida com isso */
+    padding-top: var(--header-height); /* Espaço para o header fixo */
 }
 
-/* --- COMPONENTES MODERNOS (DASHBOARD & FORMS) --- */
-
-/* Containers */
-.dashboard-container { display: flex; min-height: 100vh; padding-top: var(--header-height); }
-.dashboard-main { flex: 1; padding: 2rem; max-width: 1400px; margin: 0 auto; width: 100%; }
-.container-center { display: flex; justify-content: center; align-items: center; min-height: calc(100vh - var(--header-height)); padding: 2rem 1rem; padding-top: calc(var(--header-height) + 2rem); }
-
-/* Cards */
-.card-modern {
-    background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius);
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
-}
-
-/* Inputs */
-.input-modern, .select-modern, .textarea-modern {
+/* --- HEADER & NAVEGAÇÃO --- */
+.main-header {
+    height: var(--header-height);
+    background: rgba(9,9,11,0.98);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    position: fixed;
+    top: 0;
+    left: 0;
     width: 100%;
-    background: var(--bg-input);
-    border: 1px solid var(--border);
-    color: white;
-    padding: 0.75rem 1rem;
-    border-radius: var(--radius);
+    z-index: 1000;
+}
+
+.header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1.5rem;
+}
+
+/* Nav Desktop - Flexbox para alinhar itens */
+.nav-desktop-container {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.nav-links-desktop {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.nav-links-desktop a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-weight: 500;
     font-size: 0.95rem;
-    margin-bottom: 1rem;
-    font-family: inherit;
-    transition: border-color 0.2s;
-}
-.input-modern:focus, .select-modern:focus, .textarea-modern:focus {
-    outline: none;
-    border-color: var(--primary);
+    transition: color 0.2s;
 }
 
-/* Botões */
-.btn-primary { background: var(--primary); color: #000; font-weight: 600; border: none; }
-.btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
-.btn-full { width: 100%; text-align: center; justify-content: center; }
-.btn-sm { padding: 0.4rem 0.8rem; font-size: 0.85rem; }
+.nav-links-desktop a:hover {
+    color: var(--primary);
+}
 
-/* Texto */
-.text-neon { color: var(--primary); }
-.text-muted { color: var(--text-secondary); }
-.text-center { text-align: center; }
+/* Mobile Menu Button */
+.mobile-menu-trigger {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    z-index: 1001; /* Acima de tudo */
+}
 
-/* --- MENU MOBILE ESPECÍFICO --- */
-.nav-mobile-wrapper {
-    display: none; /* Escondido por padrão */
+/* Mobile Drawer (Gaveta) */
+.mobile-drawer {
     position: fixed;
     top: var(--header-height);
     left: 0;
     width: 100%;
-    height: 0; /* Altura zero para animação */
     background: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+    padding: 0;
+    max-height: 0;
     overflow: hidden;
-    transition: height 0.3s ease-in-out;
+    transition: max-height 0.3s ease-in-out;
     z-index: 999;
-    border-bottom: 1px solid var(--border-subtle);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
 }
 
-.nav-mobile-wrapper.active {
-    display: block;
-    height: auto;
-    min-height: 250px; /* Garante espaço suficiente */
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+.mobile-drawer.active {
+    max-height: 500px; /* Altura suficiente para o conteúdo */
 }
 
-.nav-mobile-content {
-    padding: 2rem;
+.mobile-drawer-content {
+    padding: 2rem 1.5rem;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 1.5rem;
 }
 
-.nav-link-mobile {
-    display: block;
-    padding: 1rem;
-    background: rgba(255,255,255,0.03);
+.mobile-link {
+    font-size: 1.1rem;
+    color: var(--text-main);
+    text-decoration: none;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+/* Utilitários de Visibilidade - USO OBRIGATÓRIO DE !IMPORTANT */
+@media (min-width: 993px) {
+    .mobile-only { display: none !important; }
+    .desktop-only { display: flex !important; }
+}
+
+@media (max-width: 992px) {
+    .desktop-only { display: none !important; }
+    .mobile-only { display: block !important; }
+    
+    /* Ajustes específicos mobile */
+    .dashboard-main { padding: 1rem; }
+    .container-center { padding-top: 2rem; }
+}
+
+/* Botões */
+.btn {
+    padding: 0.6rem 1.2rem;
     border-radius: var(--radius);
-    text-align: center;
     font-weight: 600;
-    border: 1px solid transparent;
-}
-.nav-link-mobile:hover {
-    border-color: var(--primary);
-    color: var(--primary);
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
 }
 
-/* --- ALERTS --- */
+.btn-primary { background: var(--primary); color: #000; }
+.btn-primary:hover { background: var(--primary-hover); }
+.btn-outline { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: white; }
+.btn-full { width: 100%; }
+
+/* Inputs e Cards (Global) */
+.card-modern { background: var(--bg-card); padding: 1.5rem; border-radius: var(--radius); border: 1px solid var(--border); margin-bottom: 1.5rem; }
+.input-modern, .select-modern { width: 100%; background: var(--bg-input); border: 1px solid var(--border); padding: 0.8rem; border-radius: var(--radius); color: white; margin-bottom: 1rem; }
+.text-neon { color: var(--primary); }
+.text-muted { color: var(--text-secondary); }
+
+/* Alerts */
 .alert { padding: 1rem; border-radius: var(--radius); margin-bottom: 1rem; display: flex; align-items: center; gap: 10px; }
 .alert-error { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); }
-.alert-warning { background: rgba(245, 158, 11, 0.15); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.3); }
-
-/* --- RESPONSIVIDADE (Unificada com styles.css - 992px) --- */
-@media (max-width: 992px) {
-    .dashboard-main { padding: 1rem; }
-    
-    /* Garante que o botão mobile apareça e o desktop suma (usando classes do styles.css ou aqui) */
-    .nav-desktop { display: none !important; }
-    .mobile-menu-btn { display: flex !important; }
-}

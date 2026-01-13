@@ -16,54 +16,67 @@
     <div class="app-container">
         <header class="main-header">
             <div class="header-content">
-                <div style="display: flex; align-items: center; gap: 1rem;">
-                    <a href="/" style="display: flex; align-items: center; gap: 0.5rem; text-decoration: none;">
-                        <img src="/images/momentum-fit-logo-completo.png" alt="Momentum Fit" style="height: 32px;" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
-                        <span style="display:none; font-weight:700; font-size:1.25rem; color:white;">Momentum Fit</span>
-                    </a>
-                </div>
                 
-                <nav class="nav-desktop desktop-only" style="display: flex; align-items: center; gap: 1.5rem;">
-                    <% if (typeof user !== 'undefined' && user) { %>
-                        <% 
-                            let dashLink = '/client/dashboard';
-                            if (user.role === 'superadmin') dashLink = '/superadmin/dashboard';
-                            else if (user.role === 'trainer') dashLink = '/admin/dashboard';
-                        %>
-                        <a href="<%= dashLink %>" class="btn btn-primary btn-sm">Painel</a>
-                        <a href="/notifications" style="color: var(--text-secondary); font-size: 1.2rem;"><i class="fas fa-bell"></i></a>
-                        <a href="/auth/logout" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" style="color: var(--text-secondary); text-decoration: none; cursor: pointer;">Sair</a>
-                        <form id="logout-form" action="/auth/logout" method="POST" style="display: none;">
-                            <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
-                        </form>
-                    <% } else { %>
-                        <a href="/auth/login" style="color: var(--text-secondary); text-decoration: none;">Entrar</a>
-                        <a href="/auth/register" class="btn btn-primary btn-sm">Criar Conta</a>
-                    <% } %>
-                </nav>
+                <a href="/" style="display: flex; align-items: center; gap: 0.5rem; text-decoration: none; z-index: 1002;">
+                    <img src="/images/momentum-fit-logo-completo.png" alt="Momentum Fit" style="height: 32px;" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+                    <span style="display:none; font-weight:700; font-size:1.25rem; color:white;">Momentum Fit</span>
+                </a>
 
-                <button id="mobileMenuBtn" class="mobile-menu-btn mobile-only" style="background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;">
+                <div class="nav-desktop-container desktop-only">
+                    <nav class="nav-links-desktop">
+                        <a href="/">Início</a>
+                        <a href="/about">Sobre</a>
+                        <a href="/articles">Artigos</a>
+                    </nav>
+
+                    <div style="width: 1px; height: 24px; background: rgba(255,255,255,0.1); margin: 0 1rem;"></div>
+
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <% if (typeof user !== 'undefined' && user) { %>
+                            <% 
+                                let dashLink = '/client/dashboard';
+                                if (user.role === 'superadmin') dashLink = '/superadmin/dashboard';
+                                else if (user.role === 'trainer') dashLink = '/admin/dashboard';
+                            %>
+                            <span class="text-muted" style="font-size: 0.9rem;">Olá, <%= user.name.split(' ')[0] %></span>
+                            <a href="<%= dashLink %>" class="btn btn-primary btn-sm">Painel</a>
+                            <a href="/auth/logout" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="text-muted hover:text-white" title="Sair"><i class="fas fa-sign-out-alt"></i></a>
+                        <% } else { %>
+                            <a href="/auth/login" class="btn btn-outline btn-sm">Entrar</a>
+                            <a href="/auth/register" class="btn btn-primary btn-sm">Criar Conta</a>
+                        <% } %>
+                    </div>
+                </div>
+
+                <button id="mobileMenuBtn" class="mobile-menu-trigger mobile-only">
                     <i class="fas fa-bars"></i>
                 </button>
             </div>
 
-            <div id="mobileNavWrapper" class="nav-mobile-wrapper">
-                <div class="nav-mobile-content">
-                    <a href="/" class="nav-link-mobile">Início</a>
+            <div id="mobileDrawer" class="mobile-drawer mobile-only">
+                <div class="mobile-drawer-content">
+                    <a href="/" class="mobile-link">Início</a>
+                    <a href="/about" class="mobile-link">Sobre</a>
+                    <a href="/articles" class="mobile-link">Artigos</a>
+                    
+                    <div style="border-top: 1px solid rgba(255,255,255,0.1); margin: 0.5rem 0;"></div>
+
                     <% if (typeof user !== 'undefined' && user) { %>
-                        <div style="text-align: center; color: var(--text-secondary); font-size: 0.9rem;">Logado como: <strong><%= user.name %></strong></div>
-                        <a href="<%= typeof dashLink !== 'undefined' ? dashLink : '/client/dashboard' %>" class="nav-link-mobile" style="background: var(--primary); color: black;">Acessar Painel</a>
-                        <a href="/notifications" class="nav-link-mobile">Notificações</a>
-                        <a href="/auth/logout" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="nav-link-mobile" style="color: var(--danger); border-color: var(--danger);">Sair</a>
+                        <div class="text-muted">Logado como: <strong class="text-neon"><%= user.name %></strong></div>
+                        <a href="<%= typeof dashLink !== 'undefined' ? dashLink : '/client/dashboard' %>" class="btn btn-primary btn-full">Acessar Painel</a>
+                        <a href="/auth/logout" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="btn btn-outline btn-full" style="border-color: var(--danger); color: var(--danger);">Sair</a>
+                        <form id="logout-form" action="/auth/logout" method="POST" style="display: none;">
+                            <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+                        </form>
                     <% } else { %>
-                        <a href="/auth/login" class="nav-link-mobile">Entrar</a>
-                        <a href="/auth/register" class="nav-link-mobile" style="background: var(--primary); color: black;">Criar Conta</a>
+                        <a href="/auth/login" class="btn btn-outline btn-full">Entrar</a>
+                        <a href="/auth/register" class="btn btn-primary btn-full">Criar Conta</a>
                     <% } %>
                 </div>
             </div>
         </header>
 
-        <div style="position: fixed; top: 90px; right: 20px; z-index: 1100; max-width: 90%;">
+        <div style="position: fixed; top: 90px; right: 20px; z-index: 1100; max-width: 90%; width: 400px;">
             <% if (typeof messages !== 'undefined' && messages.error) { %>
                 <div class="alert alert-error">
                     <i class="fas fa-exclamation-circle"></i> <span><%= messages.error %></span>
@@ -71,7 +84,7 @@
                 </div>
             <% } %>
             <% if (typeof messages !== 'undefined' && messages.success) { %>
-                <div class="alert" style="background: rgba(190, 242, 2, 0.15); color: #bef202; border: 1px solid rgba(190, 242, 2, 0.3);">
+                <div class="alert" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);">
                     <i class="fas fa-check-circle"></i> <span><%= messages.success %></span>
                     <button onclick="this.parentElement.remove()" style="margin-left:auto; background:none; border:none; color:inherit; cursor:pointer;">&times;</button>
                 </div>
