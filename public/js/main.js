@@ -1,61 +1,75 @@
 document.addEventListener('DOMContentLoaded', () => {
-    
-    // Elementos do Menu Mobile
+    console.log('Momentum Fit: Scripts carregados.');
+
+    // --- MENU MOBILE ---
     const mobileBtn = document.getElementById('mobileMenuBtn');
     const mobileDrawer = document.getElementById('mobileDrawer');
-    const icon = mobileBtn ? mobileBtn.querySelector('i') : null;
 
     if (mobileBtn && mobileDrawer) {
-        
-        // Função Toggle
-        function toggleMenu(e) {
-            if(e) e.stopPropagation();
+        // Garante que o CSS inicial esteja correto
+        mobileDrawer.classList.remove('active');
+
+        // Função de Alternância
+        mobileBtn.addEventListener('click', (e) => {
+            e.preventDefault(); // Evita comportamentos padrão
+            e.stopPropagation(); // Evita que o clique feche o menu imediatamente
             
-            const isOpen = mobileDrawer.classList.contains('active');
-            
-            if (isOpen) {
+            const icon = mobileBtn.querySelector('i');
+            const isActive = mobileDrawer.classList.contains('active');
+
+            if (isActive) {
                 // Fechar
                 mobileDrawer.classList.remove('active');
-                if(icon) {
+                if (icon) {
                     icon.classList.remove('fa-times');
                     icon.classList.add('fa-bars');
                 }
             } else {
                 // Abrir
                 mobileDrawer.classList.add('active');
-                if(icon) {
+                if (icon) {
                     icon.classList.remove('fa-bars');
                     icon.classList.add('fa-times');
                 }
             }
-        }
+        });
 
-        // Event Listeners
-        mobileBtn.addEventListener('click', toggleMenu);
-
-        // Fechar ao clicar fora
+        // Fechar ao clicar fora (no corpo da página)
         document.addEventListener('click', (e) => {
-            const isClickInside = mobileDrawer.contains(e.target) || mobileBtn.contains(e.target);
-            if (!isClickInside && mobileDrawer.classList.contains('active')) {
-                toggleMenu(); // fecha
+            const isActive = mobileDrawer.classList.contains('active');
+            const clickedInsideDrawer = mobileDrawer.contains(e.target);
+            const clickedOnBtn = mobileBtn.contains(e.target);
+
+            if (isActive && !clickedInsideDrawer && !clickedOnBtn) {
+                mobileDrawer.classList.remove('active');
+                const icon = mobileBtn.querySelector('i');
+                if (icon) {
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars');
+                }
             }
         });
-
-        // Fechar ao clicar em link (UX)
-        const links = mobileDrawer.querySelectorAll('a');
-        links.forEach(link => {
-            link.addEventListener('click', () => {
-                if(mobileDrawer.classList.contains('active')) toggleMenu();
-            });
-        });
+    } else {
+        console.warn('Momentum Fit: Elementos do menu mobile não encontrados nesta página.');
     }
 
-    // Sidebar do Dashboard (se existir)
-    const sidebarToggle = document.querySelector('.sidebar-toggle');
+    // --- DASHBOARD SIDEBAR (Se existir) ---
+    const sidebarToggle = document.getElementById('dashboardSidebarBtn');
     const sidebar = document.querySelector('.dashboard-sidebar');
+    
     if (sidebarToggle && sidebar) {
-        sidebarToggle.addEventListener('click', () => {
+        sidebarToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
             sidebar.classList.toggle('active');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth < 992 && 
+                sidebar.classList.contains('active') && 
+                !sidebar.contains(e.target) && 
+                !sidebarToggle.contains(e.target)) {
+                sidebar.classList.remove('active');
+            }
         });
     }
 });

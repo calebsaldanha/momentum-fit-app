@@ -159,3 +159,15 @@ body {
 /* Alerts */
 .alert { padding: 1rem; border-radius: var(--radius); margin-bottom: 1rem; display: flex; align-items: center; gap: 10px; }
 .alert-error { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); }
+
+/* Correção de segurança para cliques */
+.mobile-menu-trigger {
+    cursor: pointer;
+    pointer-events: auto !important;
+}
+
+/* Garante que o Drawer fique abaixo do header visualmente mas acima do conteúdo */
+.mobile-drawer {
+    top: var(--header-height) !important;
+    z-index: 999 !important;
+}
