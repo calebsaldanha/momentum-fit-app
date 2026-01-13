@@ -16,60 +16,56 @@
     <div class="app-container">
         <header class="main-header">
             <div class="header-content">
-                
-                <a href="/" style="display: flex; align-items: center; gap: 0.5rem; text-decoration: none; z-index: 1002;">
+                <a href="/" class="brand-link">
                     <img src="/images/momentum-fit-logo-completo.png" alt="Momentum Fit" style="height: 32px;" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
                     <span style="display:none; font-weight:700; font-size:1.25rem; color:white;">Momentum Fit</span>
                 </a>
 
-                <div class="nav-desktop-container desktop-only">
-                    <nav class="nav-links-desktop">
-                        <a href="/">Início</a>
-                        <a href="/about">Sobre</a>
-                        <a href="/articles">Artigos</a>
-                    </nav>
-
-                    <div style="width: 1px; height: 24px; background: rgba(255,255,255,0.1); margin: 0 1rem;"></div>
-
-                    <div style="display: flex; gap: 1rem; align-items: center;">
-                        <% if (typeof user !== 'undefined' && user) { %>
-                            <% 
-                                let dashLink = '/client/dashboard';
-                                if (user.role === 'superadmin') dashLink = '/superadmin/dashboard';
-                                else if (user.role === 'trainer') dashLink = '/admin/dashboard';
-                            %>
-                            <span class="text-muted" style="font-size: 0.9rem;">Olá, <%= user.name.split(' ')[0] %></span>
-                            <a href="<%= dashLink %>" class="btn btn-primary btn-sm">Painel</a>
-                            <a href="/auth/logout" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="text-muted hover:text-white" title="Sair"><i class="fas fa-sign-out-alt"></i></a>
-                        <% } else { %>
-                            <a href="/auth/login" class="btn btn-outline btn-sm">Entrar</a>
-                            <a href="/auth/register" class="btn btn-primary btn-sm">Criar Conta</a>
-                        <% } %>
+                <% if (typeof user !== 'undefined') { %>
+                    <button id="mobileMenuBtn" class="mobile-menu-trigger mobile-only">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                <% } else { %>
+                    <div class="desktop-only" style="display:flex; gap:1rem;">
+                        <a href="/auth/login" class="btn btn-outline btn-sm">Entrar</a>
+                        <a href="/auth/register" class="btn btn-primary btn-sm">Criar Conta</a>
                     </div>
-                </div>
-
-                <button id="mobileMenuBtn" class="mobile-menu-trigger mobile-only">
-                    <i class="fas fa-bars"></i>
-                </button>
+                    <button id="mobileMenuBtn" class="mobile-menu-trigger mobile-only">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                <% } %>
             </div>
 
             <div id="mobileDrawer" class="mobile-drawer mobile-only">
                 <div class="mobile-drawer-content">
-                    <a href="/" class="mobile-link">Início</a>
-                    <a href="/about" class="mobile-link">Sobre</a>
-                    <a href="/articles" class="mobile-link">Artigos</a>
-                    
-                    <div style="border-top: 1px solid rgba(255,255,255,0.1); margin: 0.5rem 0;"></div>
+                    <% if (typeof user !== 'undefined') { %>
+                        <div style="padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 1rem;">
+                            <div class="text-muted">Olá, <strong class="text-neon"><%= user.name.split(' ')[0] %></strong></div>
+                        </div>
 
-                    <% if (typeof user !== 'undefined' && user) { %>
-                        <div class="text-muted">Logado como: <strong class="text-neon"><%= user.name %></strong></div>
-                        <a href="<%= typeof dashLink !== 'undefined' ? dashLink : '/client/dashboard' %>" class="btn btn-primary btn-full">Acessar Painel</a>
-                        <a href="/auth/logout" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="btn btn-outline btn-full" style="border-color: var(--danger); color: var(--danger);">Sair</a>
-                        <form id="logout-form" action="/auth/logout" method="POST" style="display: none;">
-                            <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
-                        </form>
+                        <% if (user.role === 'client') { %>
+                            <a href="/client/dashboard" class="mobile-link"><i class="fas fa-chart-pie"></i> Visão Geral</a>
+                            <a href="/client/workouts" class="mobile-link"><i class="fas fa-dumbbell"></i> Meus Treinos</a>
+                            <a href="/chat" class="mobile-link"><i class="fas fa-comments"></i> Chat</a>
+                            <a href="/client/profile" class="mobile-link"><i class="fas fa-user"></i> Meu Perfil</a>
+                        
+                        <% } else if (user.role === 'trainer') { %>
+                            <a href="/admin/dashboard" class="mobile-link"><i class="fas fa-home"></i> Dashboard</a>
+                            <a href="/admin/clients" class="mobile-link"><i class="fas fa-users"></i> Alunos</a>
+                            <a href="/chat" class="mobile-link"><i class="fas fa-comments"></i> Chat</a>
+                        <% } %>
+
+                        <div style="margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
+                            <a href="/auth/logout" onclick="event.preventDefault(); document.getElementById('logout-form-mobile').submit();" class="mobile-link" style="color: var(--danger);">
+                                <i class="fas fa-sign-out-alt"></i> Sair
+                            </a>
+                            <form id="logout-form-mobile" action="/auth/logout" method="POST" style="display: none;">
+                                <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+                            </form>
+                        </div>
                     <% } else { %>
-                        <a href="/auth/login" class="btn btn-outline btn-full">Entrar</a>
+                        <a href="/" class="mobile-link">Início</a>
+                        <a href="/auth/login" class="btn btn-outline btn-full" style="margin-bottom: 0.5rem;">Entrar</a>
                         <a href="/auth/register" class="btn btn-primary btn-full">Criar Conta</a>
                     <% } %>
                 </div>
@@ -80,13 +76,13 @@
             <% if (typeof messages !== 'undefined' && messages.error) { %>
                 <div class="alert alert-error">
                     <i class="fas fa-exclamation-circle"></i> <span><%= messages.error %></span>
-                    <button onclick="this.parentElement.remove()" style="margin-left:auto; background:none; border:none; color:inherit; cursor:pointer;">&times;</button>
+                    <button onclick="this.parentElement.remove()" style="margin-left:auto; background:none; border:none; color:inherit;">&times;</button>
                 </div>
             <% } %>
             <% if (typeof messages !== 'undefined' && messages.success) { %>
                 <div class="alert" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);">
                     <i class="fas fa-check-circle"></i> <span><%= messages.success %></span>
-                    <button onclick="this.parentElement.remove()" style="margin-left:auto; background:none; border:none; color:inherit; cursor:pointer;">&times;</button>
+                    <button onclick="this.parentElement.remove()" style="margin-left:auto; background:none; border:none; color:inherit;">&times;</button>
                 </div>
             <% } %>
         </div>

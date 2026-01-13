@@ -20,10 +20,10 @@
                 <i class="fas fa-dumbbell"></i> <span>Meus Treinos</span>
             </a>
             <a href="/chat" class="sidebar-link <%= current === 'chat' ? 'active' : '' %>">
-                <i class="fas fa-comments"></i> <span>Chat com Coach</span>
+                <i class="fas fa-comments"></i> <span>Chat</span>
             </a>
             <a href="/client/profile" class="sidebar-link <%= current === 'profile' ? 'active' : '' %>">
-                <i class="fas fa-user-cog"></i> <span>Meu Perfil</span>
+                <i class="fas fa-user"></i> <span>Meu Perfil</span>
             </a>
         
         <% } else if (user.role === 'trainer') { %>
@@ -34,7 +34,7 @@
                 <i class="fas fa-users"></i> <span>Meus Alunos</span>
             </a>
             <a href="/chat" class="sidebar-link <%= current === 'chat' ? 'active' : '' %>">
-                <i class="fas fa-comments"></i> <span>Mensagens</span>
+                <i class="fas fa-comments"></i> <span>Chat</span>
             </a>
             <a href="/admin/manage-articles" class="sidebar-link <%= current === 'articles' ? 'active' : '' %>">
                 <i class="fas fa-newspaper"></i> <span>Artigos</span>
