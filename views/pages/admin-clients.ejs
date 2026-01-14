@@ -1,62 +1,72 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <%- include('../partials/header', { title: 'Meus Alunos' }) %>
-    <link rel="stylesheet" href="/css/dashboard.css">
-</head>
-<body>
-    <div class="dashboard-container">
-        <%- include('../partials/sidebar', { currentPage: 'clients' }) %>
-        
-        <main class="dashboard-main">
-            <header class="page-header">
-                <div>
-                    <h1>Meus Alunos</h1>
-                    <p>Acompanhe o progresso e gerencie treinos.</p>
-                </div>
-            </header>
-            
-            <div class="card-modern">
-                <% if (clients && clients.length > 0) { %>
-                    <div class="table-container">
-                        <table class="table-modern">
-                            <thead>
-                                <tr>
-                                    <th>Nome</th>
-                                    <th>Status</th>
-                                    <th>Última Atividade</th>
-                                    <th style="text-align: right;">Prescrição</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <% clients.forEach(c => { %>
-                                    <tr>
-                                        <td>
-                                            <div class="d-flex align-items-center gap-3">
-                                                <img src="<%= c.profile_image || '/images/default-profile.png' %>" class="avatar-ring">
-                                                <span class="fw-bold"><%= c.name %></span>
-                                            </div>
-                                        </td>
-                                        <td><span class="badge badge-active">Ativo</span></td>
-                                        <td class="text-muted">--</td>
-                                        <td style="text-align: right;">
-                                            <a href="/workouts/create?client_id=<%= c.id %>" class="btn btn-primary btn-sm">
-                                                <i class="fas fa-plus"></i> Criar Treino
-                                            </a>
-                                            <a href="/admin/clients/<%= c.id %>" class="btn btn-ghost btn-sm">Perfil</a>
-                                        </td>
-                                    </tr>
-                                <% }) %>
-                            </tbody>
-                        </table>
-                    </div>
-                <% } else { %>
-                    <div class="text-center py-5">
-                        <p class="text-muted">Você ainda não possui alunos atribuídos.</p>
-                    </div>
-                <% } %>
+<%- include('../partials/header') %>
+
+<div class="page-content-wrapper">
+    
+    <div class="dashboard-header">
+        <div>
+            <h1>Meus Alunos</h1>
+            <p>Gerencie o progresso e prescreva treinos para seus atletas.</p>
+        </div>
+        </div>
+
+    <div class="card-modern">
+        <% if (clients && clients.length > 0) { %>
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Aluno</th>
+                            <th>Status</th>
+                            <th>Última Atividade</th>
+                            <th style="text-align: right;">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% clients.forEach(c => { %>
+                            <tr>
+                                <td>
+                                    <div class="user-cell">
+                                        <% if (c.profile_image) { %>
+                                            <img src="<%= c.profile_image %>" class="avatar-small" alt="<%= c.name %>">
+                                        <% } else { %>
+                                            <div class="avatar-small"><%= c.name.charAt(0).toUpperCase() %></div>
+                                        <% } %>
+                                        <div>
+                                            <div style="font-weight: 600;"><%= c.name %></div>
+                                            <div style="font-size: 0.8rem; color: var(--text-muted);"><%= c.email %></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="badge badge-active">Ativo</span></td>
+                                <td class="text-muted" style="font-size: 0.9rem;">
+                                    <%= c.last_active ? new Date(c.last_active).toLocaleDateString('pt-BR') : '--' %>
+                                </td>
+                                <td style="text-align: right;">
+                                    <div style="display: flex; justify-content: flex-end; gap: 8px;">
+                                        <a href="/workouts/create?client_id=<%= c.id %>" class="btn btn-primary btn-sm" title="Criar Treino">
+                                            <i class="fas fa-dumbbell"></i> <span class="desktop-only">Treino</span>
+                                        </a>
+                                        <a href="/chat?user_id=<%= c.user_id %>" class="btn btn-outline btn-sm" title="Mensagem">
+                                            <i class="fas fa-comment"></i>
+                                        </a>
+                                        <a href="/admin/clients/<%= c.id %>" class="btn btn-outline btn-sm" title="Perfil">
+                                            <i class="fas fa-user"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
             </div>
-        </main>
+        <% } else { %>
+            <div style="text-align: center; padding: 4rem 1rem;">
+                <div style="font-size: 3rem; color: var(--border); margin-bottom: 1rem;"><i class="fas fa-users-slash"></i></div>
+                <h3 style="color: white; margin-bottom: 0.5rem;">Nenhum aluno encontrado</h3>
+                <p class="text-muted">Você ainda não tem alunos vinculados à sua conta.</p>
+            </div>
+        <% } %>
     </div>
-</body>
-</html>
+</div>
+
+<%- include('../partials/footer') %>
