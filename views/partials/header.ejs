@@ -73,8 +73,14 @@
                             </div>
                         </div>
 
+                        <div class="mobile-public-links" style="border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 10px;">
+                            <a href="/" class="mobile-link">Início</a>
+                            <a href="/about" class="mobile-link">Sobre</a>
+                            <a href="/articles" class="mobile-link">Artigos</a>
+                        </div>
+
                         <% const current = typeof currentPage !== 'undefined' ? currentPage : ''; %>
-                        <div class="mobile-section-title">Menu Principal</div>
+                        <div class="mobile-section-title">Menu do Painel</div>
 
                         <% if (user.role === 'client') { %>
                             <a href="/client/dashboard" class="mobile-link <%= current === 'dashboard' ? 'active' : '' %>">

@@ -225,3 +225,31 @@ body {
 .text-neon { color: var(--primary); }
 .alert { padding: 1rem; border-radius: 8px; margin-bottom: 1rem; display: flex; align-items: center; gap: 10px; font-size: 0.9rem; }
 .alert-error { background: rgba(239, 68, 68, 0.1); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.2); }
+
+/* --- CORREÇÃO DE LAYOUT AUTOMÁTICA (DESKTOP) --- */
+@media (min-width: 993px) {
+    /* Seleciona qualquer elemento que venha IMEDIATAMENTE após a sidebar 
+       e aplica a margem necessária para não ficar escondido.
+    */
+    .dashboard-sidebar-wrapper + * {
+        margin-left: var(--sidebar-width) !important;
+        width: calc(100% - var(--sidebar-width)) !important;
+        padding: 2rem !important; /* Garante espaçamento interno */
+        display: block;
+    }
+    
+    /* Garante que o footer também respeite a sidebar se estiver fora do container */
+    .dashboard-sidebar-wrapper ~ footer {
+        margin-left: var(--sidebar-width);
+        width: calc(100% - var(--sidebar-width));
+    }
+}
+
+/* Ajustes finos para Mobile */
+@media (max-width: 992px) {
+    .dashboard-sidebar-wrapper + * {
+        margin-left: 0 !important;
+        width: 100% !important;
+        padding: 1rem !important;
+    }
+}
