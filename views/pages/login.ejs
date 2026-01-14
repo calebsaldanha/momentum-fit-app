@@ -1,54 +1,40 @@
-<%- include('../partials/header.ejs', { title: 'Entrar' }) %>
+<%- include('../partials/header.ejs', { title: 'Login' }) %>
 
-<div class="auth-wrapper">
-    <div class="auth-container">
-        
-        <div class="auth-header">
-            <h1 class="auth-title">Bem-vindo(a)</h1>
-            <p class="auth-subtitle">Faça login para continuar sua evolução.</p>
-        </div>
-
+<div class="auth-main-wrapper">
+    <div class="auth-overlay"></div>
+    
+    <div class="auth-card">
+        <h2>MOMENTUM <span class="text-neon">FIT</span></h2>
+        <p>Bem-vindo(a) de volta</p>
+      
         <% if (typeof messages !== 'undefined' && messages.error) { %>
-            <div class="alert alert-error">
-                <i class="fas fa-exclamation-circle"></i> <span><%= messages.error %></span>
-            </div>
+            <div class="auth-msg auth-msg-error"><%= messages.error %></div>
         <% } %>
         <% if (typeof messages !== 'undefined' && messages.success) { %>
-            <div class="alert alert-success">
-                <i class="fas fa-check-circle"></i> <span><%= messages.success %></span>
-            </div>
+            <div class="auth-msg auth-msg-success"><%= messages.success %></div>
         <% } %>
 
-        <form action="/auth/login" method="POST" class="auth-form">
+        <form action="/auth/login" method="POST">
             <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
-    
+            
             <div class="form-group">
-                <label for="email" class="form-label">E-mail</label>
-                <div class="input-wrapper">
-                    <i class="fas fa-envelope input-icon"></i>
-                    <input type="email" id="email" name="email" class="form-input" required placeholder="seu@email.com" autocomplete="email">
-                </div>
+                <label>Email</label>
+                <input type="email" name="email" required placeholder="seu@email.com">
             </div>
 
             <div class="form-group">
-                <label for="password" class="form-label">Senha</label>
-                <div class="input-wrapper">
-                    <i class="fas fa-lock input-icon"></i>
-                    <input type="password" id="password" name="password" class="form-input" required placeholder="••••••••" autocomplete="current-password">
-                </div>
-                <div class="forgot-link-wrapper">
-                    <a href="/auth/forgot-password" class="forgot-link">Esqueceu a senha?</a>
-                </div>
+                <label>Senha</label>
+                <input type="password" name="password" required placeholder="Sua senha">
             </div>
 
-            <button type="submit" class="btn btn-primary btn-full btn-lg">
-                ENTRAR <i class="fas fa-arrow-right" style="margin-left: 8px;"></i>
-            </button>
+            <a href="/auth/forgot-password" class="forgot-pass">Esqueceu a senha?</a>
+
+            <button type="submit" class="btn btn-primary btn-full">ENTRAR</button>
         </form>
 
-        <div class="auth-footer-text">
-            <p>Não tem uma conta? <a href="/auth/register" class="link-neon">Cadastre-se</a></p>
-        </div>
+        <p style="margin-top: 2rem; margin-bottom: 0;">
+            Não tem uma conta? <a href="/auth/register" class="auth-link">Cadastre-se</a>
+        </p>
     </div>
 </div>
 

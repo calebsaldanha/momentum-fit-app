@@ -1,106 +1,54 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastro - Momentum Fit</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/styles.css">
-    <style>
-        .auth-body { 
-            background: url('/images/auth-bg.png') no-repeat center center/cover;
-            min-height: 100vh; 
-            display: flex; 
-            flex-direction: column;
-            position: relative;
-        }
-        .auth-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.7); z-index: 1; }
-        
-        .auth-wrapper {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            z-index: 2;
-            padding: 4rem 1rem;
-        }
+<%- include('../partials/header.ejs', { title: 'Cadastro' }) %>
 
-        .auth-card { 
-            background: rgba(20, 20, 20, 0.95);
-            padding: 3rem; 
-            border-radius: 12px; 
-            border: 1px solid rgba(255,255,255,0.1); 
-            width: 100%; 
-            max-width: 450px; 
-            text-align: center; 
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-        }
-        .form-group { margin-bottom: 1.5rem; text-align: left; }
-        .form-group label { display: block; font-size: 0.85rem; color: #ccc; margin-bottom: 5px; }
-        .form-group input, .form-group select { 
-            width: 100%;
-            padding: 12px; background: #0a0a0a; border: 1px solid #333; 
-            color: #fff; border-radius: 6px; outline: none; transition: 0.3s;
-        }
-        .form-group input:focus, .form-group select:focus { border-color: var(--c-accent-primary); }
-        
-        footer { position: relative; z-index: 2; background: rgba(0,0,0,0.8); border-top: 1px solid rgba(255,255,255,0.1); }
-    </style>
-</head>
-<body class="auth-body">
+<div class="auth-main-wrapper">
     <div class="auth-overlay"></div>
     
-    <div class="auth-wrapper">
-        <div class="auth-card">
-            <a href="/" style="text-decoration: none;">
-                <h2 style="font-weight: 800; color: #fff; margin-bottom: 2rem; font-size: 1.8rem;">MOMENTUM <span style="color: var(--c-accent-primary);">FIT</span></h2>
-            </a>
+    <div class="auth-card">
+        <h2>MOMENTUM <span class="text-neon">FIT</span></h2>
+        <p>Crie sua conta e comece agora</p>
+      
+        <% if (typeof error !== 'undefined' && error && error.length > 0) { %>
+            <div class="auth-msg auth-msg-error"><%= error %></div>
+        <% } %>
+
+        <form action="/auth/register" method="POST">
+            <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
             
-            <% if (typeof error !== 'undefined' && error && error.length > 0) { %>
-                <div style="background: rgba(239, 68, 68, 0.2); color: #fca5a5; padding: 10px; border-radius: 6px; margin-bottom: 1rem; font-size: 0.9rem;">
-                    <%= error %>
-                </div>
-            <% } %>
+            <div class="form-group">
+                <label>Nome Completo</label>
+                <input type="text" name="name" required placeholder="Seu nome">
+            </div>
 
-            <form action="/auth/register" method="POST">
-                <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
-                
-                <div class="form-group">
-                    <label>Nome Completo</label>
-                    <input type="text" name="name" required placeholder="Seu nome">
-                </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" name="email" required placeholder="seu@email.com">
+            </div>
 
-                <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" name="email" required placeholder="seu@email.com">
-                </div>
+            <div class="form-group">
+                <label>Tipo de Conta</label>
+                <select name="role">
+                    <option value="client">Aluno</option>
+                    <option value="trainer">Personal Trainer</option>
+                </select>
+            </div>
 
-                <div class="form-group">
-                    <label>Tipo de Conta</label>
-                    <select name="role">
-                        <option value="client">Aluno</option>
-                        <option value="trainer">Personal Trainer</option>
-                    </select>
-                </div>
+            <div class="form-group">
+                <label>Senha</label>
+                <input type="password" name="password" required placeholder="Mínimo 6 caracteres">
+            </div>
 
-                <div class="form-group">
-                    <label>Senha</label>
-                    <input type="password" name="password" required placeholder="Mínimo 6 caracteres">
-                </div>
+            <div class="form-group">
+                <label>Confirmar Senha</label>
+                <input type="password" name="confirmPassword" required placeholder="Repita a senha">
+            </div>
 
-                <div class="form-group">
-                    <label>Confirmar Senha</label>
-                    <input type="password" name="confirmPassword" required placeholder="Repita a senha">
-                </div>
+            <button type="submit" class="btn btn-primary btn-full">CRIAR CONTA</button>
+        </form>
 
-                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; font-weight: 700;">CRIAR CONTA</button>
-            </form>
-
-            <p style="margin-top: 2rem; font-size: 0.9rem; color: #888;">
-                Já tem uma conta? <a href="/auth/login" style="color: var(--c-accent-primary);">Fazer Login</a>
-            </p>
-        </div>
+        <p style="margin-top: 2rem; margin-bottom: 0;">
+            Já tem uma conta? <a href="/auth/login" class="auth-link">Fazer Login</a>
+        </p>
     </div>
+</div>
 
-    <%- include('../partials/footer.ejs') %>
+<%- include('../partials/footer.ejs') %>
