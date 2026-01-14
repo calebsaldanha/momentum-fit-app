@@ -44,4 +44,13 @@ router.get('/clients', async (req, res) => {
     } catch (e) { console.error(e); res.redirect('/admin/dashboard'); }
 });
 
+
+// Páginas adicionais solicitadas
+router.get('/approvals', (req, res) => res.render('pages/admin-approvals', { title: 'Aprovações', user: req.session.user, currentPage: '/admin/approvals', csrfToken: req.csrfToken() }));
+router.get('/content', (req, res) => res.render('pages/admin-content', { title: 'Gestão de Conteúdo', user: req.session.user, currentPage: '/admin/content', csrfToken: req.csrfToken() }));
+router.get('/plans', (req, res) => res.render('pages/admin-plans', { title: 'Gestão de Planos', user: req.session.user, currentPage: '/admin/plans', csrfToken: req.csrfToken() }));
+router.get('/finance', (req, res) => res.render('pages/admin-finance', { title: 'Financeiro Geral', user: req.session.user, currentPage: '/admin/finance', csrfToken: req.csrfToken() }));
+router.get('/ia-audit', (req, res) => res.render('pages/admin-ia-audit', { title: 'Auditoria IA', user: req.session.user, currentPage: '/admin/ia-audit', csrfToken: req.csrfToken() }));
+router.get('/settings', (req, res) => res.render('pages/admin-settings', { title: 'Configurações Globais', user: req.session.user, currentPage: '/admin/settings', csrfToken: req.csrfToken() }));
+
 module.exports = router;

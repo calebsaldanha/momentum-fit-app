@@ -10,57 +10,27 @@
 </head>
 <body>
     <% 
-        /* Lógica de Links por Perfil */
-        let menuItems = [];
-        let dashboardLink = '/';
-
+        // Define o link do dashboard baseado no role
+        let dashLink = '/client/dashboard';
         if (typeof user !== 'undefined' && user) {
-            if (user.role === 'client') {
-                dashboardLink = '/client/dashboard';
-                menuItems = [
-                    { name: 'Dashboard', url: '/client/dashboard', icon: 'fa-home' },
-                    { name: 'Meus Treinos', url: '/client/workouts', icon: 'fa-dumbbell' },
-                    { name: 'Chat', url: '/chat', icon: 'fa-comments' },
-                    { name: 'Meu Perfil', url: '/client/profile', icon: 'fa-user' }
-                ];
-            } else if (user.role === 'trainer') {
-                dashboardLink = '/trainer/dashboard';
-                menuItems = [
-                    { name: 'Dashboard', url: '/trainer/dashboard', icon: 'fa-chart-line' },
-                    { name: 'Meus Alunos', url: '/trainer/clients', icon: 'fa-users' },
-                    { name: 'Chat', url: '/chat', icon: 'fa-comments' },
-                    { name: 'Perfil', url: '/trainer/profile', icon: 'fa-user-tie' }
-                ];
-            } else if (user.role === 'admin' || user.role === 'superadmin') {
-                dashboardLink = '/admin/dashboard';
-                menuItems = [
-                    { name: 'Painel Admin', url: '/admin/dashboard', icon: 'fa-cogs' },
-                    { name: 'Gerenciar', url: '/admin/clients', icon: 'fa-users-cog' }
-                ];
-            }
-        } else {
-            // Visitante
-            menuItems = [
-                { name: 'Início', url: '/', icon: 'fa-home' },
-                { name: 'Sobre', url: '/about', icon: 'fa-info-circle' },
-                { name: 'Artigos', url: '/articles', icon: 'fa-newspaper' }
-            ];
+            if (user.role === 'trainer') dashLink = '/trainer/dashboard';
+            if (user.role === 'admin' || user.role === 'superadmin') dashLink = '/admin/dashboard';
         }
     %>
 
     <header class="main-header">
         <div class="header-container">
-            <a href="<%= isAuthenticated ? dashboardLink : '/' %>" class="brand-logo">
+            <a href="/" class="brand-logo">
                 <img src="/images/momentum-fit-icon.png" alt="Momentum Fit" class="logo-icon">
                 <span class="logo-text">Momentum Fit</span>
             </a>
 
             <nav class="desktop-nav">
-                <% menuItems.forEach(function(item) { %>
-                    <a href="<%= item.url %>" class="nav-link <%= typeof currentPage !== 'undefined' && currentPage === item.url ? 'active' : '' %>">
-                        <%= item.name %>
-                    </a>
-                <% }); %>
+                <a href="/" class="nav-link <%= typeof currentPage !== 'undefined' && currentPage === 'home' ? 'active' : '' %>">Início</a>
+                <a href="/about" class="nav-link <%= typeof currentPage !== 'undefined' && currentPage === 'about' ? 'active' : '' %>">Sobre</a>
+                <a href="/articles" class="nav-link <%= typeof currentPage !== 'undefined' && currentPage === 'articles' ? 'active' : '' %>">Artigos</a>
+                <a href="/plans" class="nav-link <%= typeof currentPage !== 'undefined' && currentPage === 'plans' ? 'active' : '' %>">Planos</a>
+                <a href="/contact" class="nav-link <%= typeof currentPage !== 'undefined' && currentPage === 'contact' ? 'active' : '' %>">Contato</a>
             </nav>
 
             <div class="desktop-actions">
@@ -68,7 +38,10 @@
                     <a href="/auth/login" class="btn btn-sm btn-outline">Entrar</a>
                     <a href="/auth/register" class="btn btn-sm btn-primary">Cadastro</a>
                 <% } else { %>
-                    <div class="user-chip desktop-only">
+                    <a href="<%= dashLink %>" class="btn btn-sm btn-secondary" title="Ir para Painel">
+                        <i class="fas fa-columns"></i> <span class="desktop-only" style="margin-left:5px;">Painel</span>
+                    </a>
+                    <div class="user-chip" style="border: 1px solid #333;">
                         <i class="fas fa-user-circle"></i> <span><%= user.name.split(' ')[0] %></span>
                     </div>
                     <form action="/auth/logout" method="POST" style="display: inline;">
@@ -78,7 +51,7 @@
                 <% } %>
             </div>
 
-            <button class="hamburger-btn mobile-only" id="mobileMenuBtn" aria-label="Menu">
+            <button class="hamburger-btn mobile-only" id="mobileMenuBtn">
                 <i class="fas fa-bars"></i>
             </button>
         </div>
@@ -88,27 +61,22 @@
                 <span class="text-neon">Menu</span>
                 <button id="closeMenuBtn" class="close-btn"><i class="fas fa-times"></i></button>
             </div>
-            
             <div class="mobile-links">
-                <% menuItems.forEach(function(item) { %>
-                    <a href="<%= item.url %>">
-                        <i class="fas <%= item.icon %>" style="width: 25px; text-align: center; margin-right: 10px;"></i>
-                        <%= item.name %>
-                    </a>
-                <% }); %>
+                <a href="/">Início</a>
+                <a href="/about">Sobre</a>
+                <a href="/articles">Artigos</a>
+                <a href="/plans">Planos</a>
+                <a href="/contact">Contato</a>
             </div>
-
             <div class="mobile-auth">
                 <% if (!isAuthenticated) { %>
                     <a href="/auth/login" class="btn btn-full btn-outline">Entrar</a>
                     <a href="/auth/register" class="btn btn-full btn-primary">Cadastro</a>
                 <% } else { %>
-                    <div style="padding: 10px 0; color: #666; font-size: 0.9rem;">
-                        Logado como <strong class="text-neon"><%= user.name %></strong>
-                    </div>
+                    <a href="<%= dashLink %>" class="btn btn-full btn-primary">Acessar Painel</a>
                     <form action="/auth/logout" method="POST">
                         <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
-                        <button type="submit" class="btn btn-full btn-ghost" style="border: 1px solid #333;">Sair</button>
+                        <button type="submit" class="btn btn-full btn-ghost">Sair</button>
                     </form>
                 <% } %>
             </div>

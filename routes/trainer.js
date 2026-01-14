@@ -101,4 +101,10 @@ router.get('/financial', async (req, res) => {
     });
 });
 
+
+// Páginas adicionais solicitadas
+router.get('/schedule', (req, res) => res.render('pages/trainer-schedule', { title: 'Minha Agenda', user: req.session.user, currentPage: '/trainer/schedule', csrfToken: req.csrfToken() }));
+router.get('/content', (req, res) => res.render('pages/trainer-content', { title: 'Meus Conteúdos', user: req.session.user, currentPage: '/trainer/content', csrfToken: req.csrfToken() }));
+router.get('/settings', (req, res) => res.render('pages/trainer-settings', { title: 'Configurações', user: req.session.user, currentPage: '/trainer/settings', csrfToken: req.csrfToken() }));
+
 module.exports = router;

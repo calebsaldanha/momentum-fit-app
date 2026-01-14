@@ -240,4 +240,12 @@ router.post('/delete/:id', requireTrainer, async (req, res) => {
     }
 });
 
+    
+router.get('/library', (req, res) => {
+    res.render('pages/trainer-library', { 
+        title: 'Biblioteca de Exercícios', user: req.session.user, 
+        currentPage: '/workouts/library', csrfToken: req.csrfToken() 
+    });
+});
+
 module.exports = router;

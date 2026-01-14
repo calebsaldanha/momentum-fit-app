@@ -1,5 +1,5 @@
-<div class="mobile-dash-header">
-    <a href="/" class="brand-logo" style="color:white; font-weight:800;">Momentum Fit</a>
+<div class="mobile-dash-header desktop-hidden">
+    <span style="font-weight: 700; color: white;">Menu do Painel</span>
     <button id="sidebarToggle" class="btn btn-ghost"><i class="fas fa-bars"></i></button>
 </div>
 
@@ -7,102 +7,75 @@
 
 <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
-        <a href="/" class="sidebar-logo">
-            <img src="/images/momentum-fit-icon.png" alt="Logo" style="height:28px;">
-            Momentum Fit
-        </a>
+        <span style="color:white; font-weight:700; font-size: 0.9rem;">ÁREA DO <%= user.role.toUpperCase() %></span>
     </div>
 
     <nav class="sidebar-nav">
         <% if (user.role === 'client') { %>
-            <div class="menu-category">Menu Principal</div>
-            <a href="/client/dashboard" class="nav-item <%= currentPage === '/client/dashboard' ? 'active' : '' %>">
-                <i class="fas fa-home"></i> Visão Geral
-            </a>
-            <a href="/client/workouts" class="nav-item <%= currentPage.includes('/client/workouts') ? 'active' : '' %>">
-                <i class="fas fa-dumbbell"></i> Meus Treinos
-            </a>
-            <a href="/chat" class="nav-item <%= currentPage === '/chat' ? 'active' : '' %>">
-                <i class="fas fa-comments"></i> Chat IA/Personal
-            </a>
-            <a href="/client/evolution" class="nav-item <%= currentPage === '/client/evolution' ? 'active' : '' %>">
-                <i class="fas fa-chart-line"></i> Evolução
-            </a>
-
-            <div class="menu-category">Conta</div>
-            <a href="/client/profile" class="nav-item <%= currentPage === '/client/profile' ? 'active' : '' %>">
-                <i class="fas fa-user-cog"></i> Meu Perfil
-            </a>
-            <a href="/client/plans" class="nav-item <%= currentPage === '/client/plans' ? 'active' : '' %>">
-                <i class="fas fa-credit-card"></i> Planos
-            </a>
-        
-        <% } else if (user.role === 'trainer') { %>
-            <div class="menu-category">Profissional</div>
-            <a href="/trainer/dashboard" class="nav-item <%= currentPage === '/trainer/dashboard' ? 'active' : '' %>">
-                <i class="fas fa-tachometer-alt"></i> Painel
-            </a>
-            <a href="/trainer/clients" class="nav-item <%= currentPage.includes('/trainer/clients') ? 'active' : '' %>">
-                <i class="fas fa-users"></i> Alunos
-            </a>
-            <a href="/workouts/library" class="nav-item <%= currentPage === '/workouts/library' ? 'active' : '' %>">
-                <i class="fas fa-book"></i> Biblioteca
-            </a>
-            <a href="/trainer/financial" class="nav-item <%= currentPage === '/trainer/financial' ? 'active' : '' %>">
-                <i class="fas fa-wallet"></i> Financeiro
-            </a>
+            <div class="menu-category">Principal</div>
+            <a href="/client/dashboard" class="nav-item <%= currentPage === '/client/dashboard' ? 'active' : '' %>"><i class="fas fa-home"></i> Dashboard</a>
+            <a href="/client/workouts" class="nav-item <%= currentPage === '/client/workouts' ? 'active' : '' %>"><i class="fas fa-dumbbell"></i> Meus Treinos</a>
+            <a href="/client/evolution" class="nav-item <%= currentPage === '/client/evolution' ? 'active' : '' %>"><i class="fas fa-chart-line"></i> Evolução & Métricas</a>
             
-            <div class="menu-category">Configurações</div>
-            <a href="/trainer/profile" class="nav-item <%= currentPage === '/trainer/profile' ? 'active' : '' %>">
-                <i class="fas fa-id-card"></i> Perfil Profissional
-            </a>
+            <div class="menu-category">Comunicação</div>
+            <a href="/client/ai-coach" class="nav-item <%= currentPage === '/client/ai-coach' ? 'active' : '' %>"><i class="fas fa-robot"></i> IA Coach</a>
+            <a href="/chat" class="nav-item <%= currentPage === '/chat' ? 'active' : '' %>"><i class="fas fa-comments"></i> Chat Personal</a>
+            
+            <div class="menu-category">Conta</div>
+            <a href="/client/profile" class="nav-item <%= currentPage === '/client/profile' ? 'active' : '' %>"><i class="fas fa-user"></i> Meu Perfil</a>
+            <a href="/client/plans" class="nav-item <%= currentPage === '/client/plans' ? 'active' : '' %>"><i class="fas fa-credit-card"></i> Planos & Pagamentos</a>
+            <a href="/client/content" class="nav-item <%= currentPage === '/client/content' ? 'active' : '' %>"><i class="fas fa-bookmark"></i> Conteúdos Salvos</a>
+            <a href="/client/settings" class="nav-item <%= currentPage === '/client/settings' ? 'active' : '' %>"><i class="fas fa-cog"></i> Configurações</a>
+
+        <% } else if (user.role === 'trainer') { %>
+            <div class="menu-category">Gestão</div>
+            <a href="/trainer/dashboard" class="nav-item <%= currentPage === '/trainer/dashboard' ? 'active' : '' %>"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+            <a href="/trainer/clients" class="nav-item <%= currentPage === '/trainer/clients' ? 'active' : '' %>"><i class="fas fa-users"></i> Gestão de Alunos</a>
+            <a href="/trainer/schedule" class="nav-item <%= currentPage === '/trainer/schedule' ? 'active' : '' %>"><i class="fas fa-calendar-alt"></i> Agenda</a>
+            
+            <div class="menu-category">Técnico</div>
+            <a href="/workouts/create" class="nav-item <%= currentPage === '/workouts/create' ? 'active' : '' %>"><i class="fas fa-plus-circle"></i> Criar Treino</a>
+            <a href="/workouts/library" class="nav-item <%= currentPage === '/workouts/library' ? 'active' : '' %>"><i class="fas fa-book"></i> Biblioteca Exercícios</a>
+            <a href="/chat" class="nav-item <%= currentPage === '/chat' ? 'active' : '' %>"><i class="fas fa-comments"></i> Chat</a>
+
+            <div class="menu-category">Carreira</div>
+            <a href="/trainer/financial" class="nav-item <%= currentPage === '/trainer/financial' ? 'active' : '' %>"><i class="fas fa-wallet"></i> Financeiro</a>
+            <a href="/trainer/content" class="nav-item <%= currentPage === '/trainer/content' ? 'active' : '' %>"><i class="fas fa-pen-fancy"></i> Criar Conteúdo</a>
+            <a href="/trainer/profile" class="nav-item <%= currentPage === '/trainer/profile' ? 'active' : '' %>"><i class="fas fa-id-card"></i> Perfil Profissional</a>
+            <a href="/trainer/settings" class="nav-item <%= currentPage === '/trainer/settings' ? 'active' : '' %>"><i class="fas fa-cog"></i> Configurações</a>
 
         <% } else if (user.role === 'admin' || user.role === 'superadmin') { %>
-            <div class="menu-category">Admin</div>
-            <a href="/admin/dashboard" class="nav-item <%= currentPage === '/admin/dashboard' ? 'active' : '' %>">
-                <i class="fas fa-chart-pie"></i> Dashboard
-            </a>
-            <a href="/admin/clients" class="nav-item <%= currentPage === '/admin/clients' ? 'active' : '' %>">
-                <i class="fas fa-users-cog"></i> Usuários
-            </a>
-            <a href="/admin/content" class="nav-item <%= currentPage === '/admin/content' ? 'active' : '' %>">
-                <i class="fas fa-file-alt"></i> Conteúdo
-            </a>
-            <a href="/admin/plans" class="nav-item <%= currentPage === '/admin/plans' ? 'active' : '' %>">
-                <i class="fas fa-tags"></i> Planos & Preços
-            </a>
+            <div class="menu-category">Visão Global</div>
+            <a href="/admin/dashboard" class="nav-item <%= currentPage === '/admin/dashboard' ? 'active' : '' %>"><i class="fas fa-chart-pie"></i> Dashboard Admin</a>
+            <a href="/admin/approvals" class="nav-item <%= currentPage === '/admin/approvals' ? 'active' : '' %>"><i class="fas fa-check-double"></i> Aprovações Pendentes</a>
+            
+            <div class="menu-category">Gestão</div>
+            <a href="/admin/clients" class="nav-item <%= currentPage === '/admin/clients' ? 'active' : '' %>"><i class="fas fa-users-cog"></i> Gestão de Usuários</a>
+            <a href="/admin/content" class="nav-item <%= currentPage === '/admin/content' ? 'active' : '' %>"><i class="fas fa-file-alt"></i> Artigos e Conteúdos</a>
+            <a href="/admin/plans" class="nav-item <%= currentPage === '/admin/plans' ? 'active' : '' %>"><i class="fas fa-tags"></i> Gestão de Planos</a>
+            
+            <div class="menu-category">Sistema</div>
+            <a href="/admin/finance" class="nav-item <%= currentPage === '/admin/finance' ? 'active' : '' %>"><i class="fas fa-coins"></i> Financeiro Geral</a>
+            <a href="/admin/ia-audit" class="nav-item <%= currentPage === '/admin/ia-audit' ? 'active' : '' %>"><i class="fas fa-brain"></i> Auditoria de IA</a>
+            <a href="/admin/settings" class="nav-item <%= currentPage === '/admin/settings' ? 'active' : '' %>"><i class="fas fa-cogs"></i> Configurações Globais</a>
         <% } %>
     </nav>
-
-    <div class="sidebar-footer">
-        <div class="user-mini-profile">
-            <div class="user-avatar-sm"><%= user.name.charAt(0) %></div>
-            <div style="flex: 1; overflow: hidden;">
-                <div style="font-size: 0.9rem; font-weight: 600; white-space: nowrap;"><%= user.name.split(' ')[0] %></div>
-                <div style="font-size: 0.7rem; color: #666; text-transform: uppercase;"><%= user.role %></div>
-            </div>
-            <form action="/auth/logout" method="POST">
-                <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
-                <button type="submit" class="btn btn-ghost" style="padding: 5px;"><i class="fas fa-sign-out-alt"></i></button>
-            </form>
-        </div>
-    </div>
 </aside>
 
 <script>
-    // Sidebar Toggle Logic
-    const toggle = document.getElementById('sidebarToggle');
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('sidebarOverlay');
+    // Lógica do Toggle Sidebar Mobile
+    const sbToggle = document.getElementById('sidebarToggle');
+    const sb = document.getElementById('sidebar');
+    const sbOverlay = document.getElementById('sidebarOverlay');
     
-    if(toggle) {
-        toggle.addEventListener('click', () => {
-            sidebar.classList.toggle('active');
-            overlay.classList.toggle('active');
+    if(sbToggle) {
+        sbToggle.addEventListener('click', () => {
+            sb.classList.toggle('active');
+            sbOverlay.classList.toggle('active');
         });
-        overlay.addEventListener('click', () => {
-            sidebar.classList.remove('active');
-            overlay.classList.remove('active');
+        sbOverlay.addEventListener('click', () => {
+            sb.classList.remove('active');
+            sbOverlay.classList.remove('active');
         });
     }
 </script>

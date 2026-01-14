@@ -150,4 +150,9 @@ router.get('/plans', (req, res) => {
     });
 });
 
+
+// Páginas adicionais solicitadas
+router.get('/content', (req, res) => res.render('pages/client-content', { title: 'Conteúdos Salvos', user: req.session.user, currentPage: '/client/content', csrfToken: req.csrfToken() }));
+router.get('/settings', (req, res) => res.render('pages/client-settings', { title: 'Configurações', user: req.session.user, currentPage: '/client/settings', csrfToken: req.csrfToken() }));
+
 module.exports = router;
