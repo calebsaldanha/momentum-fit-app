@@ -12,6 +12,17 @@
     <% } %>
 </head>
 <body>
+    <% 
+        /* LÓGICA DE NAVEGAÇÃO (Definida no topo para escopo global)
+           Define para onde o botão "Dashboard" deve levar com base na role do usuário.
+        */
+        let dashboardLink = '/client/dashboard'; // Padrão
+        if (typeof user !== 'undefined' && user) {
+            if (user.role === 'trainer') dashboardLink = '/trainer/dashboard';
+            if (user.role === 'admin' || user.role === 'superadmin') dashboardLink = '/admin/dashboard';
+        }
+    %>
+
     <header class="main-header">
         <div class="header-container">
             <a href="/" class="brand-logo">
@@ -30,15 +41,10 @@
                     <a href="/auth/login" class="btn btn-sm btn-outline">Entrar</a>
                     <a href="/auth/register" class="btn btn-sm btn-primary">Cadastro</a>
                 <% } else { %>
-                    <% 
-                        let dashboardLink = '/client/dashboard';
-                        if (user.role === 'trainer') dashboardLink = '/trainer/dashboard';
-                        if (user.role === 'admin' || user.role === 'superadmin') dashboardLink = '/admin/dashboard';
-                    %>
                     <a href="<%= dashboardLink %>" class="btn btn-sm btn-primary">Dashboard</a>
                     <form action="/auth/logout" method="POST" style="display: inline;">
                         <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
-                        <button type="submit" class="btn btn-sm btn-ghost"><i class="fas fa-sign-out-alt"></i></button>
+                        <button type="submit" class="btn btn-sm btn-ghost" title="Sair"><i class="fas fa-sign-out-alt"></i></button>
                     </form>
                 <% } %>
             </div>
@@ -66,7 +72,7 @@
                     <a href="<%= dashboardLink %>" class="btn btn-full btn-primary">Meu Dashboard</a>
                     <form action="/auth/logout" method="POST">
                         <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
-                        <button type="submit" class="btn btn-full btn-ghost">Sair</button>
+                        <button type="submit" class="btn btn-full btn-ghost" style="margin-top: 10px;">Sair</button>
                     </form>
                 <% } %>
             </div>
