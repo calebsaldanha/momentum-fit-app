@@ -7,7 +7,7 @@ function isAuthenticated(req, res, next) {
     res.redirect('/auth/login');
 }
 
-// Middleware para verificar se a anamnese existe
+// Middleware para verificar se perfil existe
 async function requireAnamnesis(req, res, next) {
     try {
         const clientQuery = `SELECT u.name, c.* FROM users u LEFT JOIN clients c ON u.id = c.user_id WHERE u.id = $1`;
@@ -29,22 +29,16 @@ async function requireAnamnesis(req, res, next) {
 
 router.use(isAuthenticated);
 
-// --- ROTA GET FORMULÁRIO ---
+// --- ROTA GET FORMULÁRIO INICIAL ---
 router.get('/initial-form', async (req, res) => {
     try {
         const query = `SELECT u.name, u.email, c.* FROM users u LEFT JOIN clients c ON u.id = c.user_id WHERE u.id = $1`;
         const { rows } = await db.query(query, [req.session.user.id]);
         
-        // Extrair dados do campo lifestyle se estiver formatado
-        let profile = rows[0] || {};
-        if (profile.lifestyle && profile.lifestyle.includes('|')) {
-            // Lógica simples para tentar recuperar dados antigos se necessário
-        }
-
         res.render('pages/initial-form', { 
             title: 'Anamnese', 
             user: req.session.user, 
-            profile: profile, 
+            profile: rows[0] || {}, 
             error: null, 
             csrfToken: req.csrfToken(),
             currentPage: 'initial-form'
@@ -52,68 +46,90 @@ router.get('/initial-form', async (req, res) => {
     } catch (err) { res.render('pages/error', { title: 'Erro', message: "Erro ao carregar" }); }
 });
 
-// --- ROTA POST FORMULÁRIO (SALVAR) ---
-router.post('/initial-form', async (req, res) => {
+// --- ROTA POST (SALVAR PERFIL) ---
+// Usada tanto pelo initial-form quanto pelo client/profile
+router.post(['/initial-form', '/profile/update'], async (req, res) => {
     const userId = req.session.user.id;
+    const redirectUrl = req.path.includes('initial-form') ? '/client/dashboard?success=anamnese_saved' : '/client/profile?success=updated';
+
+    // Extração direta dos campos do formulário
     const { 
-        age, phone, profession, sex_assigned_at_birth,
-        weight, height, body_fat, measure_waist, measure_hip, measure_arm,
-        sleep_hours, stress_level, water_intake, habits, diet_description, injuries,
-        main_goal, fitness_level, training_days, equipment
+        name, // Apenas no profile
+        birthDate, gender, 
+        weight, height, 
+        primaryGoal, goalDeadline, focusArea,
+        injuries, injuryDetails, medications, surgeries, medicalHistory,
+        occupationType, sleepHours, stressLevel, waterIntake,
+        experienceLevel, frequency, workoutLocation
     } = req.body;
 
-    // CONCATENAÇÃO INTELIGENTE para campos que não têm coluna própria no banco
-    // Isso garante que Profissão, Sono, Água, Stress e Hábitos sejam salvos em 'lifestyle'
-    const lifestyleFull = `Profissão: ${profession || 'N/A'} | Sono: ${sleep_hours || 'N/A'} | Stress: ${stress_level || 'N/A'} | Água: ${water_intake || 'N/A'} | Hábitos: ${habits || 'N/A'} | Dieta: ${diet_description || 'N/A'}`;
+    // Tratamento de Arrays (Checkboxes) para String
+    const injuriesList = Array.isArray(injuries) ? injuries.join(', ') : (injuries || '');
+    const medicalHistoryList = Array.isArray(medicalHistory) ? medicalHistory.join(', ') : (medicalHistory || '');
+
+    // Concatena detalhes APENAS onde faz sentido (ex: lesão + detalhe da lesão na mesma coluna 'injuries')
+    const injuriesFull = [injuriesList, injuryDetails].filter(Boolean).join('. Detalhes: ');
 
     try {
+        // 1. Atualiza Nome do Usuário na tabela users
+        if (name) {
+            await db.query('UPDATE users SET name = $1 WHERE id = $2', [name, userId]);
+            req.session.user.name = name; 
+        }
+
+        // 2. Verifica se cliente existe na tabela clients
         const check = await db.query('SELECT id FROM clients WHERE user_id = $1', [userId]);
         
+        // Query Dinâmica para UPDATE ou INSERT
         if (check.rows.length > 0) {
-            // UPDATE
             await db.query(`
                 UPDATE clients SET 
-                phone=$1, age=$2, sex_assigned_at_birth=$3,
-                current_weight=$4, height=$5, body_fat=$6, measure_waist=$7, measure_hip=$8, measure_arm=$9,
-                lifestyle=$10, injuries=$11,
-                fitness_goals=$12, fitness_level=$13, training_days_frequency=$14, equipment=$15
-                WHERE user_id=$16
+                birth_date=$1, sex_assigned_at_birth=$2, current_weight=$3, height=$4,
+                fitness_goals=$5, goal_deadline=$6, focus_area=$7,
+                injuries=$8, medications=$9, surgeries=$10, medical_history=$11,
+                occupation=$12, sleep_hours=$13, stress_level=$14, water_intake=$15,
+                fitness_level=$16, training_days_frequency=$17, equipment=$18,
+                updated_at=NOW()
+                WHERE user_id=$19
             `, [
-                phone, age, sex_assigned_at_birth,
-                weight, height, body_fat, measure_waist, measure_hip, measure_arm,
-                lifestyleFull, injuries,
-                main_goal, fitness_level, training_days, equipment,
+                birthDate || null, gender, weight, height,
+                primaryGoal, goalDeadline, focusArea,
+                injuriesFull, medications, surgeries, medicalHistoryList,
+                occupationType, sleepHours, stressLevel, waterIntake,
+                experienceLevel, frequency, workoutLocation,
                 userId
             ]);
         } else {
-            // INSERT
             await db.query(`
                 INSERT INTO clients (
-                    user_id, phone, age, sex_assigned_at_birth,
-                    current_weight, height, body_fat, measure_waist, measure_hip, measure_arm,
-                    lifestyle, injuries,
-                    fitness_goals, fitness_level, training_days_frequency, equipment
-                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+                    user_id, birth_date, sex_assigned_at_birth, current_weight, height,
+                    fitness_goals, goal_deadline, focus_area,
+                    injuries, medications, surgeries, medical_history,
+                    occupation, sleep_hours, stress_level, water_intake,
+                    fitness_level, training_days_frequency, equipment
+                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
             `, [
-                userId, phone, age, sex_assigned_at_birth,
-                weight, height, body_fat, measure_waist, measure_hip, measure_arm,
-                lifestyleFull, injuries,
-                main_goal, fitness_level, training_days, equipment
+                userId, birthDate || null, gender, weight, height,
+                primaryGoal, goalDeadline, focusArea,
+                injuriesFull, medications, surgeries, medicalHistoryList,
+                occupationType, sleepHours, stressLevel, waterIntake,
+                experienceLevel, frequency, workoutLocation
             ]);
         }
-        res.redirect('/client/dashboard?success=anamnese_saved');
+
+        req.flash('success', 'Perfil salvo com sucesso!');
+        res.redirect(redirectUrl);
+
     } catch (err) {
-        console.error("Erro form:", err);
-        res.render('pages/initial-form', { 
-            title: 'Anamnese', user: req.session.user, profile: req.body, 
-            error: 'Erro ao salvar. Tente novamente.', csrfToken: req.csrfToken(), currentPage: 'initial-form' 
-        });
+        console.error("Erro ao salvar perfil:", err);
+        req.flash('error', 'Erro ao processar dados. Verifique os campos.');
+        res.redirect(redirectUrl);
     }
 });
 
-// Middleware e rotas restantes
 router.use(requireAnamnesis);
 
+// --- ROTAS DO PAINEL ---
 router.get('/dashboard', async (req, res) => {
     try {
         const clientData = res.locals.clientProfile;
@@ -129,9 +145,17 @@ router.get('/dashboard', async (req, res) => {
 });
 
 router.get('/profile', async (req, res) => {
-    res.render('pages/client-profile', { 
-        title: 'Meu Perfil', user: req.session.user, profile: res.locals.clientProfile, currentPage: 'profile', csrfToken: req.csrfToken()
-    });
+    try {
+        // Busca direta das colunas (sem necessidade de 'parse' de lifestyle)
+        const query = `SELECT u.name, u.email, c.* FROM users u LEFT JOIN clients c ON u.id = c.user_id WHERE u.id = $1`;
+        const { rows } = await db.query(query, [req.session.user.id]);
+        
+        res.render('pages/client-profile', { 
+            title: 'Meu Perfil', user: req.session.user, client: rows[0] || {}, currentPage: 'profile', csrfToken: req.csrfToken()
+        });
+    } catch (err) {
+        console.error(err); res.redirect('/client/dashboard');
+    }
 });
 
 router.get('/workouts', async (req, res) => {
