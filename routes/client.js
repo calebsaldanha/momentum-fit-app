@@ -12,15 +12,15 @@ async function requireAnamnesis(req, res, next) {
     try {
         const clientQuery = `SELECT u.name, c.* FROM users u LEFT JOIN clients c ON u.id = c.user_id WHERE u.id = $1`;
         const { rows } = await db.query(clientQuery, [req.session.user.id]);
-        const client = rows[0];
+        const clientObj = rows[0];
         
         // Verifica campos críticos
-        const isProfileIncomplete = !client || !client.height || !client.current_weight || !client.fitness_goals;
+        const isProfileIncomplete = !clientObj || !clientObj.height || !clientObj.current_weight || !clientObj.fitness_goals;
 
         if (isProfileIncomplete && req.path !== '/initial-form') {
             return res.redirect('/client/initial-form?alert=missing_profile');
         }
-        res.locals.clientProfile = client || {};
+        res.locals.clientProfile = clientObj || {};
         next();
     } catch (err) {
         console.error(err); next();
@@ -47,40 +47,30 @@ router.get('/initial-form', async (req, res) => {
 });
 
 // --- ROTA POST (SALVAR PERFIL) ---
-// Usada tanto pelo initial-form quanto pelo client/profile
 router.post(['/initial-form', '/profile/update'], async (req, res) => {
     const userId = req.session.user.id;
     const redirectUrl = req.path.includes('initial-form') ? '/client/dashboard?success=anamnese_saved' : '/client/profile?success=updated';
 
-    // Extração direta dos campos do formulário
     const { 
-        name, // Apenas no profile
-        birthDate, gender, 
-        weight, height, 
+        name, birthDate, gender, weight, height, 
         primaryGoal, goalDeadline, focusArea,
         injuries, injuryDetails, medications, surgeries, medicalHistory,
         occupationType, sleepHours, stressLevel, waterIntake,
         experienceLevel, frequency, workoutLocation
     } = req.body;
 
-    // Tratamento de Arrays (Checkboxes) para String
     const injuriesList = Array.isArray(injuries) ? injuries.join(', ') : (injuries || '');
     const medicalHistoryList = Array.isArray(medicalHistory) ? medicalHistory.join(', ') : (medicalHistory || '');
-
-    // Concatena detalhes APENAS onde faz sentido (ex: lesão + detalhe da lesão na mesma coluna 'injuries')
     const injuriesFull = [injuriesList, injuryDetails].filter(Boolean).join('. Detalhes: ');
 
     try {
-        // 1. Atualiza Nome do Usuário na tabela users
         if (name) {
             await db.query('UPDATE users SET name = $1 WHERE id = $2', [name, userId]);
             req.session.user.name = name; 
         }
 
-        // 2. Verifica se cliente existe na tabela clients
         const check = await db.query('SELECT id FROM clients WHERE user_id = $1', [userId]);
         
-        // Query Dinâmica para UPDATE ou INSERT
         if (check.rows.length > 0) {
             await db.query(`
                 UPDATE clients SET 
@@ -116,20 +106,17 @@ router.post(['/initial-form', '/profile/update'], async (req, res) => {
                 experienceLevel, frequency, workoutLocation
             ]);
         }
-
         req.flash('success', 'Perfil salvo com sucesso!');
         res.redirect(redirectUrl);
-
     } catch (err) {
         console.error("Erro ao salvar perfil:", err);
-        req.flash('error', 'Erro ao processar dados. Verifique os campos.');
+        req.flash('error', 'Erro ao processar dados.');
         res.redirect(redirectUrl);
     }
 });
 
 router.use(requireAnamnesis);
 
-// --- ROTAS DO PAINEL ---
 router.get('/dashboard', async (req, res) => {
     try {
         const clientData = res.locals.clientProfile;
@@ -146,12 +133,16 @@ router.get('/dashboard', async (req, res) => {
 
 router.get('/profile', async (req, res) => {
     try {
-        // Busca direta das colunas (sem necessidade de 'parse' de lifestyle)
         const query = `SELECT u.name, u.email, c.* FROM users u LEFT JOIN clients c ON u.id = c.user_id WHERE u.id = $1`;
         const { rows } = await db.query(query, [req.session.user.id]);
         
+        // CORREÇÃO: Usamos 'clientData' em vez de 'client' para evitar qualquer conflito de nome na View
         res.render('pages/client-profile', { 
-            title: 'Meu Perfil', user: req.session.user, client: rows[0] || {}, currentPage: 'profile', csrfToken: req.csrfToken()
+            title: 'Meu Perfil', 
+            user: req.session.user, 
+            clientData: rows[0] || {}, 
+            currentPage: 'profile', 
+            csrfToken: req.csrfToken()
         });
     } catch (err) {
         console.error(err); res.redirect('/client/dashboard');
