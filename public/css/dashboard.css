@@ -142,3 +142,16 @@ body {
     .chat-container.show-list .chat-sidebar { display: flex; width: 100%; }
     .chat-container.show-list .chat-main { display: none; }
 }
+
+/* Garante que tabelas ou conteúdos largos não quebrem o card em telas pequenas */
+.card-modern {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Ajuste fino para evitar scroll duplo indesejado */
+.page-content-wrapper {
+    overflow-x: hidden;
+    max-width: 100vw;
+}
+
