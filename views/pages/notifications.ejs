@@ -1,56 +1,8 @@
-<%- include('../partials/header', { title: 'Notificações', bodyClass: 'dashboard-body' }) %>
-
-<div class="dashboard-container">
-    <%- include('../partials/sidebar.ejs', { currentPage: 'notifications' }) %>
-
-    <main class="dashboard-main">
-        <div class="section">
-            <div class="section-header">
-                <h1>Todas as Notificações</h1>
-                <button onclick="markAllReadPage()" class="btn btn-secondary btn-sm">Marcar todas como lidas</button>
-            </div>
-
-            <div class="notifications-list">
-                <% if (typeof notifications !== 'undefined' && notifications.length > 0) { %>
-                    <% notifications.forEach(n => { %>
-                        <div class="notif-row <%= n.is_read ? 'read' : 'unread' %>" 
-                             onclick="clickNotificationPage('<%= n.id %>', '<%= n.link %>')"
-                             style="padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; transition: 0.2s;">
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                                <strong style="color: white;"><%= n.title %></strong>
-                                <span style="font-size: 0.8rem; color: #666;"><%= new Date(n.created_at).toLocaleString('pt-BR') %></span>
-                            </div>
-                            <div style="color: #aaa; font-size: 0.95rem;"><%= n.message %></div>
-                        </div>
-                    <% }) %>
-                <% } else { %>
-                    <div style="padding: 3rem; text-align: center; color: #666;">
-                        <i class="far fa-bell-slash" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
-                        Nenhuma notificação encontrada.
-                    </div>
-                <% } %>
-            </div>
-        </div>
-    </main>
+<%- include('../partials/header') %>
+<div class="page-content-wrapper">
+    <h2 class="text-neon" style="margin-bottom: 2rem;">Notificações</h2>
+    <div class="card-modern">
+        <p class="text-muted" style="text-align: center; padding: 2rem;">Você não tem novas notificações.</p>
+    </div>
 </div>
-
-<style>
-    .notif-row.unread { background-color: rgba(190, 242, 2, 0.05); border-left: 3px solid var(--c-accent-primary); }
-    .notif-row:hover { background-color: rgba(255,255,255,0.02); }
-</style>
-
-<script>
-    async function markAllReadPage() {
-        if(confirm('Marcar todas como lidas?')) {
-            await fetch('/notifications/mark-all-read', { method: 'POST' });
-            window.location.reload();
-        }
-    }
-    async function clickNotificationPage(id, link) {
-        await fetch('/notifications/mark-read/' + id, { method: 'POST' });
-        if(link && link !== 'null' && link !== 'undefined') window.location.href = link;
-        else window.location.reload();
-    }
-</script>
-
 <%- include('../partials/footer') %>

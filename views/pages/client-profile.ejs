@@ -1,73 +1,70 @@
-<%- include('../partials/header.ejs', { title: 'Meu Perfil', currentPage: 'profile' }) %>
-<div class="dashboard-container">
-    <%- include('../partials/sidebar.ejs', { currentPage: 'profile' }) %>
+<%- include('../partials/header') %>
 
-    <main class="dashboard-main">
-        <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-            <div>
-                <h1 class="page-title">Meu Perfil</h1>
-                <p class="text-muted">Gerencie suas informações pessoais.</p>
+<div class="page-content-wrapper">
+    <div style="max-width: 800px; margin: 0 auto;">
+        
+        <div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2rem;">
+            <div style="width: 80px; height: 80px; background: var(--primary); color: black; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: bold;">
+                <%= user.name.charAt(0).toUpperCase() %>
             </div>
-            <a href="/client/initial-form" class="btn btn-primary btn-sm">
-                <i class="fas fa-edit"></i> Refazer Anamnese Completa
+            <div>
+                <h2 class="text-neon" style="margin: 0;"><%= user.name %></h2>
+                <p class="text-muted" style="margin: 5px 0 0 0;"><%= user.email %></p>
+                <span class="badge" style="background: var(--bg-hover); padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; margin-top: 8px; display: inline-block;">Aluno</span>
+            </div>
+        </div>
+
+        <form action="/client/profile/update" method="POST" class="card-modern">
+            <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+            
+            <h3 style="margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 10px;">Meus Dados</h3>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <div class="form-group">
+                    <label class="form-label">Nome Completo</label>
+                    <input type="text" name="name" value="<%= user.name %>" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" value="<%= user.email %>" class="form-input" disabled style="opacity: 0.7; cursor: not-allowed;">
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1rem;">
+                <div class="form-group">
+                    <label class="form-label">Peso (kg)</label>
+                    <input type="number" step="0.1" name="weight" value="<%= (user.profile && user.profile.weight) || '' %>" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Altura (cm)</label>
+                    <input type="number" name="height" value="<%= (user.profile && user.profile.height) || '' %>" class="form-input">
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 1rem;">
+                <label class="form-label">Objetivo Atual</label>
+                <select name="goal" class="form-input">
+                    <option value="weight_loss" <%= (user.profile && user.profile.goal === 'weight_loss') ? 'selected' : '' %>>Perda de Peso</option>
+                    <option value="hypertrophy" <%= (user.profile && user.profile.goal === 'hypertrophy') ? 'selected' : '' %>>Hipertrofia</option>
+                    <option value="strength" <%= (user.profile && user.profile.goal === 'strength') ? 'selected' : '' %>>Força</option>
+                    <option value="health" <%= (user.profile && user.profile.goal === 'health') ? 'selected' : '' %>>Saúde</option>
+                </select>
+            </div>
+
+            <div style="margin-top: 2rem; display: flex; justify-content: flex-end;">
+                <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+            </div>
+        </form>
+
+        <div style="margin-top: 2rem; padding: 1.5rem; border: 1px solid rgba(239,68,68,0.3); border-radius: 12px; background: rgba(239,68,68,0.05);">
+            <h4 style="color: #ef4444; margin-top: 0;">Zona de Perigo</h4>
+            <p class="text-muted" style="font-size: 0.9rem;">Deseja sair da sua conta?</p>
+            <a href="/auth/logout" onclick="event.preventDefault(); document.getElementById('logout-form-header').submit();" class="btn btn-outline" style="border-color: #ef4444; color: #ef4444;">
+                Sair da Conta
             </a>
         </div>
 
-        <div class="card-modern" style="margin-bottom: 2rem;">
-            <div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2rem;">
-                <div style="width: 80px; height: 80px; background: var(--bg-input); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: var(--primary);">
-                    <i class="fas fa-user"></i>
-                </div>
-                <div>
-                    <h2 style="margin: 0; font-size: 1.5rem;"><%= user.name %></h2>
-                    <span style="color: var(--text-secondary);"><%= user.email %></span>
-                    <div style="margin-top: 5px;">
-                        <span class="text-neon" style="font-size: 0.9rem; border: 1px solid var(--primary); padding: 2px 8px; border-radius: 4px;">Aluno</span>
-                    </div>
-                </div>
-            </div>
-
-            <h3 class="text-muted" style="font-size: 1rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">Dados Físicos (Resumo)</h3>
-            <div class="grid-cols-3">
-                <div class="form-group">
-                    <label class="form-label">Peso Atual</label>
-                    <div class="input-modern" style="opacity: 0.8;"><%= profile.current_weight || '--' %> kg</div>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Altura</label>
-                    <div class="input-modern" style="opacity: 0.8;"><%= profile.height || '--' %> m</div>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Objetivo</label>
-                    <div class="input-modern" style="opacity: 0.8;"><%= profile.fitness_goals || 'Não definido' %></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="card-modern">
-            <h3 class="text-neon" style="margin-bottom: 1.5rem;">Alterar Senha</h3>
-            <form action="/client/change-password" method="POST" style="max-width: 500px;">
-                <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
-                
-                <div class="form-group">
-                    <label class="form-label">Senha Atual</label>
-                    <input type="password" name="current_password" required class="input-modern">
-                </div>
-                
-                <div class="grid-cols-2">
-                    <div class="form-group">
-                        <label class="form-label">Nova Senha</label>
-                        <input type="password" name="new_password" required class="input-modern">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Confirmar Nova Senha</label>
-                        <input type="password" name="confirm_password" required class="input-modern">
-                    </div>
-                </div>
-
-                <button type="submit" class="btn btn-primary">Atualizar Senha</button>
-            </form>
-        </div>
-    </main>
+    </div>
 </div>
-<%- include('../partials/footer.ejs') %>
+
+<%- include('../partials/footer') %>
