@@ -6,8 +6,12 @@
                 <i class="fas fa-user"></i>
             </div>
             <div class="user-info">
-                <h4><%= user.name.split(' ')[0] %></h4>
-                <span><%= user.role === 'client' ? 'Aluno(a)' : (user.role === 'trainer' ? 'Treinador(a)' : 'Admin') %></span>
+                <% if (typeof user !== 'undefined' && user) { %>
+                    <h4><%= user.name.split(' ')[0] %></h4>
+                    <span><%= user.role === 'client' ? 'Aluno(a)' : (user.role === 'trainer' ? 'Treinador(a)' : 'Admin') %></span>
+                <% } else { %>
+                    <h4>Visitante</h4>
+                <% } %>
             </div>
         </div>
     </div>
@@ -15,41 +19,43 @@
     <div class="sidebar-nav">
         <% const current = typeof currentPage !== 'undefined' ? currentPage : ''; %>
 
-        <% if (user.role === 'client') { %>
-            <a href="/client/dashboard" class="sidebar-link <%= current === 'dashboard' ? 'active' : '' %>">
-                <i class="fas fa-chart-pie"></i> <span>Visão Geral</span>
-            </a>
-            <a href="/client/workouts" class="sidebar-link <%= current === 'workouts' ? 'active' : '' %>">
-                <i class="fas fa-dumbbell"></i> <span>Meus Treinos</span>
-            </a>
-            <a href="/chat" class="sidebar-link <%= current === 'chat' ? 'active' : '' %>">
-                <i class="fas fa-comments"></i> <span>Chat com Coach</span>
-            </a>
-            <a href="/client/profile" class="sidebar-link <%= current === 'profile' ? 'active' : '' %>">
-                <i class="fas fa-user-circle"></i> <span>Meu Perfil</span>
-            </a>
-        
-        <% } else if (user.role === 'trainer') { %>
-            <a href="/admin/dashboard" class="sidebar-link <%= current === 'dashboard' ? 'active' : '' %>">
-                <i class="fas fa-home"></i> <span>Dashboard</span>
-            </a>
-            <a href="/admin/clients" class="sidebar-link <%= current === 'clients' ? 'active' : '' %>">
-                <i class="fas fa-users"></i> <span>Meus Alunos</span>
-            </a>
-            <a href="/chat" class="sidebar-link <%= current === 'chat' ? 'active' : '' %>">
-                <i class="fas fa-comments"></i> <span>Mensagens</span>
-            </a>
-            <a href="/admin/manage-articles" class="sidebar-link <%= current === 'articles' ? 'active' : '' %>">
-                <i class="fas fa-newspaper"></i> <span>Artigos</span>
-            </a>
+        <% if (typeof user !== 'undefined' && user) { %>
+            <% if (user.role === 'client') { %>
+                <a href="/client/dashboard" class="sidebar-link <%= current === 'dashboard' ? 'active' : '' %>">
+                    <i class="fas fa-chart-pie"></i> <span>Visão Geral</span>
+                </a>
+                <a href="/client/workouts" class="sidebar-link <%= current === 'workouts' ? 'active' : '' %>">
+                    <i class="fas fa-dumbbell"></i> <span>Meus Treinos</span>
+                </a>
+                <a href="/chat" class="sidebar-link <%= current === 'chat' ? 'active' : '' %>">
+                    <i class="fas fa-comments"></i> <span>Chat com Coach</span>
+                </a>
+                <a href="/client/profile" class="sidebar-link <%= current === 'profile' ? 'active' : '' %>">
+                    <i class="fas fa-user-circle"></i> <span>Meu Perfil</span>
+                </a>
+            
+            <% } else if (user.role === 'trainer') { %>
+                <a href="/admin/dashboard" class="sidebar-link <%= current === 'dashboard' ? 'active' : '' %>">
+                    <i class="fas fa-home"></i> <span>Dashboard</span>
+                </a>
+                <a href="/admin/clients" class="sidebar-link <%= current === 'clients' ? 'active' : '' %>">
+                    <i class="fas fa-users"></i> <span>Meus Alunos</span>
+                </a>
+                <a href="/chat" class="sidebar-link <%= current === 'chat' ? 'active' : '' %>">
+                    <i class="fas fa-comments"></i> <span>Mensagens</span>
+                </a>
+                <a href="/admin/manage-articles" class="sidebar-link <%= current === 'articles' ? 'active' : '' %>">
+                    <i class="fas fa-newspaper"></i> <span>Artigos</span>
+                </a>
 
-        <% } else if (user.role === 'superadmin') { %>
-            <a href="/superadmin/dashboard" class="sidebar-link <%= current === 'dashboard' ? 'active' : '' %>">
-                <i class="fas fa-shield-alt"></i> <span>Visão Geral</span>
-            </a>
-            <a href="/superadmin/manage" class="sidebar-link <%= current === 'manage' ? 'active' : '' %>">
-                <i class="fas fa-user-tie"></i> <span>Gerenciar Equipe</span>
-            </a>
+            <% } else if (user.role === 'superadmin') { %>
+                <a href="/superadmin/dashboard" class="sidebar-link <%= current === 'dashboard' ? 'active' : '' %>">
+                    <i class="fas fa-shield-alt"></i> <span>Visão Geral</span>
+                </a>
+                <a href="/superadmin/manage" class="sidebar-link <%= current === 'manage' ? 'active' : '' %>">
+                    <i class="fas fa-user-tie"></i> <span>Gerenciar Equipe</span>
+                </a>
+            <% } %>
         <% } %>
     </div>
 
