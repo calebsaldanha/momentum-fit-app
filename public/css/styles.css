@@ -716,3 +716,38 @@ button { font-family: inherit; }
 @media (min-width: 993px) {
     .mobile-dash-header { display: none; }
 }
+
+/* --- CORREÇÕES VISUAIS SOLICITADAS --- */
+
+/* 1. Imagens redondas nos cards da Home */
+/* Aplica para qualquer imagem dentro de steps, features ou cards na home */
+.step img, 
+.feature-card img,
+.about-steps img,
+.features-grid img {
+    border-radius: 50% !important; /* Força circulo */
+    aspect-ratio: 1 / 1; /* Garante que fique quadrado/redondo */
+    object-fit: cover;   /* Evita distorção */
+    border: none !important; /* Remove bordas brancas indesejadas */
+    background-color: transparent !important; /* Remove fundos brancos */
+    padding: 5px; /* Pequeno respiro se necessário */
+}
+
+/* 2. Fundo das Páginas de Auth (Login/Register) */
+/* Usa a imagem hero-bg.png conforme solicitado */
+.auth-main-wrapper, 
+.auth-body {
+    background-image: url('/images/hero-bg.png') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    /* Adiciona overlay escuro para legibilidade */
+    box-shadow: inset 0 0 0 1000px rgba(0,0,0,0.7);
+}
+
+/* 3. Ajuste Planos Card Featured */
+.plan-card.featured:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(190, 242, 2, 0.15);
+    transition: 0.3s ease;
+}
