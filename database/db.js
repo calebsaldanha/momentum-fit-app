@@ -153,3 +153,51 @@ module.exports = {
     getClientData, ensureClientProfile, getClientWorkouts, getClientStats, getWorkoutDetails,
     getAllTrainers, getClientsByTrainer
 };
+
+// Adicionado via Script de Atualização
+async function updateUserPassword(userId, hashedPassword) {
+    const res = await query("UPDATE users SET password = $1 WHERE id = $2", [hashedPassword, userId]);
+    return res.rowCount > 0;
+}
+
+async function updateClientProfileFull(userId, data) {
+    // Atualiza tabela clients com campos estendidos
+    const { 
+        height, current_weight, fitness_goals, 
+        gender, birth_date, activity_level, training_days, 
+        available_equipment, medical_conditions 
+    } = data;
+
+    // Converte altura cm -> m se necessario
+    let h_meters = height;
+    if (height > 3) h_meters = height / 100.0;
+
+    const sql = `
+        INSERT INTO clients (user_id, height, current_weight, fitness_goals, gender, birth_date, activity_level, training_days, available_equipment, medical_conditions, updated_at)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW())
+        ON CONFLICT (user_id) 
+        DO UPDATE SET 
+            height = EXCLUDED.height,
+            current_weight = EXCLUDED.current_weight,
+            fitness_goals = EXCLUDED.fitness_goals,
+            gender = EXCLUDED.gender,
+            birth_date = EXCLUDED.birth_date,
+            activity_level = EXCLUDED.activity_level,
+            training_days = EXCLUDED.training_days,
+            available_equipment = EXCLUDED.available_equipment,
+            medical_conditions = EXCLUDED.medical_conditions,
+            updated_at = NOW()
+        RETURNING *;
+    `;
+    const res = await query(sql, [userId, h_meters, current_weight, fitness_goals, gender, birth_date, activity_level, training_days, available_equipment, medical_conditions]);
+    return res.rows[0];
+}
+
+// Exportando as novas funções (re-exportando tudo para garantir)
+module.exports = {
+    query, pool,
+    getUserByEmail, getUserById, createUser, updateUser,
+    getClientData, ensureClientProfile, getClientWorkouts, getClientStats, getWorkoutDetails,
+    getAllTrainers, getClientsByTrainer,
+    updateUserPassword, updateClientProfileFull 
+};
