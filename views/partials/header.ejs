@@ -22,14 +22,11 @@
                 </a>
 
                 <nav class="nav-desktop desktop-only">
-                    <% const isDashboard = typeof currentPage !== 'undefined'; %>
-
-                    <% if (!isDashboard) { %>
-                        <a href="/" class="nav-link">Início</a>
-                        <a href="/about" class="nav-link">Sobre</a>
-                        <a href="/articles" class="nav-link">Artigos</a>
-                        <div class="nav-separator" style="width:1px; height:20px; background:var(--border); margin:0 1rem;"></div>
-                    <% } %>
+                    <a href="/" class="nav-link">Início</a>
+                    <a href="/about" class="nav-link">Sobre</a>
+                    <a href="/articles" class="nav-link">Artigos</a>
+                    
+                    <div class="nav-separator" style="width:1px; height:20px; background:var(--border-color); margin:0 1rem; opacity: 0.3;"></div>
 
                     <% if (typeof user !== 'undefined' && user) { %>
                         <% 
@@ -37,11 +34,13 @@
                             if (user.role === 'superadmin') dashLink = '/superadmin/dashboard';
                             else if (user.role === 'trainer') dashLink = '/admin/dashboard';
                         %>
+                        <% const isDashboard = typeof currentPage !== 'undefined'; %>
                         <% if (!isDashboard) { %>
                             <a href="<%= dashLink %>" class="btn btn-primary btn-sm">Painel</a>
                         <% } %>
-                        <a href="/auth/logout" onclick="event.preventDefault(); document.getElementById('logout-form-header').submit();" class="nav-link logout-link">
-                            Sair
+                        
+                        <a href="/auth/logout" onclick="event.preventDefault(); document.getElementById('logout-form-header').submit();" class="nav-link logout-link" title="Sair">
+                            <i class="fas fa-sign-out-alt"></i>
                         </a>
                         <form id="logout-form-header" action="/auth/logout" method="POST" style="display: none;">
                             <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
@@ -61,26 +60,29 @@
                 <div class="mobile-drawer-content">
                     
                     <% if (typeof user !== 'undefined' && user) { %>
-                        <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px; padding-bottom:15px; border-bottom:1px solid var(--border);">
-                            <div style="width:36px; height:36px; background:var(--primary); color:black; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold;">
+                        <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px; padding-bottom:15px; border-bottom:1px solid var(--border-color);">
+                            <div style="width:40px; height:40px; background:var(--primary-color); color:black; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:1.1rem;">
                                 <%= user.name.charAt(0).toUpperCase() %>
                             </div>
                             <div>
                                 <div style="font-weight:600; color:white;"><%= user.name.split(' ')[0] %></div>
-                                <div style="font-size:0.8rem; color:var(--text-muted);">
+                                <div style="font-size:0.8rem; color:#a1a1aa;">
                                     <%= user.role === 'client' ? 'Aluno(a)' : 'Treinador' %>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="mobile-public-links" style="border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 10px;">
-                            <a href="/" class="mobile-link">Início</a>
-                            <a href="/about" class="mobile-link">Sobre</a>
-                            <a href="/articles" class="mobile-link">Artigos</a>
+                        <div style="display:flex; flex-direction:column; gap:5px; margin-bottom:15px;">
+                            <a href="/" class="mobile-link"><i class="fas fa-home" style="width:20px; opacity:0.7"></i> Início</a>
+                            <a href="/about" class="mobile-link"><i class="fas fa-info-circle" style="width:20px; opacity:0.7"></i> Sobre</a>
+                            <a href="/articles" class="mobile-link"><i class="fas fa-newspaper" style="width:20px; opacity:0.7"></i> Artigos</a>
                         </div>
 
+                        <div style="height:1px; background:var(--border-color); margin:10px 0; opacity:0.3;"></div>
+                        
+                        <div class="mobile-section-title" style="color:#a1a1aa; font-size:0.75rem; text-transform:uppercase; margin-bottom:10px;">Painel</div>
+
                         <% const current = typeof currentPage !== 'undefined' ? currentPage : ''; %>
-                        <div class="mobile-section-title">Menu do Painel</div>
 
                         <% if (user.role === 'client') { %>
                             <a href="/client/dashboard" class="mobile-link <%= current === 'dashboard' ? 'active' : '' %>">
@@ -105,14 +107,11 @@
                             <a href="/chat" class="mobile-link <%= current === 'chat' ? 'active' : '' %>">
                                 <i class="fas fa-comments" style="width:20px;"></i> Mensagens
                             </a>
-                            <a href="/admin/manage-articles" class="mobile-link <%= current === 'articles' ? 'active' : '' %>">
-                                <i class="fas fa-newspaper" style="width:20px;"></i> Artigos
-                            </a>
                         <% } %>
 
-                        <div style="border-top:1px solid var(--border); margin-top:10px; padding-top:10px;">
-                            <a href="/auth/logout" onclick="event.preventDefault(); document.getElementById('logout-form-header').submit();" class="mobile-link" style="color:#ef4444;">
-                                <i class="fas fa-sign-out-alt" style="width:20px;"></i> Sair
+                        <div style="border-top:1px solid rgba(255,255,255,0.1); margin-top:20px; padding-top:15px;">
+                            <a href="/auth/logout" onclick="event.preventDefault(); document.getElementById('logout-form-header').submit();" class="mobile-link" style="color:#ef4444 !important; background: rgba(239,68,68,0.1);">
+                                <i class="fas fa-sign-out-alt" style="width:20px;"></i> Sair da Conta
                             </a>
                         </div>
 
