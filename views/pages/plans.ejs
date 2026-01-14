@@ -1,0 +1,32 @@
+<%- include('../partials/header.ejs') %>
+<div class="header-spacer"></div>
+
+<section style="padding: 80px 20px; text-align: center;">
+    <h1 class="text-neon" style="font-size: 3rem; margin-bottom: 20px;">Escolha sua Evolução</h1>
+    <p style="color: #ccc; max-width: 600px; margin: 0 auto 50px;">Planos flexíveis para alunos e ferramentas poderosas para treinadores.</p>
+
+    <div class="container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
+        <% plans.forEach(plan => { %>
+            <div style="background: #111; border: 1px solid <%= plan.recommended ? 'var(--primary-color)' : '#333' %>; border-radius: 16px; padding: 40px; position: relative; display: flex; flex-direction: column;">
+                <% if (plan.recommended) { %>
+                    <span style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--primary-color); color: black; padding: 5px 15px; border-radius: 20px; font-weight: 800; font-size: 0.8rem;">MAIS POPULAR</span>
+                <% } %>
+                
+                <h3 style="color: white; font-size: 1.5rem;"><%= plan.name %></h3>
+                <div style="margin: 20px 0;">
+                    <span style="font-size: 3rem; font-weight: 800; color: white;">R$ <%= plan.price %></span>
+                    <span style="color: #666;">/mês</span>
+                </div>
+                
+                <ul style="text-align: left; list-style: none; margin-bottom: 30px; flex: 1;">
+                    <% plan.features.forEach(feat => { %>
+                        <li style="margin-bottom: 15px; color: #ccc;"><i class="fas fa-check text-neon" style="margin-right: 10px;"></i> <%= feat %></li>
+                    <% }) %>
+                </ul>
+
+                <a href="/auth/register?plan=<%= plan.name %>" class="btn <%= plan.recommended ? 'btn-primary' : 'btn-outline' %> btn-full">Começar Agora</a>
+            </div>
+        <% }) %>
+    </div>
+</section>
+<%- include('../partials/footer.ejs') %>

@@ -90,4 +90,15 @@ router.post('/profile/update', async (req, res) => {
     }
 });
 
+
+router.get('/financial', async (req, res) => {
+    // Simula dados financeiros
+    const transactions = await db.query("SELECT * FROM transactions WHERE user_id = $1 ORDER BY created_at DESC", [req.session.user.id]);
+    res.render('pages/trainer-financial', { 
+        title: 'Financeiro', user: req.session.user, 
+        balance: 1250.00, transactions: transactions.rows,
+        currentPage: '/trainer/financial', csrfToken: req.csrfToken()
+    });
+});
+
 module.exports = router;

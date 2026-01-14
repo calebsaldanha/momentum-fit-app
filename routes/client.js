@@ -122,4 +122,32 @@ router.post('/profile/change-password', async (req, res) => {
     res.redirect('/client/profile?msg=success');
 });
 
+
+// --- NOVAS FUNCIONALIDADES CLIENTE ---
+
+router.get('/evolution', async (req, res) => {
+    try {
+        // Busca histórico de peso e medidas
+        const history = await db.query("SELECT * FROM profile_history WHERE client_id = $1 ORDER BY recorded_at ASC", [res.locals.clientData.id]);
+        res.render('pages/client-evolution', { 
+            title: 'Minha Evolução', user: req.session.user, history: history.rows,
+            currentPage: '/client/evolution', csrfToken: req.csrfToken()
+        });
+    } catch(e) { res.render('pages/error'); }
+});
+
+router.get('/ai-coach', (req, res) => {
+    res.render('pages/client-ai-coach', { 
+        title: 'IA Coach', user: req.session.user, 
+        currentPage: '/client/ai-coach', csrfToken: req.csrfToken()
+    });
+});
+
+router.get('/plans', (req, res) => {
+    res.render('pages/client-plans', { 
+        title: 'Meu Plano', user: req.session.user, 
+        currentPage: '/client/plans', csrfToken: req.csrfToken()
+    });
+});
+
 module.exports = router;
