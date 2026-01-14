@@ -16,10 +16,9 @@ const pool = new Pool({
   ssl: isProduction ? { rejectUnauthorized: false } : false
 });
 
-// Wrapper para facilitar queries
 const query = (text, params) => pool.query(text, params);
 
-// --- FUNÇÕES DE USUÁRIO ---
+// --- USUÁRIOS & AUTH ---
 
 async function getUserByEmail(email) {
     const res = await query("SELECT * FROM users WHERE email = $1", [email]);
@@ -32,8 +31,6 @@ async function getUserById(id) {
 }
 
 async function createUser(user) {
-    // CORREÇÃO: Removemos height, weight, goal, etc da tabela users.
-    // Esses dados devem ser inseridos na tabela 'clients' pelo controller.
     const { name, email, password, role, trainer_id, profile_image } = user;
     
     let hashedPassword = null;
@@ -51,24 +48,21 @@ async function createUser(user) {
 }
 
 async function updateUser(id, updates) {
+    const allowedFields = ['name', 'email', 'password', 'role', 'trainer_id', 'profile_image', 'last_login'];
     const fields = [];
     const values = [];
     let idx = 1;
 
-    // Filtra apenas campos que existem na tabela users
-    const allowedFields = ['name', 'email', 'password', 'role', 'trainer_id', 'profile_image'];
-
     for (const key in updates) {
         if (!allowedFields.includes(key)) continue;
-
+        
+        let value = updates[key];
         if (key === 'password') {
-            const hashedPassword = await bcrypt.hash(updates[key], 10);
-            fields.push(`${key} = $${idx}`);
-            values.push(hashedPassword);
-        } else {
-            fields.push(`${key} = $${idx}`);
-            values.push(updates[key]);
+            value = await bcrypt.hash(value, 10);
         }
+        
+        fields.push(`${key} = $${idx}`);
+        values.push(value);
         idx++;
     }
     
@@ -76,116 +70,86 @@ async function updateUser(id, updates) {
 
     values.push(id);
     const sql = `UPDATE users SET ${fields.join(', ')} WHERE id = $${idx} RETURNING *`;
-
     const res = await query(sql, values);
     return res.rows[0];
 }
 
-// --- FUNÇÕES DE TREINO E GESTÃO ---
+// --- CLIENTES (Lógica movida das Rotas) ---
 
-async function getWorkoutsByUserId(userId) {
-    const res = await query("SELECT * FROM workouts WHERE client_id = $1 OR user_id = $1 ORDER BY created_at DESC", [userId]);
+async function getClientData(userId) {
+    const sql = `
+        SELECT u.name, u.email, u.profile_image, c.* FROM users u 
+        LEFT JOIN clients c ON u.id = c.user_id 
+        WHERE u.id = $1`;
+    const res = await query(sql, [userId]);
+    return res.rows[0];
+}
+
+async function ensureClientProfile(userId) {
+    // Garante que existe registro na tabela clients
+    await query("INSERT INTO clients (user_id) VALUES ($1) ON CONFLICT (user_id) DO NOTHING", [userId]);
+    return getClientData(userId);
+}
+
+async function getClientWorkouts(clientId, limit = null) {
+    let sql = `
+        SELECT w.*, u.name as trainer_name 
+        FROM workouts w 
+        LEFT JOIN users u ON w.trainer_id = u.id 
+        WHERE w.client_id = $1 
+        ORDER BY w.created_at DESC`;
+    
+    if (limit) sql += ` LIMIT ${limit}`;
+    
+    const res = await query(sql, [clientId]);
     return res.rows;
 }
 
-async function createWorkout(workout) {
-    const client_id = workout.client_id || workout.user_id; 
-    const { trainer_id, title, description, exercises } = workout;
-    const exercisesJson = typeof exercises === 'string' ? exercises : JSON.stringify(exercises);
+async function getClientStats(userId) {
+    const checkinsRes = await query("SELECT COUNT(*) FROM checkins WHERE user_id = $1", [userId]);
+    const streakRes = await query(`
+        SELECT COUNT(DISTINCT DATE(created_at)) 
+        FROM checkins 
+        WHERE user_id = $1 AND created_at > NOW() - INTERVAL '30 days'
+    `, [userId]);
     
-    const sql = "INSERT INTO workouts (client_id, trainer_id, title, description, exercises) VALUES ($1, $2, $3, $4, $5) RETURNING *";
-    const res = await query(sql, [client_id, trainer_id, title, description, exercisesJson]);
-    return res.rows[0];
+    return {
+        completed: parseInt(checkinsRes.rows[0].count || 0),
+        streak: parseInt(streakRes.rows[0].count || 0)
+    };
 }
+
+async function getWorkoutDetails(workoutId, clientId) {
+    const workoutRes = await query("SELECT * FROM workouts WHERE id = $1 AND client_id = $2", [workoutId, clientId]);
+    if (workoutRes.rows.length === 0) return null;
+    
+    const exercisesRes = await query("SELECT * FROM workout_exercises WHERE workout_id = $1 ORDER BY order_index ASC", [workoutId]);
+    
+    return { ...workoutRes.rows[0], exercises: exercisesRes.rows };
+}
+
+// --- TREINADORES & ADMIN ---
 
 async function getAllTrainers() {
     const res = await query("SELECT id, name, email, profile_image FROM users WHERE role = 'trainer' OR role = 'superadmin'", []);
     return res.rows;
 }
 
-async function getClients() {
-    // Retorna todos os usuários que são clientes
-    const res = await query("SELECT * FROM users WHERE role = 'client'", []);
-    return res.rows;
-}
-
-async function getUserStats(userId) {
-    return {
-        completed_workouts: 0,
-        current_streak: 0, 
-        total_checkins: 0,
-        last_workout: null
-    };
-}
-
-// --- FUNÇÕES DE TREINADOR ---
-
 async function getClientsByTrainer(trainerId) {
-    // CORRIGIDO: Busca dados físicos na tabela clients, não users
     const sql = `
         SELECT u.id, u.name, u.email, u.profile_image, u.created_at,
                c.fitness_goals as goal, c.id as client_real_id
         FROM users u 
         LEFT JOIN clients c ON u.id = c.user_id
         WHERE u.role = 'client' AND u.trainer_id = $1 
-        ORDER BY u.name ASC
-    `;
+        ORDER BY u.name ASC`;
     const res = await query(sql, [trainerId]);
     return res.rows;
-}
-
-async function getRecentClientsByTrainer(trainerId) {
-    const sql = `
-        SELECT id, name, email, created_at 
-        FROM users 
-        WHERE role = 'client' AND trainer_id = $1 
-        ORDER BY created_at DESC 
-        LIMIT 5
-    `;
-    const res = await query(sql, [trainerId]);
-    return res.rows;
-}
-
-async function getTrainerStats(trainerId) {
-    const stats = { totalClients: 0, totalWorkouts: 0, weeklyCheckins: 0 };
-    
-    try {
-        const clientsRes = await query("SELECT COUNT(*) FROM users WHERE role = 'client' AND trainer_id = $1", [trainerId]);
-        stats.totalClients = parseInt(clientsRes.rows[0].count || 0);
-
-        const workoutsRes = await query("SELECT COUNT(*) FROM workouts WHERE trainer_id = $1", [trainerId]);
-        stats.totalWorkouts = parseInt(workoutsRes.rows[0].count || 0);
-
-        try {
-            const checkinsRes = await query(`
-                SELECT COUNT(*) 
-                FROM checkins 
-                JOIN users ON checkins.user_id = users.id 
-                WHERE users.trainer_id = $1 AND checkins.created_at >= NOW() - INTERVAL '7 days'
-            `, [trainerId]);
-            stats.weeklyCheckins = parseInt(checkinsRes.rows[0].count || 0);
-        } catch (e) {
-            stats.weeklyCheckins = 0;
-        }
-    } catch (err) {
-        console.error("Erro estatisticas:", err);
-    }
-    return stats;
 }
 
 module.exports = {
-    query,
-    pool,
-    getUserByEmail,
-    getUserById,
-    createUser,
-    updateUser,
-    getWorkoutsByUserId,
-    createWorkout,
-    getAllTrainers,
-    getClients,
-    getUserStats,
-    getClientsByTrainer,
-    getRecentClientsByTrainer,
-    getTrainerStats
+    query, pool,
+    getUserByEmail, getUserById, createUser, updateUser,
+    getClientData, ensureClientProfile, getClientWorkouts, getClientStats, getWorkoutDetails,
+    getAllTrainers, getClientsByTrainer
 };

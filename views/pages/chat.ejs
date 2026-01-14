@@ -1,4 +1,4 @@
-<%- include('../partials/header') %>
+<%- include('../partials/header.ejs') %>
 
 <div class="page-content-wrapper chat-container <%= typeof activeChat !== 'undefined' && activeChat ? 'show-chat' : 'show-list' %>">
     
@@ -92,4 +92,4 @@
     if(mc) mc.scrollTop = mc.scrollHeight;
 </script>
 
-<%- include('../partials/footer') %>
+<%- include('../partials/footer.ejs') %>
