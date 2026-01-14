@@ -104,17 +104,18 @@
     <div class="app-layout-container">
         
         <% 
+        // Lógica unificada para determinar layout
         const curPage = typeof currentPage !== 'undefined' ? currentPage : '';
         const isAuthPage = ['login', 'register', 'initial-form', 'forgot-password', 'reset-password'].includes(curPage);
-        const isPublicPage = ['home', 'index', 'about', 'articles', 'article-details'].includes(curPage);
-        
-        if (typeof user !== 'undefined' && user && !isAuthPage && !isPublicPage) { 
+        const isPublicPage = ['index', 'home', 'about', 'articles', 'article-details'].includes(curPage);
+        const shouldShowSidebar = typeof user !== 'undefined' && user && !isAuthPage && !isPublicPage;
         %>
+            
+        <% if (shouldShowSidebar) { %>
             <%- include('./sidebar') %>
         <% } %>
 
-        <% const isIndex = (typeof currentPage !== "undefined" <main class="main-content-column"><main class="main-content-column"> currentPage === "index"); %>
-        <main class="main-content-column <%= isIndex ? "no-padding-top" : "" %>">
+        <main class="main-content-column <%= curPage === 'index' ? 'no-padding-top' : '' %>">
             
             <% if (typeof messages !== 'undefined' && (messages.error || messages.success)) { %>
             <div style="position: fixed; top: 90px; right: 20px; z-index: 1100; max-width: 400px; width: 90%;">
