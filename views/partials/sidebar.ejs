@@ -56,6 +56,10 @@
                     <i class="fas fa-user-tie"></i> <span>Gerenciar Equipe</span>
                 </a>
             <% } %>
+
+            <a href="/auth/logout" onclick="event.preventDefault(); document.getElementById('logout-form-header').submit();" class="sidebar-link" style="margin-top: 1rem; color: var(--danger);">
+                <i class="fas fa-sign-out-alt"></i> <span>Sair</span>
+            </a>
         <% } %>
     </div>
 

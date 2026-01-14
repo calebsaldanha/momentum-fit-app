@@ -22,11 +22,15 @@
                 </a>
 
                 <nav class="nav-desktop desktop-only">
-                    <a href="/" class="nav-link">Início</a>
-                    <a href="/about" class="nav-link">Sobre</a>
-                    <a href="/articles" class="nav-link">Artigos</a>
-                    
-                    <div class="nav-separator"></div>
+                    <% const isDashboard = typeof currentPage !== 'undefined'; %>
+
+                    <% if (!isDashboard) { %>
+                        <a href="/" class="nav-link">Início</a>
+                        <a href="/about" class="nav-link">Sobre</a>
+                        <a href="/articles" class="nav-link">Artigos</a>
+                        
+                        <div class="nav-separator"></div>
+                    <% } %>
 
                     <% if (typeof user !== 'undefined' && user) { %>
                         <% 
@@ -34,7 +38,9 @@
                             if (user.role === 'superadmin') dashLink = '/superadmin/dashboard';
                             else if (user.role === 'trainer') dashLink = '/admin/dashboard';
                         %>
-                        <a href="<%= dashLink %>" class="btn btn-primary btn-sm">Painel</a>
+                        <% if (!isDashboard) { %>
+                            <a href="<%= dashLink %>" class="btn btn-primary btn-sm">Painel</a>
+                        <% } %>
                         <a href="/auth/logout" onclick="event.preventDefault(); document.getElementById('logout-form-header').submit();" class="nav-link logout-link">
                             Sair <i class="fas fa-sign-out-alt"></i>
                         </a>
