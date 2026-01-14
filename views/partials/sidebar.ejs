@@ -1,67 +1,61 @@
-<div class="dashboard-sidebar-wrapper desktop-only">
-    
-    <div class="sidebar-header">
-        <% if (typeof user !== 'undefined' && user) { %>
-            <div class="user-profile-card">
-                <div class="user-avatar-placeholder">
-                    <%= user.name.charAt(0).toUpperCase() %>
-                </div>
-                <div class="user-info-text">
-                    <h4><%= user.name.split(' ')[0] %></h4>
-                    <span><%= user.role === 'client' ? 'Aluno(a)' : (user.role === 'trainer' ? 'Treinador' : 'Admin') %></span>
-                </div>
-            </div>
+<aside class="sidebar desktop-only">
+    <nav class="sidebar-nav">
+        
+        <% if (user.role === 'client') { %>
+            <a href="/client/dashboard" class="sidebar-link <%= currentPage === 'dashboard' ? 'active' : '' %>">
+                <i class="fas fa-home"></i> <span>Visão Geral</span>
+            </a>
+            <a href="/client/workouts" class="sidebar-link <%= currentPage === 'workouts' ? 'active' : '' %>">
+                <i class="fas fa-dumbbell"></i> <span>Meus Treinos</span>
+            </a>
+            <a href="/client/profile" class="sidebar-link <%= currentPage === 'profile' ? 'active' : '' %>">
+                <i class="fas fa-user-circle"></i> <span>Meu Perfil</span>
+            </a>
+            <a href="/chat" class="sidebar-link <%= currentPage === 'chat' ? 'active' : '' %>">
+                <i class="fas fa-comments"></i> <span>Falar com Coach</span>
+            </a>
+
+        <% } else if (user.role === 'trainer') { %>
+            <a href="/trainer/dashboard" class="sidebar-link <%= currentPage === 'dashboard' ? 'active' : '' %>">
+                <i class="fas fa-chart-line"></i> <span>Painel</span>
+            </a>
+            <a href="/trainer/clients" class="sidebar-link <%= currentPage === 'clients' ? 'active' : '' %>">
+                <i class="fas fa-users"></i> <span>Meus Alunos</span>
+            </a>
+            <a href="/workouts/create" class="sidebar-link <%= currentPage === 'create-workout' ? 'active' : '' %>">
+                <i class="fas fa-plus-circle"></i> <span>Criar Treino</span>
+            </a>
+            <a href="/chat" class="sidebar-link <%= currentPage === 'chat' ? 'active' : '' %>">
+                <i class="fas fa-comments"></i> <span>Mensagens</span>
+            </a>
+
+        <% } else if (user.role === 'admin' || user.role === 'superadmin') { %>
+            <a href="/admin/dashboard" class="sidebar-link <%= currentPage === 'dashboard' ? 'active' : '' %>">
+                <i class="fas fa-shield-alt"></i> <span>Visão Geral</span>
+            </a>
+            <a href="/admin/users" class="sidebar-link <%= currentPage === 'users' ? 'active' : '' %>">
+                <i class="fas fa-users-cog"></i> <span>Gerenciar Usuários</span>
+            </a>
+            <a href="/admin/trainers" class="sidebar-link <%= currentPage === 'trainers' ? 'active' : '' %>">
+                <i class="fas fa-user-tie"></i> <span>Treinadores</span>
+            </a>
+            <a href="/chat" class="sidebar-link <%= currentPage === 'chat' ? 'active' : '' %>">
+                <i class="fas fa-comments"></i> <span>Suporte</span>
+            </a>
         <% } %>
+
+        <div style="margin-top: 2rem; border-top: 1px solid var(--border); padding-top: 1rem; opacity: 0.5;">
+            <a href="/articles" class="sidebar-link"><i class="fas fa-book-open"></i> <span>Artigos</span></a>
+        </div>
+
+    </nav>
+
+    <div style="margin-top: auto; padding: 1.5rem;">
+        <a href="/auth/logout" onclick="event.preventDefault(); document.getElementById('logout-form-sidebar').submit();" class="btn btn-outline btn-sm" style="width: 100%; justify-content: center; border-color: #ef4444; color: #ef4444;">
+            <i class="fas fa-sign-out-alt"></i> Sair
+        </a>
+        <form id="logout-form-sidebar" action="/auth/logout" method="POST" style="display: none;">
+            <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+        </form>
     </div>
-
-    <div class="sidebar-nav">
-        <% const current = typeof currentPage !== 'undefined' ? currentPage : ''; %>
-
-        <% if (typeof user !== 'undefined' && user) { %>
-            
-            <div class="sidebar-title">Menu Principal</div>
-
-            <% if (user.role === 'client') { %>
-                <a href="/client/dashboard" class="sidebar-link <%= current === 'dashboard' ? 'active' : '' %>">
-                    <i class="fas fa-chart-pie"></i> <span>Visão Geral</span>
-                </a>
-                <a href="/client/workouts" class="sidebar-link <%= current === 'workouts' ? 'active' : '' %>">
-                    <i class="fas fa-dumbbell"></i> <span>Meus Treinos</span>
-                </a>
-                <a href="/chat" class="sidebar-link <%= current === 'chat' ? 'active' : '' %>">
-                    <i class="fas fa-comments"></i> <span>Chat com Coach</span>
-                </a>
-                <a href="/client/profile" class="sidebar-link <%= current === 'profile' ? 'active' : '' %>">
-                    <i class="fas fa-user-circle"></i> <span>Meu Perfil</span>
-                </a>
-            
-            <% } else if (user.role === 'trainer') { %>
-                <a href="/admin/dashboard" class="sidebar-link <%= current === 'dashboard' ? 'active' : '' %>">
-                    <i class="fas fa-home"></i> <span>Dashboard</span>
-                </a>
-                <a href="/admin/clients" class="sidebar-link <%= current === 'clients' ? 'active' : '' %>">
-                    <i class="fas fa-users"></i> <span>Meus Alunos</span>
-                </a>
-                <a href="/chat" class="sidebar-link <%= current === 'chat' ? 'active' : '' %>">
-                    <i class="fas fa-comments"></i> <span>Mensagens</span>
-                </a>
-                <a href="/admin/manage-articles" class="sidebar-link <%= current === 'articles' ? 'active' : '' %>">
-                    <i class="fas fa-newspaper"></i> <span>Artigos</span>
-                </a>
-            <% } else if (user.role === 'superadmin') { %>
-                <a href="/superadmin/dashboard" class="sidebar-link <%= current === 'dashboard' ? 'active' : '' %>">
-                    <i class="fas fa-shield-alt"></i> <span>Visão Geral</span>
-                </a>
-                <a href="/superadmin/manage" class="sidebar-link <%= current === 'manage' ? 'active' : '' %>">
-                    <i class="fas fa-user-tie"></i> <span>Gerenciar Equipe</span>
-                </a>
-            <% } %>
-
-            <div class="sidebar-footer">
-                <a href="/auth/logout" onclick="event.preventDefault(); document.getElementById('logout-form-header').submit();" class="sidebar-link" style="color: #ef4444;">
-                    <i class="fas fa-sign-out-alt"></i> <span>Sair da conta</span>
-                </a>
-            </div>
-        <% } %>
-    </div>
-</div>
+</aside>
