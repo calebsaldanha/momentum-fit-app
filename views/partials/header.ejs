@@ -5,31 +5,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= typeof title !== 'undefined' ? title + ' | Momentum Fit' : 'Momentum Fit' %></title>
     <link rel="icon" type="image/png" href="/images/momentum-fit-icon.png">
+    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <link rel="stylesheet" href="/css/styles.css">
     <link rel="stylesheet" href="/css/dashboard.css">
 </head>
 <body>
+    
     <header class="main-header">
         <div class="header-content">
             <a href="/" class="brand-link">
-                <img src="/images/momentum-fit-logo-completo.png" alt="Momentum Fit" style="height: 32px;" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
-                <span style="display:none; font-weight:700; font-size:1.25rem; color:white;">Momentum Fit</span>
+                <img src="/images/momentum-fit-logo-completo.png" alt="Momentum Fit" style="height: 28px;" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+                <span style="display:none; font-weight:700; font-size:1.1rem; color:white;">Momentum Fit</span>
             </a>
+
             <nav class="nav-desktop desktop-only">
-                <a href="/" class="nav-link">Início</a>
-                <a href="/about" class="nav-link">Sobre</a>
-                <a href="/articles" class="nav-link">Artigos</a>
+                <% if (!user) { %>
+                    <a href="/" class="nav-link">Início</a>
+                    <a href="/about" class="nav-link">Sobre</a>
+                <% } %>
+                
                 <div class="nav-separator" style="width:1px; height:20px; background:var(--border); margin:0 1rem; opacity: 0.3;"></div>
+
                 <% if (typeof user !== 'undefined' && user) { %>
-                    <% 
-                        let dashLink = '/client/dashboard';
-                        if (user.role === 'superadmin') dashLink = '/superadmin/dashboard';
-                        else if (user.role === 'trainer') dashLink = '/admin/dashboard';
-                    %>
-                    <a href="<%= dashLink %>" class="btn btn-primary btn-sm">Painel</a>
-                    <a href="/auth/logout" onclick="event.preventDefault(); document.getElementById('logout-form-header').submit();" class="nav-link logout-link" title="Sair"><i class="fas fa-sign-out-alt"></i></a>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span class="text-muted" style="font-size: 0.9rem;">Olá, <%= user.name.split(' ')[0] %></span>
+                        
+                        <a href="/auth/logout" onclick="event.preventDefault(); document.getElementById('logout-form-header').submit();" class="nav-link logout-link" title="Sair" style="color: #ef4444;">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </a>
+                    </div>
                     <form id="logout-form-header" action="/auth/logout" method="POST" style="display: none;">
                         <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
                     </form>
@@ -38,33 +45,98 @@
                     <a href="/auth/register" class="btn btn-primary btn-sm">Começar</a>
                 <% } %>
             </nav>
-            <button id="mobileMenuBtn" class="mobile-menu-trigger mobile-only"><i class="fas fa-bars"></i></button>
+
+            <button id="mobileMenuBtn" class="mobile-menu-trigger mobile-only" style="background: none; border: none; color: white; font-size: 1.5rem;">
+                <i class="fas fa-bars"></i>
+            </button>
         </div>
+
         <div id="mobileDrawer" class="mobile-drawer mobile-only">
-             <div class="mobile-drawer-content">
+            <div class="mobile-drawer-content" style="padding: 1.5rem;">
+                
                 <% if (typeof user !== 'undefined' && user) { %>
-                    <div style="padding:15px; border-bottom:1px solid var(--border);">Olá, <%= user.name %></div>
-                    <a href="/auth/logout" onclick="event.preventDefault(); document.getElementById('logout-form-header').submit();" class="mobile-link" style="color:#ef4444;">Sair</a>
+                    <div style="display:flex; align-items:center; gap:12px; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border);">
+                        <div style="width:50px; height:50px; background:var(--primary); color:black; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size: 1.2rem;">
+                            <%= user.name.charAt(0).toUpperCase() %>
+                        </div>
+                        <div>
+                            <div style="font-weight:700; color:white; font-size: 1.1rem;"><%= user.name %></div>
+                            <div style="font-size:0.85rem; color:var(--text-muted);">
+                                <%= user.role === 'client' ? 'Aluno(a)' : (user.role === 'trainer' ? 'Treinador(a)' : 'Admin') %>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        <% if (user.role === 'client') { %>
+                            <a href="/client/dashboard" class="mobile-link"><i class="fas fa-home"></i> Visão Geral</a>
+                            <a href="/client/workouts" class="mobile-link"><i class="fas fa-dumbbell"></i> Meus Treinos</a>
+                            <a href="/client/profile" class="mobile-link"><i class="fas fa-user-circle"></i> Meu Perfil</a>
+                            <a href="/chat" class="mobile-link"><i class="fas fa-comments"></i> Falar com Coach</a>
+                        <% } else if (user.role === 'trainer') { %>
+                            <a href="/trainer/dashboard" class="mobile-link"><i class="fas fa-chart-line"></i> Painel</a>
+                            <a href="/trainer/clients" class="mobile-link"><i class="fas fa-users"></i> Alunos</a>
+                            <a href="/workouts/create" class="mobile-link"><i class="fas fa-plus-circle"></i> Criar Treino</a>
+                            <a href="/chat" class="mobile-link"><i class="fas fa-comments"></i> Mensagens</a>
+                        <% } else { %>
+                            <a href="/admin/dashboard" class="mobile-link"><i class="fas fa-shield-alt"></i> Dashboard</a>
+                            <a href="/admin/users" class="mobile-link"><i class="fas fa-users-cog"></i> Usuários</a>
+                        <% } %>
+                    </div>
+
+                    <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+                        <a href="/auth/logout" onclick="event.preventDefault(); document.getElementById('logout-form-header').submit();" class="mobile-link" style="color:#ef4444;">
+                            <i class="fas fa-sign-out-alt"></i> Sair
+                        </a>
+                    </div>
+
                 <% } else { %>
-                    <a href="/auth/login" class="mobile-link">Entrar</a>
+                    <a href="/" class="mobile-link">Início</a>
+                    <a href="/about" class="mobile-link">Sobre</a>
+                    <div style="margin-top: 2rem; display: grid; gap: 10px;">
+                        <a href="/auth/login" class="btn btn-outline" style="text-align: center;">Entrar</a>
+                        <a href="/auth/register" class="btn btn-primary" style="text-align: center;">Começar Agora</a>
+                    </div>
                 <% } %>
             </div>
         </div>
     </header>
+
     <div class="app-layout-container">
+        
         <% 
         const curPage = typeof currentPage !== 'undefined' ? currentPage : '';
         const isAuthPage = ['login', 'register', 'initial-form', 'forgot-password', 'reset-password'].includes(curPage);
         const isPublicPage = ['index', 'home', 'about', 'articles', 'article-details'].includes(curPage);
         const shouldShowSidebar = typeof user !== 'undefined' && user && !isAuthPage && !isPublicPage;
         %>
+            
         <% if (shouldShowSidebar) { %>
             <%- include('./sidebar') %>
         <% } %>
+
         <main class="main-content-column <%= curPage === 'index' ? 'no-padding-top' : '' %>">
-            <% if (typeof messages !== 'undefined' && (messages.error || messages.success)) { %>
-            <div style="position: fixed; top: 90px; right: 20px; z-index: 1100; max-width: 400px; width: 90%;">
-                <% if (messages.error) { %><div class="alert alert-error"><%= messages.error %></div><% } %>
-                <% if (messages.success) { %><div class="alert alert-success"><%= messages.success %></div><% } %>
+            
+            <% if (typeof messages !== 'undefined' && (messages.error || messages.success || messages.error_msg || messages.success_msg)) { 
+                const err = messages.error || messages.error_msg;
+                const suc = messages.success || messages.success_msg;
+            %>
+            <div style="position: fixed; top: 90px; right: 20px; z-index: 1100; max-width: 90%; width: 400px;">
+                <% if (err && err.length > 0) { %>
+                    <div class="alert alert-error" style="background: rgba(239,68,68,0.1); backdrop-filter: blur(5px); color:#fca5a5; padding:1rem; border-radius:8px; border:1px solid rgba(239,68,68,0.2); margin-bottom: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <span><i class="fas fa-exclamation-circle"></i> <%= err %></span>
+                            <button onclick="this.parentElement.parentElement.remove()" style="background:none; border:none; color:inherit; font-size:1.2rem;">&times;</button>
+                        </div>
+                    </div>
+                <% } %>
+                <% if (suc && suc.length > 0) { %>
+                    <div class="alert" style="background: rgba(16, 185, 129, 0.15); backdrop-filter: blur(5px); color: #34d399; padding:1rem; border-radius:8px; border: 1px solid rgba(16, 185, 129, 0.3); box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <span><i class="fas fa-check-circle"></i> <%= suc %></span>
+                            <button onclick="this.parentElement.parentElement.remove()" style="background:none; border:none; color:inherit; font-size:1.2rem;">&times;</button>
+                        </div>
+                    </div>
+                <% } %>
             </div>
             <% } %>

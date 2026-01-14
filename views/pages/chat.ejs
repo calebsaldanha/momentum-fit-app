@@ -1,42 +1,106 @@
 <%- include('../partials/header') %>
 
-<div class="page-content-wrapper" style="height: calc(100vh - 140px); display: flex; flex-direction: column;">
-    <div class="card-modern" style="flex: 1; display: flex; flex-direction: column; overflow: hidden; padding: 0;">
+<div class="page-content-wrapper chat-container <%= activeChat ? 'show-chat' : 'show-list' %>">
+    
+    <div class="chat-layout">
         
-        <div class="chat-header" style="padding: 1.5rem; border-bottom: 1px solid var(--border); background: var(--bg-card);">
-            <h2 class="text-neon" style="margin: 0; font-size: 1.2rem;">
-                <i class="fas fa-comments"></i> Chat com Treinador
-            </h2>
-            <p class="text-muted" style="margin: 5px 0 0 0; font-size: 0.9rem;">Tire dúvidas e envie feedback sobre seus treinos.</p>
+        <div class="chat-sidebar">
+            <div style="padding: 1rem; border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.02);">
+                <h3 style="margin: 0; font-size: 1.1rem;">Mensagens</h3>
+            </div>
+            
+            <div style="flex: 1; overflow-y: auto;">
+                <% if (chatUsers && chatUsers.length > 0) { %>
+                    <% chatUsers.forEach(u => { %>
+                        <a href="/chat?user_id=<%= u.id %>" style="display: flex; align-items: center; gap: 12px; padding: 1rem; text-decoration: none; color: white; border-bottom: 1px solid rgba(255,255,255,0.03); <%= (activeChat && activeChat.id === u.id) ? 'background: var(--bg-hover);' : '' %>">
+                            <div style="width: 45px; height: 45px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: black; font-weight: bold; font-size: 1.1rem; flex-shrink: 0;">
+                                <%= u.name.charAt(0).toUpperCase() %>
+                            </div>
+                            <div style="overflow: hidden;">
+                                <div style="font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><%= u.name %></div>
+                                <div style="font-size: 0.8rem; color: var(--text-muted);">Toque para conversar</div>
+                            </div>
+                        </a>
+                    <% }) %>
+                <% } else { %>
+                    <div style="padding: 2rem; text-align: center; color: var(--text-muted);">
+                        <p>Nenhum contato disponível.</p>
+                    </div>
+                <% } %>
+            </div>
         </div>
 
-        <div id="chat-messages" style="flex: 1; overflow-y: auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
-            <% if (typeof messages !== 'undefined' && messages.length > 0) { %>
-                <% messages.forEach(msg => { %>
-                    <div style="background: var(--bg-hover); padding: 1rem; border-radius: 8px; max-width: 80%; align-self: <%= msg.senderId === user.id ? 'flex-end' : 'flex-start' %>;">
-                        <strong><%= msg.senderName %>:</strong>
-                        <p style="margin: 0.5rem 0 0 0; color: var(--text-main);"><%= msg.content %></p>
+        <div class="chat-main">
+            <% if (activeChat) { %>
+                <div style="padding: 0.8rem 1rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.2);">
+                    <a href="/chat" class="btn btn-sm btn-outline mobile-only" style="margin-right: 5px; padding: 8px 12px;">
+                        <i class="fas fa-arrow-left"></i>
+                    </a>
+                    
+                    <div style="width: 35px; height: 35px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: black; font-weight: bold; flex-shrink: 0;">
+                        <%= activeChat.name.charAt(0).toUpperCase() %>
                     </div>
-                <% }) %>
+                    <span style="font-weight: 600; font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><%= activeChat.name %></span>
+                </div>
+
+                <div id="messagesContainer" style="flex: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: 0.8rem; background-image: url('/images/chat-bg-pattern.png'); background-blend-mode: overlay;">
+                    <% messages.forEach(msg => { 
+                        const isMe = msg.sender_id == user.id;
+                    %>
+                        <div style="display: flex; justify-content: <%= isMe ? 'flex-end' : 'flex-start' %>;">
+                            <div style="max-width: 85%; padding: 10px 14px; border-radius: 14px; 
+                                        background: <%= isMe ? 'var(--primary)' : '#2a2a2a' %>; 
+                                        color: <%= isMe ? 'black' : 'white' %>; 
+                                        border-bottom-<%= isMe ? 'right' : 'left' %>-radius: 2px;">
+                                
+                                <% if (msg.message_type === 'text') { %>
+                                    <span style="white-space: pre-wrap; word-wrap: break-word;"><%= msg.content %></span>
+                                <% } else if (msg.message_type === 'image') { %>
+                                    <img src="<%= msg.content %>" style="max-width: 100%; border-radius: 8px; margin-top: 5px;">
+                                <% } else { %>
+                                    <a href="<%= msg.content %>" target="_blank" style="display: flex; align-items: center; gap: 5px; color: inherit; text-decoration: none;">
+                                        <i class="fas fa-paperclip"></i> Ver Anexo
+                                    </a>
+                                <% } %>
+                                
+                                <div style="font-size: 0.65rem; opacity: 0.6; margin-top: 4px; text-align: right;">
+                                    <%= new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) %>
+                                </div>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+
+                <div style="padding: 0.8rem; border-top: 1px solid var(--border); background: var(--bg-card);">
+                    <form action="/chat/send" method="POST" enctype="multipart/form-data" style="display: flex; gap: 8px; align-items: center;">
+                        <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+                        <input type="hidden" name="recipient_id" value="<%= activeChat.id %>">
+                        
+                        <label for="fileUpload" style="padding: 10px; cursor: pointer; color: var(--text-muted);">
+                            <i class="fas fa-paperclip fa-lg"></i>
+                        </label>
+                        <input type="file" id="fileUpload" name="file" style="display: none;">
+                        
+                        <input type="text" name="content" class="form-input" placeholder="Mensagem..." autocomplete="off" style="flex: 1; border-radius: 20px; border: 1px solid var(--border); background: rgba(255,255,255,0.05); color: white; padding: 10px 15px;">
+                        
+                        <button type="submit" class="btn btn-primary" style="border-radius: 50%; width: 40px; height: 40px; padding: 0; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
             <% } else { %>
-                <div style="text-align: center; color: var(--text-muted); margin-top: 2rem;">
-                    <i class="fas fa-comment-dots" style="font-size: 2rem; margin-bottom: 1rem;"></i>
-                    <p>Nenhuma mensagem ainda. Comece a conversa!</p>
+                <div style="flex: 1; display: flex; align-items: center; justify-content: center; color: var(--text-muted); flex-direction: column; padding: 2rem; text-align: center;">
+                    <i class="fas fa-comments" style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.2;"></i>
+                    <p>Selecione um contato na lista para iniciar a conversa.</p>
                 </div>
             <% } %>
         </div>
-
-        <div class="chat-input-area" style="padding: 1.5rem; border-top: 1px solid var(--border); background: var(--bg-card);">
-            <form action="/chat/send" method="POST" style="display: flex; gap: 10px;">
-                <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
-                <input type="text" name="message" class="form-input" placeholder="Digite sua mensagem..." required style="flex: 1;">
-                <button type="submit" class="btn btn-primary" style="width: auto; padding: 0 1.5rem;">
-                    <i class="fas fa-paper-plane"></i>
-                </button>
-            </form>
-        </div>
-
     </div>
 </div>
+
+<script>
+    const container = document.getElementById('messagesContainer');
+    if (container) container.scrollTop = container.scrollHeight;
+</script>
 
 <%- include('../partials/footer') %>
