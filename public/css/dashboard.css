@@ -23,12 +23,15 @@ body {
     margin: 0;
     padding-top: var(--header-height);
     -webkit-font-smoothing: antialiased;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 }
 
-/* --- HEADER --- */
+/* --- HEADER FIXO --- */
 .main-header {
     height: var(--header-height);
-    background: rgba(9, 9, 11, 0.8);
+    background: rgba(9, 9, 11, 0.95);
     backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--border);
     position: fixed;
@@ -46,161 +49,111 @@ body {
     justify-content: space-between;
 }
 
-.brand-link {
-    display: flex; align-items: center; gap: 0.8rem; text-decoration: none;
-    transition: opacity 0.2s;
-}
-.brand-link:hover { opacity: 0.8; }
-
+.brand-link { display: flex; align-items: center; gap: 0.8rem; text-decoration: none; }
 .nav-desktop { display: flex; align-items: center; gap: 1.5rem; }
-.nav-link {
-    color: var(--text-muted);
-    text-decoration: none;
-    font-size: 0.9rem;
-    font-weight: 500;
-    transition: var(--transition);
-}
+.nav-link { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: var(--transition); }
 .nav-link:hover { color: var(--text-main); }
-.nav-link.logout-link:hover { color: #ef4444; }
 
-/* --- SIDEBAR MODERN --- */
+/* --- ESTRUTURA DO LAYOUT (FLEXBOX) --- */
+/* Esta classe envolve a Sidebar e o Conteúdo para que fiquem lado a lado */
+.app-layout-container {
+    display: flex;
+    width: 100%;
+    min-height: calc(100vh - var(--header-height));
+    position: relative;
+}
+
+/* --- SIDEBAR STICKY --- */
 .dashboard-sidebar-wrapper {
     width: var(--sidebar-width);
-    position: fixed;
-    top: var(--header-height);
-    bottom: 0;
-    left: 0;
     background: var(--bg-sidebar);
     border-right: 1px solid var(--border);
     display: flex;
     flex-direction: column;
     padding: 2rem 1.5rem;
     z-index: 900;
+    
+    /* Mágica do Sticky: O menu acompanha o scroll mas fica preso na área dele */
+    position: sticky;
+    top: var(--header-height);
+    height: calc(100vh - var(--header-height));
+    overflow-y: auto; /* Permite scrollar o menu se for muito alto */
+    flex-shrink: 0;
 }
 
-/* Perfil Card Clean */
-.sidebar-header { margin-bottom: 2.5rem; padding: 0 0.5rem; }
-
+/* Estilização da Sidebar */
 .user-profile-card {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 1rem;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
+    display: flex; align-items: center; gap: 1rem; padding: 1rem;
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+    margin-bottom: 2rem;
 }
-
 .user-avatar-placeholder {
-    width: 42px; height: 42px;
-    background: var(--primary);
-    color: black;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 700;
-    font-size: 1.1rem;
-    box-shadow: 0 0 10px rgba(212, 255, 0, 0.2);
+    width: 42px; height: 42px; background: var(--primary); color: black;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700;
 }
+.user-info-text h4 { margin: 0; font-size: 0.95rem; color: white; }
+.user-info-text span { font-size: 0.75rem; color: var(--text-muted); }
 
-.user-info-text { display: flex; flex-direction: column; line-height: 1.2; }
-.user-info-text h4 { margin: 0; font-size: 0.95rem; font-weight: 600; color: white; }
-.user-info-text span { font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px; }
-
-/* Navegação Sidebar */
 .sidebar-nav { display: flex; flex-direction: column; gap: 0.5rem; flex: 1; }
-
-.sidebar-title {
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    margin: 1.5rem 0 0.5rem 1rem;
-    font-weight: 600;
-    letter-spacing: 1px;
-}
+.sidebar-title { font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin: 1rem 0 0.5rem 1rem; font-weight: 600; }
 
 .sidebar-link {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 16px;
-    color: var(--text-muted);
-    text-decoration: none;
-    border-radius: var(--radius);
-    font-size: 0.95rem;
-    font-weight: 500;
-    transition: var(--transition);
-    border: 1px solid transparent;
+    display: flex; align-items: center; gap: 12px; padding: 12px 16px;
+    color: var(--text-muted); text-decoration: none; border-radius: var(--radius);
+    font-size: 0.95rem; font-weight: 500; transition: var(--transition);
 }
+.sidebar-link:hover { background: var(--bg-hover); color: var(--text-main); }
+.sidebar-link.active { background: var(--primary-dim); color: var(--primary); font-weight: 600; }
+.sidebar-footer { margin-top: auto; border-top: 1px solid var(--border); padding-top: 1.5rem; }
 
-.sidebar-link i {
-    width: 20px;
-    text-align: center;
-    font-size: 1.1rem;
-    transition: var(--transition);
-}
-
-/* Hover State */
-.sidebar-link:hover {
-    background: var(--bg-hover);
-    color: var(--text-main);
-    transform: translateX(4px);
-}
-
-/* Active State - Estilo "Glow" */
-.sidebar-link.active {
-    background: var(--primary-dim);
-    color: var(--primary);
-    border: 1px solid rgba(212, 255, 0, 0.2);
-    font-weight: 600;
-}
-
-.sidebar-link.active i { color: var(--primary); }
-
-.sidebar-footer {
-    margin-top: auto;
-    border-top: 1px solid var(--border);
-    padding-top: 1.5rem;
-}
-
-/* --- MAIN CONTENT --- */
+/* --- CONTEÚDO PRINCIPAL --- */
 .dashboard-main {
-    flex: 1;
-    margin-left: var(--sidebar-width);
-    padding: 2.5rem;
-    width: calc(100% - var(--sidebar-width));
-    min-height: calc(100vh - var(--header-height));
+    flex-grow: 1; /* Ocupa o resto da tela */
+    padding: 0; /* Padding interno gerido pelos filhos */
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden; /* Evita scroll horizontal indesejado */
 }
 
-/* --- MOBILE --- */
-.mobile-menu-trigger {
-    background: none; border: none; color: white; font-size: 1.4rem; cursor: pointer; padding: 0.5rem;
+/* Wrapper para o conteúdo real das páginas para dar espaçamento */
+.page-content-wrapper {
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    flex: 1;
 }
+
+/* --- MOBILE DRAWER FIX --- */
+.mobile-menu-trigger { background: none; border: none; color: white; font-size: 1.4rem; cursor: pointer; }
 
 .mobile-drawer {
     position: fixed; top: var(--header-height); left: 0; width: 100%;
     background: var(--bg-app);
     border-bottom: 1px solid var(--border);
-    max-height: 0; overflow: hidden;
-    transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Controle de visibilidade/animação */
+    max-height: 0;
+    opacity: 0;
+    visibility: hidden;
+    overflow-y: hidden;
+    transition: all 0.3s ease-in-out;
     z-index: 999;
 }
-.mobile-drawer.active { max-height: 100vh; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+
+.mobile-drawer.active {
+    max-height: calc(100vh - var(--header-height)); /* Ocupa a tela toda menos o header */
+    opacity: 1;
+    visibility: visible;
+    overflow-y: auto; /* Habilita o scroll no menu mobile! */
+    padding-bottom: 2rem;
+}
+
 .mobile-drawer-content { padding: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; }
-
-/* Mobile Links - Estilo igual ao sidebar */
-.mobile-link {
-    display: flex; align-items: center; gap: 12px;
-    padding: 12px;
-    color: var(--text-muted); text-decoration: none;
-    border-radius: 8px; font-weight: 500;
-}
+.mobile-link { padding: 12px; color: var(--text-muted); text-decoration: none; border-radius: 8px; font-weight: 500; display: block; }
 .mobile-link:hover { background: var(--bg-hover); color: white; }
-.mobile-link.active { background: var(--primary-dim); color: var(--primary); }
-.mobile-section-title {
-    font-size: 0.75rem; text-transform: uppercase; color: #52525b; margin: 1rem 0 0.5rem 0.5rem;
-}
 
-/* Responsividade */
+/* --- RESPONSIVIDADE --- */
 @media (min-width: 993px) {
     .mobile-only { display: none !important; }
     .desktop-only { display: flex !important; }
@@ -210,46 +163,30 @@ body {
     .desktop-only { display: none !important; }
     .mobile-only { display: block !important; }
     
+    /* No mobile, remove a sidebar física e deixa só o drawer */
     .dashboard-sidebar-wrapper { display: none !important; }
-    .dashboard-main { margin-left: 0 !important; width: 100% !important; padding: 1.5rem 1rem; }
+    .app-layout-container { display: block; } /* Remove flex row */
+    .page-content-wrapper { padding: 1.5rem 1rem; }
     .header-content { padding: 0 1.2rem; }
 }
 
-/* Utilitários */
-.btn-primary { background: var(--primary); color: #000; font-weight: 600; padding: 0.6rem 1.2rem; border-radius: 8px; text-decoration: none; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; transition: opacity 0.2s; }
-.btn-primary:hover { opacity: 0.9; }
-.btn-sm { padding: 0.4rem 0.9rem; font-size: 0.85rem; }
-.btn-outline { background: transparent; border: 1px solid var(--border); color: white; padding: 0.6rem 1.2rem; border-radius: 8px; text-decoration: none; display: inline-block; text-align: center; }
-
-.card-modern { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; }
-.text-neon { color: var(--primary); }
-.alert { padding: 1rem; border-radius: 8px; margin-bottom: 1rem; display: flex; align-items: center; gap: 10px; font-size: 0.9rem; }
-.alert-error { background: rgba(239, 68, 68, 0.1); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.2); }
-
-/* --- CORREÇÃO DE LAYOUT AUTOMÁTICA (DESKTOP) --- */
-@media (min-width: 993px) {
-    /* Seleciona qualquer elemento que venha IMEDIATAMENTE após a sidebar 
-       e aplica a margem necessária para não ficar escondido.
-    */
-    .dashboard-sidebar-wrapper + * {
-        margin-left: var(--sidebar-width) !important;
-        width: calc(100% - var(--sidebar-width)) !important;
-        padding: 2rem !important; /* Garante espaçamento interno */
-        display: block;
-    }
-    
-    /* Garante que o footer também respeite a sidebar se estiver fora do container */
-    .dashboard-sidebar-wrapper ~ footer {
-        margin-left: var(--sidebar-width);
-        width: calc(100% - var(--sidebar-width));
-    }
+/* Utilitários de Formulário */
+.form-section-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 2rem;
+    margin-bottom: 2rem;
 }
-
-/* Ajustes finos para Mobile */
-@media (max-width: 992px) {
-    .dashboard-sidebar-wrapper + * {
-        margin-left: 0 !important;
-        width: 100% !important;
-        padding: 1rem !important;
-    }
+.form-group { margin-bottom: 1.2rem; }
+.form-label { display: block; margin-bottom: 0.5rem; color: var(--text-muted); font-size: 0.9rem; }
+.form-input { 
+    width: 100%; background: #09090b; border: 1px solid var(--border); 
+    color: white; padding: 0.8rem; border-radius: 8px; outline: none;
 }
+.form-input:focus { border-color: var(--primary); }
+.checkbox-group { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.checkbox-option { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: var(--text-muted); cursor: pointer; }
+.radio-group { display: flex; gap: 15px; flex-wrap: wrap; }
+
+.btn-primary { background: var(--primary); color: #000; padding: 0.8rem 1.5rem; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; width: 100%; }

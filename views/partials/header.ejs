@@ -13,132 +13,112 @@
     <link rel="stylesheet" href="/css/dashboard.css">
 </head>
 <body>
-    <div class="app-container">
-        <header class="main-header">
-            <div class="header-content">
-                <a href="/" class="brand-link">
-                    <img src="/images/momentum-fit-logo-completo.png" alt="Momentum Fit" style="height: 32px;" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
-                    <span style="display:none; font-weight:700; font-size:1.25rem; color:white;">Momentum Fit</span>
-                </a>
+    
+    <header class="main-header">
+        <div class="header-content">
+            <a href="/" class="brand-link">
+                <img src="/images/momentum-fit-logo-completo.png" alt="Momentum Fit" style="height: 32px;" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+                <span style="display:none; font-weight:700; font-size:1.25rem; color:white;">Momentum Fit</span>
+            </a>
 
-                <nav class="nav-desktop desktop-only">
-                    <a href="/" class="nav-link">Início</a>
-                    <a href="/about" class="nav-link">Sobre</a>
-                    <a href="/articles" class="nav-link">Artigos</a>
+            <nav class="nav-desktop desktop-only">
+                <a href="/" class="nav-link">Início</a>
+                <a href="/about" class="nav-link">Sobre</a>
+                <a href="/articles" class="nav-link">Artigos</a>
+                
+                <div class="nav-separator" style="width:1px; height:20px; background:var(--border); margin:0 1rem; opacity: 0.3;"></div>
+
+                <% if (typeof user !== 'undefined' && user) { %>
+                    <% 
+                        let dashLink = '/client/dashboard';
+                        if (user.role === 'superadmin') dashLink = '/superadmin/dashboard';
+                        else if (user.role === 'trainer') dashLink = '/admin/dashboard';
+                    %>
+                    <a href="<%= dashLink %>" class="btn btn-primary btn-sm">Painel</a>
                     
-                    <div class="nav-separator" style="width:1px; height:20px; background:var(--border-color); margin:0 1rem; opacity: 0.3;"></div>
+                    <a href="/auth/logout" onclick="event.preventDefault(); document.getElementById('logout-form-header').submit();" class="nav-link logout-link" title="Sair">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </a>
+                    <form id="logout-form-header" action="/auth/logout" method="POST" style="display: none;">
+                        <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+                    </form>
+                <% } else { %>
+                    <a href="/auth/login" class="nav-link">Entrar</a>
+                    <a href="/auth/register" class="btn btn-primary btn-sm">Começar</a>
+                <% } %>
+            </nav>
 
-                    <% if (typeof user !== 'undefined' && user) { %>
-                        <% 
-                            let dashLink = '/client/dashboard';
-                            if (user.role === 'superadmin') dashLink = '/superadmin/dashboard';
-                            else if (user.role === 'trainer') dashLink = '/admin/dashboard';
-                        %>
-                        <% const isDashboard = typeof currentPage !== 'undefined'; %>
-                        <% if (!isDashboard) { %>
-                            <a href="<%= dashLink %>" class="btn btn-primary btn-sm">Painel</a>
-                        <% } %>
-                        
-                        <a href="/auth/logout" onclick="event.preventDefault(); document.getElementById('logout-form-header').submit();" class="nav-link logout-link" title="Sair">
-                            <i class="fas fa-sign-out-alt"></i>
-                        </a>
-                        <form id="logout-form-header" action="/auth/logout" method="POST" style="display: none;">
-                            <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
-                        </form>
-                    <% } else { %>
-                        <a href="/auth/login" class="nav-link">Entrar</a>
-                        <a href="/auth/register" class="btn btn-primary btn-sm">Começar Agora</a>
-                    <% } %>
-                </nav>
+            <button id="mobileMenuBtn" class="mobile-menu-trigger mobile-only">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
 
-                <button id="mobileMenuBtn" class="mobile-menu-trigger mobile-only">
-                    <i class="fas fa-bars"></i>
-                </button>
-            </div>
-
-            <div id="mobileDrawer" class="mobile-drawer mobile-only">
-                <div class="mobile-drawer-content">
-                    
-                    <% if (typeof user !== 'undefined' && user) { %>
-                        <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px; padding-bottom:15px; border-bottom:1px solid var(--border-color);">
-                            <div style="width:40px; height:40px; background:var(--primary-color); color:black; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:1.1rem;">
-                                <%= user.name.charAt(0).toUpperCase() %>
-                            </div>
-                            <div>
-                                <div style="font-weight:600; color:white;"><%= user.name.split(' ')[0] %></div>
-                                <div style="font-size:0.8rem; color:#a1a1aa;">
-                                    <%= user.role === 'client' ? 'Aluno(a)' : 'Treinador' %>
-                                </div>
+        <div id="mobileDrawer" class="mobile-drawer mobile-only">
+            <div class="mobile-drawer-content">
+                
+                <% if (typeof user !== 'undefined' && user) { %>
+                    <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px; padding-bottom:15px; border-bottom:1px solid var(--border);">
+                        <div style="width:40px; height:40px; background:var(--primary); color:black; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold;">
+                            <%= user.name.charAt(0).toUpperCase() %>
+                        </div>
+                        <div>
+                            <div style="font-weight:600; color:white;"><%= user.name.split(' ')[0] %></div>
+                            <div style="font-size:0.8rem; color:var(--text-muted);">
+                                <%= user.role === 'client' ? 'Aluno(a)' : 'Treinador' %>
                             </div>
                         </div>
+                    </div>
 
-                        <div style="display:flex; flex-direction:column; gap:5px; margin-bottom:15px;">
-                            <a href="/" class="mobile-link"><i class="fas fa-home" style="width:20px; opacity:0.7"></i> Início</a>
-                            <a href="/about" class="mobile-link"><i class="fas fa-info-circle" style="width:20px; opacity:0.7"></i> Sobre</a>
-                            <a href="/articles" class="mobile-link"><i class="fas fa-newspaper" style="width:20px; opacity:0.7"></i> Artigos</a>
-                        </div>
+                    <a href="/" class="mobile-link">Início</a>
+                    <a href="/about" class="mobile-link">Sobre</a>
+                    <a href="/articles" class="mobile-link">Artigos</a>
 
-                        <div style="height:1px; background:var(--border-color); margin:10px 0; opacity:0.3;"></div>
-                        
-                        <div class="mobile-section-title" style="color:#a1a1aa; font-size:0.75rem; text-transform:uppercase; margin-bottom:10px;">Painel</div>
+                    <div style="margin:10px 0; border-top:1px solid var(--border); opacity:0.3;"></div>
+                    <div class="mobile-section-title" style="padding-left:10px;">Painel</div>
 
-                        <% const current = typeof currentPage !== 'undefined' ? currentPage : ''; %>
+                    <% const current = typeof currentPage !== 'undefined' ? currentPage : ''; %>
 
-                        <% if (user.role === 'client') { %>
-                            <a href="/client/dashboard" class="mobile-link <%= current === 'dashboard' ? 'active' : '' %>">
-                                <i class="fas fa-chart-pie" style="width:20px;"></i> Visão Geral
-                            </a>
-                            <a href="/client/workouts" class="mobile-link <%= current === 'workouts' ? 'active' : '' %>">
-                                <i class="fas fa-dumbbell" style="width:20px;"></i> Meus Treinos
-                            </a>
-                            <a href="/chat" class="mobile-link <%= current === 'chat' ? 'active' : '' %>">
-                                <i class="fas fa-comments" style="width:20px;"></i> Chat com Coach
-                            </a>
-                            <a href="/client/profile" class="mobile-link <%= current === 'profile' ? 'active' : '' %>">
-                                <i class="fas fa-user-circle" style="width:20px;"></i> Meu Perfil
-                            </a>
-                        <% } else if (user.role === 'trainer') { %>
-                            <a href="/admin/dashboard" class="mobile-link <%= current === 'dashboard' ? 'active' : '' %>">
-                                <i class="fas fa-home" style="width:20px;"></i> Dashboard
-                            </a>
-                            <a href="/admin/clients" class="mobile-link <%= current === 'clients' ? 'active' : '' %>">
-                                <i class="fas fa-users" style="width:20px;"></i> Meus Alunos
-                            </a>
-                            <a href="/chat" class="mobile-link <%= current === 'chat' ? 'active' : '' %>">
-                                <i class="fas fa-comments" style="width:20px;"></i> Mensagens
-                            </a>
-                        <% } %>
-
-                        <div style="border-top:1px solid rgba(255,255,255,0.1); margin-top:20px; padding-top:15px;">
-                            <a href="/auth/logout" onclick="event.preventDefault(); document.getElementById('logout-form-header').submit();" class="mobile-link" style="color:#ef4444 !important; background: rgba(239,68,68,0.1);">
-                                <i class="fas fa-sign-out-alt" style="width:20px;"></i> Sair da Conta
-                            </a>
-                        </div>
-
-                    <% } else { %>
-                        <a href="/" class="mobile-link">Início</a>
-                        <a href="/about" class="mobile-link">Sobre</a>
-                        <a href="/articles" class="mobile-link">Artigos</a>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 1.5rem;">
-                            <a href="/auth/login" class="btn btn-outline btn-full">Entrar</a>
-                            <a href="/auth/register" class="btn btn-primary btn-full" style="justify-content:center;">Cadastrar</a>
-                        </div>
+                    <% if (user.role === 'client') { %>
+                        <a href="/client/dashboard" class="mobile-link <%= current === 'dashboard' ? 'active' : '' %>"><i class="fas fa-chart-pie"></i> Visão Geral</a>
+                        <a href="/client/workouts" class="mobile-link <%= current === 'workouts' ? 'active' : '' %>"><i class="fas fa-dumbbell"></i> Meus Treinos</a>
+                        <a href="/chat" class="mobile-link <%= current === 'chat' ? 'active' : '' %>"><i class="fas fa-comments"></i> Chat</a>
+                        <a href="/client/profile" class="mobile-link <%= current === 'profile' ? 'active' : '' %>"><i class="fas fa-user-circle"></i> Perfil</a>
+                    <% } else if (user.role === 'trainer') { %>
+                        <a href="/admin/dashboard" class="mobile-link"><i class="fas fa-home"></i> Dashboard</a>
+                        <a href="/admin/clients" class="mobile-link"><i class="fas fa-users"></i> Alunos</a>
+                        <a href="/chat" class="mobile-link"><i class="fas fa-comments"></i> Mensagens</a>
                     <% } %>
-                </div>
-            </div>
-        </header>
 
+                    <div style="margin-top:20px; border-top:1px solid var(--border); padding-top:10px;">
+                        <a href="/auth/logout" onclick="event.preventDefault(); document.getElementById('logout-form-header').submit();" class="mobile-link" style="color:#ef4444;">Sair</a>
+                    </div>
+
+                <% } else { %>
+                    <a href="/" class="mobile-link">Início</a>
+                    <a href="/about" class="mobile-link">Sobre</a>
+                    <a href="/articles" class="mobile-link">Artigos</a>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 1.5rem;">
+                        <a href="/auth/login" class="btn btn-outline btn-full" style="text-align:center;">Entrar</a>
+                        <a href="/auth/register" class="btn btn-primary btn-full" style="justify-content:center;">Cadastrar</a>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </header>
+
+    <div class="app-layout-container">
+        
         <div style="position: fixed; top: 90px; right: 20px; z-index: 1100; max-width: 400px; width: 90%;">
             <% if (typeof messages !== 'undefined' && messages.error) { %>
-                <div class="alert alert-error">
+                <div class="alert alert-error" style="background: rgba(239,68,68,0.1); color:#fca5a5; padding:1rem; border-radius:8px; margin-bottom:10px; border:1px solid rgba(239,68,68,0.2);">
                     <i class="fas fa-exclamation-circle"></i> <span><%= messages.error %></span>
-                    <button onclick="this.parentElement.remove()" style="margin-left:auto; background:none; border:none; color:inherit; cursor:pointer;">&times;</button>
+                    <button onclick="this.parentElement.remove()" style="float:right; background:none; border:none; color:inherit;">&times;</button>
                 </div>
             <% } %>
             <% if (typeof messages !== 'undefined' && messages.success) { %>
-                <div class="alert" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);">
+                <div class="alert" style="background: rgba(16, 185, 129, 0.15); color: #34d399; padding:1rem; border-radius:8px; margin-bottom:10px; border: 1px solid rgba(16, 185, 129, 0.3);">
                     <i class="fas fa-check-circle"></i> <span><%= messages.success %></span>
-                    <button onclick="this.parentElement.remove()" style="margin-left:auto; background:none; border:none; color:inherit; cursor:pointer;">&times;</button>
+                    <button onclick="this.parentElement.remove()" style="float:right; background:none; border:none; color:inherit;">&times;</button>
                 </div>
             <% } %>
         </div>
