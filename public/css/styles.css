@@ -414,3 +414,8 @@ footer {
     color: var(--text-muted);
     font-size: 0.9rem;
 }
+
+/* Remove padding top na home para o header sobrepor o hero */
+.no-padding-top {
+}
+

@@ -1,11 +1,11 @@
 <%- include('../partials/header.ejs') %>
 
-<main>
     <section id="home" class="hero">
         <div class="container">
             <div class="hero-content">
                 <h1 class="hero-title">Impulsione o Seu Progresso.<br>A Sua Jornada Começa Agora.</h1>
-                <p class="hero-subtitle">Conecte-se com personal trainers qualificados para planos de treino personalizados e acompanhamento contínuo. Alcance os seus objetivos com o Momentum Fit.</p>
+                <p class="hero-subtitle">Conecte-se com personal trainers qualificados para planos de treino personalizados e acompanhamento contínuo.
+Alcance os seus objetivos com o Momentum Fit.</p>
                 <div class="hero-buttons">
                     <% if (!isAuthenticated) { %>
                         <a href="/auth/register" class="btn btn-primary">Comece Sua Transformação</a>
@@ -70,6 +70,5 @@
             </div>
         </div>
     </section>
-</main>
 
 <%- include('../partials/footer.ejs') %>

@@ -113,7 +113,8 @@
             <%- include('./sidebar') %>
         <% } %>
 
-        <main class="main-content-column">
+        <% const isIndex = (typeof currentPage !== "undefined" <main class="main-content-column"><main class="main-content-column"> currentPage === "index"); %>
+        <main class="main-content-column <%= isIndex ? "no-padding-top" : "" %>">
             
             <% if (typeof messages !== 'undefined' && (messages.error || messages.success)) { %>
             <div style="position: fixed; top: 90px; right: 20px; z-index: 1100; max-width: 400px; width: 90%;">
