@@ -751,3 +751,27 @@ button { font-family: inherit; }
     box-shadow: 0 10px 30px rgba(190, 242, 2, 0.15);
     transition: 0.3s ease;
 }
+
+/* Correção Crítica: Menu Mobile e Header sempre no topo */
+.main-header {
+    z-index: 9999 !important; /* Força ficar acima de qualquer overlay */
+    background-color: rgba(5, 5, 5, 0.95); /* Garante contraste se tiver imagem atrás */
+}
+
+/* Garante que o botão hambúrguer esteja clicável e visível */
+.hamburger-btn {
+    z-index: 10000 !important;
+    position: relative;
+    color: white !important;
+    display: none; /* Default desktop */
+}
+
+@media (max-width: 768px) {
+    .hamburger-btn {
+        display: block !important;
+    }
+    /* Em telas mobile, o header precisa de background sólido para o menu não se misturar */
+    .main-header {
+        background-color: #050505 !important; 
+    }
+}
