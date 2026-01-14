@@ -2,82 +2,46 @@ const express = require('express');
 const router = express.Router();
 const db = require('../database/db');
 
-// Middleware
-const requireAdmin = (req, res, next) => {
-    if (!req.session.user) return res.redirect('/auth/login');
-    if (['trainer', 'admin', 'superadmin'].includes(req.session.user.role)) {
+// Middleware Admin
+function isAdmin(req, res, next) {
+    if (req.session.user && (req.session.user.role === 'admin' || req.session.user.role === 'superadmin')) {
         return next();
     }
-    return res.status(403).render('pages/error', { message: 'Acesso negado.', user: req.session.user });
-};
+    res.redirect('/auth/login');
+}
 
-router.get('/dashboard', requireAdmin, async (req, res) => {
-    try {
-        const stats = await db.getTrainerStats(req.session.user.id);
-        const recentClients = await db.getRecentClientsByTrainer(req.session.user.id);
-        res.render('pages/admin-dashboard', {
-            title: 'Painel', user: req.session.user, stats: stats || {}, recentClients: recentClients || [], currentPage: 'dashboard'
-        });
-    } catch (err) {
-        res.render('pages/error', { message: 'Erro dashboard', user: req.session.user });
-    }
-});
+router.use(isAdmin);
 
-router.get('/clients', requireAdmin, async (req, res) => {
+router.get('/dashboard', async (req, res) => {
     try {
-        const clients = await db.getClientsByTrainer(req.session.user.id);
-        res.render('pages/admin-clients', {
-            title: 'Meus Alunos', user: req.session.user, clients, currentPage: 'clients'
-        });
-    } catch (err) {
-        res.render('pages/error', { message: 'Erro lista', user: req.session.user });
-    }
-});
-
-// Detalhes do Aluno
-router.get('/clients/:id', requireAdmin, async (req, res) => {
-    try {
-        const clientId = req.params.id;
+        // Estatísticas gerais do sistema
+        const usersCount = await db.query("SELECT COUNT(*) FROM users");
+        const trainersCount = await db.query("SELECT COUNT(*) FROM users WHERE role = 'trainer'");
         
-        // Busca perfil completo
-        const clientQuery = `
-            SELECT u.name, u.email, u.profile_image, u.created_at as joined_at,
-                   c.*, c.id as client_real_id
-            FROM users u
-            LEFT JOIN clients c ON u.id = c.user_id
-            WHERE u.id = $1
-        `;
-        const clientRes = await db.query(clientQuery, [clientId]);
-        const clientData = clientRes.rows[0];
-
-        if (!clientData) return res.redirect('/admin/clients');
-
-        // Busca treinos
-        let workouts = [];
-        if (clientData.client_real_id) {
-            const wRes = await db.query("SELECT * FROM workouts WHERE client_id = $1 ORDER BY created_at DESC", [clientData.client_real_id]);
-            workouts = wRes.rows;
-        }
-
-        // Renderiza usando o template padronizado
-        res.render('pages/client-details', { 
-            title: 'Detalhes do Aluno', 
+        res.render('pages/admin-dashboard', { 
+            title: 'Admin Dashboard', 
             user: req.session.user, 
-            student: clientData,
-            workouts: workouts,
-            currentPage: 'clients'
+            stats: { 
+                users: usersCount.rows[0].count,
+                trainers: trainersCount.rows[0].count 
+            },
+            currentPage: '/admin/dashboard',
+            csrfToken: req.csrfToken()
         });
-
-    } catch (err) {
-        console.error(err);
-        res.redirect('/admin/clients');
-    }
+    } catch (e) { console.error(e); res.render('pages/error'); }
 });
 
-router.get('/trainers', requireAdmin, async (req, res) => {
-    if(req.session.user.role !== 'superadmin') return res.redirect('/admin/dashboard');
-    const trainers = await db.getAllTrainers();
-    res.render('pages/admin-trainers', { title: 'Treinadores', user: req.session.user, trainers, currentPage: 'trainers' });
+router.get('/clients', async (req, res) => {
+    try {
+        const users = await db.query("SELECT * FROM users ORDER BY id DESC");
+        res.render('pages/admin-clients', { 
+            title: 'Gerenciar Usuários', 
+            user: req.session.user, 
+            users: users.rows,
+            currentPage: '/admin/clients',
+            csrfToken: req.csrfToken()
+        });
+    } catch (e) { console.error(e); res.redirect('/admin/dashboard'); }
 });
 
 module.exports = router;

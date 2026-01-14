@@ -528,3 +528,47 @@ button { font-family: inherit; }
     .auth-card { padding: 2rem 1.5rem; }
     .auth-card h2 { font-size: 1.5rem; }
 }
+
+/* Ajustes de Navegação Logada */
+.user-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    color: var(--text-main);
+    background: rgba(255,255,255,0.05);
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border-light);
+}
+
+.main-content {
+    min-height: calc(100vh - var(--header-height) - 100px); /* Garante footer embaixo */
+    padding-bottom: 40px;
+}
+
+/* Page Headers Padrão */
+.page-header {
+    background: var(--bg-card);
+    padding: 30px 20px;
+    margin-bottom: 30px;
+    border-bottom: 1px solid var(--border-light);
+    text-align: center;
+}
+.page-header h1 { font-size: 1.8rem; margin-bottom: 5px; color: var(--primary-color); }
+.page-header p { color: var(--text-muted); font-size: 0.95rem; }
+
+/* Cards Genéricos */
+.content-grid {
+    display: grid;
+    gap: 20px;
+    padding: 0 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+.card-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    padding: 20px;
+}

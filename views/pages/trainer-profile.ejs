@@ -1,0 +1,33 @@
+<%- include('../partials/header.ejs') %>
+
+<div class="page-header">
+    <h1>Perfil Profissional</h1>
+    <p>Seus dados de acesso e apresentação.</p>
+</div>
+
+<div class="container" style="max-width: 600px;">
+    <div class="card-box">
+        <form action="/trainer/profile/update" method="POST">
+            <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+            
+            <div class="form-group">
+                <label style="color: #ccc;">Nome</label>
+                <input type="text" name="name" value="<%= user.name %>" class="form-input">
+            </div>
+            
+            <div class="form-group">
+                <label style="color: #ccc;">Email</label>
+                <input type="email" name="email" value="<%= user.email %>" class="form-input">
+            </div>
+
+            <div class="form-group">
+                <label style="color: #ccc;">Especialidades (Apenas visual)</label>
+                <input type="text" disabled placeholder="Musculação, CrossFit..." class="form-input" style="opacity: 0.5;">
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-full">Atualizar Dados</button>
+        </form>
+    </div>
+</div>
+
+<%- include('../partials/footer.ejs') %>

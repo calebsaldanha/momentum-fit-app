@@ -1,71 +1,39 @@
 <%- include('../partials/header.ejs') %>
 
-<div class="page-content-wrapper">
-    
-    <div class="dashboard-header">
-        <div>
-            <h1>Meus Alunos</h1>
-            <p>Gerencie o progresso e prescreva treinos para seus atletas.</p>
-        </div>
-        </div>
+<div class="page-header">
+    <h1>Gerenciar Usuários</h1>
+</div>
 
-    <div class="card-modern">
-        <% if (clients && clients.length > 0) { %>
-            <div class="table-responsive">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Aluno</th>
-                            <th>Status</th>
-                            <th>Última Atividade</th>
-                            <th style="text-align: right;">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% clients.forEach(c => { %>
-                            <tr>
-                                <td>
-                                    <div class="user-cell">
-                                        <% if (c.profile_image) { %>
-                                            <img src="<%= c.profile_image %>" class="avatar-small" alt="<%= c.name %>">
-                                        <% } else { %>
-                                            <div class="avatar-small"><%= c.name.charAt(0).toUpperCase() %></div>
-                                        <% } %>
-                                        <div>
-                                            <div style="font-weight: 600;"><%= c.name %></div>
-                                            <div style="font-size: 0.8rem; color: var(--text-muted);"><%= c.email %></div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td><span class="badge badge-active">Ativo</span></td>
-                                <td class="text-muted" style="font-size: 0.9rem;">
-                                    <%= c.last_active ? new Date(c.last_active).toLocaleDateString('pt-BR') : '--' %>
-                                </td>
-                                <td style="text-align: right;">
-                                    <div style="display: flex; justify-content: flex-end; gap: 8px;">
-                                        <a href="/workouts/create?client_id=<%= c.id %>" class="btn btn-primary btn-sm" title="Criar Treino">
-                                            <i class="fas fa-dumbbell"></i> <span class="desktop-only">Treino</span>
-                                        </a>
-                                        <a href="/chat?user_id=<%= c.user_id %>" class="btn btn-outline btn-sm" title="Mensagem">
-                                            <i class="fas fa-comment"></i>
-                                        </a>
-                                        <a href="/admin/clients/<%= c.id %>" class="btn btn-outline btn-sm" title="Perfil">
-                                            <i class="fas fa-user"></i>
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                        <% }) %>
-                    </tbody>
-                </table>
-            </div>
-        <% } else { %>
-            <div style="text-align: center; padding: 4rem 1rem;">
-                <div style="font-size: 3rem; color: var(--border); margin-bottom: 1rem;"><i class="fas fa-users-slash"></i></div>
-                <h3 style="color: white; margin-bottom: 0.5rem;">Nenhum aluno encontrado</h3>
-                <p class="text-muted">Você ainda não tem alunos vinculados à sua conta.</p>
-            </div>
-        <% } %>
+<div class="container" style="max-width: 1200px; padding: 0 20px;">
+    <div class="card-box" style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; color: white; min-width: 600px;">
+            <thead>
+                <tr style="border-bottom: 1px solid #333; text-align: left;">
+                    <th style="padding: 15px;">ID</th>
+                    <th style="padding: 15px;">Nome</th>
+                    <th style="padding: 15px;">Email</th>
+                    <th style="padding: 15px;">Função</th>
+                    <th style="padding: 15px;">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% users.forEach(u => { %>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <td style="padding: 15px; color: #666;">#<%= u.id %></td>
+                        <td style="padding: 15px; font-weight: 600;"><%= u.name %></td>
+                        <td style="padding: 15px; color: #aaa;"><%= u.email %></td>
+                        <td style="padding: 15px;">
+                            <span style="background: <%= u.role === 'admin' ? '#ef4444' : (u.role === 'trainer' ? '#bef202' : '#3b82f6') %>; color: black; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 700;">
+                                <%= u.role.toUpperCase() %>
+                            </span>
+                        </td>
+                        <td style="padding: 15px;">
+                            <button class="btn btn-sm btn-ghost" title="Editar"><i class="fas fa-edit"></i></button>
+                        </td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
     </div>
 </div>
 

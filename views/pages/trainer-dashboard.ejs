@@ -1,102 +1,50 @@
 <%- include('../partials/header.ejs') %>
 
-<div class="page-content-wrapper">
-    <div class="dashboard-header">
-        <div>
-            <h2 class="text-neon">Painel do Treinador</h2>
-            <p class="text-muted">Bem-vindo, Coach <%= user.name.split(' ')[0] %>! Vamos transformar vidas hoje.</p>
-        </div>
-        <a href="/workouts/create" class="btn btn-primary"><i class="fas fa-plus"></i> Novo Treino</a>
-    </div>
+<div class="page-header">
+    <h1>Painel do Treinador</h1>
+    <p>Gerencie seus alunos e acompanhe resultados.</p>
+</div>
 
-    <div class="stats-grid">
-        <div class="stat-card card-modern">
-            <div class="stat-icon" style="color: var(--primary);"><i class="fas fa-users"></i></div>
-            <h3><%= stats.totalClients || 0 %></h3>
-            <p>Alunos Ativos</p>
-        </div>
-        <div class="stat-card card-modern">
-            <div class="stat-icon" style="color: #3b82f6;"><i class="fas fa-dumbbell"></i></div>
-            <h3><%= stats.totalWorkouts || 0 %></h3>
-            <p>Treinos Prescritos</p>
-        </div>
-        <div class="stat-card card-modern">
-            <div class="stat-icon" style="color: #10b981;"><i class="fas fa-check-circle"></i></div>
-            <h3><%= stats.weeklyCheckins || 0 %></h3>
-            <p>Check-ins (Semana)</p>
-        </div>
-    </div>
-
-    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
-        
-        <div class="card-modern">
-            <div class="list-header">
-                <h3>Alunos Recentes</h3>
-                <a href="/trainer/clients" class="text-neon" style="text-decoration: none; font-size: 0.9rem;">Ver Todos &rarr;</a>
+<div class="content-grid">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+        <div class="card-box" style="display: flex; align-items: center; gap: 20px;">
+            <div style="width: 50px; height: 50px; background: rgba(190, 242, 2, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-users text-neon" style="font-size: 1.5rem;"></i>
             </div>
-            
-            <% if (recentClients && recentClients.length > 0) { %>
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Nome</th>
-                            <th>Entrou em</th>
-                            <th>Ação</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% recentClients.forEach(client => { %>
-                        <tr>
-                            <td>
-                                <div class="user-cell">
-                                    <div class="avatar-small"><%= client.name.charAt(0) %></div>
-                                    <span><%= client.name %></span>
-                                </div>
-                            </td>
-                            <td class="text-muted"><%= new Date(client.created_at).toLocaleDateString('pt-BR') %></td>
-                            <td>
-                                <a href="/trainer/clients/<%= client.id %>" class="btn btn-outline btn-sm" style="padding: 4px 10px;">Perfil</a>
-                            </td>
-                        </tr>
-                        <% }) %>
-                    </tbody>
-                </table>
-            <% } else { %>
-                <p class="text-muted" style="text-align: center; padding: 2rem;">Nenhum aluno cadastrado ainda.</p>
-            <% } %>
+            <div>
+                <h3 style="margin: 0; font-size: 2rem; line-height: 1;"><%= stats.activeClients || 0 %></h3>
+                <span style="color: #888; font-size: 0.9rem;">Alunos Ativos</span>
+            </div>
         </div>
-
-        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-            <a href="/workouts/create" class="card-modern action-card">
-                <div class="action-icon-box" style="background: rgba(212, 255, 0, 0.1); color: var(--primary);">
-                    <i class="fas fa-pencil-alt"></i>
-                </div>
-                <div>
-                    <h4 style="margin: 0 0 5px 0;">Prescrever Treino</h4>
-                    <span class="text-muted" style="font-size: 0.85rem;">Criar nova rotina</span>
-                </div>
-            </a>
-            
-            <a href="/trainer/clients" class="card-modern action-card">
-                <div class="action-icon-box" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6;">
-                    <i class="fas fa-search"></i>
-                </div>
-                <div>
-                    <h4 style="margin: 0 0 5px 0;">Consultar Aluno</h4>
-                    <span class="text-muted" style="font-size: 0.85rem;">Ver histórico e fichas</span>
-                </div>
-            </a>
-
-            <a href="/chat" class="card-modern action-card">
-                <div class="action-icon-box" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">
-                    <i class="fas fa-comments"></i>
-                </div>
-                <div>
-                    <h4 style="margin: 0 0 5px 0;">Mensagens</h4>
-                    <span class="text-muted" style="font-size: 0.85rem;">Falar com alunos</span>
-                </div>
-            </a>
+        
+        <div class="card-box" style="display: flex; align-items: center; gap: 20px;">
+            <div style="width: 50px; height: 50px; background: rgba(190, 242, 2, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-clipboard-check text-neon" style="font-size: 1.5rem;"></i>
+            </div>
+            <div>
+                <h3 style="margin: 0; font-size: 2rem; line-height: 1;">--</h3>
+                <span style="color: #888; font-size: 0.9rem;">Check-ins (Hoje)</span>
+            </div>
         </div>
+    </div>
+
+    <div class="card-box">
+        <h3 style="border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 20px;">Atividade Recente</h3>
+        <% if (recentCheckins && recentCheckins.length > 0) { %>
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                <% recentCheckins.forEach(check => { %>
+                    <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px;">
+                        <div>
+                            <strong style="color: white;"><%= check.client_name %></strong>
+                            <p style="margin: 0; color: #888; font-size: 0.85rem;">Check-in realizado</p>
+                        </div>
+                        <span style="font-size: 0.8rem; color: #666;"><%= new Date(check.created_at).toLocaleDateString() %></span>
+                    </div>
+                <% }) %>
+            </div>
+        <% } else { %>
+            <p style="color: #666; text-align: center; padding: 20px;">Nenhuma atividade recente.</p>
+        <% } %>
     </div>
 </div>
 
