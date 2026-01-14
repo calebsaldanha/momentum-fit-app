@@ -55,7 +55,6 @@
 
         <div id="mobileDrawer" class="mobile-drawer mobile-only">
             <div class="mobile-drawer-content">
-                
                 <% if (typeof user !== 'undefined' && user) { %>
                     <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px; padding-bottom:15px; border-bottom:1px solid var(--border);">
                         <div style="width:40px; height:40px; background:var(--primary); color:black; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold;">
@@ -68,16 +67,12 @@
                             </div>
                         </div>
                     </div>
-
                     <a href="/" class="mobile-link">Início</a>
                     <a href="/about" class="mobile-link">Sobre</a>
                     <a href="/articles" class="mobile-link">Artigos</a>
-
                     <div style="margin:10px 0; border-top:1px solid var(--border); opacity:0.3;"></div>
-                    <div class="mobile-section-title" style="padding-left:10px;">Painel</div>
-
+                    <div class="mobile-section-title" style="padding-left:10px; color:var(--text-muted); font-size:0.8rem; text-transform:uppercase;">Painel</div>
                     <% const current = typeof currentPage !== 'undefined' ? currentPage : ''; %>
-
                     <% if (user.role === 'client') { %>
                         <a href="/client/dashboard" class="mobile-link <%= current === 'dashboard' ? 'active' : '' %>"><i class="fas fa-chart-pie"></i> Visão Geral</a>
                         <a href="/client/workouts" class="mobile-link <%= current === 'workouts' ? 'active' : '' %>"><i class="fas fa-dumbbell"></i> Meus Treinos</a>
@@ -88,11 +83,9 @@
                         <a href="/admin/clients" class="mobile-link"><i class="fas fa-users"></i> Alunos</a>
                         <a href="/chat" class="mobile-link"><i class="fas fa-comments"></i> Mensagens</a>
                     <% } %>
-
                     <div style="margin-top:20px; border-top:1px solid var(--border); padding-top:10px;">
                         <a href="/auth/logout" onclick="event.preventDefault(); document.getElementById('logout-form-header').submit();" class="mobile-link" style="color:#ef4444;">Sair</a>
                     </div>
-
                 <% } else { %>
                     <a href="/" class="mobile-link">Início</a>
                     <a href="/about" class="mobile-link">Sobre</a>
@@ -108,17 +101,26 @@
 
     <div class="app-layout-container">
         
-        <div style="position: fixed; top: 90px; right: 20px; z-index: 1100; max-width: 400px; width: 90%;">
-            <% if (typeof messages !== 'undefined' && messages.error) { %>
-                <div class="alert alert-error" style="background: rgba(239,68,68,0.1); color:#fca5a5; padding:1rem; border-radius:8px; margin-bottom:10px; border:1px solid rgba(239,68,68,0.2);">
-                    <i class="fas fa-exclamation-circle"></i> <span><%= messages.error %></span>
-                    <button onclick="this.parentElement.remove()" style="float:right; background:none; border:none; color:inherit;">&times;</button>
-                </div>
-            <% } %>
-            <% if (typeof messages !== 'undefined' && messages.success) { %>
-                <div class="alert" style="background: rgba(16, 185, 129, 0.15); color: #34d399; padding:1rem; border-radius:8px; margin-bottom:10px; border: 1px solid rgba(16, 185, 129, 0.3);">
-                    <i class="fas fa-check-circle"></i> <span><%= messages.success %></span>
-                    <button onclick="this.parentElement.remove()" style="float:right; background:none; border:none; color:inherit;">&times;</button>
-                </div>
-            <% } %>
-        </div>
+        <% 
+        const isAuthPage = ['login', 'register', 'initial-form'].includes(typeof currentPage !== 'undefined' ? currentPage : '');
+        if (typeof user !== 'undefined' && user && !isAuthPage) { 
+        %>
+            <%- include('./sidebar') %>
+        <% } %>
+
+        <main class="main-content-column">
+
+            <div style="position: fixed; top: 90px; right: 20px; z-index: 1100; max-width: 400px; width: 90%;">
+                <% if (typeof messages !== 'undefined' && messages.error) { %>
+                    <div class="alert alert-error" style="background: rgba(239,68,68,0.1); color:#fca5a5; padding:1rem; border-radius:8px; margin-bottom:10px; border:1px solid rgba(239,68,68,0.2);">
+                        <i class="fas fa-exclamation-circle"></i> <span><%= messages.error %></span>
+                        <button onclick="this.parentElement.remove()" style="float:right; background:none; border:none; color:inherit;">&times;</button>
+                    </div>
+                <% } %>
+                <% if (typeof messages !== 'undefined' && messages.success) { %>
+                    <div class="alert" style="background: rgba(16, 185, 129, 0.15); color: #34d399; padding:1rem; border-radius:8px; margin-bottom:10px; border: 1px solid rgba(16, 185, 129, 0.3);">
+                        <i class="fas fa-check-circle"></i> <span><%= messages.success %></span>
+                        <button onclick="this.parentElement.remove()" style="float:right; background:none; border:none; color:inherit;">&times;</button>
+                    </div>
+                <% } %>
+            </div>

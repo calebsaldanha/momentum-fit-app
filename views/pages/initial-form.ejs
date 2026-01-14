@@ -1,9 +1,7 @@
 <%- include('../partials/header') %>
 
 <div class="page-content-wrapper" style="display: flex; justify-content: center;">
-    
     <div style="max-width: 800px; width: 100%;">
-        
         <div style="text-align: center; margin-bottom: 3rem;">
             <h1 style="color: var(--primary); margin-bottom: 0.5rem;">Ficha de Anamnese Completa</h1>
             <p style="color: var(--text-muted);">Preencha com atenção para que seu treinador possa montar o treino ideal.</p>
@@ -16,7 +14,6 @@
                 <h3 style="color: white; border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 1.5rem;">
                     <i class="fas fa-weight"></i> 1. Dados Pessoais e Corporais
                 </h3>
-                
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
                     <div class="form-group">
                         <label class="form-label">Data de Nascimento</label>
@@ -46,7 +43,6 @@
                 <h3 style="color: white; border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 1.5rem;">
                     <i class="fas fa-bullseye"></i> 2. Objetivos
                 </h3>
-
                 <div class="form-group">
                     <label class="form-label">Qual seu objetivo principal?</label>
                     <select name="primaryGoal" class="form-input" required>
@@ -58,12 +54,10 @@
                         <option value="rehabilitation">Reabilitação de Lesão</option>
                     </select>
                 </div>
-
                 <div class="form-group">
                     <label class="form-label">Tem algum prazo específico? (Ex: casamento, verão, competição)</label>
                     <input type="text" name="goalDeadline" class="form-input" placeholder="Opcional. Ex: Casamento em 3 meses">
                 </div>
-
                 <div class="form-group">
                     <label class="form-label">Existe alguma parte do corpo que deseja focar mais?</label>
                     <input type="text" name="focusArea" class="form-input" placeholder="Ex: Glúteos, Peitoral, Abdômen...">
@@ -74,7 +68,6 @@
                 <h3 style="color: white; border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 1.5rem;">
                     <i class="fas fa-heartbeat"></i> 3. Histórico de Saúde (Muito Importante)
                 </h3>
-
                 <div class="form-group">
                     <label class="form-label">Você possui alguma lesão ou dor crônica?</label>
                     <div class="checkbox-group">
@@ -87,17 +80,14 @@
                     </div>
                     <input type="text" name="injuryDetails" class="form-input" style="margin-top: 10px;" placeholder="Se marcou algo, descreva aqui (Ex: Hérnia de disco L4-L5)">
                 </div>
-
                 <div class="form-group">
                     <label class="form-label">Toma algum medicamento de uso contínuo?</label>
                     <textarea name="medications" class="form-input" rows="2" placeholder="Nome e dosagem, ou deixe em branco."></textarea>
                 </div>
-
                 <div class="form-group">
                     <label class="form-label">Já fez alguma cirurgia?</label>
                     <input type="text" name="surgeries" class="form-input" placeholder="Ex: LCA joelho em 2018, Apêndice...">
                 </div>
-
                 <div class="form-group">
                     <label class="form-label">Histórico Cardíaco/Médico:</label>
                     <div class="checkbox-group">
@@ -113,7 +103,6 @@
                 <h3 style="color: white; border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 1.5rem;">
                     <i class="fas fa-coffee"></i> 4. Rotina e Estilo de Vida
                 </h3>
-
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
                     <div class="form-group">
                         <label class="form-label">Profissão / Tipo de Trabalho</label>
@@ -129,7 +118,6 @@
                         <input type="number" name="sleepHours" class="form-input" min="1" max="15">
                     </div>
                 </div>
-
                 <div class="form-group">
                     <label class="form-label">Nível de Estresse Diário (1 a 10)</label>
                     <input type="range" name="stressLevel" min="1" max="10" value="5" style="width:100%;">
@@ -137,7 +125,6 @@
                         <span>Baixo</span><span>Alto</span>
                     </div>
                 </div>
-
                 <div class="form-group">
                     <label class="form-label">Consumo de Água Diário</label>
                     <select name="waterIntake" class="form-input">
@@ -153,7 +140,6 @@
                 <h3 style="color: white; border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 1.5rem;">
                     <i class="fas fa-dumbbell"></i> 5. Preferências de Treino
                 </h3>
-
                 <div class="form-group">
                     <label class="form-label">Nível de Experiência</label>
                     <select name="experienceLevel" class="form-input" required>
@@ -162,7 +148,6 @@
                         <option value="advanced">Avançado (Treino consistente há > 2 anos)</option>
                     </select>
                 </div>
-
                 <div class="form-group">
                     <label class="form-label">Quantas vezes por semana você VAI treinar?</label>
                     <select name="frequency" class="form-input" required>
@@ -173,7 +158,6 @@
                         <option value="6">6 vezes</option>
                     </select>
                 </div>
-
                 <div class="form-group">
                     <label class="form-label">Tempo disponível por sessão</label>
                     <select name="duration" class="form-input" required>
@@ -182,7 +166,6 @@
                         <option value="60">Mais de 1 hora</option>
                     </select>
                 </div>
-
                 <div class="form-group">
                     <label class="form-label">Local de Treino</label>
                     <select name="workoutLocation" class="form-input" required>
@@ -197,7 +180,6 @@
             <button type="submit" class="btn btn-primary" style="font-size: 1.1rem; padding: 1rem;">
                 Enviar Ficha Completa <i class="fas fa-check-circle"></i>
             </button>
-
         </form>
     </div>
 </div>
