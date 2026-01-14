@@ -22,13 +22,12 @@ body {
     font-family: 'Inter', sans-serif;
     margin: 0;
     padding-top: var(--header-height);
-    -webkit-font-smoothing: antialiased;
     display: flex;
     flex-direction: column;
     min-height: 100vh;
 }
 
-/* --- HEADER FIXO --- */
+/* --- HEADER --- */
 .main-header {
     height: var(--header-height);
     background: rgba(9, 9, 11, 0.95);
@@ -54,8 +53,7 @@ body {
 .nav-link { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: var(--transition); }
 .nav-link:hover { color: var(--text-main); }
 
-/* --- ESTRUTURA DO LAYOUT --- */
-/* Container Principal (Flex Row: Sidebar Esquerda | Coluna Direita) */
+/* --- LAYOUT STRUCTURE --- */
 .app-layout-container {
     display: flex;
     width: 100%;
@@ -63,15 +61,14 @@ body {
     position: relative;
 }
 
-/* Coluna da Direita (Conteúdo + Footer) */
 .main-content-column {
     flex: 1;
     display: flex;
     flex-direction: column;
-    min-width: 0; /* Evita estouro do flex */
+    min-width: 0;
 }
 
-/* Sidebar Sticky */
+/* --- SIDEBAR (DESKTOP ONLY) --- */
 .dashboard-sidebar-wrapper {
     width: var(--sidebar-width);
     background: var(--bg-sidebar);
@@ -87,54 +84,7 @@ body {
     flex-shrink: 0;
 }
 
-/* Conteúdo da Página */
-.page-content-wrapper {
-    padding: 2.5rem;
-    width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
-    flex: 1; /* Empurra o footer para baixo se o conteúdo for curto */
-}
-
-/* Footer dentro da coluna direita */
-.main-footer {
-    background: #050505;
-    border-top: 1px solid var(--border);
-    padding: 3rem 2rem;
-    margin-top: auto;
-    width: 100%;
-}
-
-/* --- MOBILE DRAWER (MENU CELULAR) --- */
-.mobile-menu-trigger { background: none; border: none; color: white; font-size: 1.4rem; cursor: pointer; }
-
-.mobile-drawer {
-    position: fixed; top: var(--header-height); left: 0; width: 100%;
-    background: var(--bg-app);
-    border-bottom: 1px solid var(--border);
-    max-height: 0;
-    opacity: 0;
-    visibility: hidden;
-    overflow-y: hidden;
-    transition: all 0.3s ease-in-out;
-    z-index: 999;
-}
-
-.mobile-drawer.active {
-    max-height: calc(100vh - var(--header-height));
-    opacity: 1;
-    visibility: visible;
-    overflow-y: auto; /* Permite rolagem */
-    -webkit-overflow-scrolling: touch; /* Rolagem suave no iOS */
-    padding-bottom: 2rem;
-}
-
-.mobile-drawer-content { padding: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; }
-.mobile-link { padding: 12px; color: var(--text-muted); text-decoration: none; border-radius: 8px; font-weight: 500; display: block; }
-.mobile-link:hover { background: var(--bg-hover); color: white; }
-.mobile-link.active { background: var(--primary-dim); color: var(--primary); }
-
-/* --- SIDEBAR STYLES --- */
+/* Styles Internos da Sidebar */
 .user-profile-card {
     display: flex; align-items: center; gap: 1rem; padding: 1rem;
     background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 2rem;
@@ -144,19 +94,55 @@ body {
 .sidebar-link:hover { background: var(--bg-hover); color: var(--text-main); }
 .sidebar-link.active { background: var(--primary-dim); color: var(--primary); font-weight: 600; }
 
-/* --- RESPONSIVIDADE --- */
+/* --- PAGE CONTENT --- */
+.page-content-wrapper {
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    flex: 1;
+}
+
+/* --- MOBILE DRAWER --- */
+.mobile-drawer {
+    position: fixed; top: var(--header-height); left: 0; width: 100%;
+    background: var(--bg-app);
+    border-bottom: 1px solid var(--border);
+    max-height: 0; opacity: 0; visibility: hidden; overflow: hidden;
+    transition: all 0.3s ease-in-out;
+    z-index: 999;
+}
+.mobile-drawer.active {
+    max-height: calc(100vh - var(--header-height));
+    opacity: 1; visibility: visible; overflow-y: auto;
+    padding-bottom: 2rem;
+}
+.mobile-drawer-content { padding: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; }
+.mobile-link { padding: 12px; color: var(--text-muted); text-decoration: none; border-radius: 8px; font-weight: 500; display: block; }
+.mobile-link:hover { background: var(--bg-hover); color: white; }
+.mobile-menu-trigger { background: none; border: none; color: white; font-size: 1.4rem; cursor: pointer; }
+
+/* --- UTILS --- */
+.card-modern { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; }
+.text-neon { color: var(--primary); }
+.btn-primary { background: var(--primary); color: #000; padding: 0.6rem 1.2rem; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600; cursor: pointer; border: none; }
+.btn-outline { background: transparent; border: 1px solid var(--border); color: white; padding: 0.6rem 1.2rem; border-radius: 8px; text-decoration: none; display: inline-block; cursor: pointer; }
+
+/* --- RESPONSIVE RULES --- */
+@media (min-width: 993px) {
+    .mobile-only { display: none !important; }
+    .desktop-only { display: flex !important; }
+}
+
 @media (max-width: 992px) {
     .desktop-only { display: none !important; }
     .mobile-only { display: block !important; }
+    
+    /* ESCONDE SIDEBAR NO MOBILE */
     .dashboard-sidebar-wrapper { display: none !important; }
-    .app-layout-container { display: block; } /* Remove flex row no mobile */
+    
+    /* Layout vira bloco único */
+    .app-layout-container { display: block; }
     .page-content-wrapper { padding: 1.5rem 1rem; }
+    .header-content { padding: 0 1.2rem; }
 }
-
-/* FORMULÁRIO */
-.form-section-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 2rem; margin-bottom: 2rem; }
-.form-group { margin-bottom: 1.2rem; }
-.form-label { display: block; margin-bottom: 0.5rem; color: var(--text-muted); font-size: 0.9rem; }
-.form-input { width: 100%; background: #09090b; border: 1px solid var(--border); color: white; padding: 0.8rem; border-radius: 8px; outline: none; }
-.checkbox-group { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
-.btn-primary { background: var(--primary); color: #000; padding: 0.8rem 1.5rem; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; width: 100%; }

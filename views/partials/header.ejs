@@ -70,8 +70,10 @@
                     <a href="/" class="mobile-link">Início</a>
                     <a href="/about" class="mobile-link">Sobre</a>
                     <a href="/articles" class="mobile-link">Artigos</a>
+                    
                     <div style="margin:10px 0; border-top:1px solid var(--border); opacity:0.3;"></div>
                     <div class="mobile-section-title" style="padding-left:10px; color:var(--text-muted); font-size:0.8rem; text-transform:uppercase;">Painel</div>
+                    
                     <% const current = typeof currentPage !== 'undefined' ? currentPage : ''; %>
                     <% if (user.role === 'client') { %>
                         <a href="/client/dashboard" class="mobile-link <%= current === 'dashboard' ? 'active' : '' %>"><i class="fas fa-chart-pie"></i> Visão Geral</a>
@@ -102,25 +104,30 @@
     <div class="app-layout-container">
         
         <% 
-        const isAuthPage = ['login', 'register', 'initial-form'].includes(typeof currentPage !== 'undefined' ? currentPage : '');
-        if (typeof user !== 'undefined' && user && !isAuthPage) { 
+        const curPage = typeof currentPage !== 'undefined' ? currentPage : '';
+        const isAuthPage = ['login', 'register', 'initial-form', 'forgot-password', 'reset-password'].includes(curPage);
+        const isPublicPage = ['home', 'index', 'about', 'articles', 'article-details'].includes(curPage);
+        
+        if (typeof user !== 'undefined' && user && !isAuthPage && !isPublicPage) { 
         %>
             <%- include('./sidebar') %>
         <% } %>
 
         <main class="main-content-column">
-
+            
+            <% if (typeof messages !== 'undefined' && (messages.error || messages.success)) { %>
             <div style="position: fixed; top: 90px; right: 20px; z-index: 1100; max-width: 400px; width: 90%;">
-                <% if (typeof messages !== 'undefined' && messages.error) { %>
-                    <div class="alert alert-error" style="background: rgba(239,68,68,0.1); color:#fca5a5; padding:1rem; border-radius:8px; margin-bottom:10px; border:1px solid rgba(239,68,68,0.2);">
-                        <i class="fas fa-exclamation-circle"></i> <span><%= messages.error %></span>
-                        <button onclick="this.parentElement.remove()" style="float:right; background:none; border:none; color:inherit;">&times;</button>
+                <% if (messages.error) { %>
+                    <div class="alert alert-error" style="background: rgba(239,68,68,0.1); color:#fca5a5; padding:1rem; border-radius:8px; margin-bottom:10px; border:1px solid rgba(239,68,68,0.2); display: flex; align-items: center; justify-content: space-between;">
+                        <span><i class="fas fa-exclamation-circle"></i> <%= messages.error %></span>
+                        <button onclick="this.parentElement.remove()" style="background:none; border:none; color:inherit; cursor:pointer; font-size:1.2rem;">&times;</button>
                     </div>
                 <% } %>
-                <% if (typeof messages !== 'undefined' && messages.success) { %>
-                    <div class="alert" style="background: rgba(16, 185, 129, 0.15); color: #34d399; padding:1rem; border-radius:8px; margin-bottom:10px; border: 1px solid rgba(16, 185, 129, 0.3);">
-                        <i class="fas fa-check-circle"></i> <span><%= messages.success %></span>
-                        <button onclick="this.parentElement.remove()" style="float:right; background:none; border:none; color:inherit;">&times;</button>
+                <% if (messages.success) { %>
+                    <div class="alert" style="background: rgba(16, 185, 129, 0.15); color: #34d399; padding:1rem; border-radius:8px; margin-bottom:10px; border: 1px solid rgba(16, 185, 129, 0.3); display: flex; align-items: center; justify-content: space-between;">
+                        <span><i class="fas fa-check-circle"></i> <%= messages.success %></span>
+                        <button onclick="this.parentElement.remove()" style="background:none; border:none; color:inherit; cursor:pointer; font-size:1.2rem;">&times;</button>
                     </div>
                 <% } %>
             </div>
+            <% } %>
