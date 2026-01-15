@@ -775,3 +775,81 @@ button { font-family: inherit; }
         background-color: #050505 !important; 
     }
 }
+
+/* --- CORREÇÃO ESTRUTURAL: HEADER + SIDEBAR --- */
+/* Ajuste para o Dashboard não colidir com o Header Fixo */
+.dashboard-container {
+    display: flex;
+    min-height: calc(100vh - 70px); /* Altura total menos header */
+    margin-top: 70px; /* Empurra para baixo do header fixo */
+    position: relative;
+}
+
+/* Sidebar agora começa "abaixo" do header */
+.sidebar {
+    top: 70px; /* Encosta no header */
+    height: calc(100vh - 70px);
+    z-index: 900; /* Menor que o Header (1000) */
+}
+
+/* Ajuste fino no conteúdo principal */
+.dashboard-main {
+    flex: 1;
+    margin-left: 260px; /* Espaço da sidebar */
+    padding: 30px;
+    width: calc(100% - 260px);
+    background-color: var(--bg-dark);
+}
+
+/* Padronização de Cards */
+.card-box {
+    background: #111;
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    transition: transform 0.2s;
+}
+.card-box:hover {
+    border-color: rgba(255,255,255,0.2);
+}
+
+/* Padronização de Tabelas */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+}
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: #e0e0e0;
+}
+.data-table th {
+    text-align: left;
+    padding: 15px;
+    border-bottom: 2px solid #333;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+.data-table td {
+    padding: 15px;
+    border-bottom: 1px solid #222;
+    vertical-align: middle;
+}
+
+/* Responsividade Mobile Corrigida */
+@media (max-width: 992px) {
+    .dashboard-container { margin-top: 70px; }
+    .sidebar { top: 70px; height: calc(100vh - 70px); }
+    .dashboard-main { margin-left: 0; width: 100%; }
+    
+    /* Botão Toggle da Sidebar no Mobile (Fica flutuando ou numa barra sub-header) */
+    .mobile-dash-header {
+        position: fixed; top: 70px; left: 0; right: 0;
+        z-index: 899; height: 50px;
+        background: #1a1a1a; border-bottom: 1px solid #333;
+        display: flex !important; align-items: center; padding: 0 20px;
+    }
+    .dashboard-main { padding-top: 70px; } /* +50px do sub-header */
+}

@@ -1,58 +1,55 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard | Momentum Fit</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/styles.css">
-</head>
-<body>
-    <div class="dashboard-container">
-        <%- include('../partials/sidebar') %>
-        
-        <main class="dashboard-main">
-            <div class="page-header" style="text-align: left; padding: 0 0 30px 0; background: transparent; border: none;">
-                <h1>Olá, <span class="text-neon"><%= user.name.split(' ')[0] %></span>!</h1>
-                <p>Vamos manter o foco hoje.</p>
-            </div>
+<%- include('../partials/header.ejs', { title: 'Dashboard' }) %>
 
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 30px;">
-                <div class="card-box">
-                    <div style="color: #888; font-size: 0.9rem;">Treinos Completos</div>
-                    <div style="font-size: 2.5rem; font-weight: 800; color: white;"><%= stats.completed || 0 %></div>
-                </div>
-                <div class="card-box">
-                    <div style="color: #888; font-size: 0.9rem;">Sequência (Dias)</div>
-                    <div style="font-size: 2.5rem; font-weight: 800; color: var(--primary-color);"><%= stats.streak || 0 %> ���</div>
-                </div>
-                <div class="card-box" style="background: linear-gradient(135deg, #1a1a1a, #0d0d0d);">
-                    <div style="color: #ccc; font-size: 0.9rem;">Próximo Treino</div>
-                    <h3 style="margin-top: 5px; color: white;">Superior A</h3>
-                    <a href="/client/workouts" style="font-size: 0.8rem; color: var(--primary-color);">Iniciar agora &rarr;</a>
+<div class="dashboard-container">
+    <%- include('../partials/sidebar.ejs') %>
+    
+    <main class="dashboard-main">
+        <div class="page-header" style="text-align: left; padding: 0; background: transparent; border: none; margin-bottom: 30px;">
+            <h1 style="font-size: 2rem;">Olá, <span class="text-neon"><%= user.name.split(' ')[0] %></span>!</h1>
+            <p style="color: #888;">Aqui está o resumo do seu dia.</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 30px;">
+            <div class="card-box">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h2 style="font-size: 2.5rem; color: white; margin: 0;"><%= stats.completed || 0 %></h2>
+                        <span style="color: #888; font-size: 0.9rem;">Treinos Realizados</span>
+                    </div>
+                    <i class="fas fa-check-circle text-neon" style="font-size: 2rem; opacity: 0.5;"></i>
                 </div>
             </div>
+            
+            <div class="card-box">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h2 style="font-size: 2.5rem; color: var(--primary-color); margin: 0;"><%= stats.streak || 0 %></h2>
+                        <span style="color: #888; font-size: 0.9rem;">Dias de Sequência</span>
+                    </div>
+                    <i class="fas fa-fire text-neon" style="font-size: 2rem; opacity: 0.5;"></i>
+                </div>
+            </div>
+        </div>
 
-            <h3 class="mb-4">Histórico Recente</h3>
-            <% if (workouts && workouts.length > 0) { %>
-                <div style="display: flex; flex-direction: column; gap: 15px;">
-                    <% workouts.forEach(w => { %>
-                        <div class="card-box" style="display: flex; justify-content: space-between; align-items: center; padding: 15px;">
-                            <div>
-                                <strong style="color: white; display: block;"><%= w.title %></strong>
-                                <span style="font-size: 0.8rem; color: #666;"><%= new Date(w.created_at).toLocaleDateString() %></span>
-                            </div>
-                            <span class="btn btn-sm btn-outline" style="font-size: 0.7rem;">Detalhes</span>
+        <h3 style="color: white; margin-bottom: 15px;">Próximos Treinos</h3>
+        <% if (workouts && workouts.length > 0) { %>
+            <div style="display: grid; gap: 15px;">
+                <% workouts.forEach(w => { %>
+                    <div class="card-box" style="display: flex; justify-content: space-between; align-items: center; padding: 20px;">
+                        <div>
+                            <h4 style="color: white; margin: 0 0 5px 0;"><%= w.title %></h4>
+                            <p style="color: #666; margin: 0; font-size: 0.85rem;"><%= w.description || 'Sem descrição' %></p>
                         </div>
-                    <% }) %>
-                </div>
-            <% } else { %>
-                <p style="color: #666;">Nenhum treino registrado ainda.</p>
-            <% } %>
+                        <a href="/client/workouts/<%= w.id %>" class="btn btn-sm btn-primary">Iniciar</a>
+                    </div>
+                <% }) %>
+            </div>
+        <% } else { %>
+            <div class="card-box" style="text-align: center; color: #666;">
+                <p>Nenhum treino agendado. Fale com seu personal.</p>
+            </div>
+        <% } %>
+    </main>
+</div>
 
-        </main>
-    </div>
-    <script src="/js/main.js"></script>
-</body>
-</html>
+<%- include('../partials/footer.ejs') %>

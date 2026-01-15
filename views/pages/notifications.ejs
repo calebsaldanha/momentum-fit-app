@@ -1,8 +1,38 @@
-<%- include('../partials/header.ejs') %>
-<div class="page-content-wrapper">
-    <h2 class="text-neon" style="margin-bottom: 2rem;">Notificações</h2>
-    <div class="card-modern">
-        <p class="text-muted" style="text-align: center; padding: 2rem;">Você não tem novas notificações.</p>
-    </div>
+<%- include('../partials/header.ejs', { title: 'Notificações' }) %>
+
+<div class="dashboard-container">
+    <%- include('../partials/sidebar.ejs') %>
+    
+    <main class="dashboard-main">
+        <div class="page-header" style="text-align: left; padding: 0 0 20px 0; background: transparent;">
+            <h1>Notificações</h1>
+            <p>Fique por dentro das novidades e alertas.</p>
+        </div>
+
+        <div class="content-grid">
+            <div class="card-box">
+                <% if (typeof notifications !== 'undefined' && notifications.length > 0) { %>
+                    <ul style="list-style: none;">
+                        <% notifications.forEach(n => { %>
+                            <li style="padding: 15px; border-bottom: 1px solid #222; display: flex; gap: 15px; align-items: start;">
+                                <div style="color: var(--primary-color); margin-top: 3px;"><i class="fas fa-bell"></i></div>
+                                <div>
+                                    <h4 style="margin: 0; color: white;"><%= n.title %></h4>
+                                    <p style="margin: 5px 0; color: #aaa; font-size: 0.9rem;"><%= n.message %></p>
+                                    <small style="color: #666;"><%= new Date(n.created_at).toLocaleDateString() %></small>
+                                </div>
+                            </li>
+                        <% }) %>
+                    </ul>
+                <% } else { %>
+                    <div style="text-align: center; padding: 30px; color: #666;">
+                        <i class="fas fa-bell-slash" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                        <p>Nenhuma notificação nova.</p>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </main>
 </div>
+
 <%- include('../partials/footer.ejs') %>

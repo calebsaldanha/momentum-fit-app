@@ -7,10 +7,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/styles.css">
+    <link rel="icon" href="/images/momentum-fit-icon.png">
 </head>
 <body>
     <% 
-        // Define o link do dashboard baseado no role
         let dashLink = '/client/dashboard';
         if (typeof user !== 'undefined' && user) {
             if (user.role === 'trainer') dashLink = '/trainer/dashboard';
@@ -21,16 +21,16 @@
     <header class="main-header">
         <div class="header-container">
             <a href="/" class="brand-logo">
-                <img src="/images/momentum-fit-icon.png" alt="Momentum Fit" class="logo-icon">
+                <img src="/images/momentum-fit-icon.png" alt="Logo" class="logo-icon">
                 <span class="logo-text">Momentum Fit</span>
             </a>
 
             <nav class="desktop-nav">
-                <a href="/" class="nav-link <%= typeof currentPage !== 'undefined' && currentPage === 'home' ? 'active' : '' %>">Início</a>
-                <a href="/about" class="nav-link <%= typeof currentPage !== 'undefined' && currentPage === 'about' ? 'active' : '' %>">Sobre</a>
-                <a href="/articles" class="nav-link <%= typeof currentPage !== 'undefined' && currentPage === 'articles' ? 'active' : '' %>">Artigos</a>
-                <a href="/plans" class="nav-link <%= typeof currentPage !== 'undefined' && currentPage === 'plans' ? 'active' : '' %>">Planos</a>
-                <a href="/contact" class="nav-link <%= typeof currentPage !== 'undefined' && currentPage === 'contact' ? 'active' : '' %>">Contato</a>
+                <a href="/" class="nav-link">Início</a>
+                <a href="/about" class="nav-link">Sobre</a>
+                <a href="/articles" class="nav-link">Artigos</a>
+                <a href="/plans" class="nav-link">Planos</a>
+                <a href="/contact" class="nav-link">Contato</a>
             </nav>
 
             <div class="desktop-actions">
@@ -38,13 +38,20 @@
                     <a href="/auth/login" class="btn btn-sm btn-outline">Entrar</a>
                     <a href="/auth/register" class="btn btn-sm btn-primary">Cadastro</a>
                 <% } else { %>
-                    <a href="<%= dashLink %>" class="btn btn-sm btn-secondary" title="Ir para Painel">
-                        <i class="fas fa-columns"></i> <span class="desktop-only" style="margin-left:5px;">Painel</span>
+                    <a href="/notifications" class="btn btn-ghost" style="position: relative; margin-right: 10px;">
+                        <i class="fas fa-bell"></i>
+                        <span style="position: absolute; top: 5px; right: 5px; width: 8px; height: 8px; background: var(--primary-color); border-radius: 50%;"></span>
                     </a>
-                    <div class="user-chip" style="border: 1px solid #333;">
+
+                    <a href="<%= dashLink %>" class="btn btn-sm btn-secondary desktop-only">
+                        <i class="fas fa-columns"></i> Painel
+                    </a>
+                    
+                    <div class="user-chip" style="border: 1px solid #333; margin-left: 10px;">
                         <i class="fas fa-user-circle"></i> <span><%= user.name.split(' ')[0] %></span>
                     </div>
-                    <form action="/auth/logout" method="POST" style="display: inline;">
+                    
+                    <form action="/auth/logout" method="POST" style="display: inline; margin-left: 5px;">
                         <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
                         <button type="submit" class="btn btn-sm btn-ghost" title="Sair"><i class="fas fa-sign-out-alt"></i></button>
                     </form>
@@ -63,26 +70,12 @@
             </div>
             <div class="mobile-links">
                 <a href="/">Início</a>
-                <a href="/about">Sobre</a>
-                <a href="/articles">Artigos</a>
                 <a href="/plans">Planos</a>
                 <a href="/contact">Contato</a>
-            </div>
-            <div class="mobile-auth">
-                <% if (!isAuthenticated) { %>
-                    <a href="/auth/login" class="btn btn-full btn-outline">Entrar</a>
-                    <a href="/auth/register" class="btn btn-full btn-primary">Cadastro</a>
-                <% } else { %>
-                    <a href="<%= dashLink %>" class="btn btn-full btn-primary">Acessar Painel</a>
-                    <form action="/auth/logout" method="POST">
-                        <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
-                        <button type="submit" class="btn btn-full btn-ghost">Sair</button>
-                    </form>
+                <% if (isAuthenticated) { %>
+                    <a href="<%= dashLink %>" class="text-neon">Acessar Painel</a>
+                    <a href="/notifications">Notificações</a>
                 <% } %>
             </div>
         </div>
     </header>
-    
-    <div class="header-spacer"></div>
-
-    <main class="main-content">

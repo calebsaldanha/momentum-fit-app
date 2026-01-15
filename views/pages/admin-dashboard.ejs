@@ -1,32 +1,36 @@
-<%- include('../partials/header.ejs') %>
+<%- include('../partials/header.ejs', { title: 'Admin' }) %>
 
-<div class="page-header">
-    <h1>Administração</h1>
-    <p>Visão geral do sistema Momentum Fit.</p>
-</div>
-
-<div class="content-grid">
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
-        <div class="card-box" style="text-align: center;">
-            <i class="fas fa-users" style="font-size: 2.5rem; color: var(--primary-color); margin-bottom: 10px;"></i>
-            <h2 style="font-size: 2.5rem; color: white; margin: 0;"><%= stats.users %></h2>
-            <p style="color: #888;">Usuários Totais</p>
+<div class="dashboard-container">
+    <%- include('../partials/sidebar.ejs') %>
+    
+    <main class="dashboard-main">
+        <div class="page-header" style="text-align: left; padding: 0; background: transparent; border: none; margin-bottom: 30px;">
+            <h1>Administração Global</h1>
+            <p>Visão geral de toda a plataforma.</p>
         </div>
 
-        <div class="card-box" style="text-align: center;">
-            <i class="fas fa-dumbbell" style="font-size: 2.5rem; color: var(--primary-color); margin-bottom: 10px;"></i>
-            <h2 style="font-size: 2.5rem; color: white; margin: 0;"><%= stats.trainers %></h2>
-            <p style="color: #888;">Treinadores</p>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px;">
+            <div class="card-box" style="border-top: 3px solid var(--primary-color);">
+                <div style="display: flex; justify-content: space-between;">
+                    <div>
+                        <span style="color: #888; font-size: 0.85rem;">Usuários Totais</span>
+                        <h2 style="color: white; margin-top: 5px;"><%= stats.users || 0 %></h2>
+                    </div>
+                    <i class="fas fa-users" style="color: #333; font-size: 1.5rem;"></i>
+                </div>
+            </div>
+            
+            <div class="card-box" style="border-top: 3px solid #3b82f6;">
+                <div style="display: flex; justify-content: space-between;">
+                    <div>
+                        <span style="color: #888; font-size: 0.85rem;">Treinadores</span>
+                        <h2 style="color: white; margin-top: 5px;"><%= stats.trainers || 0 %></h2>
+                    </div>
+                    <i class="fas fa-dumbbell" style="color: #333; font-size: 1.5rem;"></i>
+                </div>
+            </div>
         </div>
-    </div>
-
-    <div class="card-box">
-        <h3>Ações Rápidas</h3>
-        <div style="display: flex; gap: 15px; margin-top: 15px; flex-wrap: wrap;">
-            <a href="/admin/clients" class="btn btn-outline">Gerenciar Usuários</a>
-            <a href="/auth/register" class="btn btn-primary">Registrar Novo Usuário</a>
-        </div>
-    </div>
+    </main>
 </div>
 
 <%- include('../partials/footer.ejs') %>

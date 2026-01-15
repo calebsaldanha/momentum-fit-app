@@ -1,51 +1,30 @@
-<%- include('../partials/header.ejs') %>
+<%- include('../partials/header.ejs', { title: 'Painel Personal' }) %>
 
-<div class="page-header">
-    <h1>Painel do Treinador</h1>
-    <p>Gerencie seus alunos e acompanhe resultados.</p>
-</div>
+<div class="dashboard-container">
+    <%- include('../partials/sidebar.ejs') %>
+    
+    <main class="dashboard-main">
+        <div class="page-header" style="text-align: left; padding: 0; background: transparent; border: none; margin-bottom: 30px;">
+            <h1>Painel do Treinador</h1>
+            <p>Gerencie seus alunos e prescreva treinos.</p>
+        </div>
 
-<div class="content-grid">
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
-        <div class="card-box" style="display: flex; align-items: center; gap: 20px;">
-            <div style="width: 50px; height: 50px; background: rgba(190, 242, 2, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
-                <i class="fas fa-users text-neon" style="font-size: 1.5rem;"></i>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
+            <div class="card-box">
+                <h3 style="color: #888; font-size: 0.9rem;">Alunos Ativos</h3>
+                <p style="font-size: 2rem; color: white; font-weight: 700;"><%= stats.activeClients || 0 %></p>
             </div>
-            <div>
-                <h3 style="margin: 0; font-size: 2rem; line-height: 1;"><%= stats.activeClients || 0 %></h3>
-                <span style="color: #888; font-size: 0.9rem;">Alunos Ativos</span>
+            <div class="card-box">
+                <h3 style="color: #888; font-size: 0.9rem;">Check-ins Hoje</h3>
+                <p style="font-size: 2rem; color: var(--primary-color); font-weight: 700;"><%= stats.totalCheckins || 0 %></p>
             </div>
         </div>
-        
-        <div class="card-box" style="display: flex; align-items: center; gap: 20px;">
-            <div style="width: 50px; height: 50px; background: rgba(190, 242, 2, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
-                <i class="fas fa-clipboard-check text-neon" style="font-size: 1.5rem;"></i>
-            </div>
-            <div>
-                <h3 style="margin: 0; font-size: 2rem; line-height: 1;">--</h3>
-                <span style="color: #888; font-size: 0.9rem;">Check-ins (Hoje)</span>
-            </div>
-        </div>
-    </div>
 
-    <div class="card-box">
-        <h3 style="border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 20px;">Atividade Recente</h3>
-        <% if (recentCheckins && recentCheckins.length > 0) { %>
-            <div style="display: flex; flex-direction: column; gap: 15px;">
-                <% recentCheckins.forEach(check => { %>
-                    <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px;">
-                        <div>
-                            <strong style="color: white;"><%= check.client_name %></strong>
-                            <p style="margin: 0; color: #888; font-size: 0.85rem;">Check-in realizado</p>
-                        </div>
-                        <span style="font-size: 0.8rem; color: #666;"><%= new Date(check.created_at).toLocaleDateString() %></span>
-                    </div>
-                <% }) %>
-            </div>
-        <% } else { %>
-            <p style="color: #666; text-align: center; padding: 20px;">Nenhuma atividade recente.</p>
-        <% } %>
-    </div>
+        <div class="card-box">
+            <h3 style="margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px;">Atividades Recentes</h3>
+            <p style="color: #666;">Nenhuma atividade recente registrada.</p>
+        </div>
+    </main>
 </div>
 
 <%- include('../partials/footer.ejs') %>
