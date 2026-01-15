@@ -1,83 +1,91 @@
 <%- include('../partials/header.ejs', { title: 'Login' }) %>
 
 <style>
-    /* Força background */
-    body {
-        background: url('/images/hero-bg.png') no-repeat center center fixed !important;
-        background-size: cover !important;
-    }
-    body::before {
-        content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0, 0, 0, 0.7); z-index: -1;
+    /* 1. Elemento da Imagem de Fundo */
+    .bg-fixed-image {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: url('/images/hero-bg.png') no-repeat center center;
+        background-size: cover;
+        z-index: 0; /* Base */
     }
 
-    /* Container de Autenticação */
-    .auth-container {
-        width: 100%;             /* Força ocupar toda a largura */
-        max-width: 100%;         /* Garante que não seja limitado pelo pai */
+    /* 2. Elemento do Overlay Escuro */
+    .bg-fixed-overlay {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 1; /* Acima da imagem */
+        backdrop-filter: blur(3px); /* Leve desfoque para melhorar leitura */
+    }
+
+    /* 3. Container do Conteúdo (Formulário) */
+    .auth-wrapper-flex {
+        position: relative;
+        z-index: 2; /* Acima de tudo */
         min-height: calc(100vh - 70px);
+        width: 100%;
         display: flex;
-        justify-content: center; /* Centraliza Horizontalmente */
-        align-items: center;     /* Centraliza Verticalmente */
+        align-items: center;
+        justify-content: center;
         padding: 20px;
     }
 
-    /* Card de Login */
     .auth-card {
-        background: rgba(15, 15, 15, 0.95);
+        background: rgba(10, 10, 10, 0.85); /* Mais transparente para ver o fundo */
         border: 1px solid rgba(255,255,255,0.1);
         border-radius: 16px;
         padding: 40px;
         width: 100%;
         max-width: 450px;
-        /* Margem automática para garantir centralização se flex falhar */
-        margin: 0 auto; 
-        box-shadow: 0 15px 50px rgba(0,0,0,0.6);
-        backdrop-filter: blur(10px);
+        box-shadow: 0 20px 60px rgba(0,0,0,0.8);
     }
 </style>
 
-<div style="width: 100%; display: flex; justify-content: center;">
-    <div class="auth-container">
-        <div class="auth-card">
-            <div style="text-align: center; margin-bottom: 30px;">
-                <h1 style="color: white; font-size: 2rem; margin-bottom: 10px;">Bem-vindo</h1>
-                <p style="color: #888;">Faça login para acessar sua conta.</p>
+<div class="bg-fixed-image"></div>
+<div class="bg-fixed-overlay"></div>
+
+<div class="auth-wrapper-flex">
+    <div class="auth-card">
+        <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="color: white; font-size: 2rem; margin-bottom: 5px;">Bem-vindo</h1>
+            <p style="color: #888; font-size: 0.95rem;">Faça login para continuar sua evolução.</p>
+        </div>
+
+        <% if (typeof messages !== 'undefined' && messages.error) { %>
+            <div style="background: rgba(255, 77, 77, 0.15); border: 1px solid rgba(255, 77, 77, 0.3); color: #ff6b6b; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9rem; display: flex; align-items: center; gap: 10px;">
+                <i class="fas fa-exclamation-circle"></i> <%= messages.error %>
+            </div>
+        <% } %>
+
+        <form action="/auth/login" method="POST">
+            <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+            
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; color: #ccc; margin-bottom: 8px; font-size: 0.9rem; font-weight: 500;">E-mail</label>
+                <div style="position: relative;">
+                    <i class="fas fa-envelope" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #666;"></i>
+                    <input type="email" name="email" required placeholder="seu@email.com" style="width: 100%; padding: 12px 12px 12px 45px; background: #000; border: 1px solid #333; color: white; border-radius: 8px; outline: none; font-size: 1rem; transition: 0.3s;">
+                </div>
             </div>
 
-            <% if (typeof messages !== 'undefined' && messages.error) { %>
-                <div class="alert alert-error" style="background: rgba(255,70,70,0.1); color: #ff6b6b; padding: 10px; border-radius: 6px; margin-bottom: 20px; border: 1px solid rgba(255,70,70,0.2);">
-                    <i class="fas fa-exclamation-circle"></i> <%= messages.error %>
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; color: #ccc; margin-bottom: 8px; font-size: 0.9rem; font-weight: 500;">Senha</label>
+                <div style="position: relative;">
+                    <i class="fas fa-lock" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #666;"></i>
+                    <input type="password" name="password" required placeholder="••••••••" style="width: 100%; padding: 12px 12px 12px 45px; background: #000; border: 1px solid #333; color: white; border-radius: 8px; outline: none; font-size: 1rem; transition: 0.3s;">
                 </div>
-            <% } %>
-
-            <form action="/auth/login" method="POST">
-                <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
-                
-                <div class="form-group" style="margin-bottom: 20px;">
-                    <label style="display: block; color: #ccc; margin-bottom: 8px;">E-mail</label>
-                    <div style="position: relative;">
-                        <i class="fas fa-envelope" style="position: absolute; left: 15px; top: 14px; color: #666;"></i>
-                        <input type="email" name="email" required placeholder="seu@email.com" style="width: 100%; padding: 12px 12px 12px 45px; background: #050505; border: 1px solid #333; color: white; border-radius: 8px; outline: none;">
-                    </div>
+                <div style="text-align: right; margin-top: 8px;">
+                    <a href="/auth/forgot-password" style="color: #888; font-size: 0.85rem; text-decoration: none;">Esqueceu a senha?</a>
                 </div>
+            </div>
 
-                <div class="form-group" style="margin-bottom: 20px;">
-                    <label style="display: block; color: #ccc; margin-bottom: 8px;">Senha</label>
-                    <div style="position: relative;">
-                        <i class="fas fa-lock" style="position: absolute; left: 15px; top: 14px; color: #666;"></i>
-                        <input type="password" name="password" required placeholder="••••••••" style="width: 100%; padding: 12px 12px 12px 45px; background: #050505; border: 1px solid #333; color: white; border-radius: 8px; outline: none;">
-                    </div>
-                    <div style="text-align: right; margin-top: 10px;">
-                        <a href="/auth/forgot-password" style="color: #888; font-size: 0.85rem; text-decoration: none;">Esqueceu a senha?</a>
-                    </div>
-                </div>
+            <button type="submit" class="btn btn-primary btn-full" style="width: 100%; padding: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 10px;">Entrar</button>
+        </form>
 
-                <button type="submit" class="btn btn-primary btn-full" style="width: 100%; padding: 14px; font-weight: 700; text-transform: uppercase;">Entrar</button>
-            </form>
-
-            <p style="text-align: center; margin-top: 30px; color: #666; font-size: 0.9rem;">
-                Não tem conta? <a href="/auth/register" style="color: var(--primary-color); font-weight: 600;">Cadastre-se</a>
+        <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05);">
+            <p style="color: #666; font-size: 0.9rem;">
+                Ainda não tem conta? <a href="/auth/register" style="color: var(--primary-color); font-weight: 600; text-decoration: none;">Cadastre-se</a>
             </p>
         </div>
     </div>
