@@ -1,6 +1,7 @@
 <%- include('../partials/header.ejs') %>
 
-<main class="page-content">
+<main class="public-content">
+    
     <section id="home" class="hero">
         <div class="hero-overlay"></div>
         <div class="container hero-container">
@@ -15,12 +16,14 @@
                 </p>
                 <div class="hero-buttons">
                     <% if (!isAuthenticated) { %>
-                        <a href="/auth/register" class="btn btn-primary btn-lg btn-glow">Comece Sua Transformação <i class="fas fa-arrow-right"></i></a>
+                        <a href="/auth/register" class="btn btn-primary btn-lg">Comece Sua Transformação <i class="fas fa-arrow-right"></i></a>
                         <a href="#about" class="btn btn-outline btn-lg">Saiba Mais</a>
                     <% } else if (user.role === 'client') { %>
-                        <a href="/client/dashboard" class="btn btn-primary btn-lg btn-glow">Meu Dashboard</a>
+                        <a href="/client/dashboard" class="btn btn-primary btn-lg">Meu Dashboard</a>
+                    <% } else if (user.role === 'trainer') { %>
+                        <a href="/trainer/dashboard" class="btn btn-primary btn-lg">Painel do Treinador</a>
                     <% } else { %>
-                        <a href="/admin/dashboard" class="btn btn-primary btn-lg btn-glow">Dashboard Admin</a>
+                        <a href="/admin/dashboard" class="btn btn-primary btn-lg">Dashboard Admin</a>
                     <% } %>
                 </div>
             </div>
@@ -31,46 +34,35 @@
         <div class="container">
             <div class="section-header center">
                 <h2 class="section-title">O Caminho para Seus Melhores Resultados</h2>
-                <p class="section-desc">Um processo simples e estruturado para o seu sucesso.</p>
+                <p style="color: #a0a0a0; font-size: 1.1rem;">Um processo simples e estruturado para o seu sucesso.</p>
             </div>
 
             <div class="features-grid">
                 <div class="feature-card">
-                    <div class="icon-box">
-                        <i class="fas fa-bullseye"></i>
-                    </div>
+                    <div class="icon-box"><i class="fas fa-bullseye"></i></div>
                     <h3>Defina Seu Alvo</h3>
-                    <p>Comece com um questionário rápido para entendermos seus objetivos exatos: emagrecimento, hipertrofia ou performance.</p>
+                    <p style="color: #888;">Comece com um questionário rápido para entendermos seus objetivos exatos: emagrecimento, hipertrofia ou performance.</p>
                 </div>
-
                 <div class="feature-card">
-                    <div class="icon-box">
-                        <i class="fas fa-clipboard-list"></i>
-                    </div>
+                    <div class="icon-box"><i class="fas fa-clipboard-list"></i></div>
                     <h3>Plano Personalizado</h3>
-                    <p>Receba um plano de treino 100% adaptado por um de nossos especialistas, focado na sua rotina e limitações.</p>
+                    <p style="color: #888;">Receba um plano de treino 100% adaptado por um de nossos especialistas, focado na sua rotina e limitações.</p>
                 </div>
-
                 <div class="feature-card">
-                    <div class="icon-box">
-                        <i class="fas fa-route"></i>
-                    </div>
+                    <div class="icon-box"><i class="fas fa-route"></i></div>
                     <h3>Acompanhamento</h3>
-                    <p>Execute seus treinos, registre seu progresso (check-ins) e tire dúvidas em tempo real pelo chat privado.</p>
+                    <p style="color: #888;">Execute seus treinos, registre seu progresso (check-ins) e tire dúvidas em tempo real pelo chat privado.</p>
                 </div>
-
                 <div class="feature-card">
-                    <div class="icon-box">
-                        <i class="fas fa-chart-line"></i>
-                    </div>
+                    <div class="icon-box"><i class="fas fa-chart-line"></i></div>
                     <h3>Evolução</h3>
-                    <p>Seu treinador ajusta o plano com base nos seus dados e feedback, garantindo que o seu progresso nunca pare.</p>
+                    <p style="color: #888;">Seu treinador ajusta o plano com base nos seus dados e feedback, garantindo que o seu progresso nunca pare.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <section id="features" class="features section-padding">
+    <section id="features" class="section-padding">
         <div class="container">
             <div class="section-header center">
                 <h2 class="section-title">A Tecnologia por Trás do Momentum</h2>
@@ -78,29 +70,24 @@
             
             <div class="features-grid">
                 <div class="feature-card">
-                    <div class="icon-box">
-                        <i class="fas fa-dumbbell"></i>
-                    </div>
+                    <div class="icon-box"><i class="fas fa-dumbbell"></i></div>
                     <h3>Treinos Focados</h3>
-                    <p>Planos de treino otimizados para maximizar seus resultados, com foco em técnica e consistência.</p>
+                    <p style="color: #888;">Planos de treino otimizados para maximizar seus resultados, com foco em técnica e consistência.</p>
                 </div>
                 <div class="feature-card">
-                    <div class="icon-box">
-                        <i class="fas fa-comments"></i>
-                    </div>
+                    <div class="icon-box"><i class="fas fa-comments"></i></div>
                     <h3>Comunicação Direta</h3>
-                    <p>Use nosso chat embutido para ter acesso rápido ao seu personal, sem intermediários.</p>
+                    <p style="color: #888;">Use nosso chat embutido para ter acesso rápido ao seu personal, sem intermediários.</p>
                 </div>
                 <div class="feature-card">
-                    <div class="icon-box">
-                        <i class="fas fa-chart-bar"></i>
-                    </div>
+                    <div class="icon-box"><i class="fas fa-chart-bar"></i></div>
                     <h3>Métricas e Check-ins</h3>
-                    <p>Acompanhe seu desempenho e feedback de treino para ver seu progresso de forma clara e motivadora.</p>
+                    <p style="color: #888;">Acompanhe seu desempenho e feedback de treino para ver seu progresso de forma clara e motivadora.</p>
                 </div>
             </div>
         </div>
     </section>
+
 </main>
 
 <%- include('../partials/footer.ejs') %>

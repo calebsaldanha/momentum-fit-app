@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- 1. Menu Mobile do Site (Header) ---
+    // --- 1. Menu Mobile da Home (Público) ---
     const mobileMenuBtn = document.getElementById('mobileMenuBtn');
     const closeMenuBtn = document.getElementById('closeMenuBtn');
     const mobileMenu = document.getElementById('mobileMenu');
@@ -16,11 +16,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.body.style.overflow = '';
             });
         }
+        
+        // Fechar ao clicar fora (opcional, se clicar nos links)
+        const links = mobileMenu.querySelectorAll('a');
+        links.forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.remove('active');
+                document.body.style.overflow = '';
+            });
+        });
     }
 
     // --- 2. Sidebar do Dashboard (Logado) ---
-    const sidebarOpenBtn = document.getElementById('sidebarOpenBtn'); // Botão no topo do conteúdo
-    const sidebarCloseBtn = document.getElementById('sidebarCloseBtn'); // Botão dentro da sidebar
+    const sidebarOpenBtn = document.getElementById('sidebarOpenBtn'); 
+    const sidebarCloseBtn = document.getElementById('sidebarCloseBtn');
     const sidebar = document.getElementById('sidebar');
     const sidebarOverlay = document.getElementById('sidebarOverlay');
 
@@ -36,15 +45,20 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.style.overflow = '';
     }
 
-    if (sidebarOpenBtn) sidebarOpenBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        openSidebar();
-    });
+    if (sidebarOpenBtn) {
+        sidebarOpenBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openSidebar();
+        });
+    }
 
     if (sidebarCloseBtn) sidebarCloseBtn.addEventListener('click', closeSidebar);
-    if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebar);
+    
+    if (sidebarOverlay) {
+        sidebarOverlay.addEventListener('click', closeSidebar);
+    }
 
-    // Auto-dismiss alerts
+    // Auto-dismiss de alertas
     const alerts = document.querySelectorAll('.alert');
     if (alerts) {
         alerts.forEach(alert => {

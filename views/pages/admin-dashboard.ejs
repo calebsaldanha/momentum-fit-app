@@ -8,16 +8,16 @@
         </div>
 
         <div class="page-header">
-            <h1>Visão Geral <span class="text-neon">Administrativa</span></h1>
+            <h1>Visão Geral <span class="text-neon">Admin</span></h1>
         </div>
 
         <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
             <div class="card-box">
-                <h3>Usuários Totais</h3>
+                <h3>Usuários</h3>
                 <p style="font-size: 2rem; font-weight: bold;"><%= typeof stats !== 'undefined' ? stats.totalUsers : 0 %></p>
             </div>
             <div class="card-box">
-                <h3>Aprovações Pendentes</h3>
+                <h3>Pendentes</h3>
                 <p style="font-size: 2rem; font-weight: bold; color: orange;"><%= typeof stats !== 'undefined' ? stats.pendingApprovals : 0 %></p>
             </div>
         </div>
