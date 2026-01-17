@@ -5,7 +5,7 @@
             <div class="hero-content">
                 <h1 class="hero-title">Impulsione o Seu Progresso.<br>A Sua Jornada Começa Agora.</h1>
                 <p class="hero-subtitle">Conecte-se com personal trainers qualificados para planos de treino personalizados e acompanhamento contínuo.
-Alcance os seus objetivos com o Momentum Fit.</p>
+                Alcance os seus objetivos com o Momentum Fit.</p>
                 <div class="hero-buttons">
                     <% if (!isAuthenticated) { %>
                         <a href="/auth/register" class="btn btn-primary">Comece Sua Transformação</a>
@@ -48,6 +48,31 @@ Alcance os seus objetivos com o Momentum Fit.</p>
         </div>
     </section>
 
+    <% if (typeof featuredTrainers !== 'undefined' && featuredTrainers.length > 0) { %>
+    <section class="features" style="background-color: #080808;">
+        <div class="container">
+            <h2 class="section-title">Nossos Especialistas</h2>
+            <div class="features-grid">
+                <% featuredTrainers.forEach(trainer => { %>
+                <div class="feature-card" style="text-align: center;">
+                    <div style="width: 100px; height: 100px; margin: 0 auto 20px; border-radius: 50%; overflow: hidden; border: 2px solid var(--primary-color);">
+                        <img src="<%= trainer.profile_image || '/images/logo-3d.png' %>" alt="<%= trainer.name %>" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <h3 class="text-neon"><%= trainer.name %></h3>
+                    <p style="font-size: 0.85rem; margin-bottom: 10px; color: #fff;"><%= trainer.specialties || 'Personal Trainer' %></p>
+                    <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 20px;">
+                        "<%= trainer.bio ? trainer.bio.substring(0, 80) + '...' : 'Pronto para te ajudar a alcançar seus objetivos.' %>"
+                    </p>
+                </div>
+                <% }) %>
+            </div>
+             <div style="text-align: center; margin-top: 40px;">
+                <a href="/auth/register" class="btn btn-outline">Ver Todos os Treinadores</a>
+            </div>
+        </div>
+    </section>
+    <% } %>
+
     <section id="features" class="features">
         <div class="container">
             <h2 class="section-title">A Tecnologia por Trás do Momentum</h2>
@@ -66,6 +91,44 @@ Alcance os seus objetivos com o Momentum Fit.</p>
                     <img src="/images/logo-3d.png" class="feature-icon-img" alt="Ícone">
                     <h3>Métricas e Check-ins</h3>
                     <p>Acompanhe seu desempenho e feedback de treino para ver seu progresso de forma clara e motivadora.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="about" style="border-top: 1px solid var(--border-light);">
+        <div class="container">
+            <h2 class="section-title">O Que Nossos Alunos Dizem</h2>
+            <div class="features-grid">
+                <div class="card-box" style="text-align: left;">
+                    <p class="text-muted" style="margin-bottom: 15px;">"A plataforma mudou minha rotina. Ter o treino e o chat com o personal no mesmo lugar facilitou muito minha constância."</p>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div style="width: 40px; height: 40px; background: #333; border-radius: 50%;"></div>
+                        <div>
+                            <strong style="display: block; color: white;">Lucas M.</strong>
+                            <span style="font-size: 0.8rem; color: var(--primary-color);">Plano Pro</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-box" style="text-align: left;">
+                    <p class="text-muted" style="margin-bottom: 15px;">"Os gráficos de evolução me mantêm motivada. Consigo ver exatamente onde melhorei mês a mês."</p>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div style="width: 40px; height: 40px; background: #333; border-radius: 50%;"></div>
+                        <div>
+                            <strong style="display: block; color: white;">Fernanda S.</strong>
+                            <span style="font-size: 0.8rem; color: var(--primary-color);">Plano Start</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-box" style="text-align: left;">
+                    <p class="text-muted" style="margin-bottom: 15px;">"Como personal, consegui dobrar meu número de alunos organizando tudo pelo Momentum. A ferramenta de criação de treinos é top."</p>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div style="width: 40px; height: 40px; background: #333; border-radius: 50%;"></div>
+                        <div>
+                            <strong style="display: block; color: white;">Roberto T.</strong>
+                            <span style="font-size: 0.8rem; color: var(--primary-color);">Personal Trainer</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
