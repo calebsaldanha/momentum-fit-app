@@ -9,6 +9,10 @@ const cookieParser = require('cookie-parser');
 
 const app = express();
 
+// --- CORREÇÃO CRÍTICA PARA VERCEL ---
+// Necessário para que cookies 'secure' funcionem atrás do proxy da Vercel
+app.set('trust proxy', 1); 
+
 // Configuração de View Engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -19,35 +23,36 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(cookieParser());
 
-// Configuração de Sessão (Robusta)
+// Configuração de Sessão (Otimizada)
 app.use(session({
     store: new pgSession({
-        pool: pool,
-        tableName: 'session'
+        pool: pool, // Usa a conexão do db.js
+        tableName: 'session',
+        createTableIfMissing: true
     }),
-    secret: process.env.SESSION_SECRET || 'momentum_secret_key_change_me',
+    secret: process.env.SESSION_SECRET || 'momentum_secret_key_change_me_immediately',
     resave: false,
     saveUninitialized: false,
     cookie: {
         maxAge: 30 * 24 * 60 * 60 * 1000, // 30 dias
-        secure: process.env.NODE_ENV === 'production',
-        httpOnly: true
+        // Secure DEVE ser true em produção (https), false localmente (http)
+        secure: process.env.NODE_ENV === 'production', 
+        httpOnly: true,
+        sameSite: 'lax' // Melhor compatibilidade com redirects
     }
 }));
 
-// CSRF Protection (Ignorar em rotas de API/Webhook se necessário no futuro)
+// CSRF Protection
 const csrfProtection = csrf({ cookie: true });
 app.use(csrfProtection);
 
 // === MIDDLEWARE GLOBAL DE VARIÁVEIS ===
-// Isso garante que o Header e Sidebar nunca quebrem
 app.use((req, res, next) => {
     res.locals.user = req.session.user || null;
     res.locals.isAuthenticated = !!req.session.user;
     res.locals.csrfToken = req.csrfToken();
-    res.locals.currentPage = req.path; // Usado para destacar menu ativo
+    res.locals.currentPage = req.path;
     
-    // Tratamento de mensagens flash (Query params simples por enquanto)
     res.locals.success = req.query.success || null;
     res.locals.error = req.query.error || null;
     
@@ -62,9 +67,9 @@ app.use('/trainer', require('./routes/trainer'));
 app.use('/admin', require('./routes/admin'));
 app.use('/workouts', require('./routes/workouts'));
 app.use('/articles', require('./routes/articles'));
-// app.use('/api', require('./routes/api')); // Se existir
+// app.use('/api', require('./routes/api'));
 
-// Rota de 404 (Página não encontrada)
+// Rota de 404
 app.use((req, res) => {
     res.status(404).render('pages/error', { 
         message: 'Página não encontrada', 
@@ -73,8 +78,13 @@ app.use((req, res) => {
     });
 });
 
-// Rota de 500 (Erro no Servidor)
+// Rota de 500
 app.use((err, req, res, next) => {
+    // Ignora erro CSRF (apenas redireciona)
+    if (err.code === 'EBADCSRFTOKEN') {
+        return res.redirect('/auth/login?error=Sessão expirada, tente novamente.');
+    }
+    
     console.error('SERVER ERROR:', err);
     res.status(500).render('pages/error', { 
         message: 'Algo deu errado no servidor.', 
