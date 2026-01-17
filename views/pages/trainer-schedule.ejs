@@ -1,27 +1,162 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <title>Minha Agenda | Momentum Fit</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/styles.css">
-</head>
-<body>
-    <div class="dashboard-container">
-        <%- include('../partials/sidebar') %>
-        <main class="dashboard-main">
-            <div class="page-header" style="text-align: left; background: transparent; padding-left: 0;">
-                <h1><i class="fas fa-calendar-alt text-neon"></i> Minha Agenda</h1>
-            </div>
+<%- include('../partials/header.ejs') %>
+
+<style>
+    .schedule-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Responsivo */
+        gap: 20px;
+        margin-top: 20px;
+        overflow-x: auto;
+        padding-bottom: 20px;
+    }
+    
+    .day-column {
+        background: #0a0a0a;
+        border: 1px solid #222;
+        border-radius: 12px;
+        min-height: 400px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .day-header {
+        background: rgba(190, 242, 2, 0.05);
+        padding: 15px;
+        border-bottom: 1px solid #222;
+        text-align: center;
+        border-radius: 12px 12px 0 0;
+    }
+    
+    .day-header h3 {
+        margin: 0;
+        font-size: 1.1rem;
+        color: var(--primary-color);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .day-content {
+        padding: 10px;
+        flex-grow: 1;
+    }
+
+    .workout-card-mini {
+        background: #181818;
+        border: 1px solid #333;
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 10px;
+        transition: 0.2s;
+        border-left: 3px solid transparent;
+    }
+
+    .workout-card-mini:hover {
+        transform: translateY(-2px);
+        background: #202020;
+    }
+
+    .workout-card-mini.status-completed { border-left-color: var(--primary-color); opacity: 0.7; }
+    .workout-card-mini.status-active { border-left-color: #40c4ff; }
+
+    .client-info-mini {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+    }
+    
+    .client-avatar-mini {
+        width: 24px; height: 24px; border-radius: 50%;
+        background: #333; object-fit: cover;
+    }
+    
+    .client-name { font-size: 0.85rem; color: #ddd; font-weight: 600; }
+    .workout-title { font-size: 0.8rem; color: #888; display: block; margin-bottom: 5px;}
+    
+    .status-badge-mini {
+        font-size: 0.7rem;
+        padding: 2px 6px;
+        border-radius: 4px;
+        display: inline-block;
+    }
+    .badge-done { background: rgba(190, 242, 2, 0.1); color: var(--primary-color); }
+    .badge-todo { background: rgba(255, 255, 255, 0.1); color: #ccc; }
+
+</style>
+
+<div class="dashboard-container">
+    <%- include('../partials/sidebar.ejs', { active: 'schedule' }) %>
+
+    <main class="dashboard-main">
+        <div class="page-header" style="text-align: left;">
+            <h1>Agenda Semanal</h1>
+            <p class="text-muted">Visão geral dos treinos distribuídos dos seus alunos.</p>
+        </div>
+
+        <div style="margin-bottom: 20px; display: flex; gap: 10px; overflow-x: auto;">
+            <button class="btn btn-sm btn-primary">Todos</button>
+            <button class="btn btn-sm btn-outline">Pendentes</button>
+            <button class="btn btn-sm btn-outline">Concluídos</button>
+        </div>
+
+        <div class="schedule-grid">
+            <% const days = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo']; %>
             
-            <div class="card-box" style="padding: 40px; text-align: center;">
-                <i class="fas fa-calendar-alt" style="font-size: 3rem; color: #333; margin-bottom: 20px;"></i>
-                <h3>Em Desenvolvimento</h3>
-                <p style="color: #888;">Esta funcionalidade estará disponível em breve na plataforma.</p>
-            </div>
-        </main>
-    </div>
-    <script src="/js/main.js"></script>
-</body>
-</html>
+            <% days.forEach(day => { %>
+                <div class="day-column">
+                    <div class="day-header">
+                        <h3><%= day %></h3>
+                        <span style="font-size: 0.8rem; color: #666;"><%= schedule[day].length %> treinos</span>
+                    </div>
+                    <div class="day-content">
+                        <% if (schedule[day].length > 0) { %>
+                            <% schedule[day].forEach(workout => { %>
+                                <div class="workout-card-mini status-<%= workout.status || 'active' %>" onclick="window.location.href='/workouts/edit/<%= workout.id %>'" style="cursor: pointer;">
+                                    <div class="client-info-mini">
+                                        <img src="<%= workout.profile_image || '/images/logo-3d.png' %>" class="client-avatar-mini" alt="Avatar">
+                                        <span class="client-name"><%= workout.client_name.split(' ')[0] %></span>
+                                    </div>
+                                    <span class="workout-title"><%= workout.title %></span>
+                                    
+                                    <% if (workout.status === 'completed') { %>
+                                        <span class="status-badge-mini badge-done"><i class="fas fa-check"></i> Feito</span>
+                                    <% } else { %>
+                                        <span class="status-badge-mini badge-todo">A Fazer</span>
+                                    <% } %>
+                                </div>
+                            <% }) %>
+                        <% } else { %>
+                            <div style="text-align: center; padding: 20px; color: #333;">
+                                <i class="fas fa-bed" style="font-size: 1.5rem; margin-bottom: 5px;"></i>
+                                <p style="font-size: 0.8rem; margin: 0;">Livre</p>
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+            <% }) %>
+
+            <% if (schedule['Flexível'] && schedule['Flexível'].length > 0) { %>
+                <div class="day-column" style="border-style: dashed; border-color: #444;">
+                    <div class="day-header" style="background: rgba(255,255,255,0.02);">
+                        <h3 style="color: #888;">Flexíveis</h3>
+                        <span style="font-size: 0.8rem; color: #666;"><%= schedule['Flexível'].length %> treinos</span>
+                    </div>
+                    <div class="day-content">
+                        <% schedule['Flexível'].forEach(workout => { %>
+                             <div class="workout-card-mini status-<%= workout.status || 'active' %>">
+                                <div class="client-info-mini">
+                                    <img src="<%= workout.profile_image || '/images/logo-3d.png' %>" class="client-avatar-mini" alt="Avatar">
+                                    <span class="client-name"><%= workout.client_name.split(' ')[0] %></span>
+                                </div>
+                                <span class="workout-title"><%= workout.title %></span>
+                            </div>
+                        <% }) %>
+                    </div>
+                </div>
+            <% } %>
+
+        </div>
+    </main>
+</div>
+
+<%- include('../partials/footer.ejs') %>

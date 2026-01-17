@@ -1,110 +1,112 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../database/db');
+const { Pool } = require('pg');
+require('dotenv').config();
 
-// Middleware de Autenticação para Trainer
-function isTrainer(req, res, next) {
-    if (req.session.user && (req.session.user.role === 'trainer' || req.session.user.role === 'superadmin')) {
+// Middleware de Autenticação do Treinador
+function requireTrainer(req, res, next) {
+    if (req.session.user && (req.session.user.role === 'trainer' || req.session.user.role === 'admin')) {
         return next();
     }
     res.redirect('/auth/login');
 }
 
-router.use(isTrainer);
+router.use(requireTrainer);
 
-// 1. Dashboard: Visão Geral
+// Middleware para dados comuns (user)
+router.use((req, res, next) => {
+    res.locals.user = req.session.user;
+    next();
+});
+
+// DASHBOARD
 router.get('/dashboard', async (req, res) => {
     try {
-        // Busca estatísticas básicas
-        const clients = await db.getClientsByTrainer(req.session.user.id);
-        const activeClients = clients.length;
+        const clientsCount = await db.query("SELECT COUNT(*) FROM clients WHERE trainer_id = $1", [req.session.user.id]);
+        const workoutsCount = await db.query("SELECT COUNT(*) FROM workouts WHERE trainer_id = $1", [req.session.user.id]);
         
-        // Simulação de checkins recentes (idealmente viria do DB)
-        const recentCheckins = await db.query(`
-            SELECT c.*, u.name as client_name 
-            FROM checkins c
+        // Busca alunos recentes
+        const recentClients = await db.query(`
+            SELECT u.name, u.profile_image, c.id as client_id 
+            FROM clients c
             JOIN users u ON c.user_id = u.id
-            WHERE u.trainer_id = $1
+            WHERE c.trainer_id = $1
             ORDER BY c.created_at DESC LIMIT 5
         `, [req.session.user.id]);
 
         res.render('pages/trainer-dashboard', { 
             title: 'Painel do Treinador', 
-            user: req.session.user, 
-            stats: { activeClients, totalCheckins: 0 }, // Pode expandir depois
-            recentCheckins: recentCheckins.rows,
-            currentPage: '/trainer/dashboard',
-            csrfToken: req.csrfToken()
+            stats: { clients: clientsCount.rows[0].count, workouts: workoutsCount.rows[0].count },
+            recentClients: recentClients.rows,
+            currentPage: '/trainer/dashboard'
         });
-    } catch (e) {
-        console.error(e);
-        res.render('pages/error', { message: 'Erro ao carregar painel.' });
-    }
+    } catch (e) { console.error(e); res.render('pages/error'); }
 });
 
-// 2. Lista de Alunos
+// MEUS ALUNOS
 router.get('/clients', async (req, res) => {
+    const clients = await db.getTrainerClients(req.session.user.id);
+    res.render('pages/trainer-clients', { title: 'Meus Alunos', clients, currentPage: '/trainer/clients' });
+});
+
+// AGENDA (NOVO)
+router.get('/schedule', async (req, res) => {
     try {
-        const clients = await db.getClientsByTrainer(req.session.user.id);
-        res.render('pages/trainer-clients', { 
-            title: 'Meus Alunos', 
-            user: req.session.user, 
-            clients: clients,
-            currentPage: '/trainer/clients',
-            csrfToken: req.csrfToken()
+        // Busca TODOS os treinos ativos vinculados a este treinador
+        // Trazendo info do aluno e do treino
+        const query = `
+            SELECT w.id, w.title, w.day_of_week, w.status, u.name as client_name, u.profile_image
+            FROM workouts w
+            JOIN clients c ON w.client_id = c.id
+            JOIN users u ON c.user_id = u.id
+            WHERE w.trainer_id = $1
+            ORDER BY 
+                CASE 
+                    WHEN w.day_of_week = 'Segunda' THEN 1
+                    WHEN w.day_of_week = 'Terça' THEN 2
+                    WHEN w.day_of_week = 'Quarta' THEN 3
+                    WHEN w.day_of_week = 'Quinta' THEN 4
+                    WHEN w.day_of_week = 'Sexta' THEN 5
+                    WHEN w.day_of_week = 'Sábado' THEN 6
+                    WHEN w.day_of_week = 'Domingo' THEN 7
+                    ELSE 8
+                END ASC
+        `;
+        const result = await db.query(query, [req.session.user.id]);
+        
+        // Agrupamento manual para facilitar o EJS
+        const schedule = {
+            'Segunda': [], 'Terça': [], 'Quarta': [], 'Quinta': [], 
+            'Sexta': [], 'Sábado': [], 'Domingo': [], 'Flexível': []
+        };
+
+        result.rows.forEach(workout => {
+            // Normaliza o dia (remove sufixos como "-feira" se houver inconsistência, mas o select já filtra)
+            let day = workout.day_of_week.split('-')[0]; 
+            if (schedule[day]) {
+                schedule[day].push(workout);
+            } else {
+                schedule['Flexível'].push(workout);
+            }
+        });
+
+        res.render('pages/trainer-schedule', { 
+            title: 'Minha Agenda', 
+            schedule: schedule, 
+            currentPage: '/trainer/schedule' 
         });
     } catch (e) {
         console.error(e);
-        res.redirect('/trainer/dashboard');
+        res.render('pages/error', { message: 'Erro ao carregar agenda.' });
     }
 });
 
-// 3. Perfil do Treinador
-router.get('/profile', async (req, res) => {
-    try {
-        // Busca dados estendidos do treinador se houver tabela 'trainers'
-        // Por enquanto usa dados do user session
-        res.render('pages/trainer-profile', { 
-            title: 'Meu Perfil', 
-            user: req.session.user, 
-            currentPage: '/trainer/profile',
-            csrfToken: req.csrfToken()
-        });
-    } catch (e) {
-        res.redirect('/trainer/dashboard');
-    }
-});
-
-router.post('/profile/update', async (req, res) => {
-    // Lógica de update simplificada
-    const { name, email } = req.body;
-    try {
-        await db.updateUser(req.session.user.id, { name, email });
-        // Atualiza a sessão
-        req.session.user.name = name;
-        req.session.user.email = email;
-        res.redirect('/trainer/profile');
-    } catch (e) {
-        console.error(e);
-        res.redirect('/trainer/profile');
-    }
-});
-
-
-router.get('/financial', async (req, res) => {
-    // Simula dados financeiros
-    const transactions = await db.query("SELECT * FROM transactions WHERE user_id = $1 ORDER BY created_at DESC", [req.session.user.id]);
-    res.render('pages/trainer-financial', { 
-        title: 'Financeiro', user: req.session.user, 
-        balance: 1250.00, transactions: transactions.rows,
-        currentPage: '/trainer/financial', csrfToken: req.csrfToken()
-    });
-});
-
-
-// Páginas adicionais solicitadas
-router.get('/schedule', (req, res) => res.render('pages/trainer-schedule', { title: 'Minha Agenda', user: req.session.user, currentPage: '/trainer/schedule', csrfToken: req.csrfToken() }));
-router.get('/content', (req, res) => res.render('pages/trainer-content', { title: 'Meus Conteúdos', user: req.session.user, currentPage: '/trainer/content', csrfToken: req.csrfToken() }));
-router.get('/settings', (req, res) => res.render('pages/trainer-settings', { title: 'Configurações', user: req.session.user, currentPage: '/trainer/settings', csrfToken: req.csrfToken() }));
+// OUTRAS ROTAS (Stubs mantidos para não quebrar links)
+router.get('/library', (req, res) => res.render('pages/trainer-library', { title: 'Biblioteca', currentPage: '/trainer/library' }));
+router.get('/financial', (req, res) => res.render('pages/trainer-financial', { title: 'Financeiro', currentPage: '/trainer/financial' }));
+router.get('/content', (req, res) => res.render('pages/trainer-content', { title: 'Conteúdo', currentPage: '/trainer/content' }));
+router.get('/profile', (req, res) => res.render('pages/trainer-profile', { title: 'Perfil Profissional', currentPage: '/trainer/profile' }));
+router.get('/settings', (req, res) => res.render('pages/trainer-settings', { title: 'Configurações', currentPage: '/trainer/settings' }));
 
 module.exports = router;
