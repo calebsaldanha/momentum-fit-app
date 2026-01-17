@@ -54,21 +54,99 @@ router.get('/workouts', async (req, res) => {
     });
 });
 
-// Placeholder Routes (Para o menu funcionar)
-router.get('/evolution', (req, res) => res.render('pages/error', { message: 'Módulo de Evolução em breve!' }));
-router.get('/plans', (req, res) => res.render('pages/error', { message: 'Gestão de Planos em breve!' }));
+// --- NOVO: MODO EXECUÇÃO DE TREINO ---
+router.get('/workout/:id', async (req, res) => {
+    try {
+        const workoutId = req.params.id;
+        
+        // Busca treino e valida se pertence ao aluno logado
+        const workoutRes = await db.query(`
+            SELECT * FROM workouts 
+            WHERE id = $1 AND client_id = $2
+        `, [workoutId, res.locals.clientData.id]);
 
-// --- ACTION ROUTES ---
+        if (workoutRes.rows.length === 0) {
+            return res.redirect('/client/workouts');
+        }
 
-// 1. Update Dados Pessoais
+        const workout = workoutRes.rows[0];
+        
+        // Busca exercícios
+        const exercisesRes = await db.query(`
+            SELECT * FROM workout_exercises 
+            WHERE workout_id = $1 
+            ORDER BY order_index ASC
+        `, [workoutId]);
+
+        res.render('pages/client-workout-play', { 
+            title: `Treinar: ${workout.title}`,
+            user: req.session.user,
+            workout: workout,
+            exercises: exercisesRes.rows,
+            currentPage: '/client/workouts',
+            csrfToken: req.csrfToken()
+        });
+
+    } catch (e) {
+        console.error(e);
+        res.render('pages/error', { message: 'Erro ao carregar treino.' });
+    }
+});
+
+// --- NOVO: FINALIZAR TREINO (POST) ---
+router.post('/workout/:id/complete', async (req, res) => {
+    const workoutId = req.params.id;
+    const { logs, feedback_text, effort_level } = req.body;
+    // logs deve ser um objeto: { exercise_id: { weight: '...', reps: '...' }, ... }
+
+    try {
+        // Validação de segurança
+        const checkOwner = await db.query("SELECT id FROM workouts WHERE id = $1 AND client_id = $2", [workoutId, res.locals.clientData.id]);
+        if (checkOwner.rows.length === 0) return res.status(403).json({ error: 'Acesso negado' });
+
+        // 1. Salvar Logs de cada exercício
+        if (logs) {
+            for (const [exId, data] of Object.entries(logs)) {
+                await db.query(`
+                    UPDATE workout_exercises 
+                    SET log_weight = $1, log_reps = $2, is_completed = TRUE
+                    WHERE id = $3 AND workout_id = $4
+                `, [data.weight, data.reps, exId, workoutId]);
+            }
+        }
+
+        // 2. Criar Check-in
+        await db.query(`
+            INSERT INTO checkins (user_id, workout_id, date, feedback_text, effort_level)
+            VALUES ($1, $2, NOW(), $3, $4)
+        `, [req.session.user.id, workoutId, feedback_text, effort_level]);
+
+        // 3. Atualizar Treino (Status e Data)
+        await db.query(`
+            UPDATE workouts 
+            SET status = 'completed', finished_at = NOW() 
+            WHERE id = $1
+        `, [workoutId]);
+
+        // 4. (Opcional) Atualizar Peso no perfil se informado no feedback? (Deixar para depois)
+
+        res.json({ success: true, redirect: '/client/dashboard' });
+
+    } catch (e) {
+        console.error("Erro ao finalizar treino:", e);
+        res.status(500).json({ error: 'Erro interno ao salvar.' });
+    }
+});
+
+
+// --- ACTION ROUTES (PERFIL) ---
+
 router.post('/profile/update-general', async (req, res) => {
     try {
         await db.updateUser(req.session.user.id, { name: req.body.name });
-        req.session.user.name = req.body.name; // Update session
-        
-        // Atualiza birth_date e gender
+        req.session.user.name = req.body.name;
         await db.updateClientProfileFull(req.session.user.id, {
-            ...res.locals.clientData, // Mantem o resto
+            ...res.locals.clientData,
             birth_date: req.body.birth_date,
             gender: req.body.gender
         });
@@ -76,7 +154,6 @@ router.post('/profile/update-general', async (req, res) => {
     } catch(e) { console.error(e); res.redirect('/client/profile?error=true'); }
 });
 
-// 2. Update Físico
 router.post('/profile/update-physical', async (req, res) => {
     try {
         await db.updateClientProfileFull(req.session.user.id, {
@@ -90,7 +167,6 @@ router.post('/profile/update-physical', async (req, res) => {
     } catch(e) { console.error(e); res.redirect('/client/profile?error=true'); }
 });
 
-// 3. Update Preferencias
 router.post('/profile/update-preferences', async (req, res) => {
     try {
         await db.updateClientProfileFull(req.session.user.id, {
@@ -103,31 +179,20 @@ router.post('/profile/update-preferences', async (req, res) => {
     } catch(e) { console.error(e); res.redirect('/client/profile?error=true'); }
 });
 
-// 4. Mudar Senha
 router.post('/profile/change-password', async (req, res) => {
     const { currentPassword, newPassword, confirmNewPassword } = req.body;
-    
     if (newPassword !== confirmNewPassword) return res.redirect('/client/profile?msg=pass_mismatch');
-    
-    // Pega usuario com senha (o do session nao tem hash)
-    const userFull = await db.getUserById(req.session.user.id); // precisa garantir que esse metodo traga senha no db.js, se nao, fazer query manual
-    // Hack rapido: getUserById geralmente retorna *
-    
+    const userFull = await db.getUserById(req.session.user.id); 
     const match = await bcrypt.compare(currentPassword, userFull.password);
     if (!match) return res.redirect('/client/profile?msg=wrong_curr_pass');
-    
     const newHash = await bcrypt.hash(newPassword, 10);
     await db.updateUserPassword(req.session.user.id, newHash);
-    
     res.redirect('/client/profile?msg=success');
 });
 
-
-// --- NOVAS FUNCIONALIDADES CLIENTE ---
-
+// --- OUTRAS ROTAS ---
 router.get('/evolution', async (req, res) => {
     try {
-        // Busca histórico de peso e medidas
         const history = await db.query("SELECT * FROM profile_history WHERE client_id = $1 ORDER BY recorded_at ASC", [res.locals.clientData.id]);
         res.render('pages/client-evolution', { 
             title: 'Minha Evolução', user: req.session.user, history: history.rows,
@@ -136,22 +201,8 @@ router.get('/evolution', async (req, res) => {
     } catch(e) { res.render('pages/error'); }
 });
 
-router.get('/ai-coach', (req, res) => {
-    res.render('pages/client-ai-coach', { 
-        title: 'IA Coach', user: req.session.user, 
-        currentPage: '/client/ai-coach', csrfToken: req.csrfToken()
-    });
-});
-
-router.get('/plans', (req, res) => {
-    res.render('pages/client-plans', { 
-        title: 'Meu Plano', user: req.session.user, 
-        currentPage: '/client/plans', csrfToken: req.csrfToken()
-    });
-});
-
-
-// Páginas adicionais solicitadas
+router.get('/ai-coach', (req, res) => res.render('pages/client-ai-coach', { title: 'IA Coach', user: req.session.user, currentPage: '/client/ai-coach', csrfToken: req.csrfToken() }));
+router.get('/plans', (req, res) => res.render('pages/client-plans', { title: 'Meu Plano', user: req.session.user, currentPage: '/client/plans', csrfToken: req.csrfToken() }));
 router.get('/content', (req, res) => res.render('pages/client-content', { title: 'Conteúdos Salvos', user: req.session.user, currentPage: '/client/content', csrfToken: req.csrfToken() }));
 router.get('/settings', (req, res) => res.render('pages/client-settings', { title: 'Configurações', user: req.session.user, currentPage: '/client/settings', csrfToken: req.csrfToken() }));
 
