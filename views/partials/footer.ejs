@@ -1,57 +1,39 @@
-    </main>
-
-    <footer class="main-footer compact-footer">
-        <div class="container">
-            <div class="footer-wrapper">
-                
-                <div class="footer-brand-section">
-                    <div class="footer-logo">
-                        <img src="/images/momentum-fit-icon.png" alt="Logo">
-                        <span>Momentum Fit</span>
-                    </div>
-                    <p class="copyright-text">&copy; 2026 Momentum Fit. Todos os direitos reservados.</p>
-                </div>
-
-                <div class="footer-contact-section">
-                    <a href="mailto:admin@momentumfitness.com.br" class="footer-link">
-                        <i class="fas fa-envelope"></i> admin@momentumfitness.com.br
-                    </a>
-                    <a href="https://instagram.com" target="_blank" class="footer-link">
-                        <i class="fab fa-instagram"></i> Instagram
-                    </a>
-                </div>
-
-            </div>
+<footer class="main-footer" style="padding: 40px 20px; background-color: #050505; color: #888; border-top: 1px solid var(--border-light); font-size: 0.9rem;">
+    <div class="container" style="max-width: 1200px; margin: 0 auto; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 30px;">
+        <div style="flex: 1; min-width: 200px;">
+            <img src="/images/momentum-fit-logo-completo.png" alt="Momentum" style="height: 30px; margin-bottom: 15px; opacity: 0.8;">
+            <p>Plataforma completa para evolução física e gestão de treinamento.</p>
         </div>
-    </footer>
+        
+        <div style="flex: 1; min-width: 150px;">
+            <h4 style="color: white; margin-bottom: 15px;">Plataforma</h4>
+            <ul style="list-style: none; padding: 0; line-height: 2;">
+                <li><a href="/" style="color: #888; text-decoration: none;">Início</a></li>
+                <li><a href="/plans" style="color: #888; text-decoration: none;">Planos</a></li>
+                <li><a href="/articles" style="color: #888; text-decoration: none;">Blog</a></li>
+            </ul>
+        </div>
 
-    <script>
-        // Mobile Menu Logic
-        document.addEventListener('DOMContentLoaded', () => {
-            const menuBtn = document.getElementById('mobileMenuBtn');
-            const closeBtn = document.getElementById('closeMenuBtn');
-            const menu = document.getElementById('mobileMenu');
-            
-            if(menuBtn && menu) {
-                menuBtn.addEventListener('click', () => {
-                    menu.classList.add('active');
-                    document.body.style.overflow = 'hidden'; // Prevent scroll
-                });
-                
-                const closeMenu = () => {
-                    menu.classList.remove('active');
-                    document.body.style.overflow = '';
-                };
+        <div style="flex: 1; min-width: 150px;">
+            <h4 style="color: white; margin-bottom: 15px;">Legal</h4>
+            <ul style="list-style: none; padding: 0; line-height: 2;">
+                <li><a href="/terms" style="color: #888; text-decoration: none;">Termos de Uso</a></li>
+                <li><a href="/contact" style="color: #888; text-decoration: none;">Suporte</a></li>
+            </ul>
+        </div>
+    </div>
+    <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #222;">
+        &copy; <%= new Date().getFullYear() %> Momentum Fit. Todos os direitos reservados.
+    </div>
+</footer>
 
-                if(closeBtn) closeBtn.addEventListener('click', closeMenu);
-                
-                // Close on click outside (optional)
-                menu.addEventListener('click', (e) => {
-                    if(e.target === menu) closeMenu();
-                });
-            }
-        });
-    </script>
-    <script src="/js/main.js"></script>
+<script src="/js/main.js"></script>
+<script>
+    // Fecha alertas automaticamente
+    setTimeout(() => {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(a => a.style.display = 'none');
+    }, 5000);
+</script>
 </body>
 </html>

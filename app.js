@@ -1,97 +1,89 @@
+require('dotenv').config();
 const express = require('express');
+const path = require('path');
 const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
-const bodyParser = require('body-parser');
+const pool = require('./database/db'); // Seu pool pg
+const csrf = require('csurf');
 const cookieParser = require('cookie-parser');
-const path = require('path');
-const flash = require('connect-flash');
-const csrf = require('csurf'); 
-const db = require('./database/db'); 
-require('dotenv').config();
 
 const app = express();
 
-app.set('trust proxy', 1);
+// Configuração de View Engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
+// Middleware de Body Parser e Static
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
-app.use(bodyParser.json({ limit: '50mb' }));
 app.use(cookieParser());
 
-// Configuração de Sessão
+// Configuração de Sessão (Robusta)
 app.use(session({
-  store: new pgSession({
-    pool: db.pool,
-    tableName: 'session',
-    createTableIfMissing: true,
-    pruneSessionInterval: 60 * 15
-  }),
-  secret: process.env.SESSION_SECRET || 'chave-secreta-padrao',
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: process.env.NODE_ENV === 'production', 
-    maxAge: 30 * 24 * 60 * 60 * 1000,
-    httpOnly: true,
-    sameSite: 'lax'
-  }
+    store: new pgSession({
+        pool: pool,
+        tableName: 'session'
+    }),
+    secret: process.env.SESSION_SECRET || 'momentum_secret_key_change_me',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 dias
+        secure: process.env.NODE_ENV === 'production',
+        httpOnly: true
+    }
 }));
 
-app.use(flash());
-
-const csrfProtection = csrf({ cookie: false });
+// CSRF Protection (Ignorar em rotas de API/Webhook se necessário no futuro)
+const csrfProtection = csrf({ cookie: true });
 app.use(csrfProtection);
 
-// Middleware Global
+// === MIDDLEWARE GLOBAL DE VARIÁVEIS ===
+// Isso garante que o Header e Sidebar nunca quebrem
 app.use((req, res, next) => {
-  res.locals.success_msg = req.flash('success_msg');
-  res.locals.error_msg = req.flash('error_msg');
-  res.locals.error = req.flash('error');
-  res.locals.user = req.session.user || null;
-  res.locals.isAuthenticated = !!req.session.user; 
-  res.locals.csrfToken = req.csrfToken();
-  next();
+    res.locals.user = req.session.user || null;
+    res.locals.isAuthenticated = !!req.session.user;
+    res.locals.csrfToken = req.csrfToken();
+    res.locals.currentPage = req.path; // Usado para destacar menu ativo
+    
+    // Tratamento de mensagens flash (Query params simples por enquanto)
+    res.locals.success = req.query.success || null;
+    res.locals.error = req.query.error || null;
+    
+    next();
 });
 
-// Tratamento de Erro CSRF
-app.use((err, req, res, next) => {
-  if (err.code !== 'EBADCSRFTOKEN') return next(err);
-  console.error('Erro CSRF:', err);
-  res.status(403).render('pages/error', { 
-    message: 'Sessão expirada ou token inválido. Por favor, recarregue a página e tente novamente.',
-    error: { status: 403 }
-  });
-});
-
-// Rotas
+// === ROTAS ===
 app.use('/', require('./routes/index'));
 app.use('/auth', require('./routes/auth'));
-app.use('/admin', require('./routes/admin'));
-app.use('/trainer', require('./routes/trainer'));
 app.use('/client', require('./routes/client'));
+app.use('/trainer', require('./routes/trainer'));
+app.use('/admin', require('./routes/admin'));
 app.use('/workouts', require('./routes/workouts'));
 app.use('/articles', require('./routes/articles'));
-app.use('/superadmin', require('./routes/superadmin'));
-app.use('/chat', require('./routes/chat'));
-app.use('/notifications', require('./routes/notifications'));
+// app.use('/api', require('./routes/api')); // Se existir
 
+// Rota de 404 (Página não encontrada)
 app.use((req, res) => {
-  res.status(404).render('pages/error', {
-    message: 'Página não encontrada',
-    error: { status: 404 }
-  });
+    res.status(404).render('pages/error', { 
+        message: 'Página não encontrada', 
+        error: { status: 404 },
+        title: 'Erro 404'
+    });
 });
 
-// Inicialização do Servidor (Condicional para evitar erro no Vercel)
-// Se o arquivo for rodado diretamente (node app.js), inicia o servidor.
-// Se for importado (pelo Vercel), apenas exporta o app.
-if (require.main === module) {
-    const PORT = process.env.PORT || 3000;
-    app.listen(PORT, () => {
-      console.log(`Servidor rodando na porta ${PORT}`);
+// Rota de 500 (Erro no Servidor)
+app.use((err, req, res, next) => {
+    console.error('SERVER ERROR:', err);
+    res.status(500).render('pages/error', { 
+        message: 'Algo deu errado no servidor.', 
+        error: { status: 500 },
+        title: 'Erro Interno'
     });
-}
+});
 
-module.exports = app;
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Servidor rodando na porta ${PORT}`);
+});

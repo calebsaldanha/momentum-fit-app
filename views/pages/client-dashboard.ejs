@@ -4,81 +4,49 @@
     <%- include('../partials/sidebar.ejs', { active: 'dashboard' }) %>
 
     <main class="dashboard-main">
-        <div style="margin-bottom: 30px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 20px;">
-            <div>
-                <h1 style="font-size: 2rem; color: white;">Olá, <span class="text-neon"><%= user.name.split(' ')[0] %></span>!</h1>
-                <p class="text-muted">Vamos manter o foco hoje?</p>
+        <div class="content-wrapper">
+            <div style="margin-bottom: 30px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 20px;">
+                <div>
+                    <h1 style="font-size: 2rem; color: white;">Olá, <span class="text-neon"><%= user.name.split(' ')[0] %></span>!</h1>
+                    <p class="text-muted">Vamos manter o foco hoje?</p>
+                </div>
+                <a href="/client/workouts" class="btn btn-primary"><i class="fas fa-play" style="margin-right: 8px;"></i> Ir para Treinos</a>
             </div>
-            <a href="/client/workouts" class="btn btn-primary"><i class="fas fa-play" style="margin-right: 8px;"></i> Iniciar Treino</a>
-        </div>
 
-        <div class="content-grid" style="padding: 0; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 30px;">
-            <div class="card-box" style="display: flex; align-items: center; gap: 15px;">
-                <div style="background: rgba(190, 242, 2, 0.1); width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--primary-color); font-size: 1.2rem;">
-                    <i class="fas fa-dumbbell"></i>
+            <div class="content-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 30px;">
+                <div class="card-box">
+                    <span class="text-muted">Treinos Completos</span>
+                    <h3 class="text-neon"><%= stats ? stats.completed_workouts : 0 %></h3>
                 </div>
-                <div>
-                    <span class="text-muted" style="font-size: 0.85rem;">Treinos Completos</span>
-                    <h3 style="margin: 0; line-height: 1;"><%= stats ? stats.completed_workouts : 0 %></h3>
+                <div class="card-box">
+                    <span class="text-muted">Sequência</span>
+                    <h3><%= stats ? stats.streak : 0 %> dias</h3>
                 </div>
-            </div>
-            <div class="card-box" style="display: flex; align-items: center; gap: 15px;">
-                <div style="background: rgba(64, 196, 255, 0.1); width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #40c4ff; font-size: 1.2rem;">
-                    <i class="fas fa-fire"></i>
-                </div>
-                <div>
-                    <span class="text-muted" style="font-size: 0.85rem;">Sequência Atual</span>
-                    <h3 style="margin: 0; line-height: 1;"><%= stats ? stats.streak : 0 %> dias</h3>
+                <div class="card-box">
+                    <span class="text-muted">Peso Atual</span>
+                    <h3><%= clientData.current_weight || '-' %> kg</h3>
                 </div>
             </div>
-            <div class="card-box" style="display: flex; align-items: center; gap: 15px;">
-                <div style="background: rgba(255, 64, 129, 0.1); width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #ff4081; font-size: 1.2rem;">
-                    <i class="fas fa-weight"></i>
-                </div>
-                <div>
-                    <span class="text-muted" style="font-size: 0.85rem;">Último Peso</span>
-                    <h3 style="margin: 0; line-height: 1;"><%= clientData.current_weight || '-' %> kg</h3>
-                </div>
-            </div>
-        </div>
 
-        <div class="content-grid" style="padding: 0; grid-template-columns: 2fr 1fr;">
-            
             <div class="card-box">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h3>Seus Treinos</h3>
-                    <a href="/client/workouts" class="btn btn-sm btn-outline">Ver Todos</a>
-                </div>
-
+                <h3>Treinos Ativos</h3>
+                <br>
                 <% if (workouts && workouts.length > 0) { %>
-                    <div style="display: flex; flex-direction: column; gap: 15px;">
-                        <% workouts.forEach(workout => { %>
-                        <div style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 8px; border: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center;">
-                            <div>
-                                <h4 style="color: white; margin-bottom: 5px;"><%= workout.title %></h4>
-                                <span class="text-muted" style="font-size: 0.85rem;"><i class="far fa-calendar"></i> <%= workout.day_of_week || 'Flexível' %></span>
-                            </div>
-                            <a href="/client/workout/<%= workout.id %>" class="btn btn-sm btn-secondary">Detalhes</a>
+                    <% workouts.forEach(workout => { %>
+                    <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong style="color: white;"><%= workout.title %></strong>
+                            <div style="font-size: 0.8rem; color: #888;"><%= workout.day_of_week || 'Flexível' %></div>
                         </div>
-                        <% }) %>
+                        <a href="/client/workout/<%= workout.id %>" class="btn btn-sm btn-outline">Abrir</a>
                     </div>
+                    <% }) %>
                 <% } else { %>
-                    <div style="text-align: center; padding: 30px;">
-                        <p class="text-muted">Nenhum treino atribuído ainda.</p>
-                    </div>
+                    <p class="text-muted">Nenhum treino atribuído pelo seu personal ainda.</p>
                 <% } %>
             </div>
-
-            <div class="card-box" style="border-color: var(--primary-color);">
-                <h3 style="color: var(--primary-color); margin-bottom: 15px;"><i class="fas fa-robot"></i> Momentum Coach</h3>
-                <p style="font-size: 0.9rem; margin-bottom: 20px; color: #ddd;">
-                    "Lembre-se: A consistência vence a intensidade. Tente manter o mesmo horário de treino essa semana!"
-                </p>
-                <a href="/client/ai-coach" class="btn btn-full btn-outline">Conversar com IA</a>
-            </div>
-
         </div>
+        
+        <%- include('../partials/footer.ejs') %>
     </main>
 </div>
-
-<%- include('../partials/footer.ejs') %>
