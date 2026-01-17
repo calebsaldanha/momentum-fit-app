@@ -1,205 +1,223 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <%- include('../partials/header', { title: 'Novo Treino' }) %>
-    <link rel="stylesheet" href="/css/dashboard.css">
-    <style>
-        .exercise-item {
-            background: var(--bg-app);
-            border: 1px solid var(--border-subtle);
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            display: grid;
-            grid-template-columns: 60px 1fr auto;
-            gap: 1rem;
-            align-items: center;
-        }
-        .exercise-inputs {
-            display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin-top: 0.5rem;
-        }
-        .exercise-inputs input {
-            background: var(--bg-card); border: 1px solid var(--border);
-            color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.9rem;
-        }
-    </style>
-</head>
-<body>
-    <div class="dashboard-container">
-        <%- include('../partials/sidebar', { currentPage: 'create-workout' }) %>
-        
-        <main class="dashboard-main">
-            <header class="page-header">
-                <div>
-                    <h1>Novo Treino</h1>
-                    <p>Monte a rotina ideal para seu aluno.</p>
-                </div>
-                <a href="/admin/clients" class="btn btn-ghost"><i class="fas fa-times"></i> Cancelar</a>
-            </header>
+<%- include('../partials/header.ejs') %>
 
-            <form id="createWorkoutForm">
-                <div class="grid-2-col" style="grid-template-columns: 1fr 350px;">
-                    <div class="card-modern">
-                        <div class="d-flex justify-content-between align-items-center mb-4">
-                            <h3 class="h5 m-0">Sequência de Exercícios</h3>
-                            <div class="d-flex gap-2">
-                                <button type="button" onclick="openLibraryModal()" class="btn btn-primary btn-sm">
-                                    <i class="fas fa-search"></i> Biblioteca
-                                </button>
-                                <button type="button" id="addManualBtn" class="btn btn-ghost btn-sm">
-                                    <i class="fas fa-pen"></i> Manual
-                                </button>
-                            </div>
-                        </div>
+<div class="dashboard-container">
+    <%- include('../partials/sidebar.ejs', { active: 'workouts' }) %>
 
-                        <div id="exercisesList">
-                            <div class="text-center py-5 text-muted border rounded border-dashed" style="border-style: dashed; border-color: var(--border);">
-                                <i class="fas fa-dumbbell mb-2 opacity-50"></i>
-                                <p class="m-0 small">Adicione exercícios da biblioteca ou manualmente.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <aside>
-                        <div class="card-modern sticky-top" style="top: 2rem;">
-                            <div class="mb-3">
-                                <label class="text-muted small mb-1">Aluno</label>
-                                <select name="client_id" id="client_id" class="select-modern" required>
-                                    <option value="" disabled <%= !selectedClientId ? 'selected' : '' %>>Selecione...</option>
-                                    <% if (clients && clients.length > 0) { %>
-                                        <% clients.forEach(c => { %>
-                                            <option value="<%= c.id %>" <%= selectedClientId == c.id ? 'selected' : '' %>><%= c.name %></option>
-                                        <% }) %>
-                                    <% } %>
-                                </select>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="text-muted small mb-1">Título do Treino</label>
-                                <input type="text" id="title" class="input-modern" placeholder="Ex: Hipertrofia A" required>
-                            </div>
-
-                            <div class="mb-4">
-                                <label class="text-muted small mb-1">Observações</label>
-                                <textarea id="description" class="textarea-modern" rows="3" placeholder="Instruções gerais..."></textarea>
-                            </div>
-
-                            <button type="submit" class="btn btn-primary w-100 py-3">
-                                <i class="fas fa-save"></i> Salvar Treino
-                            </button>
-                        </div>
-                    </aside>
-                </div>
-            </form>
-        </main>
-    </div>
-
-    <div id="libraryModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:9999; align-items:center; justify-content:center;">
-        <div class="card-modern" style="width: 90%; max-width: 800px; max-height: 80vh; overflow: hidden; display: flex; flex-direction: column;">
-            <div class="d-flex justify-content-between p-3 border-bottom border-secondary">
-                <h3 class="m-0 h5">Biblioteca de Exercícios</h3>
-                <button onclick="document.getElementById('libraryModal').style.display='none'" class="btn btn-ghost btn-sm"><i class="fas fa-times"></i></button>
+    <main class="dashboard-main">
+        <div class="page-header" style="text-align: left; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1>Novo Treino</h1>
+                <p class="text-muted">Monte um treino personalizado ou use um template.</p>
             </div>
-            <div style="padding: 1rem; overflow-y: auto;">
-                <input type="text" id="searchLib" class="input-modern mb-3" placeholder="Buscar...">
-                <div id="libraryGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem;"></div>
+            <div style="display: flex; gap: 10px;">
+                <button type="button" class="btn btn-outline" onclick="openTemplateModal()">
+                    <i class="fas fa-folder-open"></i> Carregar Template
+                </button>
             </div>
         </div>
+
+        <div class="card-box">
+            <form id="createWorkoutForm">
+                <div class="form-group">
+                    <label>Aluno</label>
+                    <select name="client_id" class="form-input" required <%= selectedClientId ? 'disabled' : '' %>>
+                        <option value="">Selecione um aluno...</option>
+                        <% clients.forEach(client => { %>
+                            <option value="<%= client.id %>" <%= selectedClientId == client.id ? 'selected' : '' %>><%= client.name %></option>
+                        <% }) %>
+                    </select>
+                    <% if(selectedClientId) { %> <input type="hidden" name="client_id" value="<%= selectedClientId %>"> <% } %>
+                </div>
+
+                <div class="form-group">
+                    <label>Título do Treino</label>
+                    <input type="text" name="title" class="form-input" placeholder="Ex: Treino A - Peito e Tríceps" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Dia Sugerido</label>
+                    <select name="day_of_week" class="form-input">
+                        <option value="Segunda">Segunda-feira</option>
+                        <option value="Terça">Terça-feira</option>
+                        <option value="Quarta">Quarta-feira</option>
+                        <option value="Quinta">Quinta-feira</option>
+                        <option value="Sexta">Sexta-feira</option>
+                        <option value="Sábado">Sábado</option>
+                        <option value="Domingo">Domingo</option>
+                        <option value="Flexível">Flexível</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Descrição / Foco</label>
+                    <textarea name="description" class="form-input" rows="2" placeholder="Instruções gerais..."></textarea>
+                </div>
+
+                <div style="margin: 30px 0;">
+                    <h3 style="margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px;">Exercícios</h3>
+                    <div id="exerciseList">
+                        </div>
+                    
+                    <div style="display: flex; gap: 10px; margin-top: 15px;">
+                        <button type="button" class="btn btn-sm btn-outline" onclick="addExerciseRow()">
+                            <i class="fas fa-plus"></i> Adicionar Manual
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline" onclick="openLibraryModal()">
+                            <i class="fas fa-book"></i> Da Biblioteca
+                        </button>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; margin-top: 40px; border-top: 1px solid #333; padding-top: 20px;">
+                    <button type="button" class="btn btn-outline" onclick="saveAsTemplate()">
+                        <i class="fas fa-save"></i> Salvar como Template
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="saveBtn">
+                        Criar e Enviar <i class="fas fa-paper-plane" style="margin-left: 8px;"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+
+<div class="modal-overlay" id="templateModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 2000; align-items: center; justify-content: center;">
+    <div class="modal-box" style="background: #111; padding: 25px; border-radius: 12px; border: 1px solid #333; width: 90%; max-width: 500px;">
+        <h3 class="text-neon" style="margin-bottom: 15px;">Meus Templates</h3>
+        <div id="templateList" style="max-height: 300px; overflow-y: auto; text-align: left;">
+            <p class="text-muted"><i class="fas fa-spinner fa-spin"></i> Carregando...</p>
+        </div>
+        <button class="btn btn-sm btn-outline" style="margin-top: 15px; width: 100%;" onclick="document.getElementById('templateModal').style.display='none'">Fechar</button>
     </div>
+</div>
 
-    <script>
-        // Lógica mantida, apenas classes CSS atualizadas visualmente
-        const libraryData = <%- JSON.stringify(exerciseLibrary || []) %>;
-        const listContainer = document.getElementById('exercisesList');
+<script>
+    let exerciseCount = 0;
+
+    function addExerciseRow(data = {}) {
+        exerciseCount++;
+        const div = document.createElement('div');
+        div.className = 'exercise-row';
+        div.style.cssText = 'background: #0a0a0a; padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #222; display: grid; grid-template-columns: 2fr 1fr 1fr 2fr 30px; gap: 10px; align-items: center;';
         
-        function openLibraryModal() {
-            document.getElementById('libraryModal').style.display = 'flex';
-            const grid = document.getElementById('libraryGrid');
-            grid.innerHTML = libraryData.map(ex => `
-                <div onclick="addExercise('${ex.id}')" style="cursor:pointer; background:var(--bg-app); padding:0.5rem; border-radius:8px; border:1px solid var(--border);">
-                    <img src="${ex.image_url || '/images/momentum-fit-icon.png'}" style="width:100%; height:80px; object-fit:cover; margin-bottom:0.5rem;">
-                    <div style="font-size:0.8rem; font-weight:bold;">${ex.name}</div>
-                </div>
-            `).join('');
-        }
+        div.innerHTML = `
+            <input type="text" name="exercises[${exerciseCount}][name]" placeholder="Nome do Exercício" class="form-input" value="${data.name || ''}" required>
+            <input type="text" name="exercises[${exerciseCount}][sets]" placeholder="Séries" class="form-input" value="${data.sets || ''}">
+            <input type="text" name="exercises[${exerciseCount}][reps]" placeholder="Reps" class="form-input" value="${data.reps || ''}">
+            <input type="text" name="exercises[${exerciseCount}][notes]" placeholder="Notas (ex: Drop-set)" class="form-input" value="${data.notes || ''}">
+            <input type="hidden" name="exercises[${exerciseCount}][id]" value="${data.id || ''}">
+            <input type="hidden" name="exercises[${exerciseCount}][order_index]" value="${exerciseCount}">
+            <button type="button" class="btn btn-sm btn-ghost" onclick="this.parentElement.remove()" style="color: #ff4d4d;"><i class="fas fa-trash"></i></button>
+        `;
+        document.getElementById('exerciseList').appendChild(div);
+    }
 
-        function addExercise(id) {
-            const ex = libraryData.find(e => String(e.id) === String(id));
-            if(!ex) return;
-            document.getElementById('libraryModal').style.display = 'none';
-            
-            // Remove placeholder se existir
-            if(listContainer.querySelector('.text-center')) listContainer.innerHTML = '';
-
-            const div = document.createElement('div');
-            div.className = 'exercise-item';
-            div.innerHTML = `
-                <img src="${ex.image_url || ''}" style="width:50px; height:50px; object-fit:cover; border-radius:6px; background:#000;">
-                <div>
-                    <input type="text" class="input-modern ex-name mb-1" value="${ex.name}" style="border:none; background:transparent; padding:0; font-weight:bold;">
-                    <div class="exercise-inputs">
-                        <input type="text" class="ex-sets" placeholder="Séries">
-                        <input type="text" class="ex-reps" placeholder="Reps">
-                        <input type="text" class="ex-weight" placeholder="Carga">
-                    </div>
-                </div>
-                <button type="button" class="btn btn-danger btn-sm" onclick="this.closest('.exercise-item').remove()"><i class="fas fa-trash"></i></button>
-                <input type="hidden" class="ex-id" value="${ex.id}">
-            `;
-            listContainer.appendChild(div);
-        }
-        
-        // Manual Add
-        document.getElementById('addManualBtn').addEventListener('click', () => {
-             if(listContainer.querySelector('.text-center')) listContainer.innerHTML = '';
-             const div = document.createElement('div');
-             div.className = 'exercise-item';
-             div.innerHTML = `
-                <div style="width:50px; height:50px; background:#333; border-radius:6px; display:flex; align-items:center; justify-content:center;"><i class="fas fa-pen"></i></div>
-                <div>
-                    <input type="text" class="input-modern ex-name mb-1" placeholder="Nome do Exercício" style="background:var(--bg-input);">
-                    <div class="exercise-inputs">
-                        <input type="text" class="ex-sets" placeholder="Séries">
-                        <input type="text" class="ex-reps" placeholder="Reps">
-                        <input type="text" class="ex-weight" placeholder="Carga">
-                    </div>
-                </div>
-                <button type="button" class="btn btn-danger btn-sm" onclick="this.closest('.exercise-item').remove()"><i class="fas fa-trash"></i></button>
-                <input type="hidden" class="ex-id" value="">
-             `;
-             listContainer.appendChild(div);
-        });
-
-        // Submit Logic (Mantida)
-        document.getElementById('createWorkoutForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const exercises = Array.from(document.querySelectorAll('.exercise-item')).map((item, idx) => ({
-                id: item.querySelector('.ex-id').value || null,
-                name: item.querySelector('.ex-name').value,
-                sets: item.querySelector('.ex-sets').value,
-                reps: item.querySelector('.ex-reps').value,
-                weight: item.querySelector('.ex-weight').value,
-                order_index: idx
-            }));
-            
-            if(exercises.length === 0) return alert("Adicione exercícios.");
-
-            try {
-                const res = await fetch('/workouts/create', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'CSRF-Token': '<%= csrfToken %>' },
-                    body: JSON.stringify({
-                        client_id: document.getElementById('client_id').value,
-                        title: document.getElementById('title').value,
-                        description: document.getElementById('description').value,
-                        exercises
-                    })
+    // Lógica de Templates
+    function openTemplateModal() {
+        document.getElementById('templateModal').style.display = 'flex';
+        fetch('/workouts/api/templates')
+            .then(res => res.json())
+            .then(data => {
+                const list = document.getElementById('templateList');
+                list.innerHTML = '';
+                if(data.length === 0) {
+                    list.innerHTML = '<p class="text-muted">Nenhum template salvo.</p>';
+                    return;
+                }
+                data.forEach(t => {
+                    const item = document.createElement('div');
+                    item.style.cssText = 'padding: 10px; border-bottom: 1px solid #222; cursor: pointer; display: flex; justify-content: space-between; align-items: center;';
+                    item.innerHTML = `<span>${t.title}</span> <button class="btn btn-sm btn-primary">Usar</button>`;
+                    item.onclick = () => loadTemplate(t.id);
+                    list.appendChild(item);
                 });
-                const json = await res.json();
-                if(json.success) window.location.href = `/admin/clients/${document.getElementById('client_id').value}`;
-                else alert(json.message);
-            } catch(e) { alert("Erro ao salvar"); }
+            });
+    }
+
+    function loadTemplate(id) {
+        fetch('/workouts/api/templates/' + id)
+            .then(res => res.json())
+            .then(data => {
+                document.querySelector('input[name="title"]').value = data.template.title;
+                document.querySelector('textarea[name="description"]').value = data.template.description || '';
+                document.getElementById('exerciseList').innerHTML = ''; // Limpa atual
+                exerciseCount = 0;
+                data.exercises.forEach(ex => addExerciseRow(ex));
+                document.getElementById('templateModal').style.display = 'none';
+            });
+    }
+
+    function saveAsTemplate() {
+        const title = document.querySelector('input[name="title"]').value;
+        if(!title) return alert('Dê um título ao treino antes de salvar como template.');
+        
+        // Coletar dados manualmente para evitar submit do form
+        const exercises = [];
+        document.querySelectorAll('.exercise-row').forEach(row => {
+            exercises.push({
+                name: row.querySelector('input[name*="[name]"]').value,
+                sets: row.querySelector('input[name*="[sets]"]').value,
+                reps: row.querySelector('input[name*="[reps]"]').value,
+                notes: row.querySelector('input[name*="[notes]"]').value,
+                order_index: row.querySelector('input[name*="[order_index]"]').value
+            });
         });
-    </script>
-</body>
-</html>
+
+        fetch('/workouts/templates/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'CSRF-Token': '<%= csrfToken %>' },
+            body: JSON.stringify({ title, description: document.querySelector('textarea[name="description"]').value, exercises })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.success) alert('Template salvo com sucesso!');
+            else alert('Erro ao salvar.');
+        });
+    }
+
+    // Submit Principal
+    document.getElementById('createWorkoutForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('saveBtn');
+        btn.innerHTML = 'Enviando...';
+        
+        // Serialização customizada similar ao saveAsTemplate
+        const exercises = [];
+        document.querySelectorAll('.exercise-row').forEach(row => {
+            exercises.push({
+                id: row.querySelector('input[name*="[id]"]').value,
+                name: row.querySelector('input[name*="[name]"]').value,
+                sets: row.querySelector('input[name*="[sets]"]').value,
+                reps: row.querySelector('input[name*="[reps]"]').value,
+                notes: row.querySelector('input[name*="[notes]"]').value,
+                order_index: row.querySelector('input[name*="[order_index]"]').value,
+                video_url: '', image_url: '' 
+            });
+        });
+
+        const formData = {
+            client_id: document.querySelector('select[name="client_id"]').value || document.querySelector('input[name="client_id"]')?.value,
+            title: document.querySelector('input[name="title"]').value,
+            day_of_week: document.querySelector('select[name="day_of_week"]').value,
+            description: document.querySelector('textarea[name="description"]').value,
+            exercises: exercises
+        };
+
+        try {
+            const res = await fetch('/workouts/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'CSRF-Token': '<%= csrfToken %>' },
+                body: JSON.stringify(formData)
+            });
+            const json = await res.json();
+            if(json.success) {
+                window.location.href = '/trainer/dashboard?success=workout_created';
+            } else {
+                alert(json.message);
+                btn.innerHTML = 'Tentar Novamente';
+            }
+        } catch(e) { console.error(e); alert('Erro de conexão'); }
+    });
+</script>
+
+<%- include('../partials/footer.ejs') %>

@@ -248,4 +248,78 @@ router.get('/library', (req, res) => {
     });
 });
 
+
+// --- ROTAS DE TEMPLATES ---
+
+// API: Listar Templates do Treinador (para o Modal)
+router.get('/api/templates', requireTrainer, async (req, res) => {
+    try {
+        const result = await pool.query(`
+            SELECT * FROM workout_templates 
+            WHERE trainer_id = $1 
+            ORDER BY created_at DESC
+        `, [req.session.user.id]);
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).json({ error: 'Erro ao buscar templates' });
+    }
+});
+
+// API: Carregar Detalhes de um Template
+router.get('/api/templates/:id', requireTrainer, async (req, res) => {
+    try {
+        const templateRes = await pool.query("SELECT * FROM workout_templates WHERE id = $1 AND trainer_id = $2", [req.params.id, req.session.user.id]);
+        if (templateRes.rows.length === 0) return res.status(404).json({ error: 'Template não encontrado' });
+
+        const exercisesRes = await pool.query("SELECT * FROM template_exercises WHERE template_id = $1 ORDER BY order_index ASC", [req.params.id]);
+        
+        res.json({
+            template: templateRes.rows[0],
+            exercises: exercisesRes.rows
+        });
+    } catch (err) {
+        res.status(500).json({ error: 'Erro ao carregar exercícios' });
+    }
+});
+
+// POST: Salvar Treino como Template
+router.post('/templates/save', requireTrainer, async (req, res) => {
+    const { title, description, exercises } = req.body;
+    const client = await pool.connect();
+    
+    try {
+        await client.query('BEGIN');
+
+        const tmplRes = await client.query(`
+            INSERT INTO workout_templates (trainer_id, title, description)
+            VALUES ($1, $2, $3) RETURNING id
+        `, [req.session.user.id, title, description]);
+        
+        const templateId = tmplRes.rows[0].id;
+
+        let exList = typeof exercises === 'string' ? JSON.parse(exercises) : exercises;
+        
+        if (Array.isArray(exList)) {
+            for (let ex of exList) {
+                let exerciseName = ex.name || 'Exercício';
+                await client.query(`
+                    INSERT INTO template_exercises 
+                    (template_id, library_id, name, sets, reps, notes, order_index)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7)
+                `, [templateId, ex.id || null, exerciseName, ex.sets, ex.reps, ex.notes, ex.order_index]);
+            }
+        }
+
+        await client.query('COMMIT');
+        res.json({ success: true, message: 'Template salvo com sucesso!' });
+
+    } catch (err) {
+        await client.query('ROLLBACK');
+        console.error(err);
+        res.status(500).json({ success: false, message: 'Erro ao salvar template.' });
+    } finally {
+        client.release();
+    }
+});
+
 module.exports = router;
