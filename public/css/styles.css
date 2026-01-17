@@ -23,7 +23,7 @@ body {
     color: var(--text-main);
     line-height: 1.6;
     overflow-x: hidden;
-    /* ESTRUTURA FLEX COLUMN (SANDUÍCHE) */
+    /* ESTRUTURA FLEX COLUMN (STICKY FOOTER) */
     display: flex;
     flex-direction: column;
     min-height: 100vh;
@@ -79,18 +79,18 @@ button { font-family: inherit; }
 .mobile-links a { font-size: 1.1rem; color: var(--text-muted); border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 12px; }
 
 /* =========================================
-   3. DASHBOARD (Conteúdo Central)
+   3. DASHBOARD (Área Logada)
    ========================================= */
 .dashboard-container {
     display: flex;
-    flex: 1; /* Cresce para ocupar o espaço disponível */
-    margin-top: var(--header-height); /* Compensa o header fixo */
+    flex: 1;
+    margin-top: var(--header-height); /* Compensa Header Fixo */
     width: 100%;
     position: relative;
     align-items: stretch;
 }
 
-/* Sidebar (Desktop: Coluna Flex / Mobile: Drawer) */
+/* Sidebar Desktop */
 .sidebar {
     width: var(--sidebar-width);
     background-color: #080808;
@@ -110,7 +110,7 @@ button { font-family: inherit; }
 .nav-item:hover { background: rgba(255,255,255,0.03); color: white; }
 .nav-item.active { background: rgba(190, 242, 2, 0.05); color: var(--primary-color); border-left-color: var(--primary-color); }
 
-/* Conteúdo Principal */
+/* Conteúdo Dashboard */
 .dashboard-main {
     flex: 1; 
     padding: 30px;
@@ -119,127 +119,108 @@ button { font-family: inherit; }
     overflow-x: hidden;
 }
 
-/* Page Headers */
-.page-header { margin-bottom: 30px; }
-.page-header h1 { font-size: 1.8rem; margin-bottom: 5px; color: var(--text-main); }
-.page-header p { color: var(--text-muted); font-size: 0.95rem; }
-
-/* Overlay Mobile */
+/* Overlay Mobile Sidebar */
 .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 899; }
 
+/* Sub-header Mobile Dashboard */
+.mobile-dash-header { display: none; }
+
 /* =========================================
-   4. FOOTER (Fixo no fim)
+   4. PÁGINAS PÚBLICAS (HOME, ETC)
+   ========================================= */
+/* Wrapper essencial para empurrar o conteúdo abaixo do header fixo */
+.page-content {
+    margin-top: var(--header-height);
+    flex: 1;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    z-index: 1;
+}
+
+/* Hero Section Ajustes */
+.hero {
+    position: relative;
+    padding: 100px 0;
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    background: linear-gradient(to bottom, rgba(5, 5, 5, 0.7), rgba(18, 18, 18, 1)), url('/images/hero-bg.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+.hero-content { max-width: 800px; position: relative; z-index: 2; }
+.hero-title { font-size: 3.5rem; line-height: 1.1; font-weight: 800; margin-bottom: 25px; color: white; }
+.hero-subtitle { font-size: 1.2rem; color: #ccc; margin-bottom: 40px; max-width: 600px; line-height: 1.6; }
+.hero-buttons { display: flex; gap: 15px; flex-wrap: wrap; }
+
+/* About & Features */
+.about, .features { padding: 80px 0; }
+.section-title { font-size: 2.2rem; text-align: center; margin-bottom: 60px; color: var(--text-main); }
+.about-steps, .features-grid { display: grid; gap: 30px; }
+.about-steps { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.features-grid { grid-template-columns: repeat(3, 1fr); }
+
+.step, .feature-card { background: rgba(255,255,255,0.03); padding: 30px; border-radius: 12px; border: 1px solid var(--border-light); text-align: center; }
+.feature-card { background: #0a0a0a; }
+
+/* =========================================
+   5. FOOTER (Compacto)
    ========================================= */
 .compact-footer {
     background-color: #050505;
     border-top: 1px solid rgba(255,255,255,0.05);
     padding: 30px 0;
     font-size: 0.9rem;
-    margin-top: auto; /* Empurra para o final */
+    margin-top: auto; /* Sticky Footer */
     flex-shrink: 0;
     z-index: 10;
 }
-
 .footer-wrapper { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
-.footer-brand-section { display: flex; flex-direction: column; gap: 5px; }
 .footer-logo { display: flex; align-items: center; gap: 10px; font-weight: 700; color: white; }
-.footer-logo img { height: 24px; }
 .footer-contact-section { display: flex; gap: 25px; }
-.footer-link { color: var(--text-muted); display: flex; align-items: center; gap: 8px; transition: 0.2s; }
-.footer-link:hover { color: var(--primary-color); }
 
 /* =========================================
-   5. COMPONENTES E UTILITÁRIOS
+   6. RESPONSIVIDADE
    ========================================= */
-.container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 20px; }
-.text-neon { color: var(--primary-color); }
-.btn { display: inline-flex; align-items: center; justify-content: center; padding: 10px 20px; border-radius: var(--radius); font-weight: 600; font-size: 0.95rem; cursor: pointer; border: none; transition: 0.2s; }
-.btn-primary { background: var(--primary-color); color: #000; }
-.btn-primary:hover { background: var(--primary-hover); transform: translateY(-2px); }
-.btn-secondary { background: rgba(255,255,255,0.1); color: #fff; }
-.btn-outline { border: 1px solid var(--border-light); color: var(--text-main); background: transparent; }
-.btn-ghost { background: none; color: var(--text-muted); }
-.btn-sm { padding: 8px 16px; font-size: 0.85rem; border-radius: 6px; }
-
-.card-box { background: #111; border: 1px solid var(--border-light); border-radius: 12px; padding: 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: 0.2s; }
-.card-box:hover { border-color: rgba(255,255,255,0.2); }
-
-/* Imagens Redondas */
-.step img, .feature-card img, .user-avatar-sm { border-radius: 50% !important; object-fit: cover; }
-.user-avatar-sm { width: 35px; height: 35px; background: #333; display: flex; align-items: center; justify-content: center; color: var(--primary-color); font-weight: bold; }
-
-.user-chip { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: var(--text-main); background: rgba(255,255,255,0.05); padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border-light); }
 .mobile-only { display: none !important; }
 .desktop-only { display: flex !important; }
 
-/* =========================================
-   6. RESPONSIVIDADE (MOBILE & TABLET)
-   ========================================= */
 @media (max-width: 992px) {
-    /* Esconde elementos desktop */
+    /* UI Geral */
     .desktop-nav, .desktop-actions, .desktop-only { display: none !important; }
     .mobile-only { display: block !important; }
 
-    /* Header Mobile */
+    /* Header e Menu */
     .main-header { background-color: #050505; }
-    .hamburger-btn { display: block !important; position: relative; z-index: 10002; }
-    
-    /* Lógica da Sidebar Mobile (Drawer) */
-    .dashboard-container { 
-        flex-direction: column; 
-    }
-    
+    .hamburger-btn { display: block !important; }
+
+    /* Dashboard Sidebar (Drawer) */
+    .dashboard-container { flex-direction: column; }
     .sidebar {
-        position: fixed; 
-        top: 70px; /* Começa abaixo do Header */
-        left: -100%; /* Escondido por padrão */
-        bottom: 0;
-        width: 260px; 
-        height: calc(100vh - 70px);
-        z-index: 2000; /* Acima do conteúdo */
-        border-right: 1px solid #333;
-        box-shadow: 5px 0 15px rgba(0,0,0,0.5);
+        position: fixed; top: 70px; left: -100%; bottom: 0;
+        width: 260px; height: calc(100vh - 70px);
+        z-index: 2000; border-right: 1px solid #333;
     }
-    
     .sidebar.active { left: 0; }
     .sidebar-overlay.active { display: block; }
-    
-    /* Sub-Header para abrir Sidebar no Mobile */
+
+    /* Dashboard Content */
     .mobile-dash-header {
-        position: fixed; 
-        top: 70px; 
-        left: 0; 
-        right: 0;
-        z-index: 899; 
-        height: 50px;
-        background: #1a1a1a; 
-        border-bottom: 1px solid #333;
-        display: flex !important; 
-        align-items: center; 
-        padding: 0 20px;
-        justify-content: space-between;
+        position: fixed; top: 70px; left: 0; right: 0; z-index: 899;
+        height: 50px; background: #1a1a1a; border-bottom: 1px solid #333;
+        display: flex !important; align-items: center; justify-content: space-between; padding: 0 20px;
     }
-    
-    /* Ajuste do conteúdo principal para não ficar escondido */
-    .dashboard-main { 
-        padding: 20px; 
-        padding-top: 70px; /* +50px do sub-header + 20px respiro */
-        width: 100%; 
-    }
-    
-    /* Footer Mobile */
-    .footer-wrapper { flex-direction: column; text-align: center; gap: 20px; }
-}
+    .dashboard-main { padding: 20px; padding-top: 70px; } /* +50px do sub-header */
 
-@media (min-width: 993px) {
-    .mobile-dash-header { display: none !important; }
-}
-
-/* --- FIX: Wrapper para páginas públicas (Home, About, etc) --- */
-.page-content {
-    margin-top: var(--header-height); /* Compensa o Header Fixo */
-    flex: 1; /* Ocupa o espaço restante e empurra o footer */
-    width: 100%;
-    display: flex;
-    flex-direction: column;
+    /* Home / Page Content */
+    .features-grid { grid-template-columns: 1fr; }
+    .hero-title { font-size: 2.2rem; }
+    .hero { text-align: center; }
+    .hero-buttons { justify-content: center; }
+    
+    /* Footer */
+    .footer-wrapper { flex-direction: column; gap: 20px; }
 }
