@@ -1,27 +1,45 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <title>Aprovações Pendentes | Momentum Fit</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/styles.css">
-</head>
-<body>
-    <div class="dashboard-container">
-        <%- include('../partials/sidebar') %>
-        <main class="dashboard-main">
-            <div class="page-header" style="text-align: left; background: transparent; padding-left: 0;">
-                <h1><i class="fas fa-check-double text-neon"></i> Aprovações Pendentes</h1>
+<%- include('../partials/header.ejs') %>
+<div class="dashboard-container">
+    <%- include('../partials/sidebar.ejs') %>
+    <main class="dashboard-main">
+        <div class="content-wrapper">
+            <div class="page-header">
+                <h1>Aprovações Pendentes</h1>
+                <p class="text-muted">Treinadores aguardando validação de cadastro.</p>
             </div>
-            
-            <div class="card-box" style="padding: 40px; text-align: center;">
-                <i class="fas fa-check-double" style="font-size: 3rem; color: #333; margin-bottom: 20px;"></i>
-                <h3>Em Desenvolvimento</h3>
-                <p style="color: #888;">Esta funcionalidade estará disponível em breve na plataforma.</p>
-            </div>
-        </main>
-    </div>
-    <script src="/js/main.js"></script>
-</body>
-</html>
+
+            <% if (pendingTrainers.length === 0) { %>
+                <div class="card-box" style="text-align: center; padding: 40px;">
+                    <i class="fas fa-check-circle" style="font-size: 3rem; color: var(--primary-color); margin-bottom: 15px;"></i>
+                    <p>Tudo limpo! Nenhuma aprovação pendente.</p>
+                </div>
+            <% } else { %>
+                <div class="content-grid">
+                    <% pendingTrainers.forEach(trainer => { %>
+                    <div class="card-box">
+                        <h3 style="margin-bottom: 5px;"><%= trainer.name %></h3>
+                        <p class="text-muted" style="margin-bottom: 15px;"><%= trainer.email %></p>
+                        
+                        <div style="background: #000; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 0.9rem;">
+                            <strong>Especialidades:</strong> <%= trainer.specialties || '-' %><br>
+                            <strong>Certificações:</strong> <%= trainer.certifications || '-' %>
+                        </div>
+
+                        <div style="display: flex; gap: 10px;">
+                            <form action="/admin/approve-trainer/<%= trainer.trainer_id %>" method="POST" style="flex: 1;">
+                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                <button class="btn btn-primary btn-full">Aprovar</button>
+                            </form>
+                            <form action="/admin/reject-trainer/<%= trainer.trainer_id %>" method="POST" style="flex: 1;">
+                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                <button class="btn btn-outline btn-full" style="border-color: #ff4d4d; color: #ff4d4d;">Rejeitar</button>
+                            </form>
+                        </div>
+                    </div>
+                    <% }) %>
+                </div>
+            <% } %>
+        </div>
+        <%- include('../partials/footer.ejs') %>
+    </main>
+</div>

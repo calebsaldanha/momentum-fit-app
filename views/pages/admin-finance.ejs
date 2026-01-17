@@ -1,27 +1,43 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <title>Financeiro Geral | Momentum Fit</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/styles.css">
-</head>
-<body>
-    <div class="dashboard-container">
-        <%- include('../partials/sidebar') %>
-        <main class="dashboard-main">
-            <div class="page-header" style="text-align: left; background: transparent; padding-left: 0;">
-                <h1><i class="fas fa-coins text-neon"></i> Financeiro Geral</h1>
+<%- include('../partials/header.ejs') %>
+<div class="dashboard-container">
+    <%- include('../partials/sidebar.ejs') %>
+    <main class="dashboard-main">
+        <div class="content-wrapper">
+            <div class="page-header">
+                <h1>Financeiro</h1>
+                <p class="text-muted">Visão consolidada da receita.</p>
             </div>
-            
-            <div class="card-box" style="padding: 40px; text-align: center;">
-                <i class="fas fa-coins" style="font-size: 3rem; color: #333; margin-bottom: 20px;"></i>
-                <h3>Em Desenvolvimento</h3>
-                <p style="color: #888;">Esta funcionalidade estará disponível em breve na plataforma.</p>
+
+            <div class="card-box" style="margin-bottom: 30px; display: inline-block; padding-right: 50px;">
+                <span class="text-muted">Receita Total (Mensal)</span>
+                <h1 style="font-size: 2.5rem; color: var(--primary-color);">R$ <%= revenue.toFixed(2) %></h1>
             </div>
-        </main>
-    </div>
-    <script src="/js/main.js"></script>
-</body>
-</html>
+
+            <div class="card-box">
+                <h3>Últimas Transações</h3>
+                <br>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Usuário</th>
+                            <th>Plano</th>
+                            <th>Valor</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% transactions.forEach(t => { %>
+                        <tr>
+                            <td><%= t.user %></td>
+                            <td><%= t.plan %></td>
+                            <td>R$ <%= t.amount.toFixed(2) %></td>
+                            <td><%= t.status %></td>
+                        </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <%- include('../partials/footer.ejs') %>
+    </main>
+</div>

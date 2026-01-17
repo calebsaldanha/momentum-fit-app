@@ -1,40 +1,45 @@
 <%- include('../partials/header.ejs') %>
+<div class="dashboard-container">
+    <%- include('../partials/sidebar.ejs') %>
+    <main class="dashboard-main">
+        <div class="content-wrapper">
+            <div class="page-header">
+                <h1>Gerenciar Usuários</h1>
+                <p class="text-muted">Lista completa de usuários registrados.</p>
+            </div>
 
-<div class="page-header">
-    <h1>Gerenciar Usuários</h1>
+            <div class="card-box">
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% users.forEach(u => { %>
+                            <tr>
+                                <td><%= u.name %></td>
+                                <td><%= u.email %></td>
+                                <td><span class="badge"><%= u.role %></span></td>
+                                <td>
+                                    <% if(u.is_active) { %> <span style="color: var(--primary-color);">Ativo</span>
+                                    <% } else { %> <span style="color: #ff4d4d;">Inativo</span> <% } %>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline"><i class="fas fa-edit"></i></button>
+                                </td>
+                            </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <%- include('../partials/footer.ejs') %>
+    </main>
 </div>
-
-<div class="container" style="max-width: 1200px; padding: 0 20px;">
-    <div class="card-box" style="overflow-x: auto;">
-        <table style="width: 100%; border-collapse: collapse; color: white; min-width: 600px;">
-            <thead>
-                <tr style="border-bottom: 1px solid #333; text-align: left;">
-                    <th style="padding: 15px;">ID</th>
-                    <th style="padding: 15px;">Nome</th>
-                    <th style="padding: 15px;">Email</th>
-                    <th style="padding: 15px;">Função</th>
-                    <th style="padding: 15px;">Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                <% users.forEach(u => { %>
-                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                        <td style="padding: 15px; color: #666;">#<%= u.id %></td>
-                        <td style="padding: 15px; font-weight: 600;"><%= u.name %></td>
-                        <td style="padding: 15px; color: #aaa;"><%= u.email %></td>
-                        <td style="padding: 15px;">
-                            <span style="background: <%= u.role === 'admin' ? '#ef4444' : (u.role === 'trainer' ? '#bef202' : '#3b82f6') %>; color: black; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 700;">
-                                <%= u.role.toUpperCase() %>
-                            </span>
-                        </td>
-                        <td style="padding: 15px;">
-                            <button class="btn btn-sm btn-ghost" title="Editar"><i class="fas fa-edit"></i></button>
-                        </td>
-                    </tr>
-                <% }) %>
-            </tbody>
-        </table>
-    </div>
-</div>
-
-<%- include('../partials/footer.ejs') %>

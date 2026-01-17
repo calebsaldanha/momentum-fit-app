@@ -1,36 +1,35 @@
-<%- include('../partials/header.ejs', { title: 'Admin' }) %>
-
+<%- include('../partials/header.ejs') %>
 <div class="dashboard-container">
     <%- include('../partials/sidebar.ejs') %>
-    
     <main class="dashboard-main">
-        <div class="page-header" style="text-align: left; padding: 0; background: transparent; border: none; margin-bottom: 30px;">
-            <h1>Administração Global</h1>
-            <p>Visão geral de toda a plataforma.</p>
-        </div>
+        <div class="content-wrapper">
+            <div class="page-header" style="margin-bottom: 30px;">
+                <h1>Visão Geral</h1>
+                <p class="text-muted">Métricas principais da plataforma.</p>
+            </div>
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px;">
-            <div class="card-box" style="border-top: 3px solid var(--primary-color);">
-                <div style="display: flex; justify-content: space-between;">
-                    <div>
-                        <span style="color: #888; font-size: 0.85rem;">Usuários Totais</span>
-                        <h2 style="color: white; margin-top: 5px;"><%= stats.users || 0 %></h2>
-                    </div>
-                    <i class="fas fa-users" style="color: #333; font-size: 1.5rem;"></i>
+            <div class="content-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
+                <div class="card-box">
+                    <span class="text-muted"><i class="fas fa-users"></i> Usuários Totais</span>
+                    <h2 class="text-neon"><%= stats.users %></h2>
                 </div>
-            </div>
-            
-            <div class="card-box" style="border-top: 3px solid #3b82f6;">
-                <div style="display: flex; justify-content: space-between;">
-                    <div>
-                        <span style="color: #888; font-size: 0.85rem;">Treinadores</span>
-                        <h2 style="color: white; margin-top: 5px;"><%= stats.trainers || 0 %></h2>
-                    </div>
-                    <i class="fas fa-dumbbell" style="color: #333; font-size: 1.5rem;"></i>
+                <div class="card-box">
+                    <span class="text-muted"><i class="fas fa-dumbbell"></i> Treinadores</span>
+                    <h2><%= stats.trainers %></h2>
+                </div>
+                <div class="card-box">
+                    <span class="text-muted"><i class="fas fa-file-alt"></i> Artigos</span>
+                    <h2><%= stats.articles %></h2>
+                </div>
+                <div class="card-box" style="<%= stats.pending > 0 ? 'border-color: #ff4d4d;' : '' %>">
+                    <span class="text-muted"><i class="fas fa-clock"></i> Pendentes</span>
+                    <h2 style="<%= stats.pending > 0 ? 'color: #ff4d4d;' : '' %>"><%= stats.pending %></h2>
+                    <% if (stats.pending > 0) { %>
+                        <a href="/admin/approvals" class="btn btn-sm btn-outline" style="margin-top: 10px;">Revisar</a>
+                    <% } %>
                 </div>
             </div>
         </div>
+        <%- include('../partials/footer.ejs') %>
     </main>
 </div>
-
-<%- include('../partials/footer.ejs') %>
