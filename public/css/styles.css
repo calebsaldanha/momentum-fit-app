@@ -234,3 +234,12 @@ button { font-family: inherit; }
 @media (min-width: 993px) {
     .mobile-dash-header { display: none !important; }
 }
+
+/* --- FIX: Wrapper para páginas públicas (Home, About, etc) --- */
+.page-content {
+    margin-top: var(--header-height); /* Compensa o Header Fixo */
+    flex: 1; /* Ocupa o espaço restante e empurra o footer */
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
