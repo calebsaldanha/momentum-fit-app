@@ -1,5 +1,3 @@
-    </main>
-
     <footer class="main-footer compact-footer">
         <div class="container">
             <div class="footer-wrapper">
@@ -26,7 +24,7 @@
     </footer>
 
     <script>
-        // Mobile Menu Logic
+        // Lógica do Menu Mobile Global (Header)
         document.addEventListener('DOMContentLoaded', () => {
             const menuBtn = document.getElementById('mobileMenuBtn');
             const closeBtn = document.getElementById('closeMenuBtn');
@@ -35,9 +33,9 @@
             if(menuBtn && menu) {
                 menuBtn.addEventListener('click', () => {
                     menu.classList.add('active');
-                    document.body.style.overflow = 'hidden'; // Prevent scroll
+                    document.body.style.overflow = 'hidden'; 
                 });
-                
+
                 const closeMenu = () => {
                     menu.classList.remove('active');
                     document.body.style.overflow = '';
@@ -45,7 +43,6 @@
 
                 if(closeBtn) closeBtn.addEventListener('click', closeMenu);
                 
-                // Close on click outside (optional)
                 menu.addEventListener('click', (e) => {
                     if(e.target === menu) closeMenu();
                 });
