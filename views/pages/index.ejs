@@ -2,70 +2,104 @@
 
 <main class="page-content">
     <section id="home" class="hero">
-        <div class="container">
+        <div class="hero-overlay"></div>
+        <div class="container hero-container">
             <div class="hero-content">
-                <h1 class="hero-title">Impulsione o Seu Progresso.<br>A Sua Jornada Começa Agora.</h1>
-                <p class="hero-subtitle">Conecte-se com personal trainers qualificados para planos de treino personalizados e acompanhamento contínuo. Alcance os seus objetivos com o Momentum Fit.</p>
+                <span class="badge-neon">Nova Plataforma</span>
+                <h1 class="hero-title">
+                    Seu Potencial, <br>
+                    <span class="text-gradient">No Próximo Nível.</span>
+                </h1>
+                <p class="hero-subtitle">
+                    Acompanhamento profissional, treinos inteligentes e métricas precisas.
+                    Tudo o que você precisa para transformar seu corpo, em um só lugar.
+                </p>
                 <div class="hero-buttons">
                     <% if (!isAuthenticated) { %>
-                        <a href="/auth/register" class="btn btn-primary">Comece Sua Transformação</a>
+                        <a href="/auth/register" class="btn btn-primary btn-lg btn-glow">Começar Agora <i class="fas fa-arrow-right"></i></a>
+                        <a href="/auth/login" class="btn btn-outline btn-lg">Fazer Login</a>
                     <% } else if (user.role === 'client') { %>
-                        <a href="/client/dashboard" class="btn btn-primary">Meu Dashboard</a>
+                        <a href="/client/dashboard" class="btn btn-primary btn-lg btn-glow">Ir para o Dashboard</a>
                     <% } else { %>
-                        <a href="/admin/dashboard" class="btn btn-primary">Dashboard Admin</a>
+                        <a href="/admin/dashboard" class="btn btn-primary btn-lg btn-glow">Painel Administrativo</a>
                     <% } %>
-                    <a href="#about" class="btn btn-secondary">Saiba Mais</a>
+                </div>
+                
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <span class="stat-number">500+</span>
+                        <span class="stat-label">Alunos Ativos</span>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-item">
+                        <span class="stat-number">98%</span>
+                        <span class="stat-label">Resultados</span>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <section id="about" class="about">
+    <section id="features" class="features section-padding">
         <div class="container">
-            <h2 class="section-title">O Caminho para Seus Melhores Resultados</h2>
-            <div class="about-steps">
-                <div class="step">
-                    <img src="/images/logo-3d.png" class="step-icon-img" alt="Passo 1" style="border-radius: 50%;">
-                    <h3>Defina Seu Alvo</h3>
-                    <p>Comece com um questionário rápido para entendermos seus objetivos exatos: emagrecimento, hipertrofia ou performance.</p>
+            <div class="section-header center">
+                <h2 class="section-title">Por que o Momentum Fit?</h2>
+                <p class="section-desc">Tecnologia de ponta aliada à expertise humana para garantir sua evolução.</p>
+            </div>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="icon-box">
+                        <i class="fas fa-dumbbell"></i>
+                    </div>
+                    <h3>Treinos Personalizados</h3>
+                    <p>Fichas montadas exclusivamente para seu biotipo e objetivos, com vídeos demonstrativos em HD.</p>
                 </div>
-                <div class="step">
-                    <img src="/images/logo-3d.png" class="step-icon-img" alt="Passo 2" style="border-radius: 50%;">
-                    <h3>Plano Personalizado</h3>
-                    <p>Receba um plano de treino 100% adaptado por um de nossos especialistas, focado na sua rotina e limitações.</p>
+                <div class="feature-card">
+                    <div class="icon-box">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>Métricas de Evolução</h3>
+                    <p>Acompanhe seu peso, medidas e cargas através de gráficos intuitivos e relatórios de progresso.</p>
                 </div>
-                <div class="step">
-                    <img src="/images/logo-3d.png" class="step-icon-img" alt="Passo 3" style="border-radius: 50%;">
-                    <h3>Acompanhamento</h3>
-                    <p>Execute seus treinos, registre seu progresso (check-ins) e tire dúvidas em tempo real pelo chat privado.</p>
-                </div>
-                <div class="step">
-                    <img src="/images/logo-3d.png" class="step-icon-img" alt="Passo 4" style="border-radius: 50%;">
-                    <h3>Evolução</h3>
-                    <p>Seu treinador ajusta o plano com base nos seus dados e feedback, garantindo que o seu progresso nunca pare.</p>
+                <div class="feature-card">
+                    <div class="icon-box">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <h3>Chat Direto</h3>
+                    <p>Tire dúvidas, envie vídeos da execução e receba feedback do seu treinador em tempo real.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <section id="features" class="features">
+    <section id="about" class="about section-padding bg-subtle">
         <div class="container">
-            <h2 class="section-title">A Tecnologia por Trás do Momentum</h2>
-             <div class="features-grid">
-                <div class="feature-card">
-                    <img src="/images/logo-3d.png" class="feature-icon-img" alt="Ícone" style="border-radius: 50%;">
-                    <h3>Treinos Focados</h3>
-                    <p>Planos de treino otimizados para maximizar seus resultados, com foco em técnica e consistência.</p>
+            <div class="section-header left-align">
+                <h2 class="section-title">Como Funciona <span class="text-neon">Sua Jornada</span></h2>
+                <p class="section-desc">Um processo simples, estruturado para o seu sucesso.</p>
+            </div>
+
+            <div class="steps-grid">
+                <div class="step-card">
+                    <span class="step-number">01</span>
+                    <h3>Cadastro & Anamnese</h3>
+                    <p>Crie sua conta e responda um questionário completo sobre sua saúde e rotina.</p>
                 </div>
-                <div class="feature-card">
-                    <img src="/images/logo-3d.png" class="feature-icon-img" alt="Ícone" style="border-radius: 50%;">
-                    <h3>Comunicação Direta</h3>
-                    <p>Use nosso chat embutido para ter acesso rápido ao seu personal, sem intermediários.</p>
+                <div class="step-card">
+                    <span class="step-number">02</span>
+                    <h3>Receba seu Plano</h3>
+                    <p>Seu treinador analisará seus dados e criará uma estratégia única para você.</p>
                 </div>
-                <div class="feature-card">
-                    <img src="/images/logo-3d.png" class="feature-icon-img" alt="Ícone" style="border-radius: 50%;">
-                    <h3>Métricas e Check-ins</h3>
-                    <p>Acompanhe seu desempenho e feedback de treino para ver seu progresso de forma clara e motivadora.</p>
+                <div class="step-card">
+                    <span class="step-number">03</span>
+                    <h3>Treine & Registre</h3>
+                    <p>Acesse o app, execute os treinos e faça check-ins semanais da sua evolução.</p>
+                </div>
+                <div class="step-card">
+                    <span class="step-number">04</span>
+                    <h3>Ajustes Contínuos</h3>
+                    <p>O plano evolui com você. Ajustes de carga e intensidade baseados no seu feedback.</p>
                 </div>
             </div>
         </div>
