@@ -1,14 +1,10 @@
 <%- include('../partials/header.ejs') %>
-
 <div class="dashboard-container">
     <%- include('../partials/sidebar.ejs', { path: '/admin/dashboard' }) %>
-
     <main class="dashboard-main">
         <div class="mobile-dash-header">
-            <button id="sidebarToggle" class="btn btn-outline btn-sm">
-                <i class="fas fa-bars"></i> Menu
-            </button>
-            <span class="text-muted">Admin</span>
+            <button id="sidebarOpenBtn" class="btn btn-outline btn-sm"><i class="fas fa-bars"></i> Menu</button>
+            <span>Admin</span>
         </div>
 
         <div class="page-header">
@@ -21,23 +17,10 @@
                 <p style="font-size: 2rem; font-weight: bold;"><%= typeof stats !== 'undefined' ? stats.totalUsers : 0 %></p>
             </div>
             <div class="card-box">
-                <h3>Treinadores</h3>
-                <p style="font-size: 2rem; font-weight: bold;"><%= typeof stats !== 'undefined' ? stats.totalTrainers : 0 %></p>
-            </div>
-            <div class="card-box">
-                <h3>Pendentes</h3>
+                <h3>Aprovações Pendentes</h3>
                 <p style="font-size: 2rem; font-weight: bold; color: orange;"><%= typeof stats !== 'undefined' ? stats.pendingApprovals : 0 %></p>
-            </div>
-        </div>
-        
-        <div style="margin-top: 40px;">
-            <h2 class="section-title">Ações Rápidas</h2>
-            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-                <a href="/admin/approvals" class="btn btn-primary">Aprovar Treinadores</a>
-                <a href="/admin/finance" class="btn btn-outline">Relatórios Financeiros</a>
             </div>
         </div>
     </main>
 </div>
-
 <%- include('../partials/footer.ejs') %>

@@ -1,27 +1,17 @@
-<%- include('../partials/header.ejs', { title: 'Chat com Treinador', currentPage: '/chat' }) %>
-
-<div class="page-header">
-    <h1>Mensagens</h1>
-    <p>Converse diretamente com seu treinador.</p>
-</div>
-
-<div class="container" style="max-width: 800px; height: 60vh; display: flex; flex-direction: column;">
-    <div class="card-box" style="flex: 1; display: flex; flex-direction: column; overflow: hidden; padding: 0;">
+<%- include('../partials/header.ejs') %>
+<div class="dashboard-container" style="height: calc(100vh - 80px);">
+    <%- include('../partials/sidebar.ejs', { path: '/chat' }) %>
+    <main class="dashboard-main" style="display: flex; flex-direction: column; padding: 0;">
+        <div class="mobile-dash-header">
+            <button id="sidebarOpenBtn" class="btn btn-outline btn-sm"><i class="fas fa-bars"></i> Menu</button>
+            <span>Chat</span>
+        </div>
         
-        <div id="chat-messages" style="flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px;">
-            <div style="text-align: center; color: #666; margin-top: 50px;">
-                <i class="fas fa-comments" style="font-size: 2rem; margin-bottom: 10px;"></i>
-                <p>Inicie a conversa...</p>
-            </div>
+        <div style="flex: 1; display: flex; align-items: center; justify-content: center; color: #666;">
+            <p>Interface do Chat (Carregar componente de chat aqui)</p>
         </div>
-
-        <div style="padding: 15px; background: #1a1a1a; border-top: 1px solid #333; display: flex; gap: 10px;">
-            <input type="text" placeholder="Digite sua mensagem..." style="flex: 1; padding: 12px; border-radius: 20px; border: 1px solid #333; background: #050505; color: white; outline: none;">
-            <button class="btn btn-primary" style="border-radius: 50%; width: 45px; height: 45px; padding: 0; display: flex; align-items: center; justify-content: center;">
-                <i class="fas fa-paper-plane"></i>
-            </button>
-        </div>
-    </div>
+    </main>
 </div>
-
-<%- include('../partials/footer.ejs') %>
+<script src="/js/main.js"></script>
+</body>
+</html>

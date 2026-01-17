@@ -1,55 +1,27 @@
 <%- include('../partials/header.ejs') %>
-
 <div class="dashboard-container">
     <%- include('../partials/sidebar.ejs', { path: '/client/dashboard' }) %>
-
     <main class="dashboard-main">
         <div class="mobile-dash-header">
-            <button id="sidebarToggle" class="btn btn-outline btn-sm">
-                <i class="fas fa-bars"></i> Menu
-            </button>
+            <button id="sidebarOpenBtn" class="btn btn-outline btn-sm"><i class="fas fa-bars"></i> Menu</button>
             <span class="text-muted">Dashboard</span>
         </div>
-
+        
         <div class="page-header">
             <h1>Olá, <span class="text-neon"><%= user.name.split(' ')[0] %></span></h1>
-            <p>Aqui está o resumo do seu progresso hoje.</p>
+            <p>Resumo do seu progresso.</p>
         </div>
 
-        <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 40px;">
+        <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
             <div class="card-box">
-                <h3 class="text-muted" style="font-size: 0.9rem;">Treinos Realizados</h3>
-                <p style="font-size: 2rem; font-weight: bold; color: white;"><%= stats ? stats.completedWorkouts : 0 %></p>
+                <h3 class="text-muted">Treinos Feitos</h3>
+                <p style="font-size: 2rem; font-weight: bold;"><%= stats ? stats.completedWorkouts : 0 %></p>
             </div>
             <div class="card-box">
-                <h3 class="text-muted" style="font-size: 0.9rem;">Check-ins</h3>
-                <p style="font-size: 2rem; font-weight: bold; color: white;"><%= stats ? stats.checkinsCount : 0 %></p>
+                <h3 class="text-muted">Check-ins</h3>
+                <p style="font-size: 2rem; font-weight: bold;"><%= stats ? stats.checkinsCount : 0 %></p>
             </div>
-            <div class="card-box">
-                <h3 class="text-muted" style="font-size: 0.9rem;">Plano Atual</h3>
-                <p style="font-size: 1.2rem; font-weight: bold; color: var(--primary-color);">Ativo</p>
-            </div>
-        </div>
-
-        <h2 class="section-title" style="font-size: 1.5rem; margin-bottom: 20px;">Acesso Rápido</h2>
-        <div class="features-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
-            <a href="/client/workouts" class="feature-card" style="text-decoration: none;">
-                <div class="icon-box"><i class="fas fa-dumbbell"></i></div>
-                <h3>Meus Treinos</h3>
-                <p>Acesse sua ficha atualizada.</p>
-            </a>
-            <a href="/client/evolution" class="feature-card" style="text-decoration: none;">
-                <div class="icon-box"><i class="fas fa-weight"></i></div>
-                <h3>Registrar Peso</h3>
-                <p>Atualize suas medidas.</p>
-            </a>
-            <a href="/chat" class="feature-card" style="text-decoration: none;">
-                <div class="icon-box"><i class="fas fa-comment-dots"></i></div>
-                <h3>Falar com Treinador</h3>
-                <p>Tire suas dúvidas.</p>
-            </a>
         </div>
     </main>
 </div>
-
 <%- include('../partials/footer.ejs') %>

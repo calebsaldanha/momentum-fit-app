@@ -1,157 +1,30 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meu Perfil | Momentum Fit</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/styles.css">
-</head>
-<body>
-    <div class="dashboard-container">
-        <%- include('../partials/sidebar') %>
-        
-        <main class="dashboard-main">
-            <div class="page-header" style="text-align: left; padding: 0 0 20px 0; background: transparent; border: none;">
-                <h1>Configurações do Perfil</h1>
-                <p>Mantenha seus dados atualizados para que a IA e seu treinador personalizem seus treinos.</p>
-            </div>
+<%- include('../partials/header.ejs') %>
+<div class="dashboard-container">
+    <%- include('../partials/sidebar.ejs', { path: '/client/profile' }) %>
+    <main class="dashboard-main">
+        <div class="mobile-dash-header">
+            <button id="sidebarOpenBtn" class="btn btn-outline btn-sm"><i class="fas fa-bars"></i> Menu</button>
+            <span>Perfil</span>
+        </div>
 
-            <div class="tabs-container">
-                <button class="tab-btn active" onclick="openTab(event, 'personal')">Dados Pessoais</button>
-                <button class="tab-btn" onclick="openTab(event, 'physical')">Corpo & Saúde</button>
-                <button class="tab-btn" onclick="openTab(event, 'preferences')">Preferências de Treino</button>
-                <button class="tab-btn" onclick="openTab(event, 'security')">Segurança</button>
-            </div>
+        <div class="page-header">
+            <h1>Meu <span class="text-neon">Perfil</span></h1>
+        </div>
 
-            <div id="personal" class="tab-content active">
-                <form action="/client/profile/update-general" method="POST" class="card-box" style="max-width: 800px;">
-                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                    <h3 class="mb-4">Informações Básicas</h3>
-                    
-                    <div class="form-group">
-                        <label>Nome Completo</label>
-                        <input type="text" name="name" value="<%= user.name %>" class="form-input">
-                    </div>
-                    <div class="form-group">
-                        <label>Email (Não editável)</label>
-                        <input type="email" value="<%= user.email %>" disabled class="form-input" style="opacity: 0.5;">
-                    </div>
-                    <div class="form-group">
-                        <label>Data de Nascimento</label>
-                        <input type="date" name="birth_date" value="<%= clientData.birth_date ? new Date(clientData.birth_date).toISOString().split('T')[0] : '' %>" class="form-input">
-                    </div>
-                    <div class="form-group">
-                        <label>Gênero</label>
-                        <select name="gender" class="form-input">
-                            <option value="male" <%= clientData.gender === 'male' ? 'selected' : '' %>>Masculino</option>
-                            <option value="female" <%= clientData.gender === 'female' ? 'selected' : '' %>>Feminino</option>
-                            <option value="other" <%= clientData.gender === 'other' ? 'selected' : '' %>>Outro</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Salvar Dados Pessoais</button>
-                </form>
-            </div>
-
-            <div id="physical" class="tab-content">
-                <form action="/client/profile/update-physical" method="POST" class="card-box" style="max-width: 800px;">
-                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                    <h3 class="mb-4">Métricas Corporais</h3>
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                        <div class="form-group">
-                            <label>Peso Atual (kg)</label>
-                            <input type="number" step="0.1" name="weight" value="<%= clientData.current_weight || '' %>" class="form-input">
-                        </div>
-                        <div class="form-group">
-                            <label>Altura (cm)</label>
-                            <input type="number" name="height" value="<%= clientData.height ? Math.round(clientData.height * 100) : '' %>" class="form-input">
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Nível de Atividade</label>
-                        <select name="activity_level" class="form-input">
-                            <option value="sedentary" <%= clientData.activity_level === 'sedentary' ? 'selected' : '' %>>Sedentário</option>
-                            <option value="light" <%= clientData.activity_level === 'light' ? 'selected' : '' %>>Levemente Ativo</option>
-                            <option value="moderate" <%= clientData.activity_level === 'moderate' ? 'selected' : '' %>>Moderado</option>
-                            <option value="active" <%= clientData.activity_level === 'active' ? 'selected' : '' %>>Muito Ativo</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Lesões ou Restrições Médicas</label>
-                        <textarea name="medical_conditions" class="form-input" rows="3" placeholder="Ex: Dor no joelho, hérnia de disco..."><%= clientData.medical_conditions || '' %></textarea>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary">Atualizar Métricas</button>
-                </form>
-            </div>
-
-            <div id="preferences" class="tab-content">
-                <form action="/client/profile/update-preferences" method="POST" class="card-box" style="max-width: 800px;">
-                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                    <h3 class="mb-4">Objetivos e Disponibilidade</h3>
-
-                    <div class="form-group">
-                        <label>Objetivo Principal</label>
-                        <textarea name="goals" class="form-input" rows="2"><%= clientData.fitness_goals || '' %></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Dias Disponíveis para Treino</label>
-                        <input type="text" name="training_days" value="<%= clientData.training_days || '' %>" class="form-input" placeholder="Ex: Seg, Qua, Sex">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Equipamentos Disponíveis</label>
-                        <textarea name="available_equipment" class="form-input" rows="2" placeholder="Ex: Halteres, Banco, Academia completa..."><%= clientData.available_equipment || '' %></textarea>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary">Salvar Preferências</button>
-                </form>
-            </div>
-
-            <div id="security" class="tab-content">
-                <form action="/client/profile/change-password" method="POST" class="card-box" style="max-width: 800px;">
-                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                    <h3 class="mb-4">Alterar Senha</h3>
-                    
-                    <div class="form-group">
-                        <label>Senha Atual</label>
-                        <input type="password" name="currentPassword" required class="form-input">
-                    </div>
-                    <div class="form-group">
-                        <label>Nova Senha</label>
-                        <input type="password" name="newPassword" required class="form-input">
-                    </div>
-                    <div class="form-group">
-                        <label>Confirmar Nova Senha</label>
-                        <input type="password" name="confirmNewPassword" required class="form-input">
-                    </div>
-
-                    <button type="submit" class="btn btn-outline" style="border-color: #ff4d4d; color: #ff4d4d;">Redefinir Senha</button>
-                </form>
-            </div>
-
-        </main>
-    </div>
-
-    <script>
-        function openTab(evt, tabName) {
-            var i, tabcontent, tablinks;
-            tabcontent = document.getElementsByClassName("tab-content");
-            for (i = 0; i < tabcontent.length; i++) {
-                tabcontent[i].classList.remove("active");
-            }
-            tablinks = document.getElementsByClassName("tab-btn");
-            for (i = 0; i < tablinks.length; i++) {
-                tablinks[i].classList.remove("active");
-            }
-            document.getElementById(tabName).classList.add("active");
-            evt.currentTarget.classList.add("active");
-        }
-    </script>
-</body>
-</html>
+        <div class="card-box">
+            <form action="/client/profile" method="POST">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; color: #888; margin-bottom: 5px;">Nome</label>
+                    <input type="text" value="<%= user.name %>" disabled style="width: 100%; padding: 10px; background: #222; border: 1px solid #333; color: white; border-radius: 5px;">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; color: #888; margin-bottom: 5px;">Email</label>
+                    <input type="email" value="<%= user.email %>" disabled style="width: 100%; padding: 10px; background: #222; border: 1px solid #333; color: white; border-radius: 5px;">
+                </div>
+                <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+            </form>
+        </div>
+    </main>
+</div>
+<%- include('../partials/footer.ejs') %>

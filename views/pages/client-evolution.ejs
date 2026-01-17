@@ -1,40 +1,17 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <title>Evolução | Momentum Fit</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/styles.css">
-</head>
-<body>
-    <div class="dashboard-container">
-        <%- include('../partials/sidebar') %>
-        <main class="dashboard-main">
-            <div class="page-header" style="text-align: left; background: transparent; padding-left: 0;">
-                <h1>Sua Evolução</h1>
-                <p>Acompanhe seu progresso físico e de performance.</p>
-            </div>
-
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; margin-bottom: 30px;">
-                <div class="card-box" style="height: 300px; display: flex; align-items: center; justify-content: center; flex-direction: column;">
-                    <i class="fas fa-chart-line" style="font-size: 3rem; color: #333; margin-bottom: 15px;"></i>
-                    <h3 style="color: #666;">Gráfico de Peso (Em breve)</h3>
-                    <p style="color: #444;">Visualize a perda de gordura ao longo do tempo.</p>
-                </div>
-                <div class="card-box" style="height: 300px; display: flex; align-items: center; justify-content: center; flex-direction: column;">
-                    <i class="fas fa-calendar-check" style="font-size: 3rem; color: #333; margin-bottom: 15px;"></i>
-                    <h3 style="color: #666;">Consistência de Treino</h3>
-                    <p style="color: #444;">Seu histórico de frequência mensal.</p>
-                </div>
-            </div>
-
-            <h3 style="margin-bottom: 20px;">Galeria de Progresso</h3>
-            <div class="card-box" style="text-align: center; padding: 40px;">
-                <button class="btn btn-outline"><i class="fas fa-camera"></i> Adicionar Nova Foto</button>
-            </div>
-        </main>
-    </div>
-    <script src="/js/main.js"></script>
-</body>
-</html>
+<%- include('../partials/header.ejs') %>
+<div class="dashboard-container">
+    <%- include('../partials/sidebar.ejs', { path: '/client/evolution' }) %>
+    <main class="dashboard-main">
+        <div class="mobile-dash-header">
+            <button id="sidebarOpenBtn" class="btn btn-outline btn-sm"><i class="fas fa-bars"></i> Menu</button>
+            <span>Evolução</span>
+        </div>
+        <div class="page-header">
+            <h1>Minha <span class="text-neon">Evolução</span></h1>
+        </div>
+        <div class="card-box">
+            <p>Gráficos e histórico de peso virão aqui.</p>
+        </div>
+    </main>
+</div>
+<%- include('../partials/footer.ejs') %>

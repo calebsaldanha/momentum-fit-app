@@ -1,39 +1,45 @@
 <%- include('../partials/header.ejs') %>
+<div class="dashboard-container">
+    <%- include('../partials/sidebar.ejs', { path: '/trainer/clients' }) %>
+    <main class="dashboard-main">
+        <div class="mobile-dash-header">
+            <button id="sidebarOpenBtn" class="btn btn-outline btn-sm"><i class="fas fa-bars"></i> Menu</button>
+            <span>Alunos</span>
+        </div>
 
-<div class="page-header">
-    <h1>Meus Alunos</h1>
-    <p>Lista completa de alunos vinculados a você.</p>
-</div>
+        <div class="page-header">
+            <h1>Gerenciar <span class="text-neon">Alunos</span></h1>
+        </div>
 
-<div class="content-grid">
-    <% if (clients && clients.length > 0) { %>
-        <div style="display: grid; gap: 15px;">
-            <% clients.forEach(client => { %>
-                <div class="card-box" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 15px;">
-                    <div style="display: flex; align-items: center; gap: 15px;">
-                        <div style="width: 40px; height: 40px; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white;">
-                            <%= client.name.charAt(0) %>
-                        </div>
-                        <div>
-                            <h4 style="margin: 0; color: white;"><%= client.name %></h4>
-                            <span style="color: #888; font-size: 0.85rem;"><%= client.email %></span>
-                        </div>
-                    </div>
-                    
-                    <div style="display: flex; gap: 10px;">
-                        <a href="/chat?client=<%= client.id %>" class="btn btn-sm btn-outline"><i class="fas fa-comment"></i> Chat</a>
-                        <a href="/workouts/create?client=<%= client.id %>" class="btn btn-sm btn-primary">Novo Treino</a>
-                    </div>
+        <div class="card-box">
+            <% if (clients && clients.length > 0) { %>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Email</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% clients.forEach(client => { %>
+                                <tr>
+                                    <td><%= client.name %></td>
+                                    <td><%= client.email %></td>
+                                    <td>
+                                        <a href="/trainer/clients/<%= client.id %>" class="btn btn-sm btn-outline">Perfil</a>
+                                        <a href="/trainer/clients/<%= client.id %>/workout" class="btn btn-sm btn-primary">Treinos</a>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
                 </div>
-            <% }) %>
+            <% } else { %>
+                <p class="text-muted">Você ainda não tem alunos.</p>
+            <% } %>
         </div>
-    <% } else { %>
-        <div class="card-box" style="text-align: center; padding: 40px;">
-            <i class="fas fa-user-slash" style="font-size: 3rem; color: #333; margin-bottom: 20px;"></i>
-            <h3>Você não tem alunos</h3>
-            <p style="color: #888;">Peça ao administrador para vincular novos alunos ao seu perfil.</p>
-        </div>
-    <% } %>
+    </main>
 </div>
-
 <%- include('../partials/footer.ejs') %>
