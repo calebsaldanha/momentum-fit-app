@@ -1,70 +1,25 @@
 <%- include('../partials/header.ejs') %>
-
-<div class="auth-main-wrapper">
-    <div class="auth-overlay"></div>
-    
-    <div class="auth-card">
-        <h2>Bem-vindo de volta</h2>
-        <p>Acesse sua conta para continuar</p>
-
-        <% if (error) { %>
-            <div class="auth-msg auth-msg-error">
-                <i class="fas fa-exclamation-circle"></i> <%= error %>
-            </div>
-        <% } %>
-        <% if (success) { %>
-            <div class="auth-msg auth-msg-success">
-                <i class="fas fa-check-circle"></i> <%= success %>
-            </div>
-        <% } %>
-
-        <form action="/auth/login" method="POST" id="loginForm">
-            <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
-            
+<main class="public-main" style="background: url('/images/auth-bg.png') center/cover; display: flex; align-items: center; justify-content: center; min-height: 80vh;">
+    <div class="card-box" style="width: 100%; max-width: 400px; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px);">
+        <h2 style="text-align: center; margin-bottom: 20px;">Entrar</h2>
+        <% if(error) { %> <div style="color: #ff4d4d; background: rgba(255,0,0,0.1); padding: 10px; border-radius: 4px; margin-bottom: 10px;"><%= error %></div> <% } %>
+        <% if(success) { %> <div style="color: #bef202; background: rgba(190,242,2,0.1); padding: 10px; border-radius: 4px; margin-bottom: 10px;"><%= success %></div> <% } %>
+        
+        <form action="/auth/login" method="POST">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
             <div class="form-group">
-                <label for="email">E-mail</label>
-                <input type="email" name="email" id="email" placeholder="seu@email.com" required>
+                <label>Email</label>
+                <input type="email" name="email" class="form-input" required>
             </div>
-
             <div class="form-group">
-                <label for="password">Senha</label>
-                <input type="password" name="password" id="password" placeholder="••••••••" required>
+                <label>Senha</label>
+                <input type="password" name="password" class="form-input" required>
             </div>
-
-            <a href="/auth/forgot-password" class="forgot-pass">Esqueceu a senha?</a>
-
-            <button type="submit" class="btn btn-primary btn-full btn-lg" id="submitBtn">
-                Entrar <i class="fas fa-arrow-right" style="margin-left: 10px;"></i>
-            </button>
+            <button class="btn btn-primary btn-full">Acessar</button>
         </form>
-
-        <p style="margin-top: 2rem; margin-bottom: 0;">
-            Ainda não tem conta? <a href="/auth/register" class="auth-link">Cadastre-se</a>
+        <p style="text-align: center; margin-top: 15px;">
+            <a href="/auth/register" style="color: #888;">Criar conta</a>
         </p>
     </div>
-</div>
-
-<script>
-    // Validação Visual Simples
-    const form = document.getElementById('loginForm');
-    const emailInput = document.getElementById('email');
-    const btn = document.getElementById('submitBtn');
-
-    form.addEventListener('submit', (e) => {
-        if (!emailInput.value.includes('@')) {
-            e.preventDefault();
-            emailInput.style.borderColor = '#ff4d4d';
-            alert('Por favor, insira um e-mail válido.');
-        } else {
-            // Efeito de loading no botão
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Entrando...';
-            btn.style.opacity = '0.7';
-        }
-    });
-
-    emailInput.addEventListener('input', () => {
-        emailInput.style.borderColor = '#333'; // Reset cor
-    });
-</script>
-
+</main>
 <%- include('../partials/footer.ejs') %>

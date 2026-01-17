@@ -1,40 +1,23 @@
-<%- include('../partials/header.ejs', { title: 'Meus Treinos' }) %>
-
-<div class="dashboard-container">
+<%- include('../partials/header.ejs') %>
+<div class="layout-wrapper">
     <%- include('../partials/sidebar.ejs') %>
-    
     <main class="dashboard-main">
-        <div class="page-header" style="text-align: left; padding: 0; background: transparent; border: none; margin-bottom: 30px;">
+        <div class="content-wrapper">
             <h1>Meus Treinos</h1>
-            <p>Lista completa de fichas de treino.</p>
-        </div>
-
-        <div class="content-grid" style="padding: 0;">
-            <% if (workouts && workouts.length > 0) { %>
-                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
-                    <% workouts.forEach(workout => { %>
-                        <div class="card-box" style="display: flex; flex-direction: column;">
-                            <div style="margin-bottom: 15px;">
-                                <h3 style="color: white; margin-bottom: 5px;"><%= workout.title %></h3>
-                                <span style="font-size: 0.8rem; background: #333; padding: 3px 8px; border-radius: 4px; color: #ccc;">
-                                    <%= workout.status === 'active' ? 'Ativo' : 'Arquivado' %>
-                                </span>
-                            </div>
-                            <p style="color: #888; font-size: 0.9rem; flex: 1; margin-bottom: 20px;">
-                                <%= workout.description ? workout.description.substring(0, 80) + '...' : 'Treino de força e resistência.' %>
-                            </p>
-                            <a href="/client/workouts/<%= workout.id %>" class="btn btn-outline btn-full">Ver Detalhes</a>
-                        </div>
+            <div class="content-grid">
+                <% if(workouts && workouts.length > 0) { %>
+                    <% workouts.forEach(w => { %>
+                    <div class="card-box">
+                        <h3><%= w.title %></h3>
+                        <p class="text-muted"><%= w.day_of_week || 'Flexível' %></p>
+                        <a href="/client/workout/<%= w.id %>" class="btn btn-primary btn-full">Começar</a>
+                    </div>
                     <% }) %>
-                </div>
-            <% } else { %>
-                <div class="card-box" style="text-align: center; padding: 50px;">
-                    <i class="fas fa-dumbbell" style="font-size: 3rem; color: #333; margin-bottom: 20px;"></i>
-                    <h3>Nenhum treino encontrado</h3>
-                </div>
-            <% } %>
+                <% } else { %>
+                    <p class="text-muted">Nenhum treino disponível.</p>
+                <% } %>
+            </div>
         </div>
     </main>
 </div>
-
 <%- include('../partials/footer.ejs') %>

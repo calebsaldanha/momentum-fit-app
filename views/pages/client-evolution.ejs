@@ -1,134 +1,14 @@
 <%- include('../partials/header.ejs') %>
-
-<div class="dashboard-container">
-    <%- include('../partials/sidebar.ejs', { active: 'evolution' }) %>
-
+<div class="layout-wrapper">
+    <%- include('../partials/sidebar.ejs') %>
     <main class="dashboard-main">
-        <div class="page-header" style="text-align: left; padding: 0 0 20px 0; background: transparent; border: none;">
+        <div class="content-wrapper">
             <h1>Minha Evolução</h1>
-            <p class="text-muted">Acompanhe seu progresso físico ao longo do tempo.</p>
-        </div>
-
-        <div class="content-grid" style="padding: 0; grid-template-columns: 1fr;">
-            
+            <p class="text-muted">Acompanhe seu progresso.</p>
             <div class="card-box">
-                <h3 style="margin-bottom: 20px;">Histórico de Peso (kg)</h3>
-                <div style="position: relative; height: 300px; width: 100%;">
-                    <canvas id="weightChart"></canvas>
-                </div>
-            </div>
-
-            <div class="card-box">
-                <h3 style="margin-bottom: 20px;">Registros Detalhados</h3>
-                <% if (history && history.length > 0) { %>
-                    <div class="table-responsive">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Data</th>
-                                    <th>Peso (kg)</th>
-                                    <th>Fotos</th>
-                                    <th>Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <% history.forEach(record => { %>
-                                <tr>
-                                    <td><%= new Date(record.recorded_at).toLocaleDateString('pt-BR') %></td>
-                                    <td><%= record.weight %> kg</td>
-                                    <td>
-                                        <% if (record.photo_front) { %>
-                                            <i class="fas fa-camera text-neon" title="Fotos disponíveis"></i>
-                                        <% } else { %>
-                                            <span class="text-muted">-</span>
-                                        <% } %>
-                                    </td>
-                                    <td>
-                                        <button class="btn btn-sm btn-outline"><i class="fas fa-eye"></i></button>
-                                    </td>
-                                </tr>
-                                <% }) %>
-                            </tbody>
-                        </table>
-                    </div>
-                <% } else { %>
-                    <div style="text-align: center; padding: 40px; color: var(--text-muted);">
-                        <i class="fas fa-chart-line" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.5;"></i>
-                        <p>Nenhum registro encontrado.</p>
-                        <button class="btn btn-primary" style="margin-top: 15px;">Registrar Agora</button>
-                    </div>
-                <% } %>
+                <p class="text-muted">Gráficos de evolução serão exibidos aqui.</p>
             </div>
         </div>
     </main>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const historyData = <%- JSON.stringify(history || []) %>;
-        
-        if (historyData.length > 0) {
-            // Preparar dados para o gráfico
-            // Ordenar por data (caso não venha ordenado)
-            historyData.sort((a, b) => new Date(a.recorded_at) - new Date(b.recorded_at));
-
-            const labels = historyData.map(h => new Date(h.recorded_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }));
-            const weights = historyData.map(h => h.weight);
-
-            const ctx = document.getElementById('weightChart').getContext('2d');
-            
-            // Gradiente Neon
-            const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-            gradient.addColorStop(0, 'rgba(190, 242, 2, 0.5)');
-            gradient.addColorStop(1, 'rgba(190, 242, 2, 0)');
-
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Peso Corporal (kg)',
-                        data: weights,
-                        borderColor: '#bef202',
-                        backgroundColor: gradient,
-                        borderWidth: 2,
-                        pointBackgroundColor: '#bef202',
-                        pointBorderColor: '#fff',
-                        fill: true,
-                        tension: 0.4 // Curva suave
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            mode: 'index',
-                            intersect: false,
-                            backgroundColor: '#111',
-                            titleColor: '#bef202',
-                            bodyColor: '#fff',
-                            borderColor: '#333',
-                            borderWidth: 1
-                        }
-                    },
-                    scales: {
-                        y: {
-                            grid: { color: 'rgba(255,255,255,0.05)' },
-                            ticks: { color: '#888' }
-                        },
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: '#888' }
-                        }
-                    }
-                }
-            });
-        }
-    });
-</script>
-
 <%- include('../partials/footer.ejs') %>

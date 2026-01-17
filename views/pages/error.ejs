@@ -1,12 +1,8 @@
-<%# Definimos um título padrão caso não seja passado %>
-<% const pageTitle = typeof title !== 'undefined' ? title : 'Ocorreu um Erro - Momentum Fit'; %>
-
-<%- include('../partials/header.ejs', { title: pageTitle, bodyClass: '' }) %>
-<main style="padding-top: 80px;">
-    <div class="container" style="padding: 100px 24px; text-align: center; min-height: 60vh; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-        <h1 style="font-size: 3rem; font-weight: 800;">Oops!</h1>
-        <p style="font-size: 1.2rem; color: var(--c-text-secondary); max-width: 500px;"><%= typeof message !== 'undefined' ? message : 'Algo deu errado.' %></p>
-        <a href="/" class="btn btn-primary" style="margin-top: 2rem;">Voltar para a Página Inicial</a>
-    </div>
+<%- include('../partials/header.ejs') %>
+<main class="public-main" style="text-align: center; padding: 100px 20px;">
+    <h1 style="font-size: 4rem; color: #333;">Ops!</h1>
+    <h2 style="color: var(--primary-color);">Algo deu errado.</h2>
+    <p class="text-muted"><%= typeof message !== 'undefined' ? message : 'Página não encontrada ou erro interno.' %></p>
+    <a href="/" class="btn btn-outline" style="margin-top: 20px;">Voltar ao Início</a>
 </main>
 <%- include('../partials/footer.ejs') %>
