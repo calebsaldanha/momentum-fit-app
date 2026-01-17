@@ -4,29 +4,26 @@
     <main class="dashboard-main">
         <div class="content-wrapper">
             <div class="page-header" style="margin-bottom: 30px;">
-                <h1>Visão Geral</h1>
-                <p class="text-muted">Métricas principais da plataforma.</p>
+                <h1>Painel Administrativo</h1>
+                <p class="text-muted">Bem-vindo à central de controle do Momentum Fit.</p>
             </div>
 
-            <div class="content-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
+            <div class="content-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
                 <div class="card-box">
-                    <span class="text-muted"><i class="fas fa-users"></i> Usuários Totais</span>
+                    <span class="text-muted"><i class="fas fa-users"></i> Usuários</span>
                     <h2 class="text-neon"><%= stats.users %></h2>
                 </div>
                 <div class="card-box">
                     <span class="text-muted"><i class="fas fa-dumbbell"></i> Treinadores</span>
                     <h2><%= stats.trainers %></h2>
                 </div>
+                <div class="card-box" style="<%= stats.pending > 0 ? 'border-color:#ff4d4d' : '' %>">
+                    <span class="text-muted"><i class="fas fa-user-clock"></i> Pendentes</span>
+                    <h2 style="<%= stats.pending > 0 ? 'color:#ff4d4d' : '' %>"><%= stats.pending %></h2>
+                </div>
                 <div class="card-box">
                     <span class="text-muted"><i class="fas fa-file-alt"></i> Artigos</span>
                     <h2><%= stats.articles %></h2>
-                </div>
-                <div class="card-box" style="<%= stats.pending > 0 ? 'border-color: #ff4d4d;' : '' %>">
-                    <span class="text-muted"><i class="fas fa-clock"></i> Pendentes</span>
-                    <h2 style="<%= stats.pending > 0 ? 'color: #ff4d4d;' : '' %>"><%= stats.pending %></h2>
-                    <% if (stats.pending > 0) { %>
-                        <a href="/admin/approvals" class="btn btn-sm btn-outline" style="margin-top: 10px;">Revisar</a>
-                    <% } %>
                 </div>
             </div>
         </div>

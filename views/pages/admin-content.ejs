@@ -3,40 +3,20 @@
     <%- include('../partials/sidebar.ejs') %>
     <main class="dashboard-main">
         <div class="content-wrapper">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-                <div>
-                    <h1>Gestão de Conteúdo</h1>
-                    <p class="text-muted">Artigos do blog e materiais educativos.</p>
-                </div>
-                <a href="/articles/create" class="btn btn-primary"><i class="fas fa-plus"></i> Novo Artigo</a>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
+                <h1>Conteúdo / Blog</h1>
+                <a href="/articles/create" class="btn btn-primary">Novo Artigo</a>
             </div>
-
             <div class="card-box">
                 <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Título</th>
-                            <th>Categoria</th>
-                            <th>Status</th>
-                            <th>Views</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
+                    <thead><tr><th>Título</th><th>Categoria</th><th>Views</th><th>Ações</th></tr></thead>
                     <tbody>
-                        <% articles.forEach(art => { %>
+                        <% articles.forEach(a => { %>
                         <tr>
-                            <td><%= art.title %></td>
-                            <td><%= art.category %></td>
-                            <td>
-                                <span class="badge" style="<%= art.status === 'published' ? 'background:rgba(190,242,2,0.1);color:#bef202' : '' %>">
-                                    <%= art.status %>
-                                </span>
-                            </td>
-                            <td><%= art.views %></td>
-                            <td>
-                                <a href="/articles/<%= art.id %>" class="btn btn-sm btn-outline"><i class="fas fa-eye"></i></a>
-                                <button class="btn btn-sm btn-outline"><i class="fas fa-edit"></i></button>
-                            </td>
+                            <td><%= a.title %></td>
+                            <td><%= a.category %></td>
+                            <td><%= a.views %></td>
+                            <td><a href="/articles/<%= a.id %>" class="btn btn-sm btn-outline">Ver</a></td>
                         </tr>
                         <% }) %>
                     </tbody>

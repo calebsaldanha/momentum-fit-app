@@ -1,14 +1,14 @@
 <aside class="sidebar">
-    <div class="sidebar-header" style="padding: 20px; text-align: center;">
-        <div style="width: 60px; height: 60px; background: #222; border-radius: 50%; margin: 0 auto 10px; overflow: hidden; border: 2px solid var(--primary-color);">
+    <div class="sidebar-header" style="padding: 20px; text-align: center; border-bottom: 1px solid var(--border-light);">
+        <div style="width: 60px; height: 60px; background: #222; border-radius: 50%; margin: 0 auto 15px; overflow: hidden; border: 2px solid var(--primary-color);">
             <img src="<%= user.profile_image || '/images/logo-3d.png' %>" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
         </div>
         <h4 style="color: white; margin: 0; font-size: 1rem;"><%= user.name.split(' ')[0] %></h4>
-        <span style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;"><%= user.role === 'superadmin' ? 'Admin' : user.role %></span>
+        <span style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;"><%= user.role === 'superadmin' ? 'Admin' : user.role %></span>
     </div>
 
-    <nav class="sidebar-nav" style="padding: 20px 0;">
-        <ul style="list-style: none; padding: 0;">
+    <nav class="sidebar-nav" style="padding: 20px 0; flex: 1;">
+        <ul style="list-style: none; padding: 0; margin: 0;">
             
             <% if (user.role === 'client') { %>
                 <li><a href="/client/dashboard" class="nav-link <%= active === 'dashboard' ? 'active' : '' %>"><i class="fas fa-home"></i> Dashboard</a></li>
@@ -27,42 +27,52 @@
             <% } %>
 
             <% if (user.role === 'admin' || user.role === 'superadmin') { %>
-                <li style="padding: 10px 20px; color: #666; font-size: 0.75rem; text-transform: uppercase; font-weight: bold; letter-spacing: 1px;">Gestão</li>
+                <li class="nav-section-title">Gestão</li>
                 <li><a href="/admin/dashboard" class="nav-link <%= active === 'dashboard' ? 'active' : '' %>"><i class="fas fa-chart-pie"></i> Visão Geral</a></li>
                 <li><a href="/admin/clients" class="nav-link <%= active === 'clients' ? 'active' : '' %>"><i class="fas fa-users-cog"></i> Usuários</a></li>
                 <li><a href="/admin/approvals" class="nav-link <%= active === 'approvals' ? 'active' : '' %>"><i class="fas fa-user-check"></i> Aprovações</a></li>
                 
-                <li style="padding: 10px 20px; color: #666; font-size: 0.75rem; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; margin-top: 10px;">Plataforma</li>
-                <li><a href="/admin/content" class="nav-link <%= active === 'content' ? 'active' : '' %>"><i class="fas fa-newspaper"></i> Conteúdo/Blog</a></li>
+                <li class="nav-section-title">Plataforma</li>
+                <li><a href="/admin/content" class="nav-link <%= active === 'content' ? 'active' : '' %>"><i class="fas fa-newspaper"></i> Conteúdo</a></li>
                 <li><a href="/admin/plans" class="nav-link <%= active === 'plans' ? 'active' : '' %>"><i class="fas fa-tags"></i> Planos</a></li>
                 <li><a href="/admin/finance" class="nav-link <%= active === 'finance' ? 'active' : '' %>"><i class="fas fa-dollar-sign"></i> Financeiro</a></li>
                 
-                <li style="padding: 10px 20px; color: #666; font-size: 0.75rem; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; margin-top: 10px;">Sistema</li>
+                <li class="nav-section-title">Sistema</li>
                 <li><a href="/admin/ia-audit" class="nav-link <%= active === 'ia-audit' ? 'active' : '' %>"><i class="fas fa-brain"></i> Auditoria IA</a></li>
                 <li><a href="/admin/settings" class="nav-link <%= active === 'settings' ? 'active' : '' %>"><i class="fas fa-cogs"></i> Configurações</a></li>
             <% } %>
-
-            <li style="margin-top: 20px; border-top: 1px solid #222;"></li>
-            <li><a href="/client/profile" class="nav-link <%= active === 'profile' ? 'active' : '' %>"><i class="fas fa-user-circle"></i> Meu Perfil</a></li>
-            <li><a href="/auth/logout" class="nav-link" style="color: #ff4d4d;"><i class="fas fa-sign-out-alt"></i> Sair</a></li>
         </ul>
     </nav>
+
+    <div style="padding: 20px; border-top: 1px solid var(--border-light);">
+        <a href="/client/profile" class="nav-link <%= active === 'profile' ? 'active' : '' %>" style="margin-bottom: 5px;"><i class="fas fa-user-circle"></i> Perfil</a>
+        <a href="/auth/logout" class="nav-link" style="color: #ff4d4d;"><i class="fas fa-sign-out-alt"></i> Sair</a>
+    </div>
 </aside>
 
 <style>
+    .nav-section-title {
+        padding: 15px 25px 10px;
+        color: #555;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        font-weight: 700;
+        letter-spacing: 1px;
+    }
     .nav-link {
         display: flex;
         align-items: center;
-        padding: 12px 20px;
+        padding: 12px 25px;
         color: #bbb;
         text-decoration: none;
-        transition: 0.2s;
+        transition: all 0.2s;
         border-left: 3px solid transparent;
+        font-size: 0.9rem;
     }
-    .nav-link i { width: 25px; text-align: center; margin-right: 10px; }
-    .nav-link:hover { background: rgba(255,255,255,0.05); color: white; }
+    .nav-link i { width: 25px; text-align: center; margin-right: 10px; font-size: 1rem; }
+    .nav-link:hover { background: rgba(255,255,255,0.03); color: white; }
     .nav-link.active {
-        background: rgba(190, 242, 2, 0.05);
+        background: rgba(190, 242, 2, 0.08);
         color: var(--primary-color);
         border-left-color: var(--primary-color);
     }

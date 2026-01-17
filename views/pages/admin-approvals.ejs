@@ -5,34 +5,30 @@
         <div class="content-wrapper">
             <div class="page-header">
                 <h1>Aprovações Pendentes</h1>
-                <p class="text-muted">Treinadores aguardando validação de cadastro.</p>
             </div>
-
-            <% if (pendingTrainers.length === 0) { %>
+            <% if(pendingTrainers.length === 0) { %>
                 <div class="card-box" style="text-align: center; padding: 40px;">
-                    <i class="fas fa-check-circle" style="font-size: 3rem; color: var(--primary-color); margin-bottom: 15px;"></i>
-                    <p>Tudo limpo! Nenhuma aprovação pendente.</p>
+                    <i class="fas fa-check-circle" style="font-size: 3rem; color: #333; margin-bottom: 10px;"></i>
+                    <p class="text-muted">Nenhuma solicitação pendente.</p>
                 </div>
             <% } else { %>
                 <div class="content-grid">
-                    <% pendingTrainers.forEach(trainer => { %>
+                    <% pendingTrainers.forEach(t => { %>
                     <div class="card-box">
-                        <h3 style="margin-bottom: 5px;"><%= trainer.name %></h3>
-                        <p class="text-muted" style="margin-bottom: 15px;"><%= trainer.email %></p>
-                        
-                        <div style="background: #000; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 0.9rem;">
-                            <strong>Especialidades:</strong> <%= trainer.specialties || '-' %><br>
-                            <strong>Certificações:</strong> <%= trainer.certifications || '-' %>
+                        <h3><%= t.name %></h3>
+                        <p class="text-muted"><%= t.email %></p>
+                        <div style="margin: 15px 0; font-size: 0.9rem; background: #000; padding: 10px; border-radius: 6px;">
+                            <strong>Specs:</strong> <%= t.specialties || '-' %><br>
+                            <strong>Certs:</strong> <%= t.certifications || '-' %>
                         </div>
-
-                        <div style="display: flex; gap: 10px;">
-                            <form action="/admin/approve-trainer/<%= trainer.trainer_id %>" method="POST" style="flex: 1;">
+                        <div style="display:flex; gap:10px;">
+                            <form action="/admin/approve-trainer/<%= t.trainer_id %>" method="POST" style="flex:1;">
                                 <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                                 <button class="btn btn-primary btn-full">Aprovar</button>
                             </form>
-                            <form action="/admin/reject-trainer/<%= trainer.trainer_id %>" method="POST" style="flex: 1;">
+                            <form action="/admin/reject-trainer/<%= t.trainer_id %>" method="POST" style="flex:1;">
                                 <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                <button class="btn btn-outline btn-full" style="border-color: #ff4d4d; color: #ff4d4d;">Rejeitar</button>
+                                <button class="btn btn-outline btn-full" style="color:#ff4d4d; border-color:#ff4d4d;">Rejeitar</button>
                             </form>
                         </div>
                     </div>

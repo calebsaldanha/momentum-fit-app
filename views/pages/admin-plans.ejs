@@ -4,20 +4,15 @@
     <main class="dashboard-main">
         <div class="content-wrapper">
             <div class="page-header">
-                <h1>Planos de Assinatura</h1>
-                <p class="text-muted">Configuração de preços e funcionalidades.</p>
+                <h1>Planos e Preços</h1>
             </div>
-
             <div class="content-grid">
-                <% plans.forEach(plan => { %>
-                <div class="card-box" style="<%= !plan.active ? 'opacity: 0.6;' : '' %>">
-                    <div style="display: flex; justify-content: space-between;">
-                        <h3><%= plan.name %></h3>
-                        <% if(plan.active) { %> <span class="badge">Ativo</span> <% } else { %> <span class="badge" style="background:#333;color:#888;">Inativo</span> <% } %>
-                    </div>
-                    <h2 class="text-neon" style="margin: 15px 0;">R$ <%= plan.price %> <span style="font-size: 1rem; color: #888;">/mês</span></h2>
-                    <p class="text-muted"><i class="fas fa-users"></i> <%= plan.users %> assinantes</p>
-                    <button class="btn btn-outline btn-full" style="margin-top: 20px;">Editar</button>
+                <% plans.forEach(p => { %>
+                <div class="card-box" style="<%= !p.active ? 'opacity:0.5' : '' %>">
+                    <h3><%= p.name %></h3>
+                    <h2 class="text-neon">R$ <%= p.price %></h2>
+                    <p class="text-muted"><%= p.active ? 'Ativo na Loja' : 'Indisponível' %></p>
+                    <button class="btn btn-outline btn-full">Editar</button>
                 </div>
                 <% }) %>
             </div>

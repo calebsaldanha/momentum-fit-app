@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../database/db');
 
-// Middleware Admin
+// Middleware Admin Seguro
 function requireAdmin(req, res, next) {
     if (req.session.user && (req.session.user.role === 'admin' || req.session.user.role === 'superadmin')) {
         return next();
@@ -14,35 +14,25 @@ router.use(requireAdmin);
 // 1. DASHBOARD
 router.get('/dashboard', async (req, res) => {
     try {
-        const users = await db.query("SELECT COUNT(*) FROM users");
-        const trainers = await db.query("SELECT COUNT(*) FROM trainers");
-        const articles = await db.query("SELECT COUNT(*) FROM articles");
-        const pending = await db.query("SELECT COUNT(*) FROM trainers WHERE approval_status = 'pending'");
+        // Consultas seguras com fallback
+        const counts = { users: 0, trainers: 0, articles: 0, pending: 0 };
+        
+        try { counts.users = (await db.query("SELECT COUNT(*) FROM users")).rows[0].count; } catch(e){}
+        try { counts.trainers = (await db.query("SELECT COUNT(*) FROM trainers")).rows[0].count; } catch(e){}
+        try { counts.articles = (await db.query("SELECT COUNT(*) FROM articles")).rows[0].count; } catch(e){}
+        try { counts.pending = (await db.query("SELECT COUNT(*) FROM trainers WHERE approval_status = 'pending'")).rows[0].count; } catch(e){}
 
         res.render('pages/admin-dashboard', { 
-            title: 'Admin Dashboard', 
-            currentPage: '/admin/dashboard',
-            active: 'dashboard',
-            stats: { 
-                users: users.rows[0].count, 
-                trainers: trainers.rows[0].count,
-                articles: articles.rows[0].count,
-                pending: pending.rows[0].count 
-            }
+            title: 'Visão Geral', active: 'dashboard', stats: counts 
         });
-    } catch (e) { res.render('pages/error', { message: 'Erro no dashboard' }); }
+    } catch (e) { res.render('pages/error', { message: 'Erro no Dashboard' }); }
 });
 
-// 2. CLIENTES / USUÁRIOS
+// 2. CLIENTES
 router.get('/clients', async (req, res) => {
     try {
         const users = await db.query("SELECT id, name, email, role, created_at, is_active FROM users ORDER BY created_at DESC LIMIT 50");
-        res.render('pages/admin-clients', { 
-            title: 'Gestão de Usuários', 
-            users: users.rows, 
-            active: 'clients', 
-            currentPage: '/admin/clients' 
-        });
+        res.render('pages/admin-clients', { title: 'Usuários', active: 'clients', users: users.rows });
     } catch(e) { res.render('pages/error'); }
 });
 
@@ -51,93 +41,65 @@ router.get('/approvals', async (req, res) => {
     try {
         const pending = await db.query(`
             SELECT t.id as trainer_id, u.name, u.email, t.specialties, t.certifications, t.created_at
-            FROM trainers t JOIN users u ON t.user_id = u.id 
-            WHERE t.approval_status = 'pending'
+            FROM trainers t JOIN users u ON t.user_id = u.id WHERE t.approval_status = 'pending'
         `);
-        res.render('pages/admin-approvals', { 
-            title: 'Aprovações', 
-            pendingTrainers: pending.rows, 
-            active: 'approvals',
-            currentPage: '/admin/approvals'
-        });
-    } catch(e) { res.render('pages/error'); }
+        res.render('pages/admin-approvals', { title: 'Aprovações', active: 'approvals', pendingTrainers: pending.rows });
+    } catch(e) { res.render('pages/admin-approvals', { title: 'Aprovações', active: 'approvals', pendingTrainers: [] }); }
 });
 
-// ACTIONS APROVAÇÃO
 router.post('/approve-trainer/:id', async (req, res) => {
     await db.query("UPDATE trainers SET approval_status = 'approved' WHERE id = $1", [req.params.id]);
-    res.redirect('/admin/approvals?success=1');
+    res.redirect('/admin/approvals?success=aprovado');
 });
 router.post('/reject-trainer/:id', async (req, res) => {
     await db.query("UPDATE trainers SET approval_status = 'rejected' WHERE id = $1", [req.params.id]);
-    res.redirect('/admin/approvals?success=0');
+    res.redirect('/admin/approvals?success=rejeitado');
 });
 
-// 4. CONTEÚDO (BLOG)
+// 4. CONTEÚDO
 router.get('/content', async (req, res) => {
     try {
-        const articles = await db.query("SELECT id, title, category, status, views, created_at FROM articles ORDER BY created_at DESC");
-        res.render('pages/admin-content', { 
-            title: 'Gestão de Conteúdo', 
-            articles: articles.rows, 
-            active: 'content',
-            currentPage: '/admin/content'
-        });
-    } catch(e) { res.render('pages/error'); }
+        const articles = await db.query("SELECT id, title, category, status, views FROM articles ORDER BY created_at DESC");
+        res.render('pages/admin-content', { title: 'Conteúdo', active: 'content', articles: articles.rows });
+    } catch(e) { res.render('pages/admin-content', { title: 'Conteúdo', active: 'content', articles: [] }); }
 });
 
-// 5. FINANCEIRO (MOCK)
+// 5. FINANCEIRO
 router.get('/finance', (req, res) => {
-    const transactions = [
-        { id: 1, user: 'João Silva', plan: 'Pro Evolution', amount: 59.90, date: new Date(), status: 'paid' },
-        { id: 2, user: 'Maria Souza', plan: 'Fit Start', amount: 29.90, date: new Date(), status: 'paid' },
-        { id: 3, user: 'Carlos Pedro', plan: 'Elite', amount: 99.90, date: new Date(), status: 'pending' }
-    ];
+    // Dados Mockados para MVP
     res.render('pages/admin-finance', { 
-        title: 'Financeiro', 
-        transactions, 
-        revenue: 12500.00,
-        active: 'finance',
-        currentPage: '/admin/finance'
+        title: 'Financeiro', active: 'finance',
+        revenue: 15450.00,
+        transactions: [
+            { id: 1, user: 'João S.', plan: 'Pro', amount: 59.90, status: 'Pago' },
+            { id: 2, user: 'Maria T.', plan: 'Start', amount: 29.90, status: 'Pago' },
+            { id: 3, user: 'Carlos E.', plan: 'Elite', amount: 99.90, status: 'Pendente' }
+        ]
     });
 });
 
-// 6. PLANOS (MOCK)
+// 6. PLANOS
 router.get('/plans', (req, res) => {
-    const plans = [
-        { id: 1, name: 'Fit Start', price: 29.90, users: 120, active: true },
-        { id: 2, name: 'Pro Evolution', price: 59.90, users: 85, active: true },
-        { id: 3, name: 'Elite Personal', price: 99.90, users: 15, active: false }
-    ];
     res.render('pages/admin-plans', { 
-        title: 'Planos de Assinatura', 
-        plans, 
-        active: 'plans',
-        currentPage: '/admin/plans'
+        title: 'Planos', active: 'plans',
+        plans: [
+            { name: 'Fit Start', price: 29.90, active: true },
+            { name: 'Pro Evolution', price: 59.90, active: true },
+            { name: 'Elite Personal', price: 99.90, active: false }
+        ]
     });
 });
 
-// 7. IA AUDIT (MOCK)
+// 7. IA AUDIT
 router.get('/ia-audit', (req, res) => {
-    const logs = [
-        { id: 101, action: 'Generate Workout', user: 'Trainer X', tokens: 150, cost: 0.002, time: '2025-01-17 14:30' },
-        { id: 102, action: 'Chat Reply', user: 'Client Y', tokens: 45, cost: 0.0005, time: '2025-01-17 14:32' }
-    ];
-    res.render('pages/admin-ia-audit', { 
-        title: 'Auditoria de IA', 
-        logs, 
-        active: 'ia-audit',
-        currentPage: '/admin/ia-audit'
-    });
+    res.render('pages/admin-ia-audit', { title: 'IA Audit', active: 'ia-audit', logs: [] });
 });
 
 // 8. CONFIGURAÇÕES
 router.get('/settings', (req, res) => {
     res.render('pages/admin-settings', { 
-        title: 'Configurações Globais', 
-        config: { maintenance: false, allow_registrations: true },
-        active: 'settings',
-        currentPage: '/admin/settings'
+        title: 'Configurações', active: 'settings', 
+        config: { maintenance: false, registrations: true }
     });
 });
 

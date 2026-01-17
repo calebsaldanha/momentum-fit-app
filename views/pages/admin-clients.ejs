@@ -4,35 +4,21 @@
     <main class="dashboard-main">
         <div class="content-wrapper">
             <div class="page-header">
-                <h1>Gerenciar Usuários</h1>
-                <p class="text-muted">Lista completa de usuários registrados.</p>
+                <h1>Base de Usuários</h1>
+                <p class="text-muted">Gerencie o acesso de clientes e treinadores.</p>
             </div>
-
             <div class="card-box">
                 <div class="table-responsive">
                     <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Nome</th>
-                                <th>Email</th>
-                                <th>Role</th>
-                                <th>Status</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
+                        <thead><tr><th>Nome</th><th>Email</th><th>Tipo</th><th>Status</th><th>Ação</th></tr></thead>
                         <tbody>
                             <% users.forEach(u => { %>
                             <tr>
                                 <td><%= u.name %></td>
                                 <td><%= u.email %></td>
                                 <td><span class="badge"><%= u.role %></span></td>
-                                <td>
-                                    <% if(u.is_active) { %> <span style="color: var(--primary-color);">Ativo</span>
-                                    <% } else { %> <span style="color: #ff4d4d;">Inativo</span> <% } %>
-                                </td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline"><i class="fas fa-edit"></i></button>
-                                </td>
+                                <td><%= u.is_active ? 'Ativo' : 'Inativo' %></td>
+                                <td><button class="btn btn-sm btn-outline"><i class="fas fa-cog"></i></button></td>
                             </tr>
                             <% }) %>
                         </tbody>
