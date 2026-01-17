@@ -1,33 +1,40 @@
-<%- include('../partials/header.ejs', { title: 'Admin' }) %>
+<%- include('../partials/header.ejs') %>
 
 <div class="dashboard-container">
-    <%- include('../partials/sidebar.ejs') %>
-    
+    <%- include('../partials/sidebar.ejs', { path: '/admin/dashboard' }) %>
+
     <main class="dashboard-main">
-        <div class="page-header" style="text-align: left; padding: 0; background: transparent; border: none; margin-bottom: 30px;">
-            <h1>Administração Global</h1>
-            <p>Visão geral de toda a plataforma.</p>
+        <div class="mobile-dash-header">
+            <button id="sidebarToggle" class="btn btn-outline btn-sm">
+                <i class="fas fa-bars"></i> Menu
+            </button>
+            <span class="text-muted">Admin</span>
         </div>
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px;">
-            <div class="card-box" style="border-top: 3px solid var(--primary-color);">
-                <div style="display: flex; justify-content: space-between;">
-                    <div>
-                        <span style="color: #888; font-size: 0.85rem;">Usuários Totais</span>
-                        <h2 style="color: white; margin-top: 5px;"><%= stats.users || 0 %></h2>
-                    </div>
-                    <i class="fas fa-users" style="color: #333; font-size: 1.5rem;"></i>
-                </div>
+        <div class="page-header">
+            <h1>Visão Geral <span class="text-neon">Administrativa</span></h1>
+        </div>
+
+        <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+            <div class="card-box">
+                <h3>Usuários Totais</h3>
+                <p style="font-size: 2rem; font-weight: bold;"><%= typeof stats !== 'undefined' ? stats.totalUsers : 0 %></p>
             </div>
-            
-            <div class="card-box" style="border-top: 3px solid #3b82f6;">
-                <div style="display: flex; justify-content: space-between;">
-                    <div>
-                        <span style="color: #888; font-size: 0.85rem;">Treinadores</span>
-                        <h2 style="color: white; margin-top: 5px;"><%= stats.trainers || 0 %></h2>
-                    </div>
-                    <i class="fas fa-dumbbell" style="color: #333; font-size: 1.5rem;"></i>
-                </div>
+            <div class="card-box">
+                <h3>Treinadores</h3>
+                <p style="font-size: 2rem; font-weight: bold;"><%= typeof stats !== 'undefined' ? stats.totalTrainers : 0 %></p>
+            </div>
+            <div class="card-box">
+                <h3>Pendentes</h3>
+                <p style="font-size: 2rem; font-weight: bold; color: orange;"><%= typeof stats !== 'undefined' ? stats.pendingApprovals : 0 %></p>
+            </div>
+        </div>
+        
+        <div style="margin-top: 40px;">
+            <h2 class="section-title">Ações Rápidas</h2>
+            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                <a href="/admin/approvals" class="btn btn-primary">Aprovar Treinadores</a>
+                <a href="/admin/finance" class="btn btn-outline">Relatórios Financeiros</a>
             </div>
         </div>
     </main>
