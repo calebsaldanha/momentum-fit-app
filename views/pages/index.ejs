@@ -5,7 +5,7 @@
         <div class="hero-overlay"></div>
         <div class="container hero-container">
             <div class="hero-content">
-                <span class="badge-neon">Nova Plataforma</span>
+                <span class="badge-neon">Plataforma Oficial</span>
                 <h1 class="hero-title">
                     Seu Potencial, <br>
                     <span class="text-gradient">No Próximo Nível.</span>
@@ -16,25 +16,13 @@
                 </p>
                 <div class="hero-buttons">
                     <% if (!isAuthenticated) { %>
-                        <a href="/auth/register" class="btn btn-primary btn-lg btn-glow">Começar Agora <i class="fas fa-arrow-right"></i></a>
-                        <a href="/auth/login" class="btn btn-outline btn-lg">Fazer Login</a>
+                        <a href="/auth/register" class="btn btn-primary btn-lg">Começar Agora <i class="fas fa-arrow-right"></i></a>
+                        <a href="/auth/login" class="btn btn-outline btn-lg">Entrar</a>
                     <% } else if (user.role === 'client') { %>
-                        <a href="/client/dashboard" class="btn btn-primary btn-lg btn-glow">Ir para o Dashboard</a>
+                        <a href="/client/dashboard" class="btn btn-primary btn-lg">Ir para o Dashboard</a>
                     <% } else { %>
-                        <a href="/admin/dashboard" class="btn btn-primary btn-lg btn-glow">Painel Administrativo</a>
+                        <a href="/admin/dashboard" class="btn btn-primary btn-lg">Painel Administrativo</a>
                     <% } %>
-                </div>
-                
-                <div class="hero-stats">
-                    <div class="stat-item">
-                        <span class="stat-number">500+</span>
-                        <span class="stat-label">Alunos Ativos</span>
-                    </div>
-                    <div class="stat-divider"></div>
-                    <div class="stat-item">
-                        <span class="stat-number">98%</span>
-                        <span class="stat-label">Resultados</span>
-                    </div>
                 </div>
             </div>
         </div>
@@ -68,38 +56,6 @@
                     </div>
                     <h3>Chat Direto</h3>
                     <p>Tire dúvidas, envie vídeos da execução e receba feedback do seu treinador em tempo real.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="about" class="about section-padding bg-subtle">
-        <div class="container">
-            <div class="section-header left-align">
-                <h2 class="section-title">Como Funciona <span class="text-neon">Sua Jornada</span></h2>
-                <p class="section-desc">Um processo simples, estruturado para o seu sucesso.</p>
-            </div>
-
-            <div class="steps-grid">
-                <div class="step-card">
-                    <span class="step-number">01</span>
-                    <h3>Cadastro & Anamnese</h3>
-                    <p>Crie sua conta e responda um questionário completo sobre sua saúde e rotina.</p>
-                </div>
-                <div class="step-card">
-                    <span class="step-number">02</span>
-                    <h3>Receba seu Plano</h3>
-                    <p>Seu treinador analisará seus dados e criará uma estratégia única para você.</p>
-                </div>
-                <div class="step-card">
-                    <span class="step-number">03</span>
-                    <h3>Treine & Registre</h3>
-                    <p>Acesse o app, execute os treinos e faça check-ins semanais da sua evolução.</p>
-                </div>
-                <div class="step-card">
-                    <span class="step-number">04</span>
-                    <h3>Ajustes Contínuos</h3>
-                    <p>O plano evolui com você. Ajustes de carga e intensidade baseados no seu feedback.</p>
                 </div>
             </div>
         </div>

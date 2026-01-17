@@ -3,10 +3,10 @@
             <div class="footer-wrapper">
                 
                 <div class="footer-brand-section">
-                    <div class="footer-logo">
+                    <a href="/" class="footer-logo">
                         <img src="/images/momentum-fit-icon.png" alt="Logo">
                         <span>Momentum Fit</span>
-                    </div>
+                    </a>
                     <p class="copyright-text">&copy; 2026 Momentum Fit. Todos os direitos reservados.</p>
                 </div>
 
@@ -43,6 +43,7 @@
 
                 if(closeBtn) closeBtn.addEventListener('click', closeMenu);
                 
+                // Fecha ao clicar fora
                 menu.addEventListener('click', (e) => {
                     if(e.target === menu) closeMenu();
                 });
