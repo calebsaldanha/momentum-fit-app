@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../database/db');
 
-// Middleware simples para passar user para views
+// Middleware Global de Usuário
 router.use((req, res, next) => {
     res.locals.user = req.session.user || null;
     res.locals.isAuthenticated = !!req.session.user;
@@ -10,31 +10,27 @@ router.use((req, res, next) => {
 });
 
 router.get('/', async (req, res) => {
+    let trainers = [];
     try {
-        // Busca 3 treinadores aprovados para destaque na Home
-        const trainersQuery = `
+        // Tenta buscar destaques
+        const trainersRes = await db.query(`
             SELECT u.name, u.profile_image, t.specialties, t.bio 
             FROM trainers t 
             JOIN users u ON t.user_id = u.id 
             WHERE t.approval_status = 'approved' 
             LIMIT 3
-        `;
-        const trainersRes = await db.query(trainersQuery);
-        
-        res.render('pages/index', { 
-            title: 'Início', 
-            currentPage: 'home',
-            featuredTrainers: trainersRes.rows 
-        });
+        `);
+        trainers = trainersRes.rows;
     } catch (err) {
-        console.error("Erro ao carregar Home:", err);
-        // Em caso de erro, renderiza sem destaques para não quebrar a página
-        res.render('pages/index', { 
-            title: 'Início', 
-            currentPage: 'home', 
-            featuredTrainers: [] 
-        });
+        // Se der erro de conexão, carrega a home vazia sem travar
+        console.warn("Home: Banco de dados inacessível no momento.");
     }
+
+    res.render('pages/index', { 
+        title: 'Início', 
+        currentPage: 'home',
+        featuredTrainers: trainers 
+    });
 });
 
 router.get('/about', (req, res) => res.render('pages/about', { title: 'Sobre', currentPage: 'about' }));
