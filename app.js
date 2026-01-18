@@ -9,6 +9,10 @@ const flash = require('connect-flash');
 
 const app = express();
 
+// --- CORREÇÃO IMPORTANTE PARA VERCEL/PRODUÇÃO ---
+// Permite que cookies seguros (https) funcionem atrás de proxies
+app.set('trust proxy', 1); 
+
 // Configuração do EJS
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -22,7 +26,8 @@ app.use(express.json());
 app.use(session({
     store: new pgSession({
         pool: pool,
-        tableName: 'session'
+        tableName: 'session',
+        createTableIfMissing: true // Garante que a tabela exista
     }),
     secret: process.env.SESSION_SECRET || 'segredo_padrao_desenvolvimento',
     resave: false,
@@ -30,22 +35,23 @@ app.use(session({
     cookie: {
         maxAge: 30 * 24 * 60 * 60 * 1000, // 30 dias
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production'
+        // Secure true apenas em produção
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax' // Importante para navegação segura
     }
 }));
 
 app.use(flash());
 
-// Middleware de Proteção CSRF (exceto para webhook/api se houver)
+// Middleware CSRF
 const csrfProtection = csrf();
 app.use(csrfProtection);
 
-// === MIDDLEWARE GLOBAL DE VARIÁVEIS (A CORREÇÃO PRINCIPAL) ===
+// Variáveis Globais (User, CSRF, Path)
 app.use((req, res, next) => {
-    // Disponibiliza variaveis essenciais para TODOS os arquivos .ejs
     res.locals.csrfToken = req.csrfToken();
     res.locals.user = req.session.user || null;
-    res.locals.path = req.path; // <--- CORRIGE O ERRO DO SIDEBAR
+    res.locals.path = req.path;
     res.locals.query = req.query;
     res.locals.messages = req.flash();
     next();

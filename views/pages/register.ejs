@@ -1,85 +1,51 @@
-<%- include('../partials/header.ejs', { title: 'Cadastro' }) %>
+<%- include('../partials/header.ejs') %>
 
-<style>
-    .bg-fixed-image {
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: url('/images/hero-bg.png') no-repeat center center;
-        background-size: cover; z-index: 0;
-    }
-    .bg-fixed-overlay {
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0, 0, 0, 0.7);
-        z-index: 1; backdrop-filter: blur(3px);
-    }
-    .auth-wrapper-flex {
-        position: relative; z-index: 2;
-        min-height: calc(100vh - 70px);
-        width: 100%; display: flex; align-items: center; justify-content: center; padding: 20px;
-    }
-    .auth-card {
-        background: rgba(10, 10, 10, 0.85); border: 1px solid rgba(255,255,255,0.1);
-        border-radius: 16px; padding: 40px; width: 100%; max-width: 500px;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.8);
-    }
-</style>
-
-<div class="bg-fixed-image"></div>
-<div class="bg-fixed-overlay"></div>
-
-<div class="auth-wrapper-flex">
-    <div class="auth-card">
+<main class="page-content" style="display: flex; align-items: center; justify-content: center; min-height: 80vh;">
+    <div class="card-box" style="width: 100%; max-width: 500px; padding: 40px;">
         <div style="text-align: center; margin-bottom: 30px;">
-            <h1 style="color: white; font-size: 2rem; margin-bottom: 5px;">Criar Conta</h1>
-            <p style="color: #888; font-size: 0.95rem;">Junte-se ao Momentum Fit hoje.</p>
+            <h1 style="color: white; font-size: 2rem; margin-bottom: 10px;">Criar Conta</h1>
+            <p class="text-muted">Comece sua transformação hoje.</p>
         </div>
 
-        <% if (typeof error !== 'undefined' && error && error.length > 0) { %>
-            <div style="background: rgba(255, 77, 77, 0.15); border: 1px solid rgba(255, 77, 77, 0.3); color: #ff6b6b; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9rem;">
-                <i class="fas fa-exclamation-circle"></i> <%= error %>
+        <% if(messages.error) { %>
+            <div class="alert alert-danger" style="background: rgba(255,0,0,0.1); color: #ff4d4d; padding: 10px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #ff4d4d;">
+                <%= messages.error %>
             </div>
         <% } %>
 
         <form action="/auth/register" method="POST">
-            <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
-            
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; color: #ccc; margin-bottom: 8px; font-size: 0.9rem;">Nome Completo</label>
-                <input type="text" name="name" required placeholder="Seu nome" style="width: 100%; padding: 12px; background: #000; border: 1px solid #333; color: white; border-radius: 8px; outline: none; transition: 0.3s;">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; color: #aaa; margin-bottom: 8px;">Nome Completo</label>
+                <input type="text" name="name" required class="form-control" style="width: 100%; padding: 12px; background: #0a0a0a; border: 1px solid #333; color: white; border-radius: 8px;">
             </div>
 
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; color: #ccc; margin-bottom: 8px; font-size: 0.9rem;">E-mail</label>
-                <input type="email" name="email" required placeholder="seu@email.com" style="width: 100%; padding: 12px; background: #000; border: 1px solid #333; color: white; border-radius: 8px; outline: none; transition: 0.3s;">
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; color: #aaa; margin-bottom: 8px;">Email</label>
+                <input type="email" name="email" required class="form-control" style="width: 100%; padding: 12px; background: #0a0a0a; border: 1px solid #333; color: white; border-radius: 8px;">
             </div>
 
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; color: #ccc; margin-bottom: 8px; font-size: 0.9rem;">Perfil</label>
-                <select name="role" style="width: 100%; padding: 12px; background: #000; border: 1px solid #333; color: white; border-radius: 8px; outline: none;">
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; color: #aaa; margin-bottom: 8px;">Senha</label>
+                <input type="password" name="password" required class="form-control" style="width: 100%; padding: 12px; background: #0a0a0a; border: 1px solid #333; color: white; border-radius: 8px;">
+            </div>
+
+            <div style="margin-bottom: 30px;">
+                <label style="display: block; color: #aaa; margin-bottom: 8px;">Tipo de Conta</label>
+                <select name="role" required style="width: 100%; padding: 12px; background: #0a0a0a; border: 1px solid #333; color: white; border-radius: 8px;">
                     <option value="client">Aluno (Quero treinar)</option>
-                    <option value="trainer">Personal Trainer (Quero dar aula)</option>
+                    <option value="trainer">Personal Trainer (Sou profissional)</option>
                 </select>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px;">
-                <div>
-                    <label style="display: block; color: #ccc; margin-bottom: 8px; font-size: 0.9rem;">Senha</label>
-                    <input type="password" name="password" required placeholder="Min 6 chars" style="width: 100%; padding: 12px; background: #000; border: 1px solid #333; color: white; border-radius: 8px; outline: none;">
-                </div>
-                <div>
-                    <label style="display: block; color: #ccc; margin-bottom: 8px; font-size: 0.9rem;">Confirmar</label>
-                    <input type="password" name="confirmPassword" required placeholder="Repita" style="width: 100%; padding: 12px; background: #000; border: 1px solid #333; color: white; border-radius: 8px; outline: none;">
-                </div>
-            </div>
-
-            <button type="submit" class="btn btn-primary btn-full" style="width: 100%; padding: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Criar Conta</button>
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 14px;">Criar Conta</button>
         </form>
 
-        <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05);">
-            <p style="color: #666; font-size: 0.9rem;">
-                Já tem conta? <a href="/auth/login" style="color: var(--primary-color); font-weight: 600; text-decoration: none;">Fazer Login</a>
-            </p>
+        <div style="text-align: center; margin-top: 20px;">
+            <a href="/auth/login" class="text-neon" style="font-size: 0.9rem;">Já tem conta? Faça Login</a>
         </div>
     </div>
-</div>
+</main>
 
 <%- include('../partials/footer.ejs') %>
