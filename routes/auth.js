@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const bcrypt = require('bcryptjs'); // ALTERADO PARA BCRYPTJS
+const bcrypt = require('bcryptjs'); // USANDO BCRYPTJS
 const db = require('../database/db');
 
 router.get('/login', (req, res) => res.render('pages/login'));

@@ -1,16 +1,15 @@
 require('dotenv').config();
 const db = require('../database/db');
-const bcrypt = require('bcryptjs'); // ALTERADO PARA BCRYPTJS
+const bcrypt = require('bcryptjs'); // USANDO BCRYPTJS
 
 async function createAdmin() {
     const email = 'admin@momentum.com';
-    const password = 'admin'; // Alterar em produção
+    const password = 'admin'; 
     const name = 'Administrador';
 
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
         
-        // Verifica se já existe
         const check = await db.query("SELECT * FROM users WHERE email = $1", [email]);
         if (check.rows.length > 0) {
             console.log('Admin já existe. Atualizando senha...');
