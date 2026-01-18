@@ -7,23 +7,50 @@
             <span>Conteúdo</span>
         </div>
         <div class="page-header" style="display: flex; justify-content: space-between;">
-            <h1>Meus <span class="text-neon">Conteúdos</span></h1>
-            <button class="btn btn-primary">Criar Artigo</button>
+            <h1>Gestão de <span class="text-neon">Conteúdo</span></h1>
+            <button class="btn btn-primary" onclick="document.getElementById('articleModal').style.display='flex'">
+                <i class="fas fa-plus"></i> Novo Artigo
+            </button>
         </div>
+
         <div class="features-grid">
-            <div class="card-box">
-                <span class="badge-neon" style="background: green; color: white;">Publicado</span>
-                <h3 style="margin: 10px 0;">5 Dicas de Hipertrofia</h3>
-                <p class="text-muted">Views: 120</p>
-                <button class="btn btn-sm btn-outline" style="margin-top: 10px;">Editar</button>
-            </div>
-            <div class="card-box">
-                <span class="badge-neon" style="background: orange; color: black;">Pendente</span>
-                <h3 style="margin: 10px 0;">Nutrição Pós-Treino</h3>
-                <p class="text-muted">Aguardando Admin</p>
-                <button class="btn btn-sm btn-outline" style="margin-top: 10px;">Ver</button>
-            </div>
+            <% if (articles && articles.length > 0) { %>
+                <% articles.forEach(a => { %>
+                    <div class="card-box">
+                        <span class="badge-neon"><%= a.status %></span>
+                        <h3 style="margin: 10px 0; font-size: 1.2rem;"><%= a.title %></h3>
+                        <p class="text-muted"><%= a.summary %></p>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <p class="text-muted">Nenhum artigo encontrado.</p>
+            <% } %>
         </div>
     </main>
+</div>
+
+<div id="articleModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; align-items: center; justify-content: center; overflow-y: auto;">
+    <div style="background: #111; padding: 30px; border-radius: 12px; width: 90%; max-width: 600px; border: 1px solid #333; margin: 20px 0;">
+        <h3 style="color: white; margin-bottom: 20px;">Escrever Artigo</h3>
+        <form action="/trainer/content/create" method="POST">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <div style="margin-bottom: 15px;">
+                <label style="color: #888;">Título</label>
+                <input type="text" name="title" required style="width: 100%; padding: 10px; background: #222; border: 1px solid #444; color: white;">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="color: #888;">Resumo</label>
+                <textarea name="summary" rows="2" style="width: 100%; padding: 10px; background: #222; border: 1px solid #444; color: white;"></textarea>
+            </div>
+            <div style="margin-bottom: 20px;">
+                <label style="color: #888;">Conteúdo Completo</label>
+                <textarea name="content" rows="10" style="width: 100%; padding: 10px; background: #222; border: 1px solid #444; color: white;"></textarea>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button type="submit" class="btn btn-primary" style="flex: 1;">Salvar Rascunho</button>
+                <button type="button" class="btn btn-outline" style="flex: 1;" onclick="document.getElementById('articleModal').style.display='none'">Cancelar</button>
+            </div>
+        </form>
+    </div>
 </div>
 <%- include('../partials/footer.ejs') %>
