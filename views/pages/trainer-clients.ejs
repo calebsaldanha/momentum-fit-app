@@ -3,12 +3,12 @@
     <%- include('../partials/sidebar.ejs', { path: '/trainer/clients' }) %>
     <main class="dashboard-main">
         <div class="mobile-dash-header">
-            <button id="sidebarOpenBtn" class="btn btn-outline btn-sm"><i class="fas fa-bars"></i> Menu</button>
+            <button id="sidebarOpenBtn" class="btn btn-outline btn-sm"><i class="fas fa-bars"></i></button>
             <span>Alunos</span>
         </div>
 
         <div class="page-header">
-            <h1>Gerenciar <span class="text-neon">Alunos</span></h1>
+            <h1>Meus <span class="text-neon">Alunos</span></h1>
         </div>
 
         <div class="card-box">
@@ -16,20 +16,16 @@
                 <div class="table-responsive">
                     <table>
                         <thead>
-                            <tr>
-                                <th>Nome</th>
-                                <th>Email</th>
-                                <th>Ações</th>
-                            </tr>
+                            <tr><th>Nome</th><th>Email</th><th>Ações</th></tr>
                         </thead>
                         <tbody>
-                            <% clients.forEach(client => { %>
+                            <% clients.forEach(c => { %>
                                 <tr>
-                                    <td><%= client.name %></td>
-                                    <td><%= client.email %></td>
+                                    <td><%= c.name %></td>
+                                    <td><%= c.email %></td>
                                     <td>
-                                        <a href="/trainer/clients/<%= client.id %>" class="btn btn-sm btn-outline">Perfil</a>
-                                        <a href="/trainer/clients/<%= client.id %>/workout" class="btn btn-sm btn-primary">Treinos</a>
+                                        <a href="/trainer/clients/<%= c.id %>" class="btn btn-sm btn-outline">Ver Perfil</a>
+                                        <a href="/trainer/clients/<%= c.id %>/create-workout" class="btn btn-sm btn-primary">Novo Treino</a>
                                     </td>
                                 </tr>
                             <% }) %>
@@ -37,7 +33,7 @@
                     </table>
                 </div>
             <% } else { %>
-                <p class="text-muted">Você ainda não tem alunos.</p>
+                <p class="text-muted">Nenhum aluno encontrado.</p>
             <% } %>
         </div>
     </main>

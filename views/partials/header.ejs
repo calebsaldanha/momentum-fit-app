@@ -3,14 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Momentum Fit - Transforme Seu Corpo</title>
-    
+    <title>Momentum Fit</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
@@ -31,9 +28,9 @@
             </nav>
 
             <div class="desktop-actions">
-                <% if (typeof user !== 'undefined' && user) { %>
-                    <span class="user-greeting">Olá, <strong><%= user.name.split(' ')[0] %></strong></span>
-                    <% if (user.role === 'admin' || user.role === 'superadmin') { %>
+                <% if (user) { %>
+                    <%- include('notification-bell') %> <span class="user-greeting">Olá, <strong><%= user.name.split(' ')[0] %></strong></span>
+                    <% if (user.role === 'admin') { %>
                         <a href="/admin/dashboard" class="btn btn-primary btn-sm">Dashboard</a>
                     <% } else if (user.role === 'trainer') { %>
                         <a href="/trainer/dashboard" class="btn btn-primary btn-sm">Painel</a>
@@ -47,9 +44,7 @@
                 <% } %>
             </div>
 
-            <button class="hamburger-btn" id="mobileMenuBtn">
-                <i class="fas fa-bars"></i>
-            </button>
+            <button class="hamburger-btn" id="mobileMenuBtn"><i class="fas fa-bars"></i></button>
         </div>
     </header>
 
@@ -58,29 +53,16 @@
             <span class="brand-logo">Momentum Fit</span>
             <button class="close-btn" id="closeMenuBtn">&times;</button>
         </div>
-        
         <div class="mobile-links">
             <a href="/">Início</a>
             <a href="/plans">Planos</a>
             <a href="/articles">Artigos</a>
-            <a href="/about">Sobre</a>
-            <a href="/contact">Contato</a>
-        </div>
-
-        <div class="mobile-actions">
-            <% if (typeof user !== 'undefined' && user) { %>
-                <p style="color: #888; margin-bottom: 5px;">Logado como <%= user.name %></p>
-                <% if (user.role === 'admin' || user.role === 'superadmin') { %>
-                    <a href="/admin/dashboard" class="btn btn-primary btn-full-mobile">Dashboard</a>
-                <% } else if (user.role === 'trainer') { %>
-                    <a href="/trainer/dashboard" class="btn btn-primary btn-full-mobile">Painel do Treinador</a>
-                <% } else { %>
-                    <a href="/client/dashboard" class="btn btn-primary btn-full-mobile">Meu Dashboard</a>
-                <% } %>
-                <a href="/auth/logout" class="btn btn-outline btn-full-mobile">Sair da Conta</a>
+            <% if (user) { %>
+                <a href="/notifications">Notificações</a>
+                <a href="/auth/logout" style="color: #ff4d4d;">Sair</a>
             <% } else { %>
-                <a href="/auth/login" class="btn btn-outline btn-full-mobile">Fazer Login</a>
-                <a href="/auth/register" class="btn btn-primary btn-full-mobile">Criar Conta Grátis</a>
+                <a href="/auth/login">Login</a>
+                <a href="/auth/register">Cadastro</a>
             <% } %>
         </div>
     </div>
