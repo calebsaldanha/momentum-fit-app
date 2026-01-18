@@ -1,75 +1,44 @@
-<%- include('../partials/header.ejs', { title: 'Planos e Preços', currentPage: 'plans' }) %>
-<div class="header-spacer"></div>
+<%- include('../partials/header.ejs') %>
 
-<section class="plans-hero" style="padding: 80px 20px; text-align: center; min-height: 80vh;">
-    <div class="container">
-        <h1 class="text-neon" style="font-size: 2.5rem; margin-bottom: 10px;">Nossos Planos</h1>
-        <p style="color: #888; margin-bottom: 50px;">Escolha como você quer evoluir.</p>
-
-        <div class="plans-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; align-items: stretch;">
-            
-            <div class="plan-card featured" style="background: linear-gradient(145deg, #111, #0a0a0a); border: 2px solid var(--primary-color); border-radius: 16px; padding: 40px 30px; display: flex; flex-direction: column; position: relative;">
-                <div style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: var(--primary-color); color: black; padding: 5px 20px; font-weight: 800; font-size: 0.8rem; border-radius: 20px; text-transform: uppercase;">
-                    Disponível Agora
-                </div>
-                
-                <h2 style="color: white; font-size: 1.8rem; margin-bottom: 5px;">FREE</h2>
-                <h3 style="color: var(--primary-color); font-size: 1rem; margin-bottom: 20px; font-weight: 400;">Edição Fundadores</h3>
-                
-                <div style="border-top: 1px solid #333; border-bottom: 1px solid #333; padding: 20px 0; margin: 20px 0;">
-                    <p style="color: #ccc; font-style: italic; margin-bottom: 15px;">"Exclusivo no primeiro ano. Não é amostra. É convite."</p>
-                    <p style="color: #888; font-size: 0.9rem;">Você entra agora, cresce com a gente e ajuda a moldar o que isso vai se tornar.</p>
-                </div>
-
-                <ul style="text-align: left; list-style: none; margin-bottom: 30px; flex: 1; color: #ccc;">
-                    <li style="margin-bottom: 12px;"><i class="fas fa-check text-neon" style="margin-right: 10px;"></i> Acesso total à plataforma</li>
-                    <li style="margin-bottom: 12px;"><i class="fas fa-check text-neon" style="margin-right: 10px;"></i> Treino de verdade</li>
-                    <li style="margin-bottom: 12px;"><i class="fas fa-check text-neon" style="margin-right: 10px;"></i> Atendimento com personal</li>
-                    <li style="margin-bottom: 12px;"><i class="fas fa-check text-neon" style="margin-right: 10px;"></i> Artigos exclusivos</li>
-                </ul>
-
-                <a href="/auth/register?plan=free" class="btn btn-primary btn-full" style="font-weight: 800;">QUERO FAZER PARTE</a>
-                <p style="font-size: 0.75rem; color: #666; margin-top: 15px;">Depois, isso vira história pra contar.</p>
+<main class="page-content">
+    <section class="section-padding">
+        <div class="container">
+            <div class="section-header center">
+                <h2 class="section-title">Nossos <span class="text-neon">Planos</span></h2>
+                <p class="section-desc">Escolha a melhor opção para transformar seu corpo.</p>
             </div>
 
-            <div class="plan-card" style="background: #0f0f0f; border: 1px solid #333; border-radius: 16px; padding: 40px 30px; display: flex; flex-direction: column; opacity: 0.7;">
-                <h2 style="color: white; font-size: 1.5rem; margin-bottom: 5px;">Momentum Básico</h2>
-                <span style="color: #666; font-size: 0.9rem; margin-bottom: 20px; display: block;">O começo do ritmo</span>
-                
-                <div style="border-top: 1px solid #222; padding: 20px 0; margin-bottom: 10px;">
-                    <p style="color: #888; font-size: 0.9rem;">Para quem quer constância, clareza e direção.</p>
-                </div>
+            <div class="features-grid">
+                <% if (typeof plans !== 'undefined' && plans.length > 0) { %>
+                    <% plans.forEach(plan => { %>
+                        <div class="card-box" style="text-align: center; border: 1px solid <%= plan.name.includes('Básico') ? 'var(--primary-color)' : '#333' %>;">
+                            <h3 style="font-size: 1.5rem; margin-bottom: 10px; color: white;"><%= plan.name %></h3>
+                            <p class="text-neon" style="font-size: 2.5rem; font-weight: 800; margin: 15px 0;">
+                                R$ <%= plan.price %>
+                            </p>
+                            <p class="text-muted" style="margin-bottom: 20px;"><%= plan.description %></p>
+                            
+                            <ul style="text-align: left; margin-bottom: 30px; list-style: none; padding: 0;">
+                                <% if (plan.features && Array.isArray(plan.features)) { %>
+                                    <% plan.features.forEach(feature => { %>
+                                        <li style="margin-bottom: 8px; color: #ccc;">
+                                            <i class="fas fa-check text-neon" style="margin-right: 8px;"></i> <%= feature %>
+                                        </li>
+                                    <% }) %>
+                                <% } else { %>
+                                    <li style="margin-bottom: 8px; color: #ccc;"><i class="fas fa-check text-neon"></i> Acesso total</li>
+                                <% } %>
+                            </ul>
 
-                <ul style="text-align: left; list-style: none; margin-bottom: 30px; flex: 1; color: #666;">
-                    <li style="margin-bottom: 12px;"><i class="fas fa-circle" style="font-size: 6px; margin-right: 10px; vertical-align: middle;"></i> Acesso à plataforma</li>
-                    <li style="margin-bottom: 12px;"><i class="fas fa-circle" style="font-size: 6px; margin-right: 10px; vertical-align: middle;"></i> Treinos estruturados</li>
-                    <li style="margin-bottom: 12px;"><i class="fas fa-circle" style="font-size: 6px; margin-right: 10px; vertical-align: middle;"></i> Acompanhamento básico</li>
-                    <li style="margin-bottom: 12px; opacity: 0.5;"><i class="fas fa-lock" style="margin-right: 10px;"></i> IA de treinos (Futuro)</li>
-                </ul>
-
-                <button class="btn btn-outline btn-full" disabled style="opacity: 0.5; cursor: not-allowed;">EM BREVE</button>
+                            <a href="/auth/register?plan=<%= plan.id %>" class="btn btn-primary btn-lg" style="width: 100%;">Assinar Agora</a>
+                        </div>
+                    <% }) %>
+                <% } else { %>
+                    <p style="text-align: center; color: #666; width: 100%;">Planos sendo atualizados. Volte em breve.</p>
+                <% } %>
             </div>
-
-            <div class="plan-card" style="background: #050505; border: 1px solid #333; border-radius: 16px; padding: 40px 30px; display: flex; flex-direction: column; opacity: 0.7;">
-                <h2 style="color: white; font-size: 1.5rem; margin-bottom: 5px;">Momentum Pro</h2>
-                <span style="color: #666; font-size: 0.9rem; margin-bottom: 20px; display: block;">Onde a evolução vira método</span>
-                
-                <div style="border-top: 1px solid #222; padding: 20px 0; margin-bottom: 10px;">
-                    <p style="color: #888; font-size: 0.9rem;">Nada genérico. Nada solto. Treino e inteligência juntos.</p>
-                </div>
-
-                <ul style="text-align: left; list-style: none; margin-bottom: 30px; flex: 1; color: #666;">
-                    <li style="margin-bottom: 12px;"><i class="fas fa-star" style="margin-right: 10px; font-size: 0.8rem;"></i> Personal dedicado</li>
-                    <li style="margin-bottom: 12px;"><i class="fas fa-star" style="margin-right: 10px; font-size: 0.8rem;"></i> IA avançada</li>
-                    <li style="margin-bottom: 12px;"><i class="fas fa-star" style="margin-right: 10px; font-size: 0.8rem;"></i> Ajustes constantes</li>
-                </ul>
-
-                <button class="btn btn-outline btn-full" disabled style="opacity: 0.5; cursor: not-allowed;">EM BREVE</button>
-                <p style="font-size: 0.75rem; color: #444; margin-top: 15px;">Aqui o corpo aprende.</p>
-            </div>
-
         </div>
-    </div>
-</section>
+    </section>
+</main>
 
 <%- include('../partials/footer.ejs') %>

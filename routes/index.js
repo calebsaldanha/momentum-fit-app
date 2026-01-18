@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const db = require('../database/db');
 
 // Home
 router.get('/', (req, res) => {
@@ -11,9 +12,16 @@ router.get('/about', (req, res) => {
     res.render('pages/about');
 });
 
-// Planos
-router.get('/plans', (req, res) => {
-    res.render('pages/plans');
+// Planos (CORRIGIDO: Busca do DB)
+router.get('/plans', async (req, res) => {
+    try {
+        const result = await db.query("SELECT * FROM plans ORDER BY price ASC");
+        res.render('pages/plans', { plans: result.rows });
+    } catch (err) {
+        console.error(err);
+        // Fallback se o banco falhar
+        res.render('pages/plans', { plans: [] });
+    }
 });
 
 // Contato
@@ -26,7 +34,6 @@ router.get('/terms', (req, res) => {
     res.render('pages/terms');
 });
 
-// Redireciona /home para /
 router.get('/home', (req, res) => res.redirect('/'));
 
 module.exports = router;
