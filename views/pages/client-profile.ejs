@@ -3,27 +3,91 @@
     <%- include('../partials/sidebar.ejs', { path: '/client/profile' }) %>
     <main class="dashboard-main">
         <div class="mobile-dash-header">
-            <button id="sidebarOpenBtn" class="btn btn-outline btn-sm"><i class="fas fa-bars"></i> Menu</button>
-            <span>Perfil</span>
+            <button id="sidebarOpenBtn" class="btn btn-outline btn-sm"><i class="fas fa-bars"></i></button>
+            <span>Meu Perfil</span>
         </div>
 
         <div class="page-header">
             <h1>Meu <span class="text-neon">Perfil</span></h1>
         </div>
 
-        <div class="card-box">
-            <form action="/client/profile" method="POST">
-                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                <div style="margin-bottom: 15px;">
-                    <label style="display: block; color: #888; margin-bottom: 5px;">Nome</label>
-                    <input type="text" value="<%= user.name %>" disabled style="width: 100%; padding: 10px; background: #222; border: 1px solid #333; color: white; border-radius: 5px;">
+        <div style="display: grid; gap: 30px; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));">
+            
+            <div class="card-box">
+                <h3 style="margin-bottom: 20px; color: white; border-bottom: 1px solid #333; padding-bottom: 10px;">Dados Pessoais & Saúde</h3>
+                <form action="/client/profile" method="POST">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="color: #888;">Nome</label>
+                        <input type="text" name="name" value="<%= client.name %>" class="form-control" style="width: 100%; padding: 8px; background: #222; border: 1px solid #444; color: white;">
+                    </div>
+                    <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+                        <div style="flex: 1;">
+                            <label style="color: #888;">Peso (kg)</label>
+                            <input type="number" name="weight" value="<%= client.weight %>" style="width: 100%; padding: 8px; background: #222; border: 1px solid #444; color: white;">
+                        </div>
+                        <div style="flex: 1;">
+                            <label style="color: #888;">Altura (cm)</label>
+                            <input type="number" name="height" value="<%= client.height %>" style="width: 100%; padding: 8px; background: #222; border: 1px solid #444; color: white;">
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="color: #888;">Objetivo</label>
+                        <select name="goal" style="width: 100%; padding: 8px; background: #222; border: 1px solid #444; color: white;">
+                            <option value="emagrecimento" <%= client.goal === 'emagrecimento' ? 'selected' : '' %>>Emagrecimento</option>
+                            <option value="hipertrofia" <%= client.goal === 'hipertrofia' ? 'selected' : '' %>>Hipertrofia</option>
+                            <option value="saude" <%= client.goal === 'saude' ? 'selected' : '' %>>Saúde/Bem-estar</option>
+                        </select>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="color: #888;">Histórico Médico / Lesões</label>
+                        <textarea name="medical_history" rows="3" style="width: 100%; padding: 8px; background: #222; border: 1px solid #444; color: white;"><%= client.medical_history || '' %></textarea>
+                    </div>
+                    <button class="btn btn-primary" style="width: 100%;">Atualizar Dados</button>
+                </form>
+            </div>
+
+            <div class="card-box">
+                <h3 style="margin-bottom: 20px; color: white; border-bottom: 1px solid #333; padding-bottom: 10px;">Assinatura & Pagamento</h3>
+                
+                <div style="background: rgba(190, 242, 2, 0.05); padding: 20px; border-radius: 8px; border: 1px solid var(--primary-color); margin-bottom: 20px;">
+                    <h4 style="color: var(--primary-color); margin-bottom: 5px;">Plano Atual: <%= subscription.plan %></h4>
+                    <p style="color: white; font-size: 1.2rem; font-weight: bold;">R$ <%= subscription.price %>/mês</p>
+                    <p class="text-muted" style="font-size: 0.9rem;">Próxima cobrança: <%= subscription.next_billing %></p>
+                    <div style="margin-top: 10px;">
+                        <span class="badge-neon" style="background: green; color: white;">Ativo</span>
+                    </div>
                 </div>
-                <div style="margin-bottom: 15px;">
-                    <label style="display: block; color: #888; margin-bottom: 5px;">Email</label>
-                    <input type="email" value="<%= user.email %>" disabled style="width: 100%; padding: 10px; background: #222; border: 1px solid #333; color: white; border-radius: 5px;">
+
+                <h4 style="color: white; margin-bottom: 15px;">Histórico de Pagamentos</h4>
+                <div class="table-responsive">
+                    <table style="width: 100%; font-size: 0.9rem;">
+                        <thead>
+                            <tr>
+                                <th style="text-align: left; padding-bottom: 10px; color: #888;">Data</th>
+                                <th style="text-align: left; padding-bottom: 10px; color: #888;">Valor</th>
+                                <th style="text-align: left; padding-bottom: 10px; color: #888;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="3" style="text-align: center; color: #666; padding: 10px;">Nenhum pagamento recente.</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
-                <button type="submit" class="btn btn-primary">Salvar Alterações</button>
-            </form>
+
+                <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #333;">
+                    <h4 style="color: white; margin-bottom: 10px;">Realizar Pagamento (PIX)</h4>
+                    <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 15px;">Escaneie o QR Code abaixo para renovar seu plano.</p>
+                    <div style="background: white; width: 150px; height: 150px; margin: 0 auto; display: flex; align-items: center; justify-content: center; color: black; font-weight: bold;">
+                        QR CODE MOCK
+                    </div>
+                    <p class="text-neon" style="text-align: center; margin-top: 10px; cursor: pointer;">Copiar código PIX</p>
+                </div>
+            </div>
+
         </div>
     </main>
 </div>
