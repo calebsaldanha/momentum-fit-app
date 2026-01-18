@@ -1,0 +1,118 @@
+<%- include('../partials/header.ejs') %>
+
+<div class="dashboard-container">
+    <%- include('../partials/sidebar.ejs', { path: '/admin/users' }) %>
+
+    <main class="dashboard-main">
+        <div class="mobile-dash-header">
+            <button id="sidebarOpenBtn" class="btn btn-outline btn-sm"><i class="fas fa-bars"></i> Menu</button>
+            <span class="text-muted">Detalhes</span>
+        </div>
+
+        <div class="page-header">
+            <a href="/admin/users" class="text-muted" style="font-size: 0.9rem;"><i class="fas fa-arrow-left"></i> Voltar</a>
+            <h1 style="margin-top: 10px;">Detalhes do <span class="text-neon">Usuário</span></h1>
+        </div>
+
+        <% if(messages.success) { %>
+            <div class="alert alert-success" style="background: rgba(0,255,0,0.1); color: #bef202; padding: 10px; border-radius: 5px; margin-bottom: 20px;">
+                <%= messages.success %>
+            </div>
+        <% } %>
+
+        <div style="display: grid; gap: 30px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
+            
+            <div class="card-box">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <div style="width: 80px; height: 80px; background: #333; border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: var(--primary-color);">
+                        <%= targetUser.name.charAt(0).toUpperCase() %>
+                    </div>
+                    <h2 style="color: white;"><%= targetUser.name %></h2>
+                    <span class="badge-neon" style="font-size: 0.8rem; padding: 4px 10px;"><%= targetUser.role.toUpperCase() %></span>
+                </div>
+
+                <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
+                    <p style="margin-bottom: 10px;"><strong style="color: #888;">Email:</strong> <span style="color: white; float: right;"><%= targetUser.email %></span></p>
+                    <p style="margin-bottom: 10px;"><strong style="color: #888;">Cadastro:</strong> <span style="color: white; float: right;"><%= new Date(targetUser.created_at).toLocaleDateString() %></span></p>
+                    <p style="margin-bottom: 10px;"><strong style="color: #888;">Status:</strong> 
+                        <span style="color: <%= targetUser.active ? '#bef202' : '#ff4d4d' %>; float: right;">
+                            <%= targetUser.active ? 'Ativo' : 'Suspenso' %>
+                        </span>
+                    </p>
+                </div>
+
+                <form action="/admin/users/<%= targetUser.id %>/toggle-status" method="POST" style="margin-top: 25px;">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <% if (targetUser.active) { %>
+                        <button type="submit" class="btn btn-outline" style="width: 100%; border-color: #ff4d4d; color: #ff4d4d;">
+                            <i class="fas fa-ban"></i> Suspender Usuário
+                        </button>
+                    <% } else { %>
+                        <button type="submit" class="btn btn-outline" style="width: 100%; border-color: #bef202; color: #bef202;">
+                            <i class="fas fa-check"></i> Reativar Usuário
+                        </button>
+                    <% } %>
+                </form>
+            </div>
+
+            <div class="card-box">
+                <h3 style="margin-bottom: 20px; color: white;">Dados do Perfil</h3>
+                
+                <% if (targetUser.role === 'trainer') { %>
+                    <div style="display: flex; flex-direction: column; gap: 15px;">
+                        <div>
+                            <label style="color: #888; font-size: 0.85rem;">Especialidades</label>
+                            <p style="color: white;"><%= details.specialties || 'Não informado' %></p>
+                        </div>
+                        <div>
+                            <label style="color: #888; font-size: 0.85rem;">Preço Mensal</label>
+                            <p style="color: white;">R$ <%= details.price_monthly || '0.00' %></p>
+                        </div>
+                        <div>
+                            <label style="color: #888; font-size: 0.85rem;">Chave PIX</label>
+                            <p style="color: white;"><%= details.pix_key || 'Não cadastrada' %></p>
+                        </div>
+                        <div>
+                            <label style="color: #888; font-size: 0.85rem;">Aprovação</label>
+                            <p style="color: <%= details.is_approved ? '#bef202' : 'orange' %>;">
+                                <%= details.is_approved ? 'Aprovado' : 'Pendente' %>
+                            </p>
+                        </div>
+                    </div>
+                <% } else if (targetUser.role === 'client') { %>
+                    <div style="display: flex; flex-direction: column; gap: 15px;">
+                        <div>
+                            <label style="color: #888; font-size: 0.85rem;">Objetivo</label>
+                            <p style="color: white;"><%= details.goal || 'Não definido' %></p>
+                        </div>
+                        <div style="display: flex; gap: 20px;">
+                            <div>
+                                <label style="color: #888; font-size: 0.85rem;">Peso</label>
+                                <p style="color: white;"><%= details.weight ? details.weight + ' kg' : '-' %></p>
+                            </div>
+                            <div>
+                                <label style="color: #888; font-size: 0.85rem;">Altura</label>
+                                <p style="color: white;"><%= details.height ? details.height + ' cm' : '-' %></p>
+                            </div>
+                        </div>
+                        <div>
+                            <label style="color: #888; font-size: 0.85rem;">Personal Trainer</label>
+                            <p style="color: white;">
+                                <% if (targetUser.trainer_id) { %>
+                                    Vinculado (ID: <%= targetUser.trainer_id %>)
+                                <% } else { %>
+                                    <span class="text-muted">Nenhum</span>
+                                <% } %>
+                            </p>
+                        </div>
+                    </div>
+                <% } else { %>
+                    <p class="text-muted">Este é um administrador. Dados de perfil não aplicáveis.</p>
+                <% } %>
+            </div>
+
+        </div>
+    </main>
+</div>
+
+<%- include('../partials/footer.ejs') %>

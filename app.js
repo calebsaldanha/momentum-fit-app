@@ -9,19 +9,19 @@ const flash = require('connect-flash');
 
 const app = express();
 
-// Configuração para Vercel/Proxy (Cookies Seguros)
+// Configuração para Vercel/Proxy
 app.set('trust proxy', 1);
 
-// Configuração do EJS
+// View Engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// Arquivos Estáticos
+// Arquivos Estáticos e Body Parser
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Configuração da Sessão
+// Sessão
 app.use(session({
     store: new pgSession({
         pool: pool,
@@ -32,7 +32,7 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: {
-        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 dias
+        maxAge: 30 * 24 * 60 * 60 * 1000,
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax'
@@ -41,16 +41,14 @@ app.use(session({
 
 app.use(flash());
 
-// Middleware CSRF
 const csrfProtection = csrf();
 app.use(csrfProtection);
 
-// === MIDDLEWARE GLOBAL DE VARIÁVEIS (CORRIGIDO) ===
+// Middleware Global
 app.use((req, res, next) => {
-    // Estas variáveis ficam disponíveis em TODOS os arquivos .ejs automaticamente
     res.locals.csrfToken = req.csrfToken();
     res.locals.user = req.session.user || null;
-    res.locals.isAuthenticated = !!req.session.user; // <--- ADICIONADO: Resolve o erro na Home
+    res.locals.isAuthenticated = !!req.session.user;
     res.locals.path = req.path;
     res.locals.query = req.query;
     res.locals.messages = req.flash();
@@ -65,7 +63,7 @@ const trainerRoutes = require('./routes/trainer');
 const adminRoutes = require('./routes/admin');
 const chatRoutes = require('./routes/chat');
 const workoutRoutes = require('./routes/workouts');
-// const notificationsRoutes = require('./routes/notifications'); // Descomentar se existir
+const articlesRoutes = require('./routes/articles'); // <--- NOVO
 
 // Definição das Rotas
 app.use('/', indexRoutes);
@@ -75,8 +73,9 @@ app.use('/trainer', trainerRoutes);
 app.use('/admin', adminRoutes);
 app.use('/chat', chatRoutes);
 app.use('/workouts', workoutRoutes);
+app.use('/articles', articlesRoutes); // <--- NOVO
 
-// Tratamento de Erro 404
+// 404 Handler
 app.use((req, res) => {
     res.status(404).render('pages/error', { 
         message: 'Página não encontrada',
