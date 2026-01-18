@@ -1,17 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcrypt'); // Agora instalado
 const db = require('../database/db');
 
 router.get('/login', (req, res) => res.render('pages/login'));
 
-// Register com suporte a plano
 router.get('/register', (req, res) => {
     res.render('pages/register', { plan: req.query.plan || 'free' });
 });
 
 router.post('/register', async (req, res) => {
-    const { name, email, password, confirmPassword, role, plan } = req.body;
+    const { name, email, password, confirmPassword, role, plan, paymentDay } = req.body;
     
     if (password !== confirmPassword) {
         return res.render('pages/register', { messages: { error: 'Senhas não conferem.' }, plan });
@@ -23,45 +22,40 @@ router.post('/register', async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
         
-        // Cria Usuário
         const newUser = await db.query(
             "INSERT INTO users (name, email, password, role) VALUES ($1, $2, $3, $4) RETURNING id, name, email, role",
             [name, email, hashedPassword, role || 'client']
         );
         const user = newUser.rows[0];
 
-        // Lógica Específica por Role
         if (user.role === 'client') {
             await db.query("INSERT INTO clients (user_id) VALUES ($1)", [user.id]);
             
-            // Define status do plano
             const isPaid = plan === 'basic' || plan === 'pro';
             const price = plan === 'basic' ? 10.00 : (plan === 'pro' ? 89.90 : 0.00);
             const status = isPaid ? 'pending' : 'active';
             const planName = plan === 'basic' ? 'Momentum Básico' : (plan === 'pro' ? 'Momentum Pro' : 'Free');
 
+            // Salva o dia de pagamento escolhido
             await db.query(
-                "INSERT INTO subscriptions (user_id, plan_name, price, status) VALUES ($1, $2, $3, $4)",
-                [user.id, planName, price, status]
+                "INSERT INTO subscriptions (user_id, plan_name, price, status, payment_due_day) VALUES ($1, $2, $3, $4, $5)",
+                [user.id, planName, price, status, paymentDay || 10]
             );
         } else if (user.role === 'trainer') {
             await db.query("INSERT INTO trainers (user_id, is_approved) VALUES ($1, false)", [user.id]);
         }
 
-        // Login Automático
         req.session.user = user;
-
-        // REDIRECIONAMENTO INTELIGENTE
+        
         if (user.role === 'client') {
-            // Cliente vai para anamnese obrigatoriamente
             res.redirect('/client/profile?first_login=true');
         } else {
             res.redirect('/trainer/profile');
         }
 
     } catch (err) {
-        console.error(err);
-        res.render('pages/register', { messages: { error: 'Erro no servidor.' }, plan });
+        console.error("Erro no registro:", err);
+        res.render('pages/register', { messages: { error: 'Erro técnico no cadastro.' }, plan });
     }
 });
 
@@ -77,7 +71,6 @@ router.post('/login', async (req, res) => {
                 req.session.user = user;
                 if (user.role.includes('admin')) return res.redirect('/admin/dashboard');
                 if (user.role === 'trainer') return res.redirect('/trainer/dashboard');
-                // Cliente vai para dashboard normalmente
                 return res.redirect('/client/dashboard');
             }
         }

@@ -44,13 +44,25 @@
                 </div>
             </div>
 
-            <div style="margin-bottom: 20px;">
-                <label style="color: #888; display: block; margin-bottom: 5px;">Escolha seu Plano</label>
-                <select name="plan" style="width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #333; background: #222; color: white;">
-                    <option value="basic" <%= plan === 'basic' ? 'selected' : '' %>>Momentum Básico (R$ 10,00)</option>
-                    <option value="free" <%= plan === 'free' ? 'selected' : '' %>>Gratuito (Limitado)</option>
-                    <option value="pro" <%= plan === 'pro' ? 'selected' : '' %>>Momentum PRO (R$ 89,90)</option>
-                </select>
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <div style="flex: 2;">
+                    <label style="color: #888; display: block; margin-bottom: 5px;">Plano</label>
+                    <select name="plan" style="width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #333; background: #222; color: white;">
+                        <option value="basic" <%= plan === 'basic' ? 'selected' : '' %>>Básico (R$ 10,00)</option>
+                        <option value="free" <%= plan === 'free' ? 'selected' : '' %>>Gratuito</option>
+                        <option value="pro" <%= plan === 'pro' ? 'selected' : '' %>>PRO (R$ 89,90)</option>
+                    </select>
+                </div>
+                <div style="flex: 1;">
+                    <label style="color: #888; display: block; margin-bottom: 5px;">Vencimento</label>
+                    <select name="paymentDay" style="width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #333; background: #222; color: white;">
+                        <option value="5">Dia 05</option>
+                        <option value="10" selected>Dia 10</option>
+                        <option value="15">Dia 15</option>
+                        <option value="20">Dia 20</option>
+                        <option value="25">Dia 25</option>
+                    </select>
+                </div>
             </div>
 
             <div style="margin-bottom: 20px;">
