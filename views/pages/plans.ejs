@@ -1,41 +1,61 @@
 <%- include('../partials/header.ejs') %>
 
 <main class="page-content">
-    <section class="section-padding">
+    <section id="plans" class="section-padding">
         <div class="container">
             <div class="section-header center">
-                <h2 class="section-title">Nossos <span class="text-neon">Planos</span></h2>
-                <p class="section-desc">Escolha a melhor opção para transformar seu corpo.</p>
+                <h2 class="section-title">Escolha Seu <span class="text-neon">Plano</span></h2>
+                <p class="section-desc">Invista em você. Comece hoje a sua transformação.</p>
             </div>
 
-            <div class="features-grid">
-                <% if (typeof plans !== 'undefined' && plans.length > 0) { %>
-                    <% plans.forEach(plan => { %>
-                        <div class="card-box" style="text-align: center; border: 1px solid <%= plan.name.includes('Básico') ? 'var(--primary-color)' : '#333' %>;">
-                            <h3 style="font-size: 1.5rem; margin-bottom: 10px; color: white;"><%= plan.name %></h3>
-                            <p class="text-neon" style="font-size: 2.5rem; font-weight: 800; margin: 15px 0;">
-                                R$ <%= plan.price %>
-                            </p>
-                            <p class="text-muted" style="margin-bottom: 20px;"><%= plan.description %></p>
-                            
-                            <ul style="text-align: left; margin-bottom: 30px; list-style: none; padding: 0;">
-                                <% if (plan.features && Array.isArray(plan.features)) { %>
-                                    <% plan.features.forEach(feature => { %>
-                                        <li style="margin-bottom: 8px; color: #ccc;">
-                                            <i class="fas fa-check text-neon" style="margin-right: 8px;"></i> <%= feature %>
-                                        </li>
-                                    <% }) %>
-                                <% } else { %>
-                                    <li style="margin-bottom: 8px; color: #ccc;"><i class="fas fa-check text-neon"></i> Acesso total</li>
-                                <% } %>
-                            </ul>
+            <div class="features-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); align-items: center;">
+                
+                <div class="card-box" style="border: 1px solid #333; position: relative; opacity: 0.8;">
+                    <h3 style="font-size: 1.4rem; color: white;">Gratuito</h3>
+                    <div style="font-size: 2.5rem; font-weight: 800; color: white; margin: 15px 0;">
+                        R$ 0 <span style="font-size: 1rem; font-weight: 400; color: #888;">/mês</span>
+                    </div>
+                    <p class="text-muted" style="margin-bottom: 20px;">Para conhecer a plataforma.</p>
+                    <ul style="list-style: none; margin-bottom: 30px; text-align: left; padding: 0;">
+                        <li style="margin-bottom: 10px; color: #ccc;"><i class="fas fa-check text-neon"></i> Acesso ao App</li>
+                        <li style="margin-bottom: 10px; color: #ccc;"><i class="fas fa-check text-neon"></i> 1 Ficha de Treino</li>
+                        <li style="margin-bottom: 10px; color: #555;"><i class="fas fa-times"></i> Sem Personal Trainer</li>
+                    </ul>
+                    <a href="/auth/register?plan=free" class="btn btn-outline" style="width: 100%;">Começar Grátis</a>
+                </div>
 
-                            <a href="/auth/register?plan=<%= plan.id %>" class="btn btn-primary btn-lg" style="width: 100%;">Assinar Agora</a>
-                        </div>
-                    <% }) %>
-                <% } else { %>
-                    <p style="text-align: center; color: #666; width: 100%;">Planos sendo atualizados. Volte em breve.</p>
-                <% } %>
+                <div class="card-box" style="border: 2px solid var(--primary-color); transform: scale(1.05); z-index: 2; background: #0f0f0f; box-shadow: 0 0 30px rgba(190, 242, 2, 0.1);">
+                    <div style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: var(--primary-color); color: black; padding: 4px 12px; border-radius: 20px; font-weight: bold; font-size: 0.8rem;">
+                        MAIS POPULAR
+                    </div>
+                    <h3 style="font-size: 1.6rem; color: var(--primary-color);">Momentum Básico</h3>
+                    <div style="font-size: 3rem; font-weight: 800; color: white; margin: 15px 0;">
+                        R$ 10 <span style="font-size: 1rem; font-weight: 400; color: #888;">/mês</span>
+                    </div>
+                    <p class="text-muted" style="margin-bottom: 20px;">Tudo o que você precisa para evoluir.</p>
+                    <ul style="list-style: none; margin-bottom: 30px; text-align: left; padding: 0;">
+                        <li style="margin-bottom: 10px; color: white;"><i class="fas fa-check text-neon"></i> <strong>Acesso Total ao App</strong></li>
+                        <li style="margin-bottom: 10px; color: white;"><i class="fas fa-check text-neon"></i> <strong>Treinos Ilimitados</strong></li>
+                        <li style="margin-bottom: 10px; color: white;"><i class="fas fa-check text-neon"></i> <strong>Suporte via Chat</strong></li>
+                        <li style="margin-bottom: 10px; color: white;"><i class="fas fa-check text-neon"></i> Histórico de Evolução</li>
+                    </ul>
+                    <a href="/auth/register?plan=basic" class="btn btn-primary btn-lg btn-glow" style="width: 100%;">Assinar Agora</a>
+                </div>
+
+                <div class="card-box" style="border: 1px solid #333; opacity: 0.5; filter: grayscale(1);">
+                    <h3 style="font-size: 1.4rem; color: white;">Momentum Pro</h3>
+                    <div style="font-size: 2.5rem; font-weight: 800; color: white; margin: 15px 0;">
+                        R$ 89 <span style="font-size: 1rem; font-weight: 400; color: #888;">/mês</span>
+                    </div>
+                    <p class="text-muted" style="margin-bottom: 20px;">Acompanhamento VIP.</p>
+                    <ul style="list-style: none; margin-bottom: 30px; text-align: left; padding: 0;">
+                        <li style="margin-bottom: 10px; color: #ccc;"><i class="fas fa-check text-neon"></i> Tudo do Básico</li>
+                        <li style="margin-bottom: 10px; color: #ccc;"><i class="fas fa-check text-neon"></i> Nutricionista</li>
+                        <li style="margin-bottom: 10px; color: #ccc;"><i class="fas fa-check text-neon"></i> Chamadas de Vídeo</li>
+                    </ul>
+                    <button class="btn btn-outline" disabled style="width: 100%; cursor: not-allowed;">Em Breve</button>
+                </div>
+
             </div>
         </div>
     </section>
