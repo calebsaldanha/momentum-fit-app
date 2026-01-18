@@ -2,7 +2,7 @@ require('dotenv').config();
 const db = require('../database/db');
 
 async function fixDatabase() {
-    console.log("��� Iniciando reparo final do Banco de Dados...");
+    console.log("��� Iniciando reparo final do Banco de Dados (Versão Corrigida)...");
     
     try {
         // 1. Corrigir Tabela USERS (Erro: column "active" does not exist)
@@ -25,18 +25,22 @@ async function fixDatabase() {
             ADD COLUMN IF NOT EXISTS exercise_id INTEGER REFERENCES exercise_library(id);
         `);
 
-        // 4. Configurar Plano de Teste (R$ 10,00)
-        // Garante que o plano "Momentum Básico" custe 10.00 e esteja disponível
+        // 4. Configurar Plano de Teste (CORREÇÃO JSON AQUI)
+        // A coluna 'features' é JSONB, então precisamos passar uma string que pareça um array JSON '["..."]'
         await db.query(`
             INSERT INTO plans (name, price, description, features) 
-            VALUES ('Momentum Básico', 10.00, 'Plano de Teste PIX', 'Acesso completo para teste')
+            VALUES (
+                'Momentum Básico', 
+                10.00, 
+                'Plano de Teste PIX', 
+                '["Acesso completo para teste", "Suporte via Chat", "Treinos Ilimitados"]'::jsonb
+            )
             ON CONFLICT (name) 
-            DO UPDATE SET price = 10.00;
+            DO UPDATE SET 
+                price = 10.00,
+                features = '["Acesso completo para teste", "Suporte via Chat", "Treinos Ilimitados"]'::jsonb;
         `);
         
-        // Atualiza para garantir que planos antigos tenham preço numérico correto
-        await db.query(`UPDATE plans SET price = 10.00 WHERE name = 'Momentum Básico'`);
-
         console.log("✅ Banco de Dados reparado com sucesso!");
         process.exit(0);
     } catch (err) {
