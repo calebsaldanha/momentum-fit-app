@@ -1,60 +1,28 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <title>IA Coach | Momentum Fit</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/styles.css">
-</head>
-<body>
-    <div class="dashboard-container">
-        <%- include('../partials/sidebar') %>
-        <main class="dashboard-main" style="display: flex; flex-direction: column; height: 100vh; padding-bottom: 0;">
-            <div class="page-header" style="text-align: left; background: transparent; padding-left: 0; padding-bottom: 10px; margin-bottom: 0;">
-                <h1><i class="fas fa-robot text-neon"></i> Momentum AI</h1>
-                <p>Seu assistente inteligente para dúvidas rápidas sobre treinos e nutrição.</p>
-            </div>
+<%- include('../partials/header.ejs') %>
+<div class="dashboard-container" style="height: calc(100vh - 80px);">
+    <%- include('../partials/sidebar.ejs', { path: '/client/ai-coach' }) %>
+    <main class="dashboard-main" style="display: flex; flex-direction: column;">
+        <div class="mobile-dash-header">
+            <button id="sidebarOpenBtn" class="btn btn-outline btn-sm"><i class="fas fa-bars"></i></button>
+            <span>IA Coach</span>
+        </div>
+        
+        <div class="page-header">
+            <h1>Coach <span class="text-neon">Inteligente</span></h1>
+            <p>Tire dúvidas sobre exercícios, nutrição e recuperação.</p>
+        </div>
 
-            <div class="card-box" style="flex: 1; margin-bottom: 20px; display: flex; flex-direction: column; overflow: hidden;">
-                <div id="ai-chat-window" style="flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px;">
-                    <div style="align-self: flex-start; background: #222; padding: 15px; border-radius: 12px 12px 12px 0; max-width: 80%;">
-                        <p style="margin: 0; font-size: 0.95rem;">Olá! Eu sou sua IA Coach. Posso te ajudar a adaptar um exercício, tirar dúvidas sobre execução ou sugerir melhorias na dieta. O que manda hoje?</p>
-                    </div>
-                </div>
-
-                <div style="padding: 20px; border-top: 1px solid #333; background: #111; display: flex; gap: 10px;">
-                    <input type="text" id="aiInput" class="form-input" placeholder="Pergunte sobre seu treino..." style="flex: 1;">
-                    <button class="btn btn-primary" onclick="sendAiMessage()"><i class="fas fa-paper-plane"></i></button>
+        <div class="card-box" style="flex: 1; display: flex; flex-direction: column; min-height: 0;">
+            <div style="flex: 1; overflow-y: auto; padding: 20px; border: 1px solid #333; border-radius: 8px; margin-bottom: 20px;">
+                <div style="background: #222; padding: 15px; border-radius: 12px; margin-bottom: 10px; max-width: 80%;">
+                    <strong class="text-neon">IA Coach:</strong> Olá, <%= user.name.split(' ')[0] %>! Como posso ajudar no seu treino hoje?
                 </div>
             </div>
-        </main>
-    </div>
-    
-    <script>
-        function sendAiMessage() {
-            const input = document.getElementById('aiInput');
-            const chat = document.getElementById('ai-chat-window');
-            if(!input.value.trim()) return;
-
-            // User Message
-            const userDiv = document.createElement('div');
-            userDiv.style.cssText = "align-self: flex-end; background: var(--primary-color); color: black; padding: 12px; border-radius: 12px 12px 0 12px; max-width: 80%;";
-            userDiv.innerText = input.value;
-            chat.appendChild(userDiv);
-
-            // Simulate AI Typing
-            setTimeout(() => {
-                const aiDiv = document.createElement('div');
-                aiDiv.style.cssText = "align-self: flex-start; background: #222; padding: 15px; border-radius: 12px 12px 12px 0; max-width: 80%;";
-                aiDiv.innerText = "Essa é uma resposta simulada da IA. Para funcionar, precisamos integrar com a API da OpenAI no backend.";
-                chat.appendChild(aiDiv);
-                chat.scrollTop = chat.scrollHeight;
-            }, 1000);
-
-            input.value = '';
-            chat.scrollTop = chat.scrollHeight;
-        }
-    </script>
-</body>
-</html>
+            <div style="display: flex; gap: 10px;">
+                <input type="text" class="form-control" placeholder="Digite sua dúvida..." style="flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #444; background: #111; color: white;">
+                <button class="btn btn-primary"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </main>
+</div>
+<%- include('../partials/footer.ejs') %>

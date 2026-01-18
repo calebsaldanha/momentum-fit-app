@@ -1,27 +1,31 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <title>Configurações Globais | Momentum Fit</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/styles.css">
-</head>
-<body>
-    <div class="dashboard-container">
-        <%- include('../partials/sidebar') %>
-        <main class="dashboard-main">
-            <div class="page-header" style="text-align: left; background: transparent; padding-left: 0;">
-                <h1><i class="fas fa-cogs text-neon"></i> Configurações Globais</h1>
-            </div>
-            
-            <div class="card-box" style="padding: 40px; text-align: center;">
-                <i class="fas fa-cogs" style="font-size: 3rem; color: #333; margin-bottom: 20px;"></i>
-                <h3>Em Desenvolvimento</h3>
-                <p style="color: #888;">Esta funcionalidade estará disponível em breve na plataforma.</p>
-            </div>
-        </main>
-    </div>
-    <script src="/js/main.js"></script>
-</body>
-</html>
+<%- include('../partials/header.ejs') %>
+<div class="dashboard-container">
+    <%- include('../partials/sidebar.ejs', { path: '/admin/settings' }) %>
+    <main class="dashboard-main">
+        <div class="mobile-dash-header">
+            <button id="sidebarOpenBtn" class="btn btn-outline btn-sm"><i class="fas fa-bars"></i></button>
+            <span>Sistema</span>
+        </div>
+        <div class="page-header">
+            <h1>Configurações <span class="text-neon">Globais</span></h1>
+        </div>
+        <div class="card-box">
+            <form>
+                <h3>Parâmetros do Sistema</h3>
+                <div style="margin-bottom: 20px;">
+                    <label>Taxa da Plataforma (%)</label>
+                    <input type="number" value="15" style="width: 100px; padding: 8px; background: #222; border: 1px solid #444; color: white; border-radius: 4px;">
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <label>Manutenção do Sistema</label>
+                    <div style="margin-top: 5px;">
+                        <input type="radio" name="maintenance" value="off" checked> Online &nbsp;
+                        <input type="radio" name="maintenance" value="on"> Modo Manutenção
+                    </div>
+                </div>
+                <button class="btn btn-primary">Salvar Alterações</button>
+            </form>
+        </div>
+    </main>
+</div>
+<%- include('../partials/footer.ejs') %>

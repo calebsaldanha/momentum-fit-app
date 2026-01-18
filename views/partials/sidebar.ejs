@@ -16,11 +16,14 @@
             <a href="/client/dashboard" class="nav-item <%= path === '/client/dashboard' ? 'active' : '' %>">
                 <i class="fas fa-home"></i> <span>Início</span>
             </a>
-            <a href="/client/workouts" class="nav-item <%= path === '/client/workouts' ? 'active' : '' %>">
+            <a href="/client/workouts" class="nav-item <%= path.includes('/workouts') ? 'active' : '' %>">
                 <i class="fas fa-dumbbell"></i> <span>Meus Treinos</span>
             </a>
             <a href="/client/evolution" class="nav-item <%= path === '/client/evolution' ? 'active' : '' %>">
                 <i class="fas fa-chart-line"></i> <span>Evolução</span>
+            </a>
+            <a href="/client/ai-coach" class="nav-item <%= path === '/client/ai-coach' ? 'active' : '' %>">
+                <i class="fas fa-robot text-neon"></i> <span>IA Coach</span>
             </a>
             
             <div class="menu-category">CONTA</div>
@@ -30,6 +33,9 @@
             <a href="/chat" class="nav-item <%= path === '/chat' ? 'active' : '' %>">
                 <i class="fas fa-comments"></i> <span>Chat</span>
             </a>
+            <a href="/client/settings" class="nav-item <%= path === '/client/settings' ? 'active' : '' %>">
+                <i class="fas fa-cog"></i> <span>Configurações</span>
+            </a>
         <% } %>
 
         <% if (user.role === 'trainer') { %>
@@ -37,11 +43,17 @@
             <a href="/trainer/dashboard" class="nav-item <%= path === '/trainer/dashboard' ? 'active' : '' %>">
                 <i class="fas fa-tachometer-alt"></i> <span>Painel</span>
             </a>
-            <a href="/trainer/clients" class="nav-item <%= path === '/trainer/clients' ? 'active' : '' %>">
+            <a href="/trainer/clients" class="nav-item <%= path.includes('/trainer/clients') ? 'active' : '' %>">
                 <i class="fas fa-users"></i> <span>Alunos</span>
             </a>
+            <a href="/trainer/schedule" class="nav-item <%= path === '/trainer/schedule' ? 'active' : '' %>">
+                <i class="far fa-calendar-alt"></i> <span>Agenda</span>
+            </a>
             <a href="/trainer/library" class="nav-item <%= path === '/trainer/library' ? 'active' : '' %>">
-                <i class="fas fa-book"></i> <span>Exercícios</span>
+                <i class="fas fa-book"></i> <span>Biblioteca</span>
+            </a>
+            <a href="/trainer/content" class="nav-item <%= path === '/trainer/content' ? 'active' : '' %>">
+                <i class="fas fa-video"></i> <span>Conteúdos</span>
             </a>
 
             <div class="menu-category">PESSOAL</div>
@@ -54,6 +66,9 @@
             <a href="/chat" class="nav-item <%= path === '/chat' ? 'active' : '' %>">
                 <i class="fas fa-comments"></i> <span>Chat</span>
             </a>
+            <a href="/trainer/settings" class="nav-item <%= path === '/trainer/settings' ? 'active' : '' %>">
+                <i class="fas fa-cog"></i> <span>Configurações</span>
+            </a>
         <% } %>
 
         <% if (user.role === 'admin' || user.role === 'superadmin') { %>
@@ -64,11 +79,20 @@
             <a href="/admin/approvals" class="nav-item <%= path === '/admin/approvals' ? 'active' : '' %>">
                 <i class="fas fa-check-circle"></i> <span>Aprovações</span>
             </a>
-            <a href="/admin/users" class="nav-item <%= path === '/admin/users' ? 'active' : '' %>">
+            <a href="/admin/users" class="nav-item <%= path.includes('/admin/users') ? 'active' : '' %>">
                 <i class="fas fa-users-cog"></i> <span>Usuários</span>
+            </a>
+            <a href="/admin/content" class="nav-item <%= path === '/admin/content' ? 'active' : '' %>">
+                <i class="fas fa-file-alt"></i> <span>Conteúdos</span>
             </a>
             <a href="/admin/finance" class="nav-item <%= path === '/admin/finance' ? 'active' : '' %>">
                 <i class="fas fa-dollar-sign"></i> <span>Financeiro</span>
+            </a>
+            <a href="/admin/ia-audit" class="nav-item <%= path === '/admin/ia-audit' ? 'active' : '' %>">
+                <i class="fas fa-brain"></i> <span>Auditoria IA</span>
+            </a>
+            <a href="/admin/settings" class="nav-item <%= path === '/admin/settings' ? 'active' : '' %>">
+                <i class="fas fa-sliders-h"></i> <span>Sistema</span>
             </a>
         <% } %>
 

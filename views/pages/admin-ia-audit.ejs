@@ -1,27 +1,46 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <title>Auditoria de IA | Momentum Fit</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/styles.css">
-</head>
-<body>
-    <div class="dashboard-container">
-        <%- include('../partials/sidebar') %>
-        <main class="dashboard-main">
-            <div class="page-header" style="text-align: left; background: transparent; padding-left: 0;">
-                <h1><i class="fas fa-brain text-neon"></i> Auditoria de IA</h1>
+<%- include('../partials/header.ejs') %>
+<div class="dashboard-container">
+    <%- include('../partials/sidebar.ejs', { path: '/admin/ia-audit' }) %>
+    <main class="dashboard-main">
+        <div class="mobile-dash-header">
+            <button id="sidebarOpenBtn" class="btn btn-outline btn-sm"><i class="fas fa-bars"></i></button>
+            <span>IA Audit</span>
+        </div>
+        <div class="page-header">
+            <h1>Auditoria de <span class="text-neon">IA</span></h1>
+            <p>Monitore o uso e os prompts enviados para a Inteligência Artificial.</p>
+        </div>
+        <div class="card-box">
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Usuário</th>
+                            <th>Prompt (Resumo)</th>
+                            <th>Tokens</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>18/01/2026 14:30</td>
+                            <td>João Silva</td>
+                            <td>"Como melhorar meu supino..."</td>
+                            <td>150</td>
+                            <td style="color: #bef202;">Sucesso</td>
+                        </tr>
+                        <tr>
+                            <td>18/01/2026 14:35</td>
+                            <td>Maria Santos</td>
+                            <td>"Dieta para perder 5kg..."</td>
+                            <td>320</td>
+                            <td style="color: #bef202;">Sucesso</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
-            
-            <div class="card-box" style="padding: 40px; text-align: center;">
-                <i class="fas fa-brain" style="font-size: 3rem; color: #333; margin-bottom: 20px;"></i>
-                <h3>Em Desenvolvimento</h3>
-                <p style="color: #888;">Esta funcionalidade estará disponível em breve na plataforma.</p>
-            </div>
-        </main>
-    </div>
-    <script src="/js/main.js"></script>
-</body>
-</html>
+        </div>
+    </main>
+</div>
+<%- include('../partials/footer.ejs') %>

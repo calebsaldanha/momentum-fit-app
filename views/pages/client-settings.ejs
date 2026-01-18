@@ -1,27 +1,30 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <title>Configurações | Momentum Fit</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/styles.css">
-</head>
-<body>
-    <div class="dashboard-container">
-        <%- include('../partials/sidebar') %>
-        <main class="dashboard-main">
-            <div class="page-header" style="text-align: left; background: transparent; padding-left: 0;">
-                <h1><i class="fas fa-cog text-neon"></i> Configurações</h1>
-            </div>
-            
-            <div class="card-box" style="padding: 40px; text-align: center;">
-                <i class="fas fa-cog" style="font-size: 3rem; color: #333; margin-bottom: 20px;"></i>
-                <h3>Em Desenvolvimento</h3>
-                <p style="color: #888;">Esta funcionalidade estará disponível em breve na plataforma.</p>
-            </div>
-        </main>
-    </div>
-    <script src="/js/main.js"></script>
-</body>
-</html>
+<%- include('../partials/header.ejs') %>
+<div class="dashboard-container">
+    <%- include('../partials/sidebar.ejs', { path: '/client/settings' }) %>
+    <main class="dashboard-main">
+        <div class="mobile-dash-header">
+            <button id="sidebarOpenBtn" class="btn btn-outline btn-sm"><i class="fas fa-bars"></i></button>
+            <span>Configurações</span>
+        </div>
+        <div class="page-header">
+            <h1>Minhas <span class="text-neon">Configurações</span></h1>
+        </div>
+        <div class="card-box" style="max-width: 600px;">
+            <h3 style="margin-bottom: 20px;">Preferências</h3>
+            <form>
+                <div style="margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;">
+                    <label>Notificações por Email</label>
+                    <input type="checkbox" checked style="transform: scale(1.5);">
+                </div>
+                <div style="margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;">
+                    <label>Modo Escuro</label>
+                    <input type="checkbox" checked disabled style="transform: scale(1.5);">
+                </div>
+                <hr style="border-color: #333; margin: 20px 0;">
+                <h3 style="margin-bottom: 20px; color: #ff4d4d;">Zona de Perigo</h3>
+                <button type="button" class="btn btn-outline" style="border-color: #ff4d4d; color: #ff4d4d; width: 100%;">Excluir Conta</button>
+            </form>
+        </div>
+    </main>
+</div>
+<%- include('../partials/footer.ejs') %>
