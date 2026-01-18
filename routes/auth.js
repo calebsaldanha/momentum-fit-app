@@ -1,90 +1,129 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../database/db');
 const bcrypt = require('bcryptjs');
+const db = require('../database/db');
 
+// --- LOGIN ---
 router.get('/login', (req, res) => {
-    res.render('pages/login', { title: 'Login', error: null, success: null });
+    // Se já estiver logado, redireciona para o dashboard correto
+    if (req.session.user) {
+        if (req.session.user.role === 'admin') return res.redirect('/admin/dashboard');
+        if (req.session.user.role === 'trainer') return res.redirect('/trainer/dashboard');
+        return res.redirect('/client/dashboard');
+    }
+    res.render('pages/login', { csrfToken: req.csrfToken(), messages: req.flash() });
 });
 
 router.post('/login', async (req, res) => {
     const { email, password } = req.body;
+    
     try {
-        const user = await db.getUserByEmail(email);
+        const result = await db.query('SELECT * FROM users WHERE email = $1', [email]);
+        const user = result.rows[0];
+
         if (user && await bcrypt.compare(password, user.password)) {
-            req.session.user = user;
-            try { await db.query('UPDATE users SET last_login = NOW() WHERE id = $1', [user.id]); } catch (e) {}
-            if (user.role === 'admin' || user.role === 'superadmin') return res.redirect('/admin/dashboard');
-            if (user.role === 'trainer') return res.redirect('/trainer/dashboard');
-            return res.redirect('/client/dashboard'); 
+            // Login Sucesso: Salva na sessão
+            req.session.user = {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                role: user.role
+            };
+
+            // Atualiza último login (opcional, mas bom ter)
+            await db.query('UPDATE users SET last_login = NOW() WHERE id = $1', [user.id]);
+
+            req.flash('success', 'Bem-vindo de volta!');
+
+            // Redirecionamento baseado na role
+            if (user.role === 'admin' || user.role === 'superadmin') {
+                return res.redirect('/admin/dashboard');
+            } else if (user.role === 'trainer') {
+                // Verifica se está aprovado
+                const trainerCheck = await db.query('SELECT is_approved FROM trainers WHERE user_id = $1', [user.id]);
+                if (trainerCheck.rows.length > 0 && !trainerCheck.rows[0].is_approved) {
+                    return res.redirect('/pages/pending-trainer'); // Ou renderizar aviso
+                }
+                return res.redirect('/trainer/dashboard');
+            } else {
+                return res.redirect('/client/dashboard');
+            }
         } else {
-            res.render('pages/login', { title: 'Login', error: 'Email ou senha incorretos.', success: null });
+            req.flash('error', 'Email ou senha incorretos.');
+            res.redirect('/auth/login');
         }
     } catch (err) {
-        console.error(err);
-        res.render('pages/login', { title: 'Login', error: 'Erro no servidor.', success: null });
+        console.error('Erro no login:', err);
+        req.flash('error', 'Erro interno no servidor.');
+        res.redirect('/auth/login');
     }
 });
 
-router.get('/register', async (req, res) => {
-    try {
-        const trainers = await db.getAllTrainers();
-        res.render('pages/register', { title: 'Criar Conta', trainers, error: null });
-    } catch (err) {
-        res.render('pages/register', { title: 'Criar Conta', trainers: [], error: 'Erro ao carregar treinadores.' });
-    }
+// --- REGISTER ---
+router.get('/register', (req, res) => {
+    if (req.session.user) return res.redirect('/');
+    res.render('pages/register', { csrfToken: req.csrfToken(), messages: req.flash() });
 });
 
 router.post('/register', async (req, res) => {
-    const { name, email, password, confirmPassword, trainer_id, role, height, weight, goal, fitness_level } = req.body;
-    try {
-        if (password !== confirmPassword) {
-            const trainers = await db.getAllTrainers();
-            return res.render('pages/register', { title: 'Criar Conta', trainers, error: 'As senhas não coincidem.' });
-        }
-        const existingUser = await db.getUserByEmail(email);
-        if (existingUser) {
-            const trainers = await db.getAllTrainers();
-            return res.render('pages/register', { title: 'Criar Conta', trainers, error: 'Email já cadastrado.' });
-        }
-        const newUser = await db.createUser({
-            name, email, password, role: role || 'client', trainer_id: trainer_id || null, profile_image: null
-        });
+    const { name, email, password, role } = req.body;
+    
+    // Validação básica
+    if (!name || !email || !password || !role) {
+        req.flash('error', 'Todos os campos são obrigatórios.');
+        return res.redirect('/auth/register');
+    }
 
-        if (newUser.role === 'client') {
-            await db.query(`INSERT INTO clients (user_id, height, current_weight, fitness_goals, fitness_level) VALUES ($1, $2, $3, $4, $5)`, 
-            [newUser.id, height || null, weight || null, goal || null, fitness_level || null]);
-            
-            req.session.user = newUser;
-            req.session.save((err) => {
-                if (err) return res.redirect('/auth/login');
-                return res.redirect('/client/initial-form');
-            });
-        } else if (newUser.role === 'trainer') {
-             await db.query(`INSERT INTO trainers (user_id) VALUES ($1)`, [newUser.id]);
-             res.render('pages/login', { title: 'Login', error: null, success: 'Conta criada. Faça login.' });
-        } else {
-            res.render('pages/login', { title: 'Login', error: null, success: 'Conta criada.' });
+    try {
+        // Verifica duplicidade
+        const existingUser = await db.query('SELECT id FROM users WHERE email = $1', [email]);
+        if (existingUser.rows.length > 0) {
+            req.flash('error', 'Este email já está cadastrado.');
+            return res.redirect('/auth/register');
         }
+
+        // Hash da senha
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Transação para criar User + Perfil (Client ou Trainer)
+        await db.query('BEGIN');
+
+        const userResult = await db.query(
+            'INSERT INTO users (name, email, password, role) VALUES ($1, $2, $3, $4) RETURNING id',
+            [name, email, hashedPassword, role]
+        );
+        const userId = userResult.rows[0].id;
+
+        if (role === 'client') {
+            await db.query('INSERT INTO clients (user_id) VALUES ($1)', [userId]);
+        } else if (role === 'trainer') {
+            await db.query('INSERT INTO trainers (user_id, is_approved) VALUES ($1, false)', [userId]);
+        }
+
+        await db.query('COMMIT');
+
+        req.flash('success', 'Conta criada com sucesso! Faça login.');
+        res.redirect('/auth/login');
+
     } catch (err) {
-        console.error("Erro no registro:", err);
-        const trainers = await db.getAllTrainers();
-        res.render('pages/register', { title: 'Criar Conta', trainers, error: 'Erro ao criar conta.' });
+        await db.query('ROLLBACK');
+        console.error('Erro no registro:', err);
+        req.flash('error', 'Erro ao criar conta. Tente novamente.');
+        res.redirect('/auth/register');
     }
 });
 
-router.get('/forgot-password', (req, res) => {
-    res.render('pages/forgot-password', { title: 'Recuperar Senha', error: null, success: null, csrfToken: req.csrfToken() });
-});
-
-router.post('/forgot-password', async (req, res) => {
-    // Stub de recuperação
-    res.render('pages/forgot-password', { title: 'Recuperar Senha', error: null, success: 'Link enviado (simulação).', csrfToken: req.csrfToken() });
-});
-
-router.post('/logout', (req, res) => {
-    req.session.destroy();
-    res.redirect('/auth/login');
+// --- LOGOUT (A CORREÇÃO PRINCIPAL) ---
+// Usa GET porque o link é <a href="...">
+router.get('/logout', (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            console.error('Erro ao encerrar sessão:', err);
+            return res.redirect('/'); // Se falhar, manda pra home mesmo assim
+        }
+        res.clearCookie('connect.sid'); // Limpa o cookie da sessão
+        res.redirect('/auth/login'); // Manda para login após sair
+    });
 });
 
 module.exports = router;
