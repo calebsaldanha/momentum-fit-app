@@ -14,124 +14,155 @@
             <span class="text-muted">Treino</span>
         </div>
 
+        <div class="page-header" style="display: flex; gap: 15px; align-items: center;">
+            <a href="javascript:history.back()" class="btn btn-outline btn-sm"><i class="fas fa-arrow-left"></i> Voltar</a>
+            <h1 style="margin: 0;"><%= workout.title %></h1>
+        </div>
+
         <% if(messages.success) { %><div class="alert alert-success"><%= messages.success %></div><% } %>
-        <% if(messages.error) { %><div class="alert alert-danger"><%= messages.error %></div><% } %>
 
-        <% if (user.role === 'admin' || user.role === 'superadmin' || user.role === 'trainer') { %>
+        <% if (user.role !== 'client') { %>
             
-            <div class="page-header" style="border-bottom: none; margin-bottom: 20px;">
-                <div style="background: #222; padding: 20px; border-radius: 12px; border: 1px solid #333;">
-                    <h3 style="color: var(--primary-color); margin-bottom: 15px;">Administrar Treino</h3>
-                    
-                    <form action="/workouts/<%= workout.id %>/update" method="POST" style="display: grid; gap: 15px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
-                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                        <div>
-                            <label style="color: #888; font-size: 0.8rem;">Título</label>
-                            <input type="text" name="title" value="<%= workout.title %>" class="form-control" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: white;">
-                        </div>
-                        <div>
-                            <label style="color: #888; font-size: 0.8rem;">Dia da Semana</label>
-                            <select name="day_of_week" class="form-control" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: white;">
-                                <% ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'].forEach(day => { %>
-                                    <option value="<%= day %>" <%= workout.day_of_week === day ? 'selected' : '' %>><%= day %></option>
-                                <% }) %>
-                            </select>
-                        </div>
-                        <div style="grid-column: 1 / -1;">
-                            <label style="color: #888; font-size: 0.8rem;">Descrição / Foco</label>
-                            <input type="text" name="description" value="<%= workout.description %>" class="form-control" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: white;">
-                        </div>
-                        <button class="btn btn-primary btn-sm" style="width: fit-content;">Salvar Alterações</button>
-                    </form>
-                </div>
-            </div>
-
-            <div class="card-box" style="margin-bottom: 30px; border: 1px dashed #444;">
-                <h4 style="color: white; margin-bottom: 15px;"><i class="fas fa-plus-circle"></i> Adicionar Exercício da Biblioteca</h4>
-                <form action="/workouts/<%= workout.id %>/add-exercise" method="POST" style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <div class="card-box" style="margin-bottom: 20px;">
+                <h4 style="color: white; margin-bottom: 15px;">Editar Detalhes</h4>
+                <form action="/workouts/<%= workout.id %>/update" method="POST" style="display: grid; gap: 15px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
                     <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                    
-                    <select name="exercise_id" required style="flex: 2; min-width: 200px; padding: 10px; background: #222; border: 1px solid #444; color: white; border-radius: 6px;">
-                        <option value="">Selecione um exercício...</option>
-                        <% if(library) { library.forEach(ex => { %>
-                            <option value="<%= ex.id %>"><%= ex.name %> (<%= ex.muscle_group %>)</option>
-                        <% }) } %>
-                    </select>
-                    
-                    <input type="number" name="sets" placeholder="Séries" value="3" style="width: 80px; padding: 10px; background: #222; border: 1px solid #444; color: white; border-radius: 6px;">
-                    <input type="number" name="reps" placeholder="Reps" value="12" style="width: 80px; padding: 10px; background: #222; border: 1px solid #444; color: white; border-radius: 6px;">
-                    <input type="text" name="load" placeholder="Kg" style="width: 80px; padding: 10px; background: #222; border: 1px solid #444; color: white; border-radius: 6px;">
-                    
-                    <button class="btn btn-outline" style="border-color: var(--primary-color); color: var(--primary-color);">Adicionar</button>
+                    <div>
+                        <label style="color: #888; font-size: 0.8rem;">Título</label>
+                        <input type="text" name="title" value="<%= workout.title %>" class="form-control" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: white;">
+                    </div>
+                    <div>
+                        <label style="color: #888; font-size: 0.8rem;">Dia</label>
+                        <select name="day_of_week" class="form-control" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: white;">
+                            <% ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'].forEach(day => { %>
+                                <option value="<%= day %>" <%= workout.day_of_week === day ? 'selected' : '' %>><%= day %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+                    <div style="grid-column: 1 / -1;">
+                        <label style="color: #888; font-size: 0.8rem;">Descrição</label>
+                        <input type="text" name="description" value="<%= workout.description %>" class="form-control" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: white;">
+                    </div>
+                    <button class="btn btn-primary btn-sm" style="width: fit-content;">Salvar</button>
                 </form>
             </div>
 
+            <div style="margin-bottom: 30px;">
+                <button class="btn btn-primary" onclick="document.getElementById('addExModal').style.display='flex'" style="width: 100%; justify-content: center; padding: 15px;">
+                    <i class="fas fa-plus-circle"></i> &nbsp; Adicionar Exercício da Biblioteca
+                </button>
+            </div>
+
         <% } else { %>
-            <div class="page-header">
-                <h1><%= workout.title %></h1>
+            <div style="margin-bottom: 20px;">
                 <p class="text-neon"><%= workout.day_of_week %></p>
                 <p class="text-muted"><%= workout.description || 'Siga a execução correta.' %></p>
             </div>
         <% } %>
 
         <div class="card-box">
-            <h3 style="color: white; margin-bottom: 20px;">Lista de Exercícios</h3>
+            <h3 style="color: white; margin-bottom: 20px;">Exercícios</h3>
             
             <% if (exercises && exercises.length > 0) { %>
                 <div class="workout-list" style="display: flex; flex-direction: column; gap: 15px;">
                     <% exercises.forEach(ex => { %>
-                        <div style="background: #1a1a1a; padding: 20px; border-radius: 10px; border-left: 4px solid var(--primary-color); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 15px;">
+                        <div style="background: #1a1a1a; padding: 15px; border-radius: 10px; border-left: 4px solid var(--primary-color); display: flex; flex-wrap: wrap; align-items: center; gap: 20px;">
                             
+                            <% if(ex.image_url) { %>
+                                <img src="<%= ex.image_url %>" alt="<%= ex.name %>" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px; background: #000;">
+                            <% } else { %>
+                                <div style="width: 80px; height: 80px; background: #333; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #666;">
+                                    <i class="fas fa-dumbbell fa-2x"></i>
+                                </div>
+                            <% } %>
+
                             <div style="flex: 1; min-width: 200px;">
                                 <h4 style="color: white; margin-bottom: 5px; font-size: 1.1rem;"><%= ex.name %></h4>
                                 <span class="badge-neon" style="font-size: 0.7rem; background: rgba(255,255,255,0.1); color: #ccc; border:none;"><%= ex.muscle_group || 'Geral' %></span>
                                 <% if(ex.video_url) { %>
-                                    <a href="<%= ex.video_url %>" target="_blank" style="font-size: 0.85rem; color: var(--primary-color); margin-left: 10px;"><i class="fas fa-play-circle"></i> Ver Vídeo</a>
+                                    <a href="<%= ex.video_url %>" target="_blank" style="font-size: 0.85rem; color: var(--primary-color); margin-left: 10px;"><i class="fas fa-play-circle"></i> Vídeo</a>
                                 <% } %>
                             </div>
 
                             <% if (user.role !== 'client') { %>
-                                <form action="/workouts/<%= workout.id %>/update-exercise/<%= ex.id %>" method="POST" style="display: flex; gap: 10px; align-items: center; margin: 0;">
+                                <form action="/workouts/<%= workout.id %>/update-exercise/<%= ex.id %>" method="POST" style="display: flex; gap: 10px; align-items: center;">
                                     <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                    
                                     <div style="text-align: center;">
-                                        <label style="font-size: 0.6rem; color: #666; display: block;">Séries</label>
+                                        <label style="font-size: 0.6rem; color: #666;">Séries</label>
                                         <input type="number" name="sets" value="<%= ex.sets %>" style="width: 50px; padding: 5px; background: #333; border: none; color: white; text-align: center; border-radius: 4px;">
                                     </div>
                                     <div style="text-align: center;">
-                                        <label style="font-size: 0.6rem; color: #666; display: block;">Reps</label>
+                                        <label style="font-size: 0.6rem; color: #666;">Reps</label>
                                         <input type="number" name="reps" value="<%= ex.reps %>" style="width: 50px; padding: 5px; background: #333; border: none; color: white; text-align: center; border-radius: 4px;">
                                     </div>
                                     <div style="text-align: center;">
-                                        <label style="font-size: 0.6rem; color: #666; display: block;">Carga</label>
+                                        <label style="font-size: 0.6rem; color: #666;">Kg</label>
                                         <input type="text" name="load" value="<%= ex.load %>" style="width: 50px; padding: 5px; background: #333; border: none; color: white; text-align: center; border-radius: 4px;">
                                     </div>
-                                    
-                                    <button class="btn btn-sm btn-primary" title="Salvar Alterações"><i class="fas fa-save"></i></button>
+                                    <button class="btn btn-sm btn-primary" title="Salvar"><i class="fas fa-save"></i></button>
                                 </form>
-
-                                <form action="/workouts/<%= workout.id %>/remove-exercise/<%= ex.id %>" method="POST" style="margin: 0;" onsubmit="return confirm('Remover este exercício?');">
+                                <form action="/workouts/<%= workout.id %>/remove-exercise/<%= ex.id %>" method="POST" onsubmit="return confirm('Remover?');">
                                     <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                                     <button class="btn btn-sm btn-outline" style="border-color: #ff4d4d; color: #ff4d4d;"><i class="fas fa-trash"></i></button>
                                 </form>
-                            
                             <% } else { %>
-                                <div style="display: flex; gap: 20px; text-align: center;">
-                                    <div><span style="display: block; color: #888; font-size: 0.8rem;">Séries</span><strong style="color: white; font-size: 1.2rem;"><%= ex.sets %></strong></div>
-                                    <div><span style="display: block; color: #888; font-size: 0.8rem;">Reps</span><strong style="color: white; font-size: 1.2rem;"><%= ex.reps %></strong></div>
-                                    <div><span style="display: block; color: #888; font-size: 0.8rem;">Carga</span><strong style="color: var(--primary-color); font-size: 1.2rem;"><%= ex.load %>kg</strong></div>
-                                </div>
-                                <div style="display: flex; align-items: center;">
-                                    <input type="checkbox" style="width: 20px; height: 20px; accent-color: var(--primary-color);">
+                                <div style="display: flex; gap: 20px;">
+                                    <div><small style="color:#888">Séries</small><br><strong style="color:white"><%= ex.sets %></strong></div>
+                                    <div><small style="color:#888">Reps</small><br><strong style="color:white"><%= ex.reps %></strong></div>
+                                    <div><small style="color:#888">Carga</small><br><strong style="color:var(--primary-color)"><%= ex.load %>kg</strong></div>
                                 </div>
                             <% } %>
                         </div>
                     <% }) %>
                 </div>
             <% } else { %>
-                <p class="text-muted" style="text-align: center; padding: 20px;">Nenhum exercício neste treino.</p>
+                <p class="text-muted" style="text-align: center; padding: 20px;">Nenhum exercício adicionado ainda.</p>
             <% } %>
         </div>
     </main>
 </div>
+
+<% if (user.role !== 'client') { %>
+<div id="addExModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: #111; padding: 30px; border-radius: 12px; width: 100%; max-width: 500px; border: 1px solid #333; max-height: 90vh; overflow-y: auto;">
+        <h3 style="color: white; margin-bottom: 20px;">Adicionar da Biblioteca</h3>
+        
+        <form action="/workouts/<%= workout.id %>/add-exercise" method="POST">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            
+            <div style="margin-bottom: 20px;">
+                <label style="color: #888; margin-bottom: 10px; display: block;">Selecione o exercício:</label>
+                <div style="max-height: 200px; overflow-y: auto; border: 1px solid #333; border-radius: 8px;">
+                    <% if(library) { library.forEach(ex => { %>
+                        <label style="display: flex; align-items: center; gap: 10px; padding: 10px; border-bottom: 1px solid #222; cursor: pointer;">
+                            <input type="radio" name="exercise_id" value="<%= ex.id %>" required>
+                            <% if(ex.image_url) { %>
+                                <img src="<%= ex.image_url %>" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">
+                            <% } else { %>
+                                <div style="width: 40px; height: 40px; background: #333; border-radius: 4px;"></div>
+                            <% } %>
+                            <div>
+                                <strong style="color: white; display: block;"><%= ex.name %></strong>
+                                <small style="color: #666;"><%= ex.muscle_group %></small>
+                            </div>
+                        </label>
+                    <% }) } %>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <div style="flex: 1;"><label style="color:#888">Séries</label><input type="number" name="sets" value="3" class="form-control" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"></div>
+                <div style="flex: 1;"><label style="color:#888">Reps</label><input type="number" name="reps" value="12" class="form-control" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"></div>
+                <div style="flex: 1;"><label style="color:#888">Carga</label><input type="text" name="load" value="0" class="form-control" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"></div>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <button type="submit" class="btn btn-primary" style="flex: 1;">Adicionar</button>
+                <button type="button" class="btn btn-outline" style="flex: 1;" onclick="document.getElementById('addExModal').style.display='none'">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+<% } %>
+
 <%- include('../partials/footer.ejs') %>

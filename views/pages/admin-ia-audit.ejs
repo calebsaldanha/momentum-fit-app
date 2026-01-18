@@ -4,11 +4,11 @@
     <main class="dashboard-main">
         <div class="mobile-dash-header">
             <button id="sidebarOpenBtn" class="btn btn-outline btn-sm"><i class="fas fa-bars"></i></button>
-            <span>IA Audit</span>
+            <span>Auditoria IA</span>
         </div>
         <div class="page-header">
-            <h1>Auditoria de <span class="text-neon">IA</span></h1>
-            <p>Monitore o uso e os prompts enviados para a Inteligência Artificial.</p>
+            <h1>Log de <span class="text-neon">Inteligência Artificial</span></h1>
+            <p>Monitoramento de interações reais com o Gemini.</p>
         </div>
         <div class="card-box">
             <div class="table-responsive">
@@ -17,26 +17,23 @@
                         <tr>
                             <th>Data</th>
                             <th>Usuário</th>
-                            <th>Prompt (Resumo)</th>
+                            <th>Prompt</th>
                             <th>Tokens</th>
-                            <th>Status</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>18/01/2026 14:30</td>
-                            <td>João Silva</td>
-                            <td>"Como melhorar meu supino..."</td>
-                            <td>150</td>
-                            <td style="color: #bef202;">Sucesso</td>
-                        </tr>
-                        <tr>
-                            <td>18/01/2026 14:35</td>
-                            <td>Maria Santos</td>
-                            <td>"Dieta para perder 5kg..."</td>
-                            <td>320</td>
-                            <td style="color: #bef202;">Sucesso</td>
-                        </tr>
+                        <% if (logs && logs.length > 0) { %>
+                            <% logs.forEach(log => { %>
+                                <tr>
+                                    <td><%= new Date(log.created_at).toLocaleString() %></td>
+                                    <td><%= log.user_name || 'Desconhecido' %></td>
+                                    <td title="<%= log.response %>"><%= log.prompt.substring(0, 50) %>...</td>
+                                    <td><%= log.tokens_used || 0 %></td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr><td colspan="4" style="text-align: center; padding: 20px;">Nenhuma interação registrada ainda.</td></tr>
+                        <% } %>
                     </tbody>
                 </table>
             </div>

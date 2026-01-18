@@ -12,7 +12,7 @@
 
         <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
             <div style="display: flex; align-items: center; gap: 15px;">
-                <a href="/admin/users" class="btn btn-sm btn-outline"><i class="fas fa-arrow-left"></i></a>
+                <a href="/admin/users" class="btn btn-sm btn-outline"><i class="fas fa-arrow-left"></i> Voltar</a>
                 <div>
                     <h1 style="margin: 0; font-size: 1.8rem;"><%= targetUser.name %></h1>
                     <div style="display: flex; gap: 10px; margin-top: 5px;">
@@ -47,6 +47,10 @@
                     <p style="font-size: 2rem; font-weight: bold; color: white;"><%= bi.totalWorkouts || 0 %></p>
                 </div>
                 <div class="card-box" style="text-align: center;">
+                    <h3 class="text-muted" style="font-size: 0.9rem;">Assiduidade</h3>
+                    <p style="font-size: 2rem; font-weight: bold; color: var(--primary-color);"><%= bi.attendanceRate %>%</p>
+                </div>
+                <div class="card-box" style="text-align: center;">
                     <h3 class="text-muted" style="font-size: 0.9rem;">Plano</h3>
                     <p style="font-size: 1.2rem; font-weight: bold; color: white; margin-top: 10px;">
                         <%= activePlan ? activePlan.plan_name : 'Nenhum' %>
@@ -56,54 +60,12 @@
 
             <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 30px; margin-bottom: 30px;">
                 <div class="card-box">
-                    <h3 style="color: var(--primary-color); border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 20px;">Ficha de Anamnese Completa</h3>
-                    
+                    <h3 style="color: var(--primary-color); border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 20px;">Ficha de Anamnese</h3>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                        <div><label style="color:#666; font-size:0.8rem">Email</label><p style="color:white"><%= targetUser.email %></p></div>
-                        <div><label style="color:#666; font-size:0.8rem">Telefone</label><p style="color:white"><%= targetUser.phone || '-' %></p></div>
-                        
-                        <div><label style="color:#666; font-size:0.8rem">Peso (kg)</label><p style="color:white"><%= details.weight || '-' %></p></div>
-                        <div><label style="color:#666; font-size:0.8rem">Altura (cm)</label><p style="color:white"><%= details.height || '-' %></p></div>
-                        
-                        <div><label style="color:#666; font-size:0.8rem">Objetivo</label><p style="color:var(--primary-color)"><%= details.goal || '-' %></p></div>
-                        <div style="grid-column: 1 / -1;">
-                            <label style="color:#666; font-size:0.8rem">Descrição do Objetivo</label>
-                            <p style="background: #222; padding: 10px; border-radius: 5px; color: #ddd;"><%= details.goal_description || 'Não informado.' %></p>
-                        </div>
-
-                        <div style="grid-column: 1 / -1; margin-top: 15px; border-top: 1px dashed #333; padding-top: 15px;">
-                            <h4 style="color: #4da6ff; margin-bottom: 15px; font-size: 0.95rem;">ESTILO DE VIDA</h4>
-                        </div>
-                        <div><label style="color:#666; font-size:0.8rem">Qualidade do Sono</label><p style="color:white"><%= details.sleep_quality || '-' %></p></div>
-                        <div><label style="color:#666; font-size:0.8rem">Nível de Estresse</label><p style="color:white"><%= details.stress_level || '-' %></p></div>
-                        <div><label style="color:#666; font-size:0.8rem">Consumo de Água</label><p style="color:white"><%= details.water_intake || '-' %></p></div>
-                        <div><label style="color:#666; font-size:0.8rem">Tipo de Alimentação</label><p style="color:white"><%= details.nutrition_type || '-' %></p></div>
-                        <div><label style="color:#666; font-size:0.8rem">Meta Dias/Semana</label><p style="color:white"><%= details.training_days_goal || '-' %> dias</p></div>
-
-                        <div style="grid-column: 1 / -1; margin-top: 15px; border-top: 1px dashed #333; padding-top: 15px;">
-                            <h4 style="color: #ff4d4d; margin-bottom: 15px; font-size: 0.95rem;">SAÚDE & LIMITAÇÕES</h4>
-                        </div>
-                        <div style="grid-column: 1 / -1;">
-                            <label style="color:#666; font-size:0.8rem">Histórico Médico</label>
-                            <p style="background: #222; padding: 10px; border-radius: 5px; color: #ddd;"><%= details.medical_history || 'Nenhum.' %></p>
-                        </div>
-                        <div style="grid-column: 1 / -1;">
-                            <label style="color:#666; font-size:0.8rem">Medicamentos</label>
-                            <p style="background: #222; padding: 10px; border-radius: 5px; color: #ddd;"><%= details.medications || 'Nenhum.' %></p>
-                        </div>
-                        <div style="grid-column: 1 / -1;">
-                            <label style="color:#666; font-size:0.8rem">Lesões</label>
-                            <p style="background: #222; padding: 10px; border-radius: 5px; color: #ddd;"><%= details.injuries || 'Nenhuma.' %></p>
-                        </div>
-
-                        <div style="grid-column: 1 / -1; margin-top: 15px; border-top: 1px dashed #333; padding-top: 15px;">
-                            <h4 style="color: #bef202; margin-bottom: 15px; font-size: 0.95rem;">LOGÍSTICA</h4>
-                        </div>
-                        <div><label style="color:#666; font-size:0.8rem">Nível Atividade</label><p><%= details.activity_level || '-' %></p></div>
-                        <div style="grid-column: 1 / -1;">
-                            <label style="color:#666; font-size:0.8rem">Equipamentos</label>
-                            <p style="background: #222; padding: 10px; border-radius: 5px; color: #ddd;"><%= details.available_equipment || '-' %></p>
-                        </div>
+                         <div><label style="color:#666; font-size:0.8rem">Email</label><p style="color:white"><%= targetUser.email %></p></div>
+                         <div><label style="color:#666; font-size:0.8rem">Telefone</label><p style="color:white"><%= targetUser.phone || '-' %></p></div>
+                         <div><label style="color:#666; font-size:0.8rem">Objetivo</label><p style="color:white"><%= details.goal || '-' %></p></div>
+                         <div style="grid-column: 1 / -1;"><label style="color:#666; font-size:0.8rem">Histórico Médico</label><p style="background: #222; padding: 10px; border-radius: 5px; color: #ddd;"><%= details.medical_history || 'Nenhum' %></p></div>
                     </div>
                 </div>
 
@@ -125,7 +87,7 @@
                 </div>
             </div>
 
-            <div class="card-box">
+             <div class="card-box">
                 <h3 style="color: white; margin-bottom: 15px;">Treinos Atribuídos (Histórico)</h3>
                 <div class="table-responsive">
                     <table style="width: 100%;">
@@ -150,22 +112,59 @@
             </div>
 
         <% } else if (targetUser.role === 'trainer') { %>
-             <div class="card-box">
-                <% if (!details.is_approved) { %>
-                    <div style="background: rgba(255, 165, 0, 0.1); border: 1px solid orange; color: orange; padding: 20px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
-                        <span><i class="fas fa-exclamation-triangle"></i> Aprovação Pendente</span>
-                        <form action="/admin/users/<%= targetUser.id %>/approve-trainer" method="POST" style="margin:0;">
-                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                            <button class="btn btn-primary" style="background: #bef202; color: black;">Aprovar</button>
-                        </form>
-                    </div>
-                <% } %>
-                <h3>Dados Profissionais</h3>
-                <p><strong>Nome:</strong> <%= targetUser.name %></p>
-                <p><strong>Bio:</strong> <%= details.bio || '-' %></p>
-                <p><strong>Chave PIX:</strong> <%= details.pix_key || '-' %></p>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                <div class="card-box">
+                    <h3>Alunos</h3>
+                    <p style="font-size: 2rem; font-weight: bold;"><%= bi.activeStudents %></p>
+                </div>
+                <div class="card-box">
+                    <h3>Status Aprovação</h3>
+                    <p style="font-size: 1.5rem; color: <%= details.is_approved ? '#bef202' : 'orange' %>;">
+                        <%= details.is_approved ? 'Aprovado' : 'Pendente' %>
+                    </p>
+                </div>
             </div>
+
+            <% if (!details.is_approved) { %>
+                <div style="background: rgba(255, 165, 0, 0.1); border: 1px solid orange; color: orange; padding: 20px; border-radius: 8px; margin-bottom: 30px; display: flex; align-items: center; justify-content: space-between;">
+                    <span><i class="fas fa-exclamation-triangle"></i> Treinador aguardando aprovação.</span>
+                    <form action="/admin/users/<%= targetUser.id %>/approve-trainer" method="POST" style="margin: 0;">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <button type="submit" class="btn btn-primary" style="background: #bef202; color: black; border: none;">Aprovar Agora</button>
+                    </form>
+                </div>
+            <% } %>
+
+            <div class="card-box">
+                <h3 style="margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px;">Informações Pessoais & Contato</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+                    <div><label style="color:#888; font-size:0.8rem">Nome Completo</label><p style="color:white"><%= targetUser.name %></p></div>
+                    <div><label style="color:#888">Email</label><p style="color:white"><%= targetUser.email %></p></div>
+                    <div><label style="color:#888">Telefone</label><p style="color:white"><%= targetUser.phone || '-' %></p></div>
+                    <div><label style="color:#888">Data Nascimento</label><p style="color:white"><%= targetUser.birth_date ? new Date(targetUser.birth_date).toLocaleDateString() : '-' %></p></div>
+                </div>
+
+                <h3 style="margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px;">Qualificações & Perfil</h3>
+                <div style="display: grid; grid-template-columns: 1fr; gap: 20px; margin-bottom: 30px;">
+                    <div><label style="color:#888; font-size:0.8rem">Especialidades</label><p style="color:white"><%= details.specialties || '-' %></p></div>
+                    <div><label style="color:#888; font-size:0.8rem">Formação Acadêmica</label><p style="background: #222; padding: 10px; border-radius: 5px; color: #ddd;"><%= details.education || '-' %></p></div>
+                    <div><label style="color:#888; font-size:0.8rem">Experiência</label><p style="background: #222; padding: 10px; border-radius: 5px; color: #ddd;"><%= details.experience || '-' %></p></div>
+                    <div><label style="color:#888; font-size:0.8rem">Bio / Sobre</label><p style="background: #222; padding: 10px; border-radius: 5px; color: #ddd;"><%= details.bio || '-' %></p></div>
+                </div>
+
+                <h3 style="margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px;">Dados Financeiros</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                     <div><label style="color:#888; font-size:0.8rem">Chave PIX</label><p style="color:var(--primary-color); font-weight:bold;"><%= details.pix_key || '-' %></p></div>
+                     <div><label style="color:#888; font-size:0.8rem">Tipo Chave</label><p style="color:white"><%= details.pix_key_type || '-' %></p></div>
+                     <div><label style="color:#888; font-size:0.8rem">Preço Mensal</label><p style="color:white">R$ <%= details.price_monthly || '0.00' %></p></div>
+                </div>
+            </div>
+
+        <% } else { %>
+            <div class="card-box"><p>Usuário Administrador.</p></div>
         <% } %>
+
     </main>
 </div>
 <%- include('../partials/footer.ejs') %>
