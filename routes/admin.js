@@ -11,7 +11,7 @@ function isAdmin(req, res, next) {
 
 router.use(isAdmin);
 
-// Dashboard
+// --- DASHBOARD ---
 router.get('/dashboard', async (req, res) => {
     try {
         const totalUsers = await db.query('SELECT COUNT(*) FROM users');
@@ -34,7 +34,7 @@ router.get('/dashboard', async (req, res) => {
     }
 });
 
-// Lista de Usuários
+// --- LISTA DE USUÁRIOS ---
 router.get('/users', async (req, res) => {
     try {
         const result = await db.query("SELECT id, name, email, role, active, created_at FROM users ORDER BY created_at DESC");
@@ -44,12 +44,12 @@ router.get('/users', async (req, res) => {
     }
 });
 
-// --- DETALHES DO USUÁRIO (Lógica Aprofundada) ---
+// --- DETALHES DO USUÁRIO ---
 router.get('/users/:id', async (req, res) => {
     try {
         const userId = req.params.id;
         
-        // 1. Dados Básicos
+        // 1. Busca Usuário Base
         const userRes = await db.query("SELECT * FROM users WHERE id = $1", [userId]);
         if (userRes.rows.length === 0) return res.redirect('/admin/users');
         const targetUser = userRes.rows[0];
@@ -68,7 +68,6 @@ router.get('/users/:id', async (req, res) => {
             }
 
             // LISTA DE TODOS OS TREINADORES (Aprovados e Pendentes)
-            // Isso garante que seu treinador apareça na lista
             const allTrainers = await db.query(`
                 SELECT u.id, u.name, t.is_approved 
                 FROM users u 
@@ -82,7 +81,7 @@ router.get('/users/:id', async (req, res) => {
             try {
                 const activePlan = await db.query("SELECT * FROM subscriptions WHERE user_id = $1 AND status = 'active' LIMIT 1", [userId]);
                 data.activePlan = activePlan.rows[0];
-                const planHistory = await db.query("SELECT * FROM payments WHERE user_id = $1 ORDER BY created_at DESC", [userId]);
+                const planHistory = await db.query("SELECT * FROM payments WHERE user_id = $1 ORDER BY COALESCE(payment_date, created_at) DESC", [userId]);
                 data.financialHistory = planHistory.rows;
             } catch (e) { data.financialHistory = []; }
 
@@ -97,6 +96,12 @@ router.get('/users/:id', async (req, res) => {
         } else if (targetUser.role === 'trainer') {
             const trainerRes = await db.query("SELECT * FROM trainers WHERE user_id = $1", [userId]);
             data.details = trainerRes.rows[0] || {};
+            
+            // Se não tiver dados de trainer ainda, cria um objeto vazio com is_approved false
+            if (trainerRes.rows.length === 0) {
+                 data.details = { is_approved: false };
+            }
+
             const students = await db.query("SELECT COUNT(*) FROM users WHERE trainer_id = $1", [userId]);
             data.bi = { activeStudents: students.rows[0].count, totalRevenue: 0 };
         }
@@ -110,7 +115,7 @@ router.get('/users/:id', async (req, res) => {
     }
 });
 
-// Ações Gerais
+// --- AÇÕES GERAIS ---
 router.post('/users/:id/toggle-status', async (req, res) => {
     await db.query("UPDATE users SET active = NOT active WHERE id = $1", [req.params.id]);
     res.redirect(`/admin/users/${req.params.id}`);
@@ -136,7 +141,7 @@ router.post('/users/:id/delete', async (req, res) => {
     }
 });
 
-// Ações Específicas
+// --- AÇÕES ESPECÍFICAS ---
 router.post('/users/:id/assign-trainer', async (req, res) => {
     const { trainer_id } = req.body;
     await db.query("UPDATE users SET trainer_id = $1 WHERE id = $2", [trainer_id === 'none' ? null : trainer_id, req.params.id]);
@@ -144,13 +149,16 @@ router.post('/users/:id/assign-trainer', async (req, res) => {
     res.redirect(`/admin/users/${req.params.id}`);
 });
 
-// NOVA ROTA: Aprovar Treinador Diretamente da Página de Detalhes
-// O formulário na view apontará para cá, mas usando o ID do user para redirecionar de volta corretamente
+// APROVAR TREINADOR (ROTA CRÍTICA)
 router.post('/users/:id/approve-trainer', async (req, res) => {
     const userId = req.params.id;
-    // O ID recebido na rota é o user_id (tabela users)
-    await db.query('UPDATE trainers SET is_approved = true WHERE user_id = $1', [userId]);
-    req.flash('success', 'Treinador aprovado com sucesso!');
+    try {
+        await db.query('UPDATE trainers SET is_approved = true WHERE user_id = $1', [userId]);
+        req.flash('success', 'Treinador aprovado com sucesso!');
+    } catch(err) {
+        console.error(err);
+        req.flash('error', 'Erro ao aprovar.');
+    }
     res.redirect(`/admin/users/${userId}`);
 });
 
@@ -161,11 +169,7 @@ router.get('/approvals', async (req, res) => {
         res.render('pages/admin-approvals', { pendingTrainers: result.rows });
     } catch (e) { res.render('pages/admin-approvals', { pendingTrainers: [] }); }
 });
-router.post('/approve/:id', async (req, res) => {
-    // Esta rota usa o ID do trainer (tabela trainers)
-    await db.query('UPDATE trainers SET is_approved = true WHERE id = $1', [req.params.id]);
-    res.redirect('/admin/approvals');
-});
+
 router.get('/finance', (req, res) => res.render('pages/admin-finance', { revenue: { total: 0 } }));
 router.get('/content', (req, res) => res.render('pages/admin-content'));
 router.get('/settings', (req, res) => res.render('pages/admin-settings'));
