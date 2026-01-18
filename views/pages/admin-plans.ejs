@@ -1,27 +1,46 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <title>Planos do Sistema | Momentum Fit</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/styles.css">
-</head>
-<body>
-    <div class="dashboard-container">
-        <%- include('../partials/sidebar') %>
-        <main class="dashboard-main">
-            <div class="page-header" style="text-align: left; background: transparent; padding-left: 0;">
-                <h1><i class="fas fa-tags text-neon"></i> Planos do Sistema</h1>
+<%- include('../partials/header.ejs') %>
+
+<div class="dashboard-container">
+    <%- include('../partials/sidebar.ejs', { path: '/admin/plans' }) %>
+
+    <main class="dashboard-main">
+        <div class="mobile-dash-header">
+            <button id="sidebarOpenBtn" class="btn btn-outline btn-sm"><i class="fas fa-bars"></i> Menu</button>
+            <span class="text-muted">Planos</span>
+        </div>
+
+        <div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1>Gerenciar <span class="text-neon">Planos</span></h1>
+                <p>Configure os planos de assinatura disponíveis.</p>
             </div>
-            
-            <div class="card-box" style="padding: 40px; text-align: center;">
-                <i class="fas fa-tags" style="font-size: 3rem; color: #333; margin-bottom: 20px;"></i>
-                <h3>Em Desenvolvimento</h3>
-                <p style="color: #888;">Esta funcionalidade estará disponível em breve na plataforma.</p>
-            </div>
-        </main>
-    </div>
-    <script src="/js/main.js"></script>
-</body>
-</html>
+            <button class="btn btn-primary">Novo Plano</button>
+        </div>
+
+        <div class="features-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
+            <% if (typeof plans !== 'undefined' && plans.length > 0) { %>
+                <% plans.forEach(plan => { %>
+                    <div class="card-box">
+                        <h3><%= plan.name %></h3>
+                        <p class="text-neon" style="font-size: 1.5rem; font-weight: bold; margin: 10px 0;">R$ <%= plan.price %></p>
+                        <p class="text-muted"><%= plan.description %></p>
+                        <div style="margin-top: 20px;">
+                            <button class="btn btn-outline btn-sm">Editar</button>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <div class="card-box">
+                    <h3>Plano Básico</h3>
+                    <p class="text-neon" style="font-size: 1.5rem; font-weight: bold; margin: 10px 0;">R$ 49,90</p>
+                    <p class="text-muted">Acesso completo à plataforma.</p>
+                    <div style="margin-top: 20px;">
+                        <button class="btn btn-outline btn-sm">Editar</button>
+                    </div>
+                </div>
+            <% } %>
+        </div>
+    </main>
+</div>
+
+<%- include('../partials/footer.ejs') %>

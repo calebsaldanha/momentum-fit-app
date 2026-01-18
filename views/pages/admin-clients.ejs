@@ -1,40 +1,53 @@
 <%- include('../partials/header.ejs') %>
 
-<div class="page-header">
-    <h1>Gerenciar Usuários</h1>
-</div>
+<div class="dashboard-container">
+    <%- include('../partials/sidebar.ejs', { path: '/admin/users' }) %>
 
-<div class="container" style="max-width: 1200px; padding: 0 20px;">
-    <div class="card-box" style="overflow-x: auto;">
-        <table style="width: 100%; border-collapse: collapse; color: white; min-width: 600px;">
-            <thead>
-                <tr style="border-bottom: 1px solid #333; text-align: left;">
-                    <th style="padding: 15px;">ID</th>
-                    <th style="padding: 15px;">Nome</th>
-                    <th style="padding: 15px;">Email</th>
-                    <th style="padding: 15px;">Função</th>
-                    <th style="padding: 15px;">Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                <% users.forEach(u => { %>
-                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                        <td style="padding: 15px; color: #666;">#<%= u.id %></td>
-                        <td style="padding: 15px; font-weight: 600;"><%= u.name %></td>
-                        <td style="padding: 15px; color: #aaa;"><%= u.email %></td>
-                        <td style="padding: 15px;">
-                            <span style="background: <%= u.role === 'admin' ? '#ef4444' : (u.role === 'trainer' ? '#bef202' : '#3b82f6') %>; color: black; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 700;">
-                                <%= u.role.toUpperCase() %>
-                            </span>
-                        </td>
-                        <td style="padding: 15px;">
-                            <button class="btn btn-sm btn-ghost" title="Editar"><i class="fas fa-edit"></i></button>
-                        </td>
-                    </tr>
-                <% }) %>
-            </tbody>
-        </table>
-    </div>
+    <main class="dashboard-main">
+        <div class="mobile-dash-header">
+            <button id="sidebarOpenBtn" class="btn btn-outline btn-sm"><i class="fas fa-bars"></i> Menu</button>
+            <span class="text-muted">Usuários</span>
+        </div>
+
+        <div class="page-header">
+            <h1>Todos os <span class="text-neon">Usuários</span></h1>
+        </div>
+
+        <div class="card-box">
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Email</th>
+                            <th>Tipo</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (typeof users !== 'undefined' && users.length > 0) { %>
+                            <% users.forEach(u => { %>
+                                <tr>
+                                    <td><%= u.name %></td>
+                                    <td><%= u.email %></td>
+                                    <td>
+                                        <span style="padding: 4px 8px; border-radius: 4px; background: rgba(255,255,255,0.1); font-size: 0.8rem;">
+                                            <%= u.role.toUpperCase() %>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline">Editar</button>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr><td colspan="4" style="text-align:center;">Nenhum usuário encontrado.</td></tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
 </div>
 
 <%- include('../partials/footer.ejs') %>

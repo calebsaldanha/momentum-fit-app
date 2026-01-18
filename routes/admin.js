@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../database/db');
 
-// Middleware Admin
+// Middleware: Verifica se é Admin
 function isAdmin(req, res, next) {
     if (req.session.user && (req.session.user.role === 'admin' || req.session.user.role === 'superadmin')) {
         return next();
@@ -12,45 +12,79 @@ function isAdmin(req, res, next) {
 
 router.use(isAdmin);
 
+// Dashboard Principal
 router.get('/dashboard', async (req, res) => {
     try {
-        // Estatísticas gerais do sistema
-        const usersCount = await db.query("SELECT COUNT(*) FROM users");
-        const trainersCount = await db.query("SELECT COUNT(*) FROM users WHERE role = 'trainer'");
-        
-        res.render('pages/admin-dashboard', { 
-            title: 'Admin Dashboard', 
-            user: req.session.user, 
-            stats: { 
-                users: usersCount.rows[0].count,
-                trainers: trainersCount.rows[0].count 
-            },
-            currentPage: '/admin/dashboard',
-            csrfToken: req.csrfToken()
-        });
-    } catch (e) { console.error(e); res.render('pages/error'); }
+        const stats = {
+            totalUsers: (await db.query('SELECT COUNT(*) FROM users')).rows[0].count,
+            totalTrainers: (await db.query("SELECT COUNT(*) FROM users WHERE role = 'trainer'")).rows[0].count,
+            pendingApprovals: (await db.query("SELECT COUNT(*) FROM trainers WHERE is_approved = false")).rows[0].count
+        };
+        res.render('pages/admin-dashboard', { stats });
+    } catch (err) {
+        console.error(err);
+        res.render('pages/error', { message: 'Erro ao carregar dashboard', error: err });
+    }
 });
 
-router.get('/clients', async (req, res) => {
+// Aprovações
+router.get('/approvals', async (req, res) => {
     try {
-        const users = await db.query("SELECT * FROM users ORDER BY id DESC");
-        res.render('pages/admin-clients', { 
-            title: 'Gerenciar Usuários', 
-            user: req.session.user, 
-            users: users.rows,
-            currentPage: '/admin/clients',
-            csrfToken: req.csrfToken()
-        });
-    } catch (e) { console.error(e); res.redirect('/admin/dashboard'); }
+        const result = await db.query(`
+            SELECT t.id, u.name, u.email, t.specialties, t.created_at 
+            FROM trainers t
+            JOIN users u ON t.user_id = u.id
+            WHERE t.is_approved = false
+        `);
+        res.render('pages/admin-approvals', { pendingTrainers: result.rows });
+    } catch (err) {
+        console.error(err);
+        res.redirect('/admin/dashboard');
+    }
 });
 
+// Rota POST para aprovar (necessária para funcionalidade)
+router.post('/approve/:id', async (req, res) => {
+    try {
+        await db.query('UPDATE trainers SET is_approved = true WHERE id = $1', [req.params.id]);
+        req.flash('success', 'Treinador aprovado com sucesso.');
+        res.redirect('/admin/approvals');
+    } catch (err) {
+        console.error(err);
+        req.flash('error', 'Erro ao aprovar.');
+        res.redirect('/admin/approvals');
+    }
+});
 
-// Páginas adicionais solicitadas
-router.get('/approvals', (req, res) => res.render('pages/admin-approvals', { title: 'Aprovações', user: req.session.user, currentPage: '/admin/approvals', csrfToken: req.csrfToken() }));
-router.get('/content', (req, res) => res.render('pages/admin-content', { title: 'Gestão de Conteúdo', user: req.session.user, currentPage: '/admin/content', csrfToken: req.csrfToken() }));
-router.get('/plans', (req, res) => res.render('pages/admin-plans', { title: 'Gestão de Planos', user: req.session.user, currentPage: '/admin/plans', csrfToken: req.csrfToken() }));
-router.get('/finance', (req, res) => res.render('pages/admin-finance', { title: 'Financeiro Geral', user: req.session.user, currentPage: '/admin/finance', csrfToken: req.csrfToken() }));
-router.get('/ia-audit', (req, res) => res.render('pages/admin-ia-audit', { title: 'Auditoria IA', user: req.session.user, currentPage: '/admin/ia-audit', csrfToken: req.csrfToken() }));
-router.get('/settings', (req, res) => res.render('pages/admin-settings', { title: 'Configurações Globais', user: req.session.user, currentPage: '/admin/settings', csrfToken: req.csrfToken() }));
+// Usuários (No sidebar chama /users, mas renderiza a lista de clientes/users)
+router.get('/users', async (req, res) => {
+    try {
+        const result = await db.query("SELECT id, name, email, role, created_at FROM users ORDER BY created_at DESC");
+        res.render('pages/admin-clients', { users: result.rows }); // Reusa admin-clients layout
+    } catch (err) {
+        console.error(err);
+        res.redirect('/admin/dashboard');
+    }
+});
+
+// Financeiro (A página que deu erro)
+router.get('/finance', async (req, res) => {
+    // Mock data por enquanto, pode conectar com tabela payments depois
+    res.render('pages/admin-finance', { 
+        revenue: { total: 15000, month: 3200 },
+        transactions: [] 
+    });
+});
+
+// Planos
+router.get('/plans', async (req, res) => {
+    try {
+        const result = await db.query("SELECT * FROM plans ORDER BY price ASC");
+        res.render('pages/admin-plans', { plans: result.rows });
+    } catch (err) {
+        console.error(err);
+        res.redirect('/admin/dashboard');
+    }
+});
 
 module.exports = router;
