@@ -1,49 +1,43 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const db = require('../database/db');
 
-// Usa a chave fornecida ou do ambiente
+// Usa a chave do ambiente ou a fornecida
 const API_KEY = process.env.GEMINI_API_KEY || 'AIzaSyARoaW9QAA-3PSNztzJNpVZR10WQdcszTc';
 const genAI = new GoogleGenerativeAI(API_KEY);
 
 async function getChatResponse(userId, userMessage) {
     try {
-        const model = genAI.getGenerativeModel({ model: "gemini-pro"});
+        // ATUALIZADO: gemini-pro -> gemini-1.5-flash (Mais rápido e estável para chat)
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash"});
 
-        // Contexto do sistema (Personal Trainer)
         const systemInstruction = `
-            Você é o Momentum AI, um personal trainer virtual altamente qualificado e motivador.
-            Seu objetivo é ajudar o aluno com dúvidas sobre execução de exercícios, nutrição básica e motivação.
-            Seja direto, use emojis ocasionalmente e mantenha um tom profissional mas acessível.
-            Nunca prescreva dietas médicas ou tratamentos de lesões graves, recomende um profissional presencial nesses casos.
+            Você é o Momentum AI, um personal trainer virtual da plataforma Momentum Fit.
+            Seja motivador, breve e direto. Use emojis.
+            O aluno está perguntando sobre treinos ou saúde.
         `;
 
         const chat = model.startChat({
             history: [
-                {
-                    role: "user",
-                    parts: [{ text: systemInstruction }],
-                },
-                {
-                    role: "model",
-                    parts: [{ text: "Entendido! Estou pronto para atuar como o Momentum AI. Como posso ajudar hoje?" }],
-                },
+                { role: "user", parts: [{ text: systemInstruction }] },
+                { role: "model", parts: [{ text: "Entendido! Sou o Momentum AI. Vamos treinar!" }] },
             ],
         });
 
         const result = await chat.sendMessage(userMessage);
-        const response = result.response;
-        const text = response.text();
+        const response = result.response.text();
 
-        // Logar na auditoria
-        await db.query(
-            "INSERT INTO ia_logs (user_id, prompt, response, tokens_used) VALUES ($1, $2, $3, $4)",
-            [userId, userMessage, text, userMessage.length + text.length] // Estimativa simples de tokens
-        );
+        // Log auditoria (sem quebrar se a tabela nao existir)
+        try {
+            await db.query(
+                "INSERT INTO ia_logs (user_id, prompt, response, tokens_used) VALUES ($1, $2, $3, $4)",
+                [userId, userMessage, response, userMessage.length]
+            );
+        } catch(e) { console.log('Erro ao salvar log IA:', e.message); }
 
-        return text;
+        return response;
     } catch (error) {
         console.error("Erro na API Gemini:", error);
-        return "Desculpe, estou com uma sobrecarga neural no momento. Tente novamente em alguns instantes.";
+        return "⚠️ Minha conexão neural falhou momentaneamente. Tente novamente.";
     }
 }
 

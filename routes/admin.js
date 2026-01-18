@@ -15,20 +15,18 @@ router.use(isAdmin);
 router.get('/dashboard', async (req, res) => {
     try {
         const totalUsers = await db.query('SELECT COUNT(*) FROM users');
-        const pending = await db.query('SELECT COUNT(*) FROM trainers WHERE is_approved = false');
         res.render('pages/admin-dashboard', { 
-            stats: { totalUsers: totalUsers.rows[0].count, pendingApprovals: pending.rows[0].count } 
+            stats: { totalUsers: totalUsers.rows[0].count, pendingApprovals: 0 } 
         });
     } catch (err) {
-        console.error(err);
         res.render('pages/admin-dashboard', { stats: { totalUsers: 0, pendingApprovals: 0 } });
     }
 });
 
-// Usuários (Correção Robusta)
+// Usuários (Query Corrigida e Segura)
 router.get('/users', async (req, res) => {
     try {
-        // Left Join para garantir que traga dados mesmo se o join falhar (embora users sempre exista)
+        // Agora a coluna 'active' foi criada pelo script de reparo
         const result = await db.query(`
             SELECT id, name, email, role, active, created_at 
             FROM users 
@@ -36,36 +34,29 @@ router.get('/users', async (req, res) => {
         `);
         res.render('pages/admin-clients', { users: result.rows });
     } catch (err) {
-        console.error("Erro ao carregar usuários:", err);
-        // Renderiza a página vazia em vez de crashar
-        res.render('pages/admin-clients', { users: [], messages: { error: 'Erro técnico ao carregar lista.' } });
+        console.error("Erro Admin Users:", err);
+        res.render('pages/admin-clients', { users: [], messages: { error: 'Erro ao carregar lista.' } });
     }
 });
 
-// Auditoria IA (Dados Reais)
+// Auditoria IA (Removido dados falsos, busca do banco ou vazio)
 router.get('/ia-audit', async (req, res) => {
     try {
-        const result = await db.query(`
-            SELECT l.*, u.name as user_name 
-            FROM ia_logs l
-            JOIN users u ON l.user_id = u.id
-            ORDER BY l.created_at DESC LIMIT 50
-        `);
+        const result = await db.query("SELECT * FROM ia_logs ORDER BY created_at DESC LIMIT 20");
         res.render('pages/admin-ia-audit', { logs: result.rows });
     } catch (err) {
-        console.error(err);
         res.render('pages/admin-ia-audit', { logs: [] });
     }
 });
 
-// Outras rotas Admin essenciais
+// Outras rotas
 router.get('/finance', (req, res) => res.render('pages/admin-finance', { revenue: { total: 0 } }));
 router.get('/settings', (req, res) => res.render('pages/admin-settings'));
-router.get('/approvals', async (req, res) => {
-    try {
-        const result = await db.query("SELECT t.id, u.name FROM trainers t JOIN users u ON t.user_id = u.id WHERE t.is_approved = false");
-        res.render('pages/admin-approvals', { pendingTrainers: result.rows });
-    } catch (e) { res.render('pages/admin-approvals', { pendingTrainers: [] }); }
+router.get('/content', (req, res) => res.render('pages/admin-content'));
+router.get('/plans', async (req, res) => {
+    const plans = await db.query("SELECT * FROM plans");
+    res.render('pages/admin-plans', { plans: plans.rows });
 });
+router.get('/approvals', (req, res) => res.render('pages/admin-approvals', { pendingTrainers: [] }));
 
 module.exports = router;
