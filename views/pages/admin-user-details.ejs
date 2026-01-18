@@ -1,108 +1,48 @@
 <%- include('../partials/header.ejs') %>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <div class="dashboard-container">
-    <%- include('../partials/sidebar.ejs', { path: user.role.includes('admin') ? '/admin/users' : '/trainer/clients' }) %>
-
+    <%- include('../partials/sidebar.ejs', { path: '/admin/users' }) %>
     <main class="dashboard-main">
-        <div class="page-header" style="display:flex; justify-content:space-between;">
-             <a href="javascript:history.back()" class="btn btn-outline btn-sm"><i class="fas fa-arrow-left"></i> Voltar</a>
-             <h1>Ficha de: <span class="text-neon"><%= targetUser.name %></span></h1>
+        <div class="page-header" style="display: flex; justify-content: space-between;">
+            <a href="/admin/users" class="btn btn-sm btn-outline"><i class="fas fa-arrow-left"></i> Voltar</a>
+            <h1><%= targetUser.name %></h1>
         </div>
-        
-        <% if(targetUser.role === 'client') { %>
-            <div style="display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
-                
-                <div class="card-box">
-                    <h3 style="color:#bef202; border-bottom:1px solid #444; padding-bottom:10px; margin-bottom:15px;">Resumo & Metas</h3>
-                    <p><strong>Idade:</strong> <%= targetUser.birth_date ? new Date().getFullYear() - new Date(targetUser.birth_date).getFullYear() : '-' %> anos</p>
-                    <p><strong>Peso:</strong> <%= details.weight %>kg | <strong>Altura:</strong> <%= details.height %>cm</p>
-                    <p><strong>Objetivo:</strong> <%= details.goal %></p>
-                    <p><strong>Experiência:</strong> <%= details.training_experience || '-' %></p>
-                    <p><strong>Dias p/ Treino:</strong> <%= details.training_days_goal || 0 %> dias</p>
-                    <p style="background:#222; padding:10px; border-radius:5px; margin-top:10px;"><em>"<%= details.goal_description || 'Sem descrição detalhada' %>"</em></p>
-                </div>
 
-                <div class="card-box" style="border: 1px solid #522;">
-                    <h3 style="color:#ff4d4d; border-bottom:1px solid #444; padding-bottom:10px; margin-bottom:15px;">Alerta de Saúde</h3>
-                    <p><strong>Histórico Médico:</strong> <%= details.medical_history || 'Nenhum' %></p>
-                    <p><strong>Lesões:</strong> <%= details.injuries || 'Nenhuma' %></p>
-                    <p><strong>Medicamentos:</strong> <%= details.medications || 'Nenhum' %></p>
-                    <p><strong>Fumante:</strong> <%= details.smoking_status || '-' %></p>
-                    <div style="margin-top:15px; padding-top:10px; border-top:1px dashed #444;">
-                        <small style="color:#888;">EMERGÊNCIA</small><br>
-                        <strong><%= details.emergency_contact || '-' %></strong>: <%= details.emergency_phone || '-' %>
-                    </div>
-                </div>
-
-                <div class="card-box">
-                    <h3 style="color:#4da6ff; border-bottom:1px solid #444; padding-bottom:10px; margin-bottom:15px;">Rotina & Estilo de Vida</h3>
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                        <div><small>Sono</small><br><%= details.sleep_quality || '-' %></div>
-                        <div><small>Estresse</small><br><%= details.stress_level || '-' %></div>
-                        <div><small>Água</small><br><%= details.water_intake || '-' %></div>
-                        <div><small>Álcool</small><br><%= details.alcohol_consumption || '-' %></div>
-                        <div><small>Treino Pref.</small><br><%= details.preferred_training_time || '-' %></div>
-                        <div><small>Equip.</small><br><%= details.available_equipment || '-' %></div>
-                    </div>
-                </div>
-
-                <div class="card-box">
-                    <h3 style="color:white; margin-bottom:15px;">Gestão</h3>
-                    <% if(user.role.includes('admin')) { %>
-                        <form action="/admin/users/<%= targetUser.id %>/assign-trainer" method="POST" style="margin-bottom:15px;">
-                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                            <label style="color:#888">Treinador Responsável</label>
-                            <select name="trainer_id" class="form-control" style="width:100%; margin-bottom:10px; background:#222; color:white; padding:8px;">
-                                <option value="none">-- Nenhum --</option>
-                                <% if(allTrainers) { allTrainers.forEach(t => { %>
-                                    <option value="<%= t.id %>" <%= targetUser.trainer_id == t.id ? 'selected' : '' %>><%= t.name %></option>
-                                <% }) } %>
-                            </select>
-                            <button class="btn btn-primary btn-sm" style="width:100%">Atualizar Vínculo</button>
-                        </form>
-                    <% } else { %>
-                        <p class="text-muted">Você é o treinador responsável.</p>
-                    <% } %>
-                    
-                    <a href="/workouts/<%= targetUser.id %>/create" class="btn btn-outline btn-sm" style="width:100%; display:block; text-align:center; margin-top:10px;">
-                        <i class="fas fa-dumbbell"></i> Ver/Criar Treinos
-                    </a>
-                </div>
+        <% if (targetUser.role === 'client') { %>
+            <div class="card-box">
+                <h3>Gestão de Treinos</h3>
+                <a href="/workouts/create?userId=<%= targetUser.id %>" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Criar Novo Treino
+                </a>
             </div>
-
+            
             <div class="card-box" style="margin-top: 20px;">
-                <h3>Histórico de Treinos</h3>
+                <h3>Treinos Existentes</h3>
                 <div class="table-responsive">
-                    <table style="width:100%; color:#ccc;">
-                        <thead><tr><th>Título</th><th>Dia</th><th>Exercícios</th><th>Ação</th></tr></thead>
+                    <table style="width:100%">
+                        <thead><tr><th>Título</th><th>Dia</th><th>Ações</th></tr></thead>
                         <tbody>
-                            <% if(workouts && workouts.length) { workouts.forEach(w => { %>
+                            <% if(workouts && workouts.length > 0) { workouts.forEach(w => { %>
                                 <tr>
                                     <td><%= w.title %></td>
                                     <td><%= w.day_of_week %></td>
-                                    <td><%= w.exercise_count %></td>
-                                    <td><a href="/workouts/<%= w.id %>" class="btn btn-sm btn-primary">Ver</a></td>
+                                    <td><a href="/workouts/<%= w.id %>" class="btn btn-sm btn-outline">Ver</a></td>
                                 </tr>
                             <% }) } else { %>
-                                <tr><td colspan="4" style="text-align:center; padding:15px;">Sem treinos ainda.</td></tr>
+                                <tr><td colspan="3">Sem treinos</td></tr>
                             <% } %>
                         </tbody>
                     </table>
                 </div>
             </div>
-
-        <% } else if (targetUser.role === 'trainer') { %>
-            <div class="card-box">
-                <h3>Dados do Treinador</h3>
-                <p><strong>Status:</strong> <%= details.is_approved ? 'Aprovado' : 'Pendente' %></p>
-                <p><strong>Bio:</strong> <%= details.bio %></p>
-                <% if(!details.is_approved) { %>
-                    <form action="/admin/users/<%= targetUser.id %>/approve-trainer" method="POST" style="margin-top:20px;">
-                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                        <button class="btn btn-primary">Aprovar Cadastro</button>
-                    </form>
-                <% } %>
-            </div>
         <% } %>
+
+        <div class="card-box" style="margin-top:20px;">
+            <h3>Dados Básicos</h3>
+            <p>Email: <%= targetUser.email %></p>
+            <p>Status: <%= targetUser.active ? 'Ativo' : 'Suspenso' %></p>
+        </div>
     </main>
 </div>
 <%- include('../partials/footer.ejs') %>

@@ -1,0 +1,38 @@
+<%- include('../partials/header.ejs') %>
+<div class="dashboard-container">
+    <%- include('../partials/sidebar.ejs', { path: '/client/financial' }) %>
+    <main class="dashboard-main">
+        <div class="mobile-dash-header">
+            <button id="sidebarOpenBtn" class="btn btn-outline btn-sm"><i class="fas fa-bars"></i></button>
+            <span>Financeiro</span>
+        </div>
+
+        <div class="page-header">
+            <h1>Pagamento <span class="text-neon">Pendente</span></h1>
+            <p>Seu plano <strong><%= subscription.plan_name %></strong> aguarda ativação.</p>
+        </div>
+
+        <% if(messages.success) { %><div class="alert alert-success"><%= messages.success %></div><% } %>
+
+        <div class="card-box" style="text-align: center; max-width: 600px; margin: 0 auto; border: 2px solid var(--primary-color);">
+            <h2 style="color: white; margin-bottom: 10px;">Valor: R$ <%= subscription.price %></h2>
+            <p class="text-muted" style="margin-bottom: 20px;">Escaneie o QR Code abaixo com o app do seu banco:</p>
+            
+            <div style="background: white; padding: 15px; border-radius: 12px; display: inline-block; margin-bottom: 20px;">
+                <img src="<%= qrCodeUrl %>" alt="QR Code PIX" style="width: 200px; height: 200px;">
+            </div>
+
+            <div style="background: #222; padding: 15px; border-radius: 8px; word-break: break-all; margin-bottom: 20px;">
+                <p style="color: #888; font-size: 0.8rem; margin-bottom: 5px;">Chave PIX (Copia e Cola):</p>
+                <code style="color: white; font-size: 1rem;"><%= pixKey %></code>
+            </div>
+
+            <div class="alert alert-info" style="font-size: 0.9rem; background: rgba(0, 255, 255, 0.1); border-color: cyan; color: cyan;">
+                <i class="fas fa-clock"></i> Após o pagamento, envie o comprovante para o suporte ou aguarde a aprovação automática em até 1 hora.
+            </div>
+
+            <a href="/client/dashboard" class="btn btn-outline" style="margin-top: 20px;">Voltar ao Dashboard (Acesso Limitado)</a>
+        </div>
+    </main>
+</div>
+<%- include('../partials/footer.ejs') %>
