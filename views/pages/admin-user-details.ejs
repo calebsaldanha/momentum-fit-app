@@ -22,16 +22,15 @@
                 <h3>Dados da Conta</h3>
                 <p><strong>ID:</strong> <%= targetUser.id %></p>
                 <p><strong>Email:</strong> <%= targetUser.email %></p>
-                <p><strong>Perfil:</strong> <span class="badge-neon"><%= targetUser.role.toUpperCase() %></span></p>
+                <p><strong>Role:</strong> <span class="badge-neon"><%= targetUser.role.toUpperCase() %></span></p>
+                <p><strong>Status:</strong> <span style="color: <%= targetUser.active ? '#bef202' : 'red' %>"><%= targetUser.active ? 'Ativo' : 'Bloqueado' %></span></p>
                 <p><strong>Criado em:</strong> <%= new Date(targetUser.created_at).toLocaleDateString() %></p>
-                
+
                 <form action="/admin/users/<%= targetUser.id %>/toggle-status" method="POST" style="margin-top: 20px;">
                     <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                    <% if(targetUser.active) { %>
-                        <button class="btn btn-outline" style="border-color: red; color: red; width: 100%;">Bloquear Usuário</button>
-                    <% } else { %>
-                        <button class="btn btn-outline" style="border-color: green; color: green; width: 100%;">Desbloquear Usuário</button>
-                    <% } %>
+                    <button class="btn btn-outline" style="width: 100%; border-color: <%= targetUser.active ? 'red' : 'green' %>; color: <%= targetUser.active ? 'red' : 'green' %>;">
+                        <%= targetUser.active ? 'Suspender Usuário' : 'Ativar Usuário' %>
+                    </button>
                 </form>
             </div>
 
@@ -42,18 +41,20 @@
                         <p><strong>Objetivo:</strong> <%= details.goal || '-' %></p>
                         <p><strong>Peso:</strong> <%= details.weight || '-' %> kg</p>
                         <p><strong>Altura:</strong> <%= details.height || '-' %> cm</p>
+                        <p><strong>Histórico Médico:</strong> <%= details.medical_history || '-' %></p>
                     <% } else { %>
-                        <p class="text-muted">O aluno ainda não preencheu o perfil (Anamnese).</p>
+                        <p class="text-muted">Perfil ainda não preenchido pelo aluno.</p>
                     <% } %>
                 <% } else if (targetUser.role === 'trainer') { %>
                     <% if (details && Object.keys(details).length > 0) { %>
                         <p><strong>Especialidades:</strong> <%= details.specialties || '-' %></p>
-                        <p><strong>Status:</strong> <%= details.is_approved ? 'Aprovado' : 'Pendente' %></p>
+                        <p><strong>Bio:</strong> <%= details.bio || '-' %></p>
+                        <p><strong>Aprovação:</strong> <%= details.is_approved ? 'Aprovado' : 'Pendente' %></p>
                     <% } else { %>
-                        <p class="text-muted">O treinador ainda não completou o cadastro.</p>
+                        <p class="text-muted">Perfil ainda não preenchido pelo treinador.</p>
                     <% } %>
                 <% } else { %>
-                    <p class="text-muted">Administrador do Sistema.</p>
+                    <p class="text-muted">Usuário administrativo. Sem perfil adicional.</p>
                 <% } %>
             </div>
         </div>

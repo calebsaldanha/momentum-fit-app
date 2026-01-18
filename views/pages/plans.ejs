@@ -4,56 +4,71 @@
     <section id="plans" class="section-padding">
         <div class="container">
             <div class="section-header center">
-                <h2 class="section-title">Escolha Seu <span class="text-neon">Plano</span></h2>
-                <p class="section-desc">Invista em você. Comece hoje a sua transformação.</p>
+                <h2 class="section-title">Nossos <span class="text-neon">Planos</span></h2>
+                <p class="section-desc">Escolha a opção ideal para o seu momento.</p>
             </div>
 
-            <div class="features-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); align-items: center;">
+            <div class="features-grid" style="align-items: center;">
                 
-                <div class="card-box" style="border: 1px solid #333; position: relative; opacity: 0.8;">
-                    <h3 style="font-size: 1.4rem; color: white;">Gratuito</h3>
+                <div class="card-box" style="border: 1px solid #333; opacity: 0.8;">
+                    <h3 style="font-size: 1.5rem; color: white;">Gratuito</h3>
                     <div style="font-size: 2.5rem; font-weight: 800; color: white; margin: 15px 0;">
                         R$ 0 <span style="font-size: 1rem; font-weight: 400; color: #888;">/mês</span>
                     </div>
-                    <p class="text-muted" style="margin-bottom: 20px;">Para conhecer a plataforma.</p>
+                    <p class="text-muted" style="margin-bottom: 20px;">Para começar a se movimentar.</p>
+                    
                     <ul style="list-style: none; margin-bottom: 30px; text-align: left; padding: 0;">
-                        <li style="margin-bottom: 10px; color: #ccc;"><i class="fas fa-check text-neon"></i> Acesso ao App</li>
+                        <li style="margin-bottom: 10px; color: #ccc;"><i class="fas fa-check text-neon"></i> Acesso à plataforma</li>
                         <li style="margin-bottom: 10px; color: #ccc;"><i class="fas fa-check text-neon"></i> 1 Ficha de Treino</li>
-                        <li style="margin-bottom: 10px; color: #555;"><i class="fas fa-times"></i> Sem Personal Trainer</li>
+                        <li style="margin-bottom: 10px; color: #555;"><i class="fas fa-times"></i> Sem suporte de Personal</li>
                     </ul>
-                    <a href="/auth/register?plan=free" class="btn btn-outline" style="width: 100%;">Começar Grátis</a>
+
+                    <% if (!isAuthenticated) { %>
+                        <a href="/auth/register?plan=free" class="btn btn-outline" style="width: 100%;">Criar Conta</a>
+                    <% } else { %>
+                        <button class="btn btn-outline" disabled style="width: 100%;">Plano Atual</button>
+                    <% } %>
                 </div>
 
-                <div class="card-box" style="border: 2px solid var(--primary-color); transform: scale(1.05); z-index: 2; background: #0f0f0f; box-shadow: 0 0 30px rgba(190, 242, 2, 0.1);">
-                    <div style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: var(--primary-color); color: black; padding: 4px 12px; border-radius: 20px; font-weight: bold; font-size: 0.8rem;">
-                        MAIS POPULAR
+                <div class="card-box" style="border: 2px solid var(--primary-color); transform: scale(1.05); z-index: 2; background: #0f0f0f; box-shadow: 0 0 30px rgba(190, 242, 2, 0.15);">
+                    <div style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--primary-color); color: black; padding: 4px 15px; border-radius: 20px; font-weight: bold; font-size: 0.8rem;">
+                        RECOMENDADO
                     </div>
-                    <h3 style="font-size: 1.6rem; color: var(--primary-color);">Momentum Básico</h3>
+                    
+                    <h3 style="font-size: 1.8rem; color: var(--primary-color);">Momentum Básico</h3>
                     <div style="font-size: 3rem; font-weight: 800; color: white; margin: 15px 0;">
-                        R$ 10 <span style="font-size: 1rem; font-weight: 400; color: #888;">/mês</span>
+                        R$ 10,00 <span style="font-size: 1rem; font-weight: 400; color: #888;">/mês</span>
                     </div>
-                    <p class="text-muted" style="margin-bottom: 20px;">Tudo o que você precisa para evoluir.</p>
+                    <p class="text-muted" style="margin-bottom: 20px;">Evolução constante com custo acessível.</p>
+                    
                     <ul style="list-style: none; margin-bottom: 30px; text-align: left; padding: 0;">
-                        <li style="margin-bottom: 10px; color: white;"><i class="fas fa-check text-neon"></i> <strong>Acesso Total ao App</strong></li>
-                        <li style="margin-bottom: 10px; color: white;"><i class="fas fa-check text-neon"></i> <strong>Treinos Ilimitados</strong></li>
-                        <li style="margin-bottom: 10px; color: white;"><i class="fas fa-check text-neon"></i> <strong>Suporte via Chat</strong></li>
-                        <li style="margin-bottom: 10px; color: white;"><i class="fas fa-check text-neon"></i> Histórico de Evolução</li>
+                        <li style="margin-bottom: 12px; color: white;"><i class="fas fa-check text-neon"></i> <strong>Treinos Ilimitados</strong></li>
+                        <li style="margin-bottom: 12px; color: white;"><i class="fas fa-check text-neon"></i> <strong>Suporte via Chat</strong></li>
+                        <li style="margin-bottom: 12px; color: white;"><i class="fas fa-check text-neon"></i> Histórico de Evolução</li>
+                        <li style="margin-bottom: 12px; color: white;"><i class="fas fa-check text-neon"></i> Acesso ao IA Coach</li>
                     </ul>
-                    <a href="/auth/register?plan=basic" class="btn btn-primary btn-lg btn-glow" style="width: 100%;">Assinar Agora</a>
+
+                    <% if (!isAuthenticated) { %>
+                        <a href="/auth/register?plan=basic" class="btn btn-primary btn-lg" style="width: 100%; box-shadow: 0 0 15px rgba(190, 242, 2, 0.4);">Assinar Agora</a>
+                    <% } else { %>
+                         <a href="/client/profile" class="btn btn-primary btn-lg" style="width: 100%;">Fazer Upgrade</a>
+                    <% } %>
                 </div>
 
-                <div class="card-box" style="border: 1px solid #333; opacity: 0.5; filter: grayscale(1);">
-                    <h3 style="font-size: 1.4rem; color: white;">Momentum Pro</h3>
+                <div class="card-box" style="border: 1px solid #333; opacity: 0.6;">
+                    <h3 style="font-size: 1.5rem; color: white;">Momentum Pro</h3>
                     <div style="font-size: 2.5rem; font-weight: 800; color: white; margin: 15px 0;">
-                        R$ 89 <span style="font-size: 1rem; font-weight: 400; color: #888;">/mês</span>
+                        R$ 89,90 <span style="font-size: 1rem; font-weight: 400; color: #888;">/mês</span>
                     </div>
-                    <p class="text-muted" style="margin-bottom: 20px;">Acompanhamento VIP.</p>
+                    <p class="text-muted" style="margin-bottom: 20px;">Acompanhamento VIP completo.</p>
+                    
                     <ul style="list-style: none; margin-bottom: 30px; text-align: left; padding: 0;">
                         <li style="margin-bottom: 10px; color: #ccc;"><i class="fas fa-check text-neon"></i> Tudo do Básico</li>
-                        <li style="margin-bottom: 10px; color: #ccc;"><i class="fas fa-check text-neon"></i> Nutricionista</li>
-                        <li style="margin-bottom: 10px; color: #ccc;"><i class="fas fa-check text-neon"></i> Chamadas de Vídeo</li>
+                        <li style="margin-bottom: 10px; color: #ccc;"><i class="fas fa-check text-neon"></i> Nutricionista Dedicado</li>
+                        <li style="margin-bottom: 10px; color: #ccc;"><i class="fas fa-check text-neon"></i> Videoconferência Mensal</li>
                     </ul>
-                    <button class="btn btn-outline" disabled style="width: 100%; cursor: not-allowed;">Em Breve</button>
+
+                    <button class="btn btn-outline" disabled style="width: 100%; cursor: not-allowed; border-style: dashed;">Em Breve</button>
                 </div>
 
             </div>
