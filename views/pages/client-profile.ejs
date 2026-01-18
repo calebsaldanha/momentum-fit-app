@@ -9,11 +9,9 @@
 
         <div class="page-header">
             <h1>Ficha de <span class="text-neon">Anamnese</span></h1>
-            <p>Preencha com atenção. Estas informações são vitais para o seu treinador.</p>
         </div>
 
         <% if(messages.success) { %><div class="alert alert-success"><%= messages.success %></div><% } %>
-        <% if(messages.error) { %><div class="alert alert-danger"><%= messages.error %></div><% } %>
 
         <form action="/client/profile" method="POST">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
@@ -21,103 +19,78 @@
             <div style="display: grid; gap: 30px; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));">
                 
                 <div class="card-box">
-                    <h3 style="color: white; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px;">Biometria & Objetivo</h3>
+                    <h3 style="color: white; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px;">Pessoal & Biometria</h3>
                     <div style="margin-bottom: 15px;">
-                        <label style="color: #888;">Nome Completo</label>
-                        <input type="text" name="name" value="<%= client.name %>" class="form-control" style="width: 100%; padding: 10px; background: #222; border: 1px solid #444; color: white;">
+                        <label style="color:#888">Nome</label>
+                        <input type="text" name="name" value="<%= client.name %>" class="form-control" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;">
                     </div>
-                    <div style="display: flex; gap: 15px; margin-bottom: 15px;">
-                        <div style="flex: 1;"><label style="color: #888;">Peso (kg)</label><input type="number" step="0.1" name="weight" value="<%= client.weight %>" style="width: 100%; padding: 10px; background: #222; border: 1px solid #444; color: white;"></div>
-                        <div style="flex: 1;"><label style="color: #888;">Altura (cm)</label><input type="number" name="height" value="<%= client.height %>" style="width: 100%; padding: 10px; background: #222; border: 1px solid #444; color: white;"></div>
+                    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                        <div style="flex:1"><label style="color:#888">Peso (kg)</label><input type="number" step="0.1" name="weight" value="<%= client.weight %>" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"></div>
+                        <div style="flex:1"><label style="color:#888">Altura (cm)</label><input type="number" name="height" value="<%= client.height %>" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"></div>
                     </div>
+                    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                        <div style="flex:1"><label style="color:#888">Telefone</label><input type="text" name="phone" value="<%= client.phone %>" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"></div>
+                        <div style="flex:1"><label style="color:#888">Nascimento</label><input type="date" name="birth_date" value="<%= client.birth_date ? new Date(client.birth_date).toISOString().split('T')[0] : '' %>" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"></div>
+                    </div>
+                </div>
+
+                <div class="card-box">
+                    <h3 style="color: #bef202; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px;">Treino & Objetivos</h3>
                     <div style="margin-bottom: 15px;">
-                        <label style="color: #888;">Objetivo</label>
-                        <select name="goal" style="width: 100%; padding: 10px; background: #222; border: 1px solid #444; color: white;">
-                            <option value="emagrecimento" <%= client.goal === 'emagrecimento' ? 'selected' : '' %>>Emagrecimento</option>
-                            <option value="hipertrofia" <%= client.goal === 'hipertrofia' ? 'selected' : '' %>>Hipertrofia</option>
-                            <option value="saude" <%= client.goal === 'saude' ? 'selected' : '' %>>Saúde</option>
-                            <option value="performance" <%= client.goal === 'performance' ? 'selected' : '' %>>Performance</option>
+                        <label style="color:#888">Objetivo Principal</label>
+                        <select name="goal" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;">
+                            <option value="emagrecimento" <%= client.goal == 'emagrecimento' ? 'selected' : '' %>>Emagrecimento</option>
+                            <option value="hipertrofia" <%= client.goal == 'hipertrofia' ? 'selected' : '' %>>Hipertrofia</option>
+                            <option value="saude" <%= client.goal == 'saude' ? 'selected' : '' %>>Saúde</option>
                         </select>
                     </div>
-                    <div>
-                        <label style="color: #888;">Detalhes do Objetivo</label>
-                        <textarea name="goal_description" rows="2" style="width: 100%; padding: 10px; background: #222; border: 1px solid #444; color: white;"><%= client.goal_description || '' %></textarea>
+                    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                        <div style="flex:1"><label style="color:#888">Nível Experiência</label>
+                            <select name="training_experience" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;">
+                                <option value="iniciante" <%= client.training_experience == 'iniciante' ? 'selected' : '' %>>Iniciante</option>
+                                <option value="intermediario" <%= client.training_experience == 'intermediario' ? 'selected' : '' %>>Intermediário</option>
+                                <option value="avancado" <%= client.training_experience == 'avancado' ? 'selected' : '' %>>Avançado</option>
+                            </select>
+                        </div>
+                        <div style="flex:1"><label style="color:#888">Horário Pref.</label>
+                            <select name="preferred_training_time" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;">
+                                <option value="manha" <%= client.preferred_training_time == 'manha' ? 'selected' : '' %>>Manhã</option>
+                                <option value="tarde" <%= client.preferred_training_time == 'tarde' ? 'selected' : '' %>>Tarde</option>
+                                <option value="noite" <%= client.preferred_training_time == 'noite' ? 'selected' : '' %>>Noite</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 15px;"><label style="color:#888">Equipamentos Disponíveis</label><input type="text" name="available_equipment" value="<%= client.available_equipment %>" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"></div>
+                </div>
+
+                <div class="card-box">
+                    <h3 style="color: #ff4d4d; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px;">Saúde & Histórico</h3>
+                    <div style="margin-bottom: 15px;"><label style="color:#888">Histórico Médico (Doenças, Cirurgias)</label><textarea name="medical_history" rows="2" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"><%= client.medical_history %></textarea></div>
+                    <div style="margin-bottom: 15px;"><label style="color:#888">Lesões Atuais/Passadas</label><textarea name="injuries" rows="2" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"><%= client.injuries %></textarea></div>
+                    <div style="margin-bottom: 15px;"><label style="color:#888">Medicamentos de Uso Contínuo</label><input type="text" name="medications" value="<%= client.medications %>" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"></div>
+                    
+                    <div style="display:flex; gap:10px; margin-top:10px; border-top:1px dashed #444; padding-top:10px;">
+                        <div style="flex:1;"><label style="color:#ff4d4d">Contato Emergência</label><input type="text" name="emergency_contact" value="<%= client.emergency_contact %>" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"></div>
+                        <div style="flex:1;"><label style="color:#ff4d4d">Tel. Emergência</label><input type="text" name="emergency_phone" value="<%= client.emergency_phone %>" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"></div>
                     </div>
                 </div>
 
                 <div class="card-box">
                     <h3 style="color: #4da6ff; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px;">Estilo de Vida</h3>
-                    
-                    <div style="display: flex; gap: 15px; margin-bottom: 15px;">
-                         <div style="flex: 1;">
-                            <label style="color: #888;">Qualidade Sono</label>
-                            <select name="sleep_quality" style="width: 100%; padding: 10px; background: #222; border: 1px solid #444; color: white;">
-                                <option value="boa" <%= client.sleep_quality === 'boa' ? 'selected' : '' %>>Boa (7-8h)</option>
-                                <option value="regular" <%= client.sleep_quality === 'regular' ? 'selected' : '' %>>Regular (5-6h)</option>
-                                <option value="ruim" <%= client.sleep_quality === 'ruim' ? 'selected' : '' %>>Ruim (<5h)</option>
-                            </select>
-                        </div>
-                        <div style="flex: 1;">
-                            <label style="color: #888;">Nível Estresse</label>
-                            <select name="stress_level" style="width: 100%; padding: 10px; background: #222; border: 1px solid #444; color: white;">
-                                <option value="baixo" <%= client.stress_level === 'baixo' ? 'selected' : '' %>>Baixo</option>
-                                <option value="medio" <%= client.stress_level === 'medio' ? 'selected' : '' %>>Médio</option>
-                                <option value="alto" <%= client.stress_level === 'alto' ? 'selected' : '' %>>Alto</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div style="display: flex; gap: 15px; margin-bottom: 15px;">
-                         <div style="flex: 1;">
-                            <label style="color: #888;">Água (Litros/dia)</label>
-                            <select name="water_intake" style="width: 100%; padding: 10px; background: #222; border: 1px solid #444; color: white;">
-                                <option value="<1L" <%= client.water_intake === '<1L' ? 'selected' : '' %>>Menos de 1L</option>
-                                <option value="1-2L" <%= client.water_intake === '1-2L' ? 'selected' : '' %>>1 a 2 Litros</option>
-                                <option value=">2L" <%= client.water_intake === '>2L' ? 'selected' : '' %>>Mais de 2 Litros</option>
-                            </select>
-                        </div>
-                        <div style="flex: 1;">
-                            <label style="color: #888;">Dias Treino/Semana</label>
-                            <input type="number" name="training_days_goal" value="<%= client.training_days_goal || 3 %>" style="width: 100%; padding: 10px; background: #222; border: 1px solid #444; color: white;">
-                        </div>
-                    </div>
-
-                     <div style="margin-bottom: 15px;">
-                        <label style="color: #888;">Alimentação (Tipo)</label>
-                        <input type="text" name="nutrition_type" value="<%= client.nutrition_type || '' %>" placeholder="Ex: Onívoro, Vegetariano, Low Carb..." style="width: 100%; padding: 10px; background: #222; border: 1px solid #444; color: white;">
-                    </div>
-                </div>
-
-                <div class="card-box">
-                    <h3 style="color: #ff4d4d; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px;">Saúde</h3>
-                    <div style="margin-bottom: 15px;">
-                        <label style="color: #888;">Histórico Médico</label>
-                        <textarea name="medical_history" rows="2" style="width: 100%; padding: 10px; background: #222; border: 1px solid #444; color: white;"><%= client.medical_history || '' %></textarea>
-                    </div>
-                    <div style="margin-bottom: 15px;">
-                        <label style="color: #888;">Medicamentos</label>
-                        <textarea name="medications" rows="2" style="width: 100%; padding: 10px; background: #222; border: 1px solid #444; color: white;"><%= client.medications || '' %></textarea>
-                    </div>
-                    <div style="margin-bottom: 15px;">
-                        <label style="color: #888;">Lesões / Dores</label>
-                        <textarea name="injuries" rows="2" style="width: 100%; padding: 10px; background: #222; border: 1px solid #444; color: white;"><%= client.injuries || '' %></textarea>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div><label style="color:#888">Sono</label><select name="sleep_quality" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"><option value="boa">Boa</option><option value="regular">Regular</option><option value="ruim">Ruim</option></select></div>
+                        <div><label style="color:#888">Estresse</label><select name="stress_level" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"><option value="baixo">Baixo</option><option value="medio">Médio</option><option value="alto">Alto</option></select></div>
+                        <div><label style="color:#888">Água (L/dia)</label><select name="water_intake" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"><option value="<1L">< 1L</option><option value="2L">~ 2L</option><option value=">3L">> 3L</option></select></div>
+                        <div><label style="color:#888">Álcool</label><select name="alcohol_consumption" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"><option value="nunca">Nunca</option><option value="social">Socialmente</option><option value="frequente">Frequente</option></select></div>
+                        <div><label style="color:#888">Fumo</label><select name="smoking_status" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"><option value="nao">Não fumante</option><option value="sim">Fumante</option></select></div>
                     </div>
                 </div>
 
                 <div style="grid-column: 1 / -1; text-align: right;">
-                    <button class="btn btn-primary btn-lg" style="width: 100%;">Salvar Ficha Completa</button>
+                    <button class="btn btn-primary btn-lg" style="width: 100%; max-width: 300px;">Salvar Ficha Completa</button>
                 </div>
             </div>
         </form>
-
-        <div class="card-box" style="margin-top: 30px; border: 1px solid var(--primary-color);">
-            <h3 style="color: var(--primary-color);">Assinatura</h3>
-            <p style="color: white; font-size: 1.2rem;">Plano: <strong><%= subscription.plan %></strong> - R$ <%= subscription.price %></p>
-            <div style="margin-top: 15px; background: white; padding: 10px; width: fit-content; border-radius: 8px;">
-                <img src="<%= subscription.qrCode %>" width="120">
-            </div>
-            <p class="text-muted" style="margin-top: 10px;">Chave PIX: <%= subscription.pixKey %></p>
-        </div>
     </main>
 </div>
 <%- include('../partials/footer.ejs') %>
