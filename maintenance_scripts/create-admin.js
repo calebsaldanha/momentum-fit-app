@@ -1,51 +1,30 @@
 require('dotenv').config();
-const { Pool } = require('pg');
-const bcrypt = require('bcryptjs');
-
-const pool = new Pool({
-  connectionString: process.env.POSTGRES_URL,
-});
+const db = require('../database/db');
+const bcrypt = require('bcryptjs'); // ALTERADO PARA BCRYPTJS
 
 async function createAdmin() {
-  const name = "Admin";
-  const email = "calebsaldanhawork@gmail.com"; 
-  const password = "Nascimento12@"; 
-  const role = "superadmin";
-  const status = "active";
+    const email = 'admin@momentum.com';
+    const password = 'admin'; // Alterar em produ√ß√£o
+    const name = 'Administrador';
 
-  try {
-    // Criptografa a senha (obrigat√≥rio)
-    const hashedPassword = await bcrypt.hash(password, 12);
-
-    console.log('‚è≥ Conectando ao banco e criando usu√°rio...');
-
-    const query = `
-      INSERT INTO users (name, email, password, role, status)
-      VALUES ($1, $2, $3, $4, $5)
-      ON CONFLICT (email) DO NOTHING
-      RETURNING id, name, email, role;
-    `;
-
-    const res = await pool.query(query, [name, email, hashedPassword, role, status]);
-
-    if (res.rows.length > 0) {
-      console.log("‚úÖ Sucesso! Usu√°rio Super Admin criado:");
-      console.log("--------------------------------------");
-      console.log("Ì±§ Nome: " + res.rows[0].name);
-      console.log("Ì≥ß Email: " + res.rows[0].email);
-      console.log("Ì¥ë Senha: " + password);
-      console.log("Ìª°Ô∏è  Role: " + res.rows[0].role);
-      console.log("--------------------------------------");
-    } else {
-      console.log("‚ö†Ô∏è  O email '" + email + "' j√° existe no banco de dados.");
-      console.log("Se quiser torn√°-lo admin, voc√™ precisar√° alterar a role manualmente ou deletar o usu√°rio antigo.");
+    try {
+        const hashedPassword = await bcrypt.hash(password, 10);
+        
+        // Verifica se j√° existe
+        const check = await db.query("SELECT * FROM users WHERE email = $1", [email]);
+        if (check.rows.length > 0) {
+            console.log('Admin j√° existe. Atualizando senha...');
+            await db.query("UPDATE users SET password = $1, role = 'superadmin' WHERE email = $2", [hashedPassword, email]);
+        } else {
+            console.log('Criando novo admin...');
+            await db.query("INSERT INTO users (name, email, password, role) VALUES ($1, $2, $3, 'superadmin')", [name, email, hashedPassword]);
+        }
+        console.log('‚úÖ Admin configurado com sucesso!');
+        process.exit(0);
+    } catch (err) {
+        console.error('Erro:', err);
+        process.exit(1);
     }
-
-  } catch (err) {
-    console.error("‚ùå Erro ao criar usu√°rio:", err);
-  } finally {
-    await pool.end();
-  }
 }
 
 createAdmin();

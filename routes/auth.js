@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const bcrypt = require('bcrypt'); // Agora instalado
+const bcrypt = require('bcryptjs'); // ALTERADO PARA BCRYPTJS
 const db = require('../database/db');
 
 router.get('/login', (req, res) => res.render('pages/login'));
@@ -36,7 +36,6 @@ router.post('/register', async (req, res) => {
             const status = isPaid ? 'pending' : 'active';
             const planName = plan === 'basic' ? 'Momentum Básico' : (plan === 'pro' ? 'Momentum Pro' : 'Free');
 
-            // Salva o dia de pagamento escolhido
             await db.query(
                 "INSERT INTO subscriptions (user_id, plan_name, price, status, payment_due_day) VALUES ($1, $2, $3, $4, $5)",
                 [user.id, planName, price, status, paymentDay || 10]
