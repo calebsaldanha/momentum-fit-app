@@ -1,107 +1,137 @@
 <%- include('../partials/header.ejs') %>
 
-<div class="page-content-wrapper">
-    
-    <div style="margin-bottom: 1.5rem;">
-        <a href="/client/workouts" class="text-muted" style="text-decoration: none; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 5px;">
-            <i class="fas fa-arrow-left"></i> Voltar
-        </a>
-    </div>
+<div class="dashboard-container">
+    <% 
+       let sidebarPath = '/client/workouts';
+       if(user.role === 'trainer') sidebarPath = '/trainer/clients';
+       if(user.role.includes('admin')) sidebarPath = '/admin/users';
+    %>
+    <%- include('../partials/sidebar.ejs', { path: sidebarPath }) %>
 
-    <div class="dashboard-header">
-        <div>
-            <h2 class="text-neon" style="font-size: 1.5rem;"><%= workout.title %></h2>
-            <p class="text-muted" style="font-size: 0.9rem;"><%= workout.description || 'Sem descrição.' %></p>
+    <main class="dashboard-main">
+        <div class="mobile-dash-header">
+            <button id="sidebarOpenBtn" class="btn btn-outline btn-sm"><i class="fas fa-bars"></i></button>
+            <span class="text-muted">Treino</span>
         </div>
-        <button onclick="window.print()" class="btn btn-outline btn-sm desktop-only"><i class="fas fa-print"></i> Imprimir</button>
-    </div>
 
-    <div class="card-modern" style="padding: 0; overflow: hidden;">
-        <% if (exercises && exercises.length > 0) { %>
-            <div style="display: flex; flex-direction: column;">
-                <% exercises.forEach((ex, index) => { %>
-                    <div style="display: flex; flex-direction: column; gap: 1rem; padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                        
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <div style="width: 32px; height: 32px; background: rgba(212, 255, 0, 0.1); color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem;">
-                                    <%= index + 1 %>
-                                </div>
-                                <h3 style="margin: 0; font-size: 1.1rem; color: white;"><%= ex.name %></h3>
-                            </div>
-                            
-                            <% if (ex.video_url) { %>
-                                <a href="<%= ex.video_url %>" target="_blank" style="color: #ef4444; font-size: 1.2rem;" title="Ver Vídeo">
-                                    <i class="fab fa-youtube"></i>
-                                </a>
-                            <% } %>
+        <% if(messages.success) { %><div class="alert alert-success"><%= messages.success %></div><% } %>
+        <% if(messages.error) { %><div class="alert alert-danger"><%= messages.error %></div><% } %>
+
+        <% if (user.role === 'admin' || user.role === 'superadmin' || user.role === 'trainer') { %>
+            
+            <div class="page-header" style="border-bottom: none; margin-bottom: 20px;">
+                <div style="background: #222; padding: 20px; border-radius: 12px; border: 1px solid #333;">
+                    <h3 style="color: var(--primary-color); margin-bottom: 15px;">Administrar Treino</h3>
+                    
+                    <form action="/workouts/<%= workout.id %>/update" method="POST" style="display: grid; gap: 15px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <div>
+                            <label style="color: #888; font-size: 0.8rem;">Título</label>
+                            <input type="text" name="title" value="<%= workout.title %>" class="form-control" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: white;">
                         </div>
-
-                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; background: rgba(255,255,255,0.02); padding: 10px; border-radius: 8px;">
-                            <div style="text-align: center;">
-                                <span style="display: block; font-size: 0.7rem; color: var(--text-muted);">SÉRIES</span>
-                                <span style="font-weight: 600;"><%= ex.sets || '-' %></span>
-                            </div>
-                            <div style="text-align: center; border-left: 1px solid rgba(255,255,255,0.1); border-right: 1px solid rgba(255,255,255,0.1);">
-                                <span style="display: block; font-size: 0.7rem; color: var(--text-muted);">REPS</span>
-                                <span style="font-weight: 600;"><%= ex.reps || '-' %></span>
-                            </div>
-                            <div style="text-align: center;">
-                                <span style="display: block; font-size: 0.7rem; color: var(--text-muted);">CARGA</span>
-                                <span style="font-weight: 600;"><%= ex.weight ? ex.weight + 'kg' : '-' %></span>
-                            </div>
+                        <div>
+                            <label style="color: #888; font-size: 0.8rem;">Dia da Semana</label>
+                            <select name="day_of_week" class="form-control" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: white;">
+                                <% ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'].forEach(day => { %>
+                                    <option value="<%= day %>" <%= workout.day_of_week === day ? 'selected' : '' %>><%= day %></option>
+                                <% }) %>
+                            </select>
                         </div>
-
-                        <div style="display: flex; flex-direction: column; gap: 1rem;">
-                            <% if (ex.notes) { %>
-                                <div style="background: rgba(59, 130, 246, 0.1); padding: 10px; border-radius: 8px; border-left: 3px solid #3b82f6; font-size: 0.9rem; color: #dbeafe;">
-                                    <i class="fas fa-info-circle" style="margin-right: 5px;"></i> <%= ex.notes %>
-                                </div>
-                            <% } %>
-
-                            <% if (ex.image_url) { %>
-                                <div style="position: relative; border-radius: 8px; overflow: hidden; max-width: 100%; border: 1px solid var(--border);">
-                                    <img src="<%= ex.image_url %>" onclick="openModal(this.src)" style="width: 100%; height: 200px; object-fit: cover; cursor: zoom-in;" alt="Execução">
-                                    <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.6); color: white; font-size: 0.7rem; padding: 4px; text-align: center; pointer-events: none;">
-                                        <i class="fas fa-search"></i> Toque para ampliar
-                                    </div>
-                                </div>
-                            <% } %>
+                        <div style="grid-column: 1 / -1;">
+                            <label style="color: #888; font-size: 0.8rem;">Descrição / Foco</label>
+                            <input type="text" name="description" value="<%= workout.description %>" class="form-control" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: white;">
                         </div>
-
-                    </div>
-                <% }) %>
+                        <button class="btn btn-primary btn-sm" style="width: fit-content;">Salvar Alterações</button>
+                    </form>
+                </div>
             </div>
+
+            <div class="card-box" style="margin-bottom: 30px; border: 1px dashed #444;">
+                <h4 style="color: white; margin-bottom: 15px;"><i class="fas fa-plus-circle"></i> Adicionar Exercício da Biblioteca</h4>
+                <form action="/workouts/<%= workout.id %>/add-exercise" method="POST" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    
+                    <select name="exercise_id" required style="flex: 2; min-width: 200px; padding: 10px; background: #222; border: 1px solid #444; color: white; border-radius: 6px;">
+                        <option value="">Selecione um exercício...</option>
+                        <% if(library) { library.forEach(ex => { %>
+                            <option value="<%= ex.id %>"><%= ex.name %> (<%= ex.muscle_group %>)</option>
+                        <% }) } %>
+                    </select>
+                    
+                    <input type="number" name="sets" placeholder="Séries" value="3" style="width: 80px; padding: 10px; background: #222; border: 1px solid #444; color: white; border-radius: 6px;">
+                    <input type="number" name="reps" placeholder="Reps" value="12" style="width: 80px; padding: 10px; background: #222; border: 1px solid #444; color: white; border-radius: 6px;">
+                    <input type="text" name="load" placeholder="Kg" style="width: 80px; padding: 10px; background: #222; border: 1px solid #444; color: white; border-radius: 6px;">
+                    
+                    <button class="btn btn-outline" style="border-color: var(--primary-color); color: var(--primary-color);">Adicionar</button>
+                </form>
+            </div>
+
         <% } else { %>
-            <p style="text-align: center; padding: 2rem; color: var(--text-muted);">Nenhum exercício cadastrado.</p>
+            <div class="page-header">
+                <h1><%= workout.title %></h1>
+                <p class="text-neon"><%= workout.day_of_week %></p>
+                <p class="text-muted"><%= workout.description || 'Siga a execução correta.' %></p>
+            </div>
         <% } %>
-    </div>
 
-    <div style="margin-top: 2rem; text-align: center;">
-        <form action="/client/workouts/complete/<%= workout.id %>" method="POST">
-            <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
-            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 1rem; font-size: 1.1rem; border-radius: 12px;">
-                <i class="fas fa-check"></i> Concluir Treino
-            </button>
-        </form>
-    </div>
+        <div class="card-box">
+            <h3 style="color: white; margin-bottom: 20px;">Lista de Exercícios</h3>
+            
+            <% if (exercises && exercises.length > 0) { %>
+                <div class="workout-list" style="display: flex; flex-direction: column; gap: 15px;">
+                    <% exercises.forEach(ex => { %>
+                        <div style="background: #1a1a1a; padding: 20px; border-radius: 10px; border-left: 4px solid var(--primary-color); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 15px;">
+                            
+                            <div style="flex: 1; min-width: 200px;">
+                                <h4 style="color: white; margin-bottom: 5px; font-size: 1.1rem;"><%= ex.name %></h4>
+                                <span class="badge-neon" style="font-size: 0.7rem; background: rgba(255,255,255,0.1); color: #ccc; border:none;"><%= ex.muscle_group || 'Geral' %></span>
+                                <% if(ex.video_url) { %>
+                                    <a href="<%= ex.video_url %>" target="_blank" style="font-size: 0.85rem; color: var(--primary-color); margin-left: 10px;"><i class="fas fa-play-circle"></i> Ver Vídeo</a>
+                                <% } %>
+                            </div>
+
+                            <% if (user.role !== 'client') { %>
+                                <form action="/workouts/<%= workout.id %>/update-exercise/<%= ex.id %>" method="POST" style="display: flex; gap: 10px; align-items: center; margin: 0;">
+                                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                    
+                                    <div style="text-align: center;">
+                                        <label style="font-size: 0.6rem; color: #666; display: block;">Séries</label>
+                                        <input type="number" name="sets" value="<%= ex.sets %>" style="width: 50px; padding: 5px; background: #333; border: none; color: white; text-align: center; border-radius: 4px;">
+                                    </div>
+                                    <div style="text-align: center;">
+                                        <label style="font-size: 0.6rem; color: #666; display: block;">Reps</label>
+                                        <input type="number" name="reps" value="<%= ex.reps %>" style="width: 50px; padding: 5px; background: #333; border: none; color: white; text-align: center; border-radius: 4px;">
+                                    </div>
+                                    <div style="text-align: center;">
+                                        <label style="font-size: 0.6rem; color: #666; display: block;">Carga</label>
+                                        <input type="text" name="load" value="<%= ex.load %>" style="width: 50px; padding: 5px; background: #333; border: none; color: white; text-align: center; border-radius: 4px;">
+                                    </div>
+                                    
+                                    <button class="btn btn-sm btn-primary" title="Salvar Alterações"><i class="fas fa-save"></i></button>
+                                </form>
+
+                                <form action="/workouts/<%= workout.id %>/remove-exercise/<%= ex.id %>" method="POST" style="margin: 0;" onsubmit="return confirm('Remover este exercício?');">
+                                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                    <button class="btn btn-sm btn-outline" style="border-color: #ff4d4d; color: #ff4d4d;"><i class="fas fa-trash"></i></button>
+                                </form>
+                            
+                            <% } else { %>
+                                <div style="display: flex; gap: 20px; text-align: center;">
+                                    <div><span style="display: block; color: #888; font-size: 0.8rem;">Séries</span><strong style="color: white; font-size: 1.2rem;"><%= ex.sets %></strong></div>
+                                    <div><span style="display: block; color: #888; font-size: 0.8rem;">Reps</span><strong style="color: white; font-size: 1.2rem;"><%= ex.reps %></strong></div>
+                                    <div><span style="display: block; color: #888; font-size: 0.8rem;">Carga</span><strong style="color: var(--primary-color); font-size: 1.2rem;"><%= ex.load %>kg</strong></div>
+                                </div>
+                                <div style="display: flex; align-items: center;">
+                                    <input type="checkbox" style="width: 20px; height: 20px; accent-color: var(--primary-color);">
+                                </div>
+                            <% } %>
+                        </div>
+                    <% }) %>
+                </div>
+            <% } else { %>
+                <p class="text-muted" style="text-align: center; padding: 20px;">Nenhum exercício neste treino.</p>
+            <% } %>
+        </div>
+    </main>
 </div>
-
-<div id="imageModal" style="display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.95); align-items: center; justify-content: center; flex-direction: column;">
-    <span onclick="closeModal()" style="position: absolute; top: 20px; right: 20px; color: white; font-size: 40px; cursor: pointer; z-index: 2001;">&times;</span>
-    <img id="modalImg" style="max-width: 100%; max-height: 90vh; object-fit: contain;">
-</div>
-
-<script>
-    function openModal(src) {
-        const modal = document.getElementById("imageModal");
-        const img = document.getElementById("modalImg");
-        img.src = src;
-        modal.style.display = "flex";
-    }
-    function closeModal() {
-        document.getElementById("imageModal").style.display = "none";
-    }
-</script>
-
 <%- include('../partials/footer.ejs') %>
