@@ -9,9 +9,8 @@ const flash = require('connect-flash');
 
 const app = express();
 
-// --- CORREÇÃO IMPORTANTE PARA VERCEL/PRODUÇÃO ---
-// Permite que cookies seguros (https) funcionem atrás de proxies
-app.set('trust proxy', 1); 
+// Configuração para Vercel/Proxy (Cookies Seguros)
+app.set('trust proxy', 1);
 
 // Configuração do EJS
 app.set('view engine', 'ejs');
@@ -27,7 +26,7 @@ app.use(session({
     store: new pgSession({
         pool: pool,
         tableName: 'session',
-        createTableIfMissing: true // Garante que a tabela exista
+        createTableIfMissing: true
     }),
     secret: process.env.SESSION_SECRET || 'segredo_padrao_desenvolvimento',
     resave: false,
@@ -35,9 +34,8 @@ app.use(session({
     cookie: {
         maxAge: 30 * 24 * 60 * 60 * 1000, // 30 dias
         httpOnly: true,
-        // Secure true apenas em produção
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax' // Importante para navegação segura
+        sameSite: 'lax'
     }
 }));
 
@@ -47,10 +45,12 @@ app.use(flash());
 const csrfProtection = csrf();
 app.use(csrfProtection);
 
-// Variáveis Globais (User, CSRF, Path)
+// === MIDDLEWARE GLOBAL DE VARIÁVEIS (CORRIGIDO) ===
 app.use((req, res, next) => {
+    // Estas variáveis ficam disponíveis em TODOS os arquivos .ejs automaticamente
     res.locals.csrfToken = req.csrfToken();
     res.locals.user = req.session.user || null;
+    res.locals.isAuthenticated = !!req.session.user; // <--- ADICIONADO: Resolve o erro na Home
     res.locals.path = req.path;
     res.locals.query = req.query;
     res.locals.messages = req.flash();
@@ -65,6 +65,7 @@ const trainerRoutes = require('./routes/trainer');
 const adminRoutes = require('./routes/admin');
 const chatRoutes = require('./routes/chat');
 const workoutRoutes = require('./routes/workouts');
+// const notificationsRoutes = require('./routes/notifications'); // Descomentar se existir
 
 // Definição das Rotas
 app.use('/', indexRoutes);
