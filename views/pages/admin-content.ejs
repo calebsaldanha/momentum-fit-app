@@ -6,27 +6,78 @@
             <button id="sidebarOpenBtn" class="btn btn-outline btn-sm"><i class="fas fa-bars"></i></button>
             <span>Conteúdo</span>
         </div>
-        <div class="page-header">
-            <h1>Gestão de <span class="text-neon">Conteúdo</span></h1>
+        
+        <div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1>Gestão de <span class="text-neon">Conteúdo</span></h1>
+                <p>Gerencie blog e artigos da plataforma.</p>
+            </div>
+            <button class="btn btn-primary" onclick="document.getElementById('articleModal').style.display='flex'">
+                <i class="fas fa-plus"></i> Criar Artigo
+            </button>
         </div>
+
+        <% if(messages.success) { %><div class="alert alert-success"><%= messages.success %></div><% } %>
+        <% if(messages.error) { %><div class="alert alert-danger"><%= messages.error %></div><% } %>
+
         <div class="card-box">
-            <h3>Artigos Pendentes de Aprovação</h3>
             <div class="table-responsive">
-                <table>
+                <table style="width: 100%;">
                     <thead>
-                        <tr>
-                            <th>Título</th>
-                            <th>Autor</th>
-                            <th>Data</th>
-                            <th>Ações</th>
-                        </tr>
+                        <tr><th>Título</th><th>Autor</th><th>Status</th><th>Data</th><th>Ações</th></tr>
                     </thead>
                     <tbody>
-                        <tr><td colspan="4" style="text-align:center; padding: 20px;">Nenhum artigo pendente.</td></tr>
+                        <% if (articles && articles.length > 0) { %>
+                            <% articles.forEach(a => { %>
+                                <tr>
+                                    <td><%= a.title %></td>
+                                    <td><%= a.author_name || 'Admin' %></td>
+                                    <td>
+                                        <span class="badge-neon" style="background: <%= a.status === 'published' ? 'green' : 'orange' %>; color: white;">
+                                            <%= a.status %>
+                                        </span>
+                                    </td>
+                                    <td><%= new Date(a.created_at).toLocaleDateString() %></td>
+                                    <td>
+                                        <form action="/admin/content/<%= a.id %>/delete" method="POST" onsubmit="return confirm('Excluir este artigo?');">
+                                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                            <button class="btn btn-sm btn-outline" style="color: #ff4d4d; border-color: #ff4d4d;"><i class="fas fa-trash"></i></button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr><td colspan="5" style="text-align:center; padding: 20px;">Nenhum artigo encontrado.</td></tr>
+                        <% } %>
                     </tbody>
                 </table>
             </div>
         </div>
     </main>
+</div>
+
+<div id="articleModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; align-items: center; justify-content: center; overflow-y: auto;">
+    <div style="background: #111; padding: 30px; border-radius: 12px; width: 90%; max-width: 600px; border: 1px solid #333; margin: 20px 0;">
+        <h3 style="color: white; margin-bottom: 20px;">Publicar Novo Artigo</h3>
+        <form action="/admin/content/create" method="POST">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <div style="margin-bottom: 15px;">
+                <label style="color: #888;">Título</label>
+                <input type="text" name="title" required style="width: 100%; padding: 10px; background: #222; border: 1px solid #444; color: white;">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="color: #888;">Resumo</label>
+                <textarea name="summary" rows="2" style="width: 100%; padding: 10px; background: #222; border: 1px solid #444; color: white;"></textarea>
+            </div>
+            <div style="margin-bottom: 20px;">
+                <label style="color: #888;">Conteúdo Completo</label>
+                <textarea name="content" rows="10" style="width: 100%; padding: 10px; background: #222; border: 1px solid #444; color: white;"></textarea>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button type="submit" class="btn btn-primary" style="flex: 1;">Publicar</button>
+                <button type="button" class="btn btn-outline" style="flex: 1;" onclick="document.getElementById('articleModal').style.display='none'">Cancelar</button>
+            </div>
+        </form>
+    </div>
 </div>
 <%- include('../partials/footer.ejs') %>

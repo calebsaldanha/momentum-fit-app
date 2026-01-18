@@ -11,7 +11,7 @@ function isAdmin(req, res, next) {
 
 router.use(isAdmin);
 
-// Dashboard
+// --- DASHBOARD ---
 router.get('/dashboard', async (req, res) => {
     try {
         const totalUsers = await db.query('SELECT COUNT(*) FROM users');
@@ -34,7 +34,7 @@ router.get('/dashboard', async (req, res) => {
     }
 });
 
-// Usuários Lista
+// --- USUÁRIOS ---
 router.get('/users', async (req, res) => {
     try {
         const result = await db.query("SELECT id, name, email, role, active, created_at FROM users ORDER BY created_at DESC");
@@ -44,7 +44,6 @@ router.get('/users', async (req, res) => {
     }
 });
 
-// Detalhes do Usuário
 router.get('/users/:id', async (req, res) => {
     try {
         const userId = req.params.id;
@@ -52,30 +51,22 @@ router.get('/users/:id', async (req, res) => {
         if (userRes.rows.length === 0) return res.redirect('/admin/users');
         const targetUser = userRes.rows[0];
 
-        let data = { targetUser, details: {}, bi: {}, history: [] };
+        let data = { targetUser, details: {}, bi: {}, history: [], workouts: [] };
 
+        // DADOS DE ALUNO
         if (targetUser.role === 'client') {
             const clientRes = await db.query("SELECT * FROM clients WHERE user_id = $1", [userId]);
             data.details = clientRes.rows[0] || {};
             
-            // Corrige exibição de Nulo para string vazia para não quebrar a view
-            for (let key in data.details) {
-                if (data.details[key] === null) data.details[key] = '';
-            }
-
             if (targetUser.trainer_id) {
                 const trainerRes = await db.query("SELECT name FROM users WHERE id = $1", [targetUser.trainer_id]);
                 data.details.trainerName = trainerRes.rows[0]?.name;
             }
 
-            // Lista de treinadores (Aprovados E Pendentes)
-            const allTrainers = await db.query(`
-                SELECT u.id, u.name, t.is_approved 
-                FROM users u JOIN trainers t ON u.id = t.user_id 
-                WHERE u.role = 'trainer' ORDER BY u.name ASC
-            `);
+            const allTrainers = await db.query(`SELECT u.id, u.name, t.is_approved FROM users u JOIN trainers t ON u.id = t.user_id WHERE u.role = 'trainer' ORDER BY u.name ASC`);
             data.allTrainers = allTrainers.rows;
 
+            // Financeiro
             try {
                 const activePlan = await db.query("SELECT * FROM subscriptions WHERE user_id = $1 AND status = 'active' LIMIT 1", [userId]);
                 data.activePlan = activePlan.rows[0];
@@ -83,16 +74,30 @@ router.get('/users/:id', async (req, res) => {
                 data.financialHistory = planHistory.rows;
             } catch (e) { data.financialHistory = []; }
 
+            // TREINOS (Ativos e Histórico)
             try {
-                const workouts = await db.query("SELECT * FROM workouts WHERE user_id = $1", [userId]);
-                data.workouts = workouts.rows; 
-                data.bi = { totalWorkouts: workouts.rows.length, attendanceRate: 85 };
+                // Aqui buscamos TODOS os treinos.
+                // Como o banco não tem flag "active" no workout, consideramos todos na tabela 'workouts' como a ficha atual/ativa.
+                // Futuramente, uma tabela 'workout_history' guardaria os arquivados.
+                const workoutsRes = await db.query(`
+                    SELECT w.*, 
+                    (SELECT COUNT(*) FROM workout_exercises WHERE workout_id = w.id) as exercise_count
+                    FROM workouts w 
+                    WHERE user_id = $1 
+                    ORDER BY w.created_at DESC
+                `, [userId]);
+                data.workouts = workoutsRes.rows; 
+                
+                data.bi = { 
+                    totalWorkouts: workoutsRes.rows.length, 
+                    attendanceRate: 85 // Mock placeholder
+                };
             } catch (e) { data.workouts = []; }
 
+        // DADOS DE TREINADOR
         } else if (targetUser.role === 'trainer') {
             const trainerRes = await db.query("SELECT * FROM trainers WHERE user_id = $1", [userId]);
             data.details = trainerRes.rows[0] || { is_approved: false };
-            
             const students = await db.query("SELECT COUNT(*) FROM users WHERE trainer_id = $1", [userId]);
             data.bi = { activeStudents: students.rows[0].count, totalRevenue: 0 };
         }
@@ -101,14 +106,25 @@ router.get('/users/:id', async (req, res) => {
 
     } catch (err) {
         console.error("Erro Admin Details:", err);
-        req.flash('error', 'Erro ao carregar detalhes.');
         res.redirect('/admin/users');
     }
 });
 
-// Ações
+// Ações Usuário
 router.post('/users/:id/toggle-status', async (req, res) => {
     await db.query("UPDATE users SET active = NOT active WHERE id = $1", [req.params.id]);
+    res.redirect(`/admin/users/${req.params.id}`);
+});
+
+router.post('/users/:id/approve-trainer', async (req, res) => {
+    await db.query('UPDATE trainers SET is_approved = true WHERE user_id = $1', [req.params.id]);
+    req.flash('success', 'Treinador aprovado!');
+    res.redirect(`/admin/users/${req.params.id}`);
+});
+
+router.post('/users/:id/assign-trainer', async (req, res) => {
+    const { trainer_id } = req.body;
+    await db.query("UPDATE users SET trainer_id = $1 WHERE id = $2", [trainer_id === 'none' ? null : trainer_id, req.params.id]);
     res.redirect(`/admin/users/${req.params.id}`);
 });
 
@@ -124,7 +140,6 @@ router.post('/users/:id/delete', async (req, res) => {
         await db.query("DELETE FROM trainers WHERE user_id = $1", [userId]);
         await db.query("DELETE FROM users WHERE id = $1", [userId]);
         await db.query('COMMIT');
-        req.flash('success', 'Usuário excluído.');
         res.redirect('/admin/users');
     } catch (err) {
         await db.query('ROLLBACK');
@@ -132,47 +147,60 @@ router.post('/users/:id/delete', async (req, res) => {
     }
 });
 
-router.post('/users/:id/assign-trainer', async (req, res) => {
-    const { trainer_id } = req.body;
-    await db.query("UPDATE users SET trainer_id = $1 WHERE id = $2", [trainer_id === 'none' ? null : trainer_id, req.params.id]);
-    req.flash('success', 'Treinador atualizado.');
-    res.redirect(`/admin/users/${req.params.id}`);
-});
-
-// APROVAÇÃO (CORREÇÃO DE ROTA)
-// Esta rota deve receber o ID do USUÁRIO (user_id) que está na URL e atualizar a tabela TRAINERS
-router.post('/users/:id/approve-trainer', async (req, res) => {
-    const userId = req.params.id;
+// --- GESTÃO DE CONTEÚDO (NOVO) ---
+router.get('/content', async (req, res) => {
     try {
-        console.log(`Aprovando treinador com User ID: ${userId}`); // Log para debug
-        
-        // Verifica se o registro existe antes
-        const trainerCheck = await db.query('SELECT * FROM trainers WHERE user_id = $1', [userId]);
-        
-        if (trainerCheck.rows.length === 0) {
-            // Se não existir na tabela trainers (inconsistência), cria
-            await db.query('INSERT INTO trainers (user_id, is_approved) VALUES ($1, true)', [userId]);
-        } else {
-            // Atualiza
-            await db.query('UPDATE trainers SET is_approved = true WHERE user_id = $1', [userId]);
-        }
-        
-        req.flash('success', 'Treinador aprovado com sucesso!');
-    } catch(err) {
-        console.error("Erro na aprovação:", err);
-        req.flash('error', 'Erro técnico ao aprovar.');
-    }
-    res.redirect(`/admin/users/${userId}`);
+        const result = await db.query(`
+            SELECT a.*, u.name as author_name 
+            FROM articles a 
+            LEFT JOIN users u ON a.author_id = u.id 
+            ORDER BY a.created_at DESC
+        `);
+        res.render('pages/admin-content', { articles: result.rows });
+    } catch (e) { res.render('pages/admin-content', { articles: [] }); }
 });
 
-// Rotas auxiliares
-router.get('/finance', (req, res) => res.render('pages/admin-finance', { revenue: { total: 0 } }));
-router.get('/content', (req, res) => res.render('pages/admin-content'));
-router.get('/settings', (req, res) => res.render('pages/admin-settings'));
-router.get('/ia-audit', async (req, res) => {
-    try { const logs = await db.query("SELECT * FROM ia_logs ORDER BY created_at DESC LIMIT 20"); res.render('pages/admin-ia-audit', { logs: logs.rows }); }
-    catch(e) { res.render('pages/admin-ia-audit', { logs: [] }); }
+router.post('/content/create', async (req, res) => {
+    const { title, summary, content } = req.body;
+    try {
+        // Admin publica direto
+        await db.query(
+            "INSERT INTO articles (title, summary, content, author_id, status) VALUES ($1, $2, $3, $4, 'published')",
+            [title, summary, content, req.session.user.id]
+        );
+        req.flash('success', 'Artigo publicado com sucesso!');
+    } catch (err) {
+        req.flash('error', 'Erro ao publicar artigo.');
+    }
+    res.redirect('/admin/content');
 });
+
+router.post('/content/:id/delete', async (req, res) => {
+    await db.query("DELETE FROM articles WHERE id = $1", [req.params.id]);
+    req.flash('success', 'Artigo removido.');
+    res.redirect('/admin/content');
+});
+
+// --- AUDITORIA IA (SEM DADOS FALSOS) ---
+router.get('/ia-audit', async (req, res) => {
+    try {
+        // Busca APENAS dados reais do banco. Se a tabela estiver vazia, retorna array vazio.
+        const logs = await db.query(`
+            SELECT l.*, u.name as user_name 
+            FROM ia_logs l 
+            LEFT JOIN users u ON l.user_id = u.id 
+            ORDER BY l.created_at DESC LIMIT 50
+        `);
+        res.render('pages/admin-ia-audit', { logs: logs.rows });
+    } catch(e) { 
+        // Em caso de erro (tabela não existe), renderiza vazio, sem dados fake.
+        res.render('pages/admin-ia-audit', { logs: [] }); 
+    }
+});
+
+// Outras
+router.get('/finance', (req, res) => res.render('pages/admin-finance', { revenue: { total: 0 } }));
+router.get('/settings', (req, res) => res.render('pages/admin-settings'));
 router.get('/approvals', async (req, res) => {
     try {
         const result = await db.query("SELECT t.id, u.name FROM trainers t JOIN users u ON t.user_id = u.id WHERE t.is_approved = false");

@@ -43,16 +43,12 @@
             
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
                 <div class="card-box" style="text-align: center;">
-                    <h3 class="text-muted" style="font-size: 0.9rem;">Treinos</h3>
+                    <h3 class="text-muted" style="font-size: 0.9rem;">Total Treinos</h3>
                     <p style="font-size: 2rem; font-weight: bold; color: white;"><%= bi.totalWorkouts || 0 %></p>
                 </div>
                 <div class="card-box" style="text-align: center;">
-                    <h3 class="text-muted" style="font-size: 0.9rem;">Assiduidade</h3>
-                    <p style="font-size: 2rem; font-weight: bold; color: var(--primary-color);"><%= bi.attendanceRate %>%</p>
-                </div>
-                <div class="card-box" style="text-align: center;">
-                    <h3 class="text-muted" style="font-size: 0.9rem;">Plano</h3>
-                    <p style="font-size: 1.2rem; font-weight: bold; color: white; margin-top: 10px;">
+                    <h3 class="text-muted" style="font-size: 0.9rem;">Plano Ativo</h3>
+                    <p style="font-size: 1.2rem; font-weight: bold; color: var(--primary-color); margin-top: 10px;">
                         <%= activePlan ? activePlan.plan_name : 'Nenhum' %>
                     </p>
                 </div>
@@ -65,48 +61,13 @@
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                         <div><label style="color:#666; font-size:0.8rem">Email</label><p style="color:white"><%= targetUser.email %></p></div>
                         <div><label style="color:#666; font-size:0.8rem">Telefone</label><p style="color:white"><%= targetUser.phone || '-' %></p></div>
-                        <div><label style="color:#666; font-size:0.8rem">Nascimento</label><p style="color:white"><%= targetUser.birth_date ? new Date(targetUser.birth_date).toLocaleDateString() : '-' %></p></div>
-                        
-                        <div><label style="color:#666; font-size:0.8rem">Peso</label><p style="color:white"><%= details.weight ? details.weight + ' kg' : '-' %></p></div>
-                        <div><label style="color:#666; font-size:0.8rem">Altura</label><p style="color:white"><%= details.height ? details.height + ' cm' : '-' %></p></div>
-                        
+                        <div><label style="color:#666; font-size:0.8rem">Peso / Altura</label><p style="color:white"><%= details.weight || '-' %> kg / <%= details.height || '-' %> cm</p></div>
                         <div><label style="color:#666; font-size:0.8rem">Objetivo</label><p style="color:var(--primary-color)"><%= details.goal || '-' %></p></div>
-                        <div style="grid-column: 1 / -1;">
-                            <label style="color:#666; font-size:0.8rem">Descrição do Objetivo</label>
-                            <p style="background: #222; padding: 10px; border-radius: 5px; color: #ddd;"><%= details.goal_description || 'Não informado.' %></p>
-                        </div>
 
-                        <div style="grid-column: 1 / -1; margin-top: 10px;">
-                            <h4 style="color: #ff4d4d; margin-bottom: 10px; font-size: 0.9rem;">SAÚDE</h4>
-                        </div>
-                        <div style="grid-column: 1 / -1;">
-                            <label style="color:#666; font-size:0.8rem">Histórico Médico</label>
-                            <p style="background: #222; padding: 10px; border-radius: 5px; color: #ddd;"><%= details.medical_history || 'Nada informado.' %></p>
-                        </div>
-                        <div style="grid-column: 1 / -1;">
-                            <label style="color:#666; font-size:0.8rem">Medicamentos</label>
-                            <p style="background: #222; padding: 10px; border-radius: 5px; color: #ddd;"><%= details.medications || 'Nada informado.' %></p>
-                        </div>
-                        <div style="grid-column: 1 / -1;">
-                            <label style="color:#666; font-size:0.8rem">Lesões</label>
-                            <p style="background: #222; padding: 10px; border-radius: 5px; color: #ddd;"><%= details.injuries || 'Nenhuma.' %></p>
-                        </div>
-
-                        <div style="grid-column: 1 / -1; margin-top: 10px;">
-                            <h4 style="color: #bef202; margin-bottom: 10px; font-size: 0.9rem;">ROTINA</h4>
-                        </div>
-                        <div style="grid-column: 1 / -1;">
-                            <label style="color:#666; font-size:0.8rem">Nível de Atividade</label>
-                            <p style="background: #222; padding: 10px; border-radius: 5px; color: #ddd;"><%= details.activity_level || '-' %></p>
-                        </div>
-                        <div style="grid-column: 1 / -1;">
-                            <label style="color:#666; font-size:0.8rem">Equipamentos</label>
-                            <p style="background: #222; padding: 10px; border-radius: 5px; color: #ddd;"><%= details.available_equipment || '-' %></p>
-                        </div>
-                        <div style="grid-column: 1 / -1;">
-                            <label style="color:#666; font-size:0.8rem">Limitações Gerais</label>
-                            <p style="background: #222; padding: 10px; border-radius: 5px; color: #ddd;"><%= details.limitations || '-' %></p>
-                        </div>
+                        <div style="grid-column: 1 / -1;"><label style="color:#666; font-size:0.8rem">Descrição Objetivo</label><p class="bg-dark p-2 rounded"><%= details.goal_description || '-' %></p></div>
+                        <div style="grid-column: 1 / -1;"><label style="color:#666; font-size:0.8rem">Histórico Médico</label><p class="bg-dark p-2 rounded"><%= details.medical_history || '-' %></p></div>
+                        <div style="grid-column: 1 / -1;"><label style="color:#666; font-size:0.8rem">Lesões/Limitações</label><p class="bg-dark p-2 rounded"><%= details.injuries || details.limitations || '-' %></p></div>
+                        <div style="grid-column: 1 / -1;"><label style="color:#666; font-size:0.8rem">Equipamentos</label><p class="bg-dark p-2 rounded"><%= details.available_equipment || '-' %></p></div>
                     </div>
                 </div>
 
@@ -115,21 +76,13 @@
                     <div style="background: rgba(190, 242, 2, 0.05); padding: 15px; border-radius: 8px; border: 1px solid var(--primary-color); margin-bottom: 20px; text-align: center;">
                         <h4 style="color: white;"><%= details.trainerName || 'Nenhum Atribuído' %></h4>
                     </div>
-
                     <form action="/admin/users/<%= targetUser.id %>/assign-trainer" method="POST">
                         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                        <label style="color: #888;">Atribuir / Trocar</label>
                         <select name="trainer_id" class="form-control" style="width: 100%; margin-bottom: 15px; background: #222; border: 1px solid #444; padding: 10px; color: white;">
                             <option value="none">-- Sem Treinador --</option>
-                            <% if(allTrainers && allTrainers.length > 0) { %>
-                                <% allTrainers.forEach(t => { %>
-                                    <option value="<%= t.id %>" <%= targetUser.trainer_id === t.id ? 'selected' : '' %>>
-                                        <%= t.name %> <%= t.is_approved ? '' : '(Pendente)' %>
-                                    </option>
-                                <% }) %>
-                            <% } else { %>
-                                <option disabled>Nenhum treinador cadastrado</option>
-                            <% } %>
+                            <% if(allTrainers) { allTrainers.forEach(t => { %>
+                                <option value="<%= t.id %>" <%= targetUser.trainer_id === t.id ? 'selected' : '' %>><%= t.name %> <%= t.is_approved ? '' : '(Pendente)' %></option>
+                            <% }) } %>
                         </select>
                         <button class="btn btn-primary" style="width: 100%;">Salvar Vínculo</button>
                     </form>
@@ -137,10 +90,34 @@
             </div>
 
             <div class="card-box">
+                <h3 style="color: white; margin-bottom: 15px;">Treinos Atribuídos (Histórico)</h3>
+                <div class="table-responsive">
+                    <table style="width: 100%;">
+                        <thead><tr><th>Título</th><th>Dia</th><th>Exercícios</th><th>Criado em</th><th>Ações</th></tr></thead>
+                        <tbody>
+                            <% if (workouts && workouts.length > 0) { %>
+                                <% workouts.forEach(w => { %>
+                                    <tr>
+                                        <td><%= w.title %></td>
+                                        <td><span class="badge-neon"><%= w.day_of_week %></span></td>
+                                        <td><%= w.exercise_count %> exercícios</td>
+                                        <td><%= new Date(w.created_at).toLocaleDateString() %></td>
+                                        <td><a href="/workouts/<%= w.id %>" target="_blank" class="btn btn-sm btn-outline">Ver</a></td>
+                                    </tr>
+                                <% }) %>
+                            <% } else { %>
+                                <tr><td colspan="5" style="text-align: center; padding: 15px;">Nenhum treino encontrado.</td></tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card-box" style="margin-top: 30px;">
                 <h3 style="color: white; margin-bottom: 15px;">Histórico Financeiro</h3>
                 <div class="table-responsive">
                     <table style="width: 100%;">
-                        <thead><tr><th>Data</th><th>Valor</th><th>Status</th><th>Método</th></tr></thead>
+                        <thead><tr><th>Data</th><th>Valor</th><th>Status</th><th>Ref</th></tr></thead>
                         <tbody>
                             <% if (financialHistory && financialHistory.length > 0) { %>
                                 <% financialHistory.forEach(pay => { %>
@@ -160,48 +137,20 @@
             </div>
 
         <% } else if (targetUser.role === 'trainer') { %>
-            
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
-                <div class="card-box">
-                    <h3>Alunos</h3>
-                    <p style="font-size: 2rem; font-weight: bold;"><%= bi.activeStudents %></p>
-                </div>
-                <div class="card-box">
-                    <h3>Status Aprovação</h3>
-                    <p style="font-size: 1.5rem; color: <%= details.is_approved ? '#bef202' : 'orange' %>;">
-                        <%= details.is_approved ? 'Aprovado' : 'Pendente' %>
-                    </p>
-                </div>
-            </div>
-
-            <% if (!details.is_approved) { %>
-                <div style="background: rgba(255, 165, 0, 0.1); border: 1px solid orange; color: orange; padding: 20px; border-radius: 8px; margin-bottom: 30px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px;">
-                    <span style="font-size: 1.1rem;"><i class="fas fa-exclamation-triangle"></i> <strong>Atenção:</strong> Treinador pendente de aprovação.</span>
-                    
-                    <form action="/admin/users/<%= targetUser.id %>/approve-trainer" method="POST" style="margin: 0;">
-                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                        <button type="submit" class="btn btn-primary" style="background: #bef202; color: black; border: none; font-weight: bold; padding: 12px 25px; cursor: pointer;">
-                            <i class="fas fa-check"></i> APROVAR AGORA
-                        </button>
-                    </form>
-                </div>
-            <% } %>
-
             <div class="card-box">
+                <% if (!details.is_approved) { %>
+                    <div style="background: rgba(255, 165, 0, 0.1); border: 1px solid orange; color: orange; padding: 20px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+                        <span><i class="fas fa-exclamation-triangle"></i> Aprovação Pendente</span>
+                        <form action="/admin/users/<%= targetUser.id %>/approve-trainer" method="POST" style="margin:0;">
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                            <button class="btn btn-primary" style="background: #bef202; color: black;">Aprovar</button>
+                        </form>
+                    </div>
+                <% } %>
                 <h3>Dados Profissionais</h3>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                    <div><label style="color:#888">Nome</label><p><%= targetUser.name %></p></div>
-                    <div><label style="color:#888">Telefone</label><p><%= targetUser.phone || '-' %></p></div>
-                    <div><label style="color:#888">Chave PIX</label><p><%= details.pix_key || '-' %></p></div>
-                    <div><label style="color:#888">Tipo Chave</label><p><%= details.pix_key_type || '-' %></p></div>
-                    <div style="grid-column: 1 / -1;"><label style="color:#888">Formação</label><p class="bg-dark p-2 rounded"><%= details.education || '-' %></p></div>
-                    <div style="grid-column: 1 / -1;"><label style="color:#888">Experiência</label><p class="bg-dark p-2 rounded"><%= details.experience || '-' %></p></div>
-                    <div style="grid-column: 1 / -1;"><label style="color:#888">Bio</label><p class="bg-dark p-2 rounded"><%= details.bio || '-' %></p></div>
-                </div>
+                <p><strong>Bio:</strong> <%= details.bio || '-' %></p>
+                <p><strong>Chave PIX:</strong> <%= details.pix_key || '-' %></p>
             </div>
-
-        <% } else { %>
-            <div class="card-box"><p>Usuário Administrador.</p></div>
         <% } %>
 
     </main>
