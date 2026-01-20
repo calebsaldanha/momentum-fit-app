@@ -24,24 +24,24 @@
                     <h3 style="color: white; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px;">Pessoal</h3>
                     <div style="margin-bottom: 15px;">
                         <label style="color:#888">Nome</label>
-                        <input type="text" name="name" value="<%= client.name || '' %>" class="form-control" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;">
+                        <input type="text" name="name" value="<%= clientData.name || '' %>" class="form-control" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;">
                     </div>
                     <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                        <div style="flex:1"><label style="color:#888">Telefone</label><input type="text" name="phone" value="<%= client.phone || '' %>" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"></div>
+                        <div style="flex:1"><label style="color:#888">Telefone</label><input type="text" name="phone" value="<%= clientData.phone || '' %>" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"></div>
                         <div style="flex:1">
                             <label style="color:#888">Nascimento</label>
                             <% 
                                 let birthVal = '';
-                                if(client.birth_date) {
-                                    try { birthVal = new Date(client.birth_date).toISOString().split('T')[0]; } catch(e){}
+                                if(clientData.birth_date) {
+                                    try { birthVal = new Date(clientData.birth_date).toISOString().split('T')[0]; } catch(e){}
                                 }
                             %>
                             <input type="date" name="birth_date" value="<%= birthVal %>" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;">
                         </div>
                     </div>
                     <div style="display: flex; gap: 10px;">
-                        <div style="flex:1"><label style="color:#888">Peso (kg)</label><input type="number" step="0.1" name="weight" value="<%= client.weight || '' %>" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"></div>
-                        <div style="flex:1"><label style="color:#888">Altura (cm)</label><input type="number" name="height" value="<%= client.height || '' %>" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"></div>
+                        <div style="flex:1"><label style="color:#888">Peso (kg)</label><input type="number" step="0.1" name="weight" value="<%= clientData.weight || '' %>" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"></div>
+                        <div style="flex:1"><label style="color:#888">Altura (cm)</label><input type="number" name="height" value="<%= clientData.height || '' %>" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"></div>
                     </div>
                 </div>
 
@@ -50,25 +50,25 @@
                     <div style="margin-bottom: 15px;">
                         <label style="color:#888">Meta Principal</label>
                         <select name="goal" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;">
-                            <option value="emagrecimento" <%= client.goal == 'emagrecimento' ? 'selected' : '' %>>Emagrecimento</option>
-                            <option value="hipertrofia" <%= client.goal == 'hipertrofia' ? 'selected' : '' %>>Hipertrofia</option>
-                            <option value="saude" <%= client.goal == 'saude' ? 'selected' : '' %>>Saúde</option>
+                            <option value="emagrecimento" <%= clientData.goal == 'emagrecimento' ? 'selected' : '' %>>Emagrecimento</option>
+                            <option value="hipertrofia" <%= clientData.goal == 'hipertrofia' ? 'selected' : '' %>>Hipertrofia</option>
+                            <option value="saude" <%= clientData.goal == 'saude' ? 'selected' : '' %>>Saúde</option>
                         </select>
                     </div>
-                    <div style="margin-bottom: 15px;"><label style="color:#888">Descrição</label><textarea name="goal_description" rows="2" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"><%= client.goal_description || '' %></textarea></div>
+                    <div style="margin-bottom: 15px;"><label style="color:#888">Descrição</label><textarea name="goal_description" rows="2" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"><%= clientData.goal_description || '' %></textarea></div>
                     <div style="display:flex; gap:10px;">
                         <div style="flex:1"><label style="color:#888">Experiência</label>
                             <select name="training_experience" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;">
-                                <option value="iniciante" <%= client.training_experience == 'iniciante' ? 'selected' : '' %>>Iniciante</option>
-                                <option value="intermediario" <%= client.training_experience == 'intermediario' ? 'selected' : '' %>>Intermediário</option>
-                                <option value="avancado" <%= client.training_experience == 'avancado' ? 'selected' : '' %>>Avançado</option>
+                                <option value="iniciante" <%= clientData.training_experience == 'iniciante' ? 'selected' : '' %>>Iniciante</option>
+                                <option value="intermediario" <%= clientData.training_experience == 'intermediario' ? 'selected' : '' %>>Intermediário</option>
+                                <option value="avancado" <%= clientData.training_experience == 'avancado' ? 'selected' : '' %>>Avançado</option>
                             </select>
                         </div>
                         <div style="flex:1"><label style="color:#888">Horário</label>
                             <select name="preferred_training_time" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;">
-                                <option value="manha" <%= client.preferred_training_time == 'manha' ? 'selected' : '' %>>Manhã</option>
-                                <option value="tarde" <%= client.preferred_training_time == 'tarde' ? 'selected' : '' %>>Tarde</option>
-                                <option value="noite" <%= client.preferred_training_time == 'noite' ? 'selected' : '' %>>Noite</option>
+                                <option value="manha" <%= clientData.preferred_training_time == 'manha' ? 'selected' : '' %>>Manhã</option>
+                                <option value="tarde" <%= clientData.preferred_training_time == 'tarde' ? 'selected' : '' %>>Tarde</option>
+                                <option value="noite" <%= clientData.preferred_training_time == 'noite' ? 'selected' : '' %>>Noite</option>
                             </select>
                         </div>
                     </div>
@@ -76,12 +76,12 @@
 
                 <div class="card-box">
                     <h3 style="color: #ff4d4d; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px;">Saúde</h3>
-                    <div style="margin-bottom: 15px;"><label style="color:#888">Histórico Médico</label><textarea name="medical_history" rows="2" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"><%= client.medical_history || '' %></textarea></div>
-                    <div style="margin-bottom: 15px;"><label style="color:#888">Medicamentos</label><textarea name="medications" rows="2" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"><%= client.medications || '' %></textarea></div>
-                    <div style="margin-bottom: 15px;"><label style="color:#888">Lesões</label><textarea name="injuries" rows="2" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"><%= client.injuries || '' %></textarea></div>
+                    <div style="margin-bottom: 15px;"><label style="color:#888">Histórico Médico</label><textarea name="medical_history" rows="2" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"><%= clientData.medical_history || '' %></textarea></div>
+                    <div style="margin-bottom: 15px;"><label style="color:#888">Medicamentos</label><textarea name="medications" rows="2" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"><%= clientData.medications || '' %></textarea></div>
+                    <div style="margin-bottom: 15px;"><label style="color:#888">Lesões</label><textarea name="injuries" rows="2" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"><%= clientData.injuries || '' %></textarea></div>
                     <div style="display:flex; gap:10px;">
-                        <div style="flex:1"><label style="color:#ff4d4d">Contato Emerg.</label><input type="text" name="emergency_contact" value="<%= client.emergency_contact || '' %>" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"></div>
-                        <div style="flex:1"><label style="color:#ff4d4d">Telefone</label><input type="text" name="emergency_phone" value="<%= client.emergency_phone || '' %>" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"></div>
+                        <div style="flex:1"><label style="color:#ff4d4d">Contato Emerg.</label><input type="text" name="emergency_contact" value="<%= clientData.emergency_contact || '' %>" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"></div>
+                        <div style="flex:1"><label style="color:#ff4d4d">Telefone</label><input type="text" name="emergency_phone" value="<%= clientData.emergency_phone || '' %>" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"></div>
                     </div>
                 </div>
 
@@ -93,7 +93,7 @@
                         <div><label style="color:#888">Água</label><select name="water_intake" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"><option value="<1L">< 1L</option><option value="2L">~ 2L</option><option value=">3L">> 3L</option></select></div>
                         <div><label style="color:#888">Fumo</label><select name="smoking_status" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"><option value="nao">Não</option><option value="sim">Sim</option></select></div>
                     </div>
-                    <div style="margin-top: 15px;"><label style="color:#888">Equipamentos</label><input type="text" name="available_equipment" value="<%= client.available_equipment || '' %>" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"></div>
+                    <div style="margin-top: 15px;"><label style="color:#888">Equipamentos</label><input type="text" name="available_equipment" value="<%= clientData.available_equipment || '' %>" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"></div>
                 </div>
 
                 <div style="grid-column: 1 / -1; text-align: right;">

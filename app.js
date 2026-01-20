@@ -34,6 +34,7 @@ app.use(flash());
 // Middleware Global de Variáveis (User, Messages, etc)
 app.use((req, res, next) => {
     res.locals.user = req.session.user || null;
+    res.locals.isAuthenticated = !!req.session.user; // Correção: Define isAuthenticated
     res.locals.messages = req.flash();
     // CSRF Mock simples para evitar erros se csurf não estiver ativo
     res.locals.csrfToken = 'token-mock-safe'; 
@@ -60,5 +61,5 @@ app.use((req, res) => {
 // Iniciar Servidor
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`✅ Servidor rodando na porta ${PORT}`);
+    console.log(\`✅ Servidor rodando na porta \${PORT}\`);
 });

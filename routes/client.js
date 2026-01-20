@@ -12,18 +12,19 @@ router.use(isClient);
 // Profile - Rota Limpa
 router.get('/profile', async (req, res) => {
     try {
-        const result = await db.query(`
+        const result = await db.query(\`
             SELECT u.name, u.email, u.phone, u.birth_date, c.*
             FROM users u
             LEFT JOIN clients c ON u.id = c.user_id
             WHERE u.id = $1
-        `, [req.session.user.id]);
+        \`, [req.session.user.id]);
         
         const clientData = result.rows[0] || {};
         const subscription = { plan: 'Básico', price: '10.00' }; // Mock seguro
 
+        // CORREÇÃO: Usar 'clientData' como chave para não conflitar com opção 'client' do EJS
         res.render('pages/client-profile', { 
-            client: clientData,
+            clientData: clientData,
             subscription: subscription
         });
     } catch (err) {
