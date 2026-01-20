@@ -15,16 +15,62 @@ function isClient(req, res, next) {
 
 router.use(isClient);
 
+// === FUNÇÃO AUXILIAR PIX (Payload BR Code) ===
+function generatePixPayload(key, name, city, txId, price) {
+    const formatField = (id, value) => {
+        const len = value.length.toString().padStart(2, '0');
+        return \`\${id}\${len}\${value}\`;
+    };
+
+    let payload = 
+        formatField('00', '01') +
+        formatField('26', 
+            formatField('00', 'BR.GOV.BCB.PIX') + 
+            formatField('01', key)
+        ) +
+        formatField('52', '0000') +
+        formatField('53', '986');
+
+    if (price) {
+         payload += formatField('54', price.toFixed(2));
+    }
+
+    payload += formatField('58', 'BR');
+    payload += formatField('59', name);
+    payload += formatField('60', city);
+    payload += formatField('62', formatField('05', txId || '***'));
+
+    payload += '6304'; // CRC16 placeholder
+
+    // Cálculo CRC16 (CCITT-FALSE)
+    const polynomial = 0x1021;
+    let crc = 0xFFFF;
+    
+    for (let i = 0; i < payload.length; i++) {
+        crc ^= payload.charCodeAt(i) << 8;
+        for (let j = 0; j < 8; j++) {
+            if ((crc & 0x8000) !== 0) {
+                crc = (crc << 1) ^ polynomial;
+            } else {
+                crc = crc << 1;
+            }
+        }
+    }
+    
+    const crcHex = (crc & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
+    return payload + crcHex;
+}
+
 // === ANAMNESE (PROFILE) ===
 router.get('/profile', async (req, res) => {
     try {
         const userId = req.session.user.id;
-        const result = await db.query(`
+        const result = await db.query(\`
             SELECT u.name, u.email, u.phone as user_phone, u.birth_date as user_birth_date, c.*
             FROM users u
             LEFT JOIN clients c ON u.id = c.user_id
             WHERE u.id = $1
-        `, [userId]);
+        \`, [userId]);
         
         let clientData = result.rows[0] || {};
         clientData.name = clientData.name || req.session.user.name;
@@ -32,7 +78,6 @@ router.get('/profile', async (req, res) => {
         clientData.phone = clientData.user_phone || clientData.phone || '';
         clientData.birth_date = clientData.user_birth_date || clientData.birth_date || null;
         
-        // Garante que o campo de medidas seja um objeto
         if (!clientData.body_measurements) clientData.body_measurements = {};
 
         res.render('pages/client-profile', { clientData });
@@ -47,11 +92,9 @@ router.post('/profile', async (req, res) => {
     try {
         await db.query('BEGIN');
         
-        // 1. Atualiza Dados Básicos
         await db.query('UPDATE users SET name=$1, phone=$2, birth_date=$3 WHERE id=$4', 
             [data.name, data.phone, data.birth_date || null, req.session.user.id]);
 
-        // 2. Prepara Medidas e Dados do Cliente
         const measurements = JSON.stringify({ 
             chest: data.meas_chest, waist: data.meas_waist, hips: data.meas_hips, 
             arms: data.meas_arms, thighs: data.meas_thighs 
@@ -62,52 +105,46 @@ router.post('/profile', async (req, res) => {
         const clientParams = [
             req.session.user.id, data.weight||0, data.weight||0, data.height||0, data.goal, 
             data.phone, data.birth_date||null, measurements,
-            // Campos adicionais para evitar null
             data.goal_description || '', data.training_experience || '', data.preferred_training_time || '',
             data.medical_history || '', data.medications || '', data.injuries || '',
             data.emergency_contact || '', data.emergency_phone || ''
         ];
 
-        // Lógica Upsert simplificada para garantir funcionamento
         if(check.rows.length === 0) {
-             await db.query(`
+             await db.query(\`
                 INSERT INTO clients (
                     user_id, weight, current_weight, height, goal, phone, birth_date, body_measurements,
                     goal_description, training_experience, preferred_training_time,
                     medical_history, medications, injuries, emergency_contact, emergency_phone
                 ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
-             `, clientParams);
+             \`, clientParams);
         } else {
-             await db.query(`
+             await db.query(\`
                 UPDATE clients SET 
                     weight=$2, current_weight=$3, height=$4, goal=$5, phone=$6, birth_date=$7, body_measurements=$8,
                     goal_description=$9, training_experience=$10, preferred_training_time=$11,
                     medical_history=$12, medications=$13, injuries=$14, emergency_contact=$15, emergency_phone=$16
                 WHERE user_id=$1
-             `, clientParams);
+             \`, clientParams);
         }
 
         await db.query('COMMIT');
         
-        // 3. Lógica de Redirecionamento (CORREÇÃO DO ERRO)
-        // Verifica se existe assinatura ativa e qual o preço do plano
-        const subRes = await db.query(`
+        const subRes = await db.query(\`
             SELECT s.id as sub_id, p.price, p.id as plan_id, p.name 
             FROM subscriptions s 
             JOIN plans p ON s.plan_id = p.id 
             WHERE s.user_id = $1 AND s.status = 'active' 
             ORDER BY s.start_date DESC LIMIT 1
-        `, [req.session.user.id]);
+        \`, [req.session.user.id]);
 
         if (subRes.rows.length > 0) {
             const subscription = subRes.rows[0];
             const price = parseFloat(subscription.price);
             
-            // Se o plano é pago (preço > 0) e ainda não foi pago (aqui assumimos que 'active' foi setado na criação, mas vamos forçar o checkout se necessário)
-            // Lógica ajustada: Redireciona para checkout SE for pago.
             if (price > 0 && subscription.plan_id) {
-                req.flash('success', 'Perfil salvo! Vamos finalizar seu pagamento.');
-                return res.redirect(`/client/checkout/${subscription.plan_id}`);
+                req.flash('success', 'Perfil salvo! Finalize o pagamento para ativar sua conta.');
+                return res.redirect(\`/client/checkout/\${subscription.plan_id}\`);
             }
         }
 
@@ -122,25 +159,34 @@ router.post('/profile', async (req, res) => {
     }
 });
 
-// === CHECKOUT (CORREÇÃO DE VARIÁVEIS) ===
+// === CHECKOUT ===
 router.get('/checkout/:planId', async (req, res) => {
     try {
         const planId = req.params.planId;
         
-        // Busca o plano
         const planResult = await db.query('SELECT * FROM plans WHERE id = $1', [planId]);
         
         if (planResult.rows.length === 0) {
-            console.log(`Plano ${planId} não encontrado.`);
             req.flash('error', 'Plano não encontrado.');
             return res.redirect('/client/plans');
         }
+
+        const plan = planResult.rows[0];
         
-        const pixKey = '084dee93-9dc5-44e7-aa2e-3eff8623651d';
+        // Defina aqui sua chave PIX real (CPF, CNPJ, Email, Tel ou Aleatória)
+        const pixKey = '084dee93-9dc5-44e7-aa2e-3eff8623651d'; 
+        const merchantName = 'Momentum Fit';
+        const merchantCity = 'SAO PAULO';
+        const txId = 'MOMENTUM' + Date.now().toString().slice(-6); // ID único curto
+        const price = parseFloat(plan.price);
+
+        // Gera o Payload oficial (BR Code) para o QR Code funcionar nos bancos
+        const pixPayload = generatePixPayload(pixKey, merchantName, merchantCity, txId, price);
         
         res.render('pages/client-checkout', { 
-            plan: planResult.rows[0],
-            pixKey: pixKey // Garante que a variável existe
+            plan: plan,
+            pixKey: pixKey,          // Para o botão "Copiar Chave"
+            pixPayload: pixPayload   // Para o QR Code
         });
 
     } catch (e) {
@@ -159,27 +205,23 @@ router.post('/checkout', async (req, res) => {
         if (planRes.rows.length === 0) throw new Error("Plano inválido");
         const plan = planRes.rows[0];
 
-        // Atualiza status anteriores
         await db.query("UPDATE subscriptions SET status = 'cancelled' WHERE user_id = $1 AND status = 'pending_payment'", [req.session.user.id]);
         
-        // Cria nova subscrição pendente
-        const subRes = await db.query(`
+        const subRes = await db.query(\`
             INSERT INTO subscriptions (user_id, plan_id, status, start_date, payment_due_day, auto_renew) 
             VALUES ($1, $2, 'pending_payment', NOW(), $3, true) 
-            RETURNING id`, 
+            RETURNING id\`, 
             [req.session.user.id, plan_id, due_day]
         );
         
-        // Registra tentativa de pagamento
-        await db.query(`
+        await db.query(\`
             INSERT INTO payments (user_id, amount, status, payment_date, subscription_id, proof_url) 
-            VALUES ($1, $2, 'pending', NOW(), $3, 'pix_manual_verify')`, 
+            VALUES ($1, $2, 'pending', NOW(), $3, 'pix_manual_verify')\`, 
             [req.session.user.id, plan.price, subRes.rows[0].id]
         );
 
-        // Tenta notificar (sem quebrar se falhar)
         try {
-            await createNotification(null, 'Pagamento Pendente', `Usuário ${req.session.user.name} enviou comprovante.`, '/admin/finance', 'alert');
+            await createNotification(null, 'Pagamento Pendente', \`Usuário \${req.session.user.name} enviou comprovante.\`, '/admin/finance', 'alert');
             await createNotification(req.session.user.id, 'Pagamento em Análise', 'Aguarde a validação.', '/client/financial', 'info');
             sendPaymentPendingEmail(req.session.user.email, req.session.user.name, plan.name).catch(console.error);
         } catch(nErr) { console.error("Erro notificação:", nErr); }
@@ -200,8 +242,8 @@ router.post('/checkout', async (req, res) => {
 router.get('/financial', async (req, res) => {
     try {
         const userId = req.session.user.id;
-        const subRes = await db.query(`SELECT s.*, p.name as plan_name, p.price, p.features FROM subscriptions s JOIN plans p ON s.plan_id = p.id WHERE s.user_id = $1 AND s.status IN ('active', 'pending_payment', 'past_due') ORDER BY s.start_date DESC LIMIT 1`, [userId]);
-        const payRes = await db.query(`SELECT py.*, pl.name as plan_name FROM payments py LEFT JOIN subscriptions s ON py.subscription_id = s.id LEFT JOIN plans pl ON s.plan_id = pl.id WHERE py.user_id = $1 ORDER BY py.created_at DESC`, [userId]);
+        const subRes = await db.query(\`SELECT s.*, p.name as plan_name, p.price, p.features FROM subscriptions s JOIN plans p ON s.plan_id = p.id WHERE s.user_id = $1 AND s.status IN ('active', 'pending_payment', 'past_due') ORDER BY s.start_date DESC LIMIT 1\`, [userId]);
+        const payRes = await db.query(\`SELECT py.*, pl.name as plan_name FROM payments py LEFT JOIN subscriptions s ON py.subscription_id = s.id LEFT JOIN plans pl ON s.plan_id = pl.id WHERE py.user_id = $1 ORDER BY py.created_at DESC\`, [userId]);
         res.render('pages/client-financial', { subscription: subRes.rows[0] || null, payments: payRes.rows });
     } catch (err) { 
         console.error("Erro Financial:", err);
@@ -209,7 +251,6 @@ router.get('/financial', async (req, res) => {
     }
 });
 
-// Outras rotas (Dashboard, Plans, etc)
 router.get('/dashboard', (req, res) => res.render('pages/client-dashboard', { stats: {} }));
 router.get('/plans', async (req, res) => { try { const p = await db.query("SELECT * FROM plans WHERE is_active = true ORDER BY price ASC"); res.render('pages/client-plans', { plans: p.rows }); } catch(e) { res.render('pages/client-plans', { plans: [] }); } });
 router.get('/content', (req, res) => res.render('pages/client-content', { articles: [] }));

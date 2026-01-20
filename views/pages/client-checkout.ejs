@@ -3,67 +3,123 @@
     <%- include('../partials/sidebar') %>
     
     <main class="main-content">
+        <div class="checkout-header" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 30px; border-radius: 12px; margin-bottom: 30px; text-align: center; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+            <div style="font-size: 3rem; margin-bottom: 10px;">���</div>
+            <h2 style="margin: 0; font-weight: 700;">Cadastro Recebido!</h2>
+            <p style="margin: 10px 0 0; opacity: 0.9;">Você está a um passo de transformar sua rotina.</p>
+        </div>
+
         <div class="page-header">
-            <h1>Finalizar Assinatura</h1>
-            <% if (plan) { %>
-                <p>Plano Selecionado: <strong><%= plan.name %></strong></p>
-            <% } else { %>
-                <p>Plano Selecionado: <strong>Desconhecido</strong></p>
-            <% } %>
+            <h1>Ativação da Assinatura</h1>
+            <p>Confirme os detalhes e realize o pagamento para liberar seu acesso.</p>
         </div>
 
         <% if (messages && messages.error) { %>
             <div class="alert alert-danger"><%= messages.error %></div>
         <% } %>
+        <% if (messages && messages.success) { %>
+            <div class="alert alert-success"><%= messages.success %></div>
+        <% } %>
 
         <% if (plan) { %>
-        <div class="checkout-grid">
-            <div class="card plan-summary">
-                <h3>Resumo</h3>
-                <div class="price-tag">R$ <%= plan.price %> <span class="period">/mês</span></div>
-                <ul class="features-list">
-                    <li>✅ Acesso à plataforma</li>
-                    <li>✅ Treinos personalizados</li>
-                    <li>✅ Suporte via Chat e IA</li>
-                </ul>
+        <div class="checkout-grid" style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 2rem;">
+            
+            <div class="card plan-summary" style="height: fit-content; border: 1px solid #e5e7eb; box-shadow: none;">
+                <div class="card-header" style="background: #f9fafb; padding: 1.5rem; border-bottom: 1px solid #e5e7eb;">
+                    <h3 style="margin: 0; color: #111827;">Resumo do Pedido</h3>
+                </div>
+                <div class="card-body" style="padding: 1.5rem;">
+                    <h2 style="color: var(--primary-color); font-size: 2rem; margin: 0 0 1rem;">
+                        <%= plan.name %>
+                    </h2>
+                    <div class="price-tag" style="font-size: 1.5rem; font-weight: 700; color: #374151; margin-bottom: 1.5rem;">
+                        R$ <%= plan.price %> <span class="period" style="font-size: 0.875rem; font-weight: 400; color: #6b7280;">/mês</span>
+                    </div>
+                    
+                    <ul class="features-list" style="list-style: none; padding: 0; margin: 0;">
+                        <li style="margin-bottom: 0.75rem; display: flex; align-items: center; color: #4b5563;">
+                            <span style="color: #10b981; margin-right: 8px;">✔</span> Acesso à plataforma
+                        </li>
+                        <li style="margin-bottom: 0.75rem; display: flex; align-items: center; color: #4b5563;">
+                            <span style="color: #10b981; margin-right: 8px;">✔</span> Treinos personalizados
+                        </li>
+                        <li style="margin-bottom: 0.75rem; display: flex; align-items: center; color: #4b5563;">
+                            <span style="color: #10b981; margin-right: 8px;">✔</span> Avaliação IA
+                        </li>
+                    </ul>
+                </div>
             </div>
 
             <div class="card payment-details">
-                <h3>Pagamento via PIX</h3>
-                <p>Use o QR Code ou a chave abaixo.</p>
-                
-                <div style="text-align: center; margin: 20px 0;">
-                    <% if (typeof pixKey !== 'undefined') { %>
-                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=<%= pixKey %>" alt="QR Code" style="border: 2px solid #eee; padding: 10px; border-radius: 8px;">
-                    <% } %>
+                <div class="card-header" style="border-bottom: 1px solid #eee; margin-bottom: 20px; padding-bottom: 10px;">
+                    <h3 style="display: flex; align-items: center; gap: 10px; margin: 0;">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/a/a2/Logo%E2%80%94pix_powered_by_Banco_Central_%28Brazil%2C_2020%29.svg" alt="Pix" style="height: 24px;">
+                        Pagamento via PIX
+                    </h3>
                 </div>
 
-                <div class="form-group">
-                    <label>Chave Pix:</label>
-                    <div style="display: flex; gap: 10px;">
-                        <input type="text" value="<%= typeof pixKey !== 'undefined' ? pixKey : '' %>" id="pixKeyInput" readonly class="form-control">
-                        <button type="button" onclick="copyPix()" class="btn-secondary">Copiar</button>
+                <div class="payment-body" style="text-align: center;">
+                    <div class="alert alert-info" style="font-size: 0.9rem; text-align: left; border-left: 4px solid #3b82f6;">
+                        <strong>Instruções:</strong>
+                        <ol style="margin: 5px 0 0 15px; padding: 0;">
+                            <li>Abra o aplicativo do seu banco.</li>
+                            <li>Escolha <strong>Pix > Pagar com QR Code</strong>.</li>
+                            <li>Escaneie o código abaixo ou copie a chave.</li>
+                        </ol>
                     </div>
-                </div>
 
-                <hr>
-
-                <form action="/client/checkout" method="POST">
-                    <input type="hidden" name="plan_id" value="<%= plan.id %>">
-                    <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+                    <div class="qr-container" style="background: white; padding: 15px; border: 1px solid #e5e7eb; border-radius: 8px; display: inline-block; margin: 20px 0;">
+                        <% if (typeof pixPayload !== 'undefined') { %>
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=<%= encodeURIComponent(pixPayload) %>" 
+                                 alt="QR Code Pix" 
+                                 style="display: block;">
+                        <% } else { %>
+                            <p>Erro ao gerar QR Code</p>
+                        <% } %>
+                    </div>
                     
-                    <div class="form-group">
-                        <label>Dia de vencimento:</label>
-                        <select name="due_day" required>
-                            <option value="5">Dia 05</option>
-                            <option value="10">Dia 10</option>
-                            <option value="15">Dia 15</option>
-                            <option value="20">Dia 20</option>
-                        </select>
+                    <p style="font-size: 0.9rem; color: #6b7280;">Escaneie para pagar <strong>R$ <%= plan.price %></strong></p>
+
+                    <div class="form-group" style="margin-top: 20px; text-align: left;">
+                        <label style="font-size: 0.85rem; font-weight: 600; color: #374151; margin-bottom: 5px; display: block;">
+                            Ou use o Pix Copia e Cola:
+                        </label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" 
+                                   value="<%= typeof pixPayload !== 'undefined' ? pixPayload : (typeof pixKey !== 'undefined' ? pixKey : '') %>" 
+                                   id="pixKeyInput" 
+                                   readonly 
+                                   class="form-control" 
+                                   style="background: #f3f4f6; color: #6b7280; font-family: monospace;">
+                            <button type="button" onclick="copyPix()" class="btn btn-secondary" style="white-space: nowrap; display: flex; align-items: center; gap: 5px;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                Copiar
+                            </button>
+                        </div>
                     </div>
 
-                    <button type="submit" class="btn-primary btn-block">Confirmar Pagamento Enviado</button>
-                </form>
+                    <hr style="margin: 30px 0;">
+
+                    <form action="/client/checkout" method="POST" style="text-align: left;">
+                        <input type="hidden" name="plan_id" value="<%= plan.id %>">
+                        <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+                        
+                        <div class="form-group">
+                            <label style="font-weight: 600;">Escolha o dia de vencimento das próximas faturas:</label>
+                            <select name="due_day" required class="form-control" style="max-width: 200px;">
+                                <option value="5">Dia 05</option>
+                                <option value="10">Dia 10</option>
+                                <option value="15">Dia 15</option>
+                                <option value="20">Dia 20</option>
+                            </select>
+                            <small class="text-muted">A primeira cobrança é referente ao acesso imediato.</small>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-block" style="padding: 15px; font-size: 1.1rem; font-weight: 600; margin-top: 20px;">
+                            JÁ FIZ O PIX, LIBERAR ACESSO
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
         <% } else { %>
@@ -74,13 +130,37 @@
     </main>
 </div>
 
+<style>
+    @media (max-width: 768px) {
+        .checkout-grid {
+            grid-template-columns: 1fr !important;
+        }
+        .checkout-header h2 {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+
 <script>
     function copyPix() {
         var copyText = document.getElementById("pixKeyInput");
         if(copyText) {
             copyText.select();
-            navigator.clipboard.writeText(copyText.value);
-            alert("Chave copiada!");
+            copyText.setSelectionRange(0, 99999); /* Para mobile */
+            
+            navigator.clipboard.writeText(copyText.value).then(function() {
+                // Feedback visual no botão
+                const btn = document.querySelector('button[onclick="copyPix()"]');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = 'Copiado!';
+                btn.classList.add('btn-success');
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.classList.remove('btn-success');
+                }, 2000);
+            }, function(err) {
+                alert("Erro ao copiar. Tente selecionar manualmente.");
+            });
         }
     }
 </script>
