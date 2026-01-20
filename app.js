@@ -8,7 +8,6 @@ const flash = require('connect-flash');
 const db = require('./database/db');
 
 // --- VERCEL SPECIFIC: Trust Proxy ---
-// Required for cookies to work over HTTPS on Vercel
 app.set('trust proxy', 1);
 
 app.set('view engine', 'ejs');
@@ -30,19 +29,25 @@ app.use(session({
     saveUninitialized: false,
     cookie: { 
         maxAge: 30 * 24 * 60 * 60 * 1000,
-        secure: process.env.NODE_ENV === 'production', // True on Vercel (HTTPS)
+        secure: process.env.NODE_ENV === 'production', 
         httpOnly: true,
-        sameSite: 'lax' // Important for navigation
+        sameSite: 'lax'
     }
 }));
 
 app.use(flash());
 
+// Middleware Global de Variáveis (AQUI ESTAVA O PROBLEMA)
 app.use((req, res, next) => {
     res.locals.user = req.session.user || null;
     res.locals.isAuthenticated = !!req.session.user; 
     res.locals.messages = req.flash();
     res.locals.csrfToken = 'token-mock-safe'; 
+    
+    // --- CORREÇÃO: Disponibilizar 'path' para a Sidebar ---
+    res.locals.path = req.path; 
+    // -----------------------------------------------------
+    
     next();
 });
 
