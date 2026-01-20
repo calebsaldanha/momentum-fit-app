@@ -30,7 +30,7 @@ router.post('/login', async (req, res) => {
 
                 req.session.user = user;
                 
-                // Redirecionamento baseado no papel
+                // Redirecionamento
                 if (user.role === 'admin' || user.role === 'superadmin') return res.redirect('/admin/dashboard');
                 if (user.role === 'trainer') return res.redirect('/trainer/dashboard');
                 return res.redirect('/client/dashboard');
@@ -48,17 +48,19 @@ router.post('/login', async (req, res) => {
 
 // GET Register
 router.get('/register', (req, res) => {
-    res.render('pages/register');
+    // CORREÇÃO: Passar 'plan' para a view para evitar ReferenceError se ela usar essa variável
+    const plan = req.query.plan || '';
+    res.render('pages/register', { plan: plan });
 });
 
-// POST Register (CORRIGIDO)
+// POST Register
 router.post('/register', async (req, res) => {
-    const { name, email, password, role } = req.body; // role pode vir de um select oculto ou ser 'client' por padrão
+    const { name, email, password, role } = req.body;
     
     try {
         await db.query('BEGIN');
 
-        // 1. Verificar se usuário já existe
+        // 1. Verificar duplicação
         const userCheck = await db.query('SELECT id FROM users WHERE email = $1', [email]);
         if (userCheck.rows.length > 0) {
             await db.query('ROLLBACK');
@@ -66,11 +68,9 @@ router.post('/register', async (req, res) => {
             return res.redirect('/auth/register');
         }
 
-        // 2. Criar Hash da Senha
+        // 2. Criar Usuário
         const hashedPassword = await bcrypt.hash(password, 10);
-        
-        // 3. Inserir Usuário
-        const userRole = role === 'trainer' ? 'trainer' : 'client'; // Segurança básica
+        const userRole = role === 'trainer' ? 'trainer' : 'client';
         const userStatus = userRole === 'trainer' ? 'pending_approval' : 'active';
         
         const newUser = await db.query(
@@ -79,29 +79,29 @@ router.post('/register', async (req, res) => {
         );
         const userId = newUser.rows[0].id;
 
-        // 4. Configurar Perfil Inicial Baseado no Role
+        // 3. Configurar Perfil
         if (userRole === 'client') {
-            // Inicializar tabela clients
             await db.query('INSERT INTO clients (user_id) VALUES ($1)', [userId]);
             
-            // CORREÇÃO: Buscar ID do plano Gratuito/Básico
+            // CORREÇÃO CRÍTICA: Buscar ID do plano correto para inserir na tabela subscriptions
+            // A tabela aceita plan_id (int), não plan_name (string)
             let planRes = await db.query("SELECT id FROM plans WHERE price = 0 OR name ILIKE '%Gratuito%' LIMIT 1");
             
-            // Fallback: Se não achar plano gratuito, pega o plano mais barato
             if (planRes.rows.length === 0) {
+                // Fallback para o plano mais barato se não houver gratuito
                 planRes = await db.query("SELECT id FROM plans ORDER BY price ASC LIMIT 1");
             }
 
-            // Se existir algum plano, criar assinatura
             if (planRes.rows.length > 0) {
                 const planId = planRes.rows[0].id;
+                // Inserção corrigida usando plan_id
                 await db.query(
                     "INSERT INTO subscriptions (user_id, plan_id, status, start_date) VALUES ($1, $2, 'active', NOW())",
                     [userId, planId]
                 );
             } else {
-                // Opcional: Criar plano default se não existir nenhum
-                const newPlan = await db.query("INSERT INTO plans (name, price, description) VALUES ('Gratuito', 0, 'Plano Inicial') RETURNING id");
+                // Se nenhum plano existir no banco, cria um default
+                const newPlan = await db.query("INSERT INTO plans (name, price, description) VALUES ('Básico', 0, 'Plano Inicial') RETURNING id");
                 await db.query(
                     "INSERT INTO subscriptions (user_id, plan_id, status, start_date) VALUES ($1, $2, 'active', NOW())",
                     [userId, newPlan.rows[0].id]
@@ -110,18 +110,17 @@ router.post('/register', async (req, res) => {
 
         } else if (userRole === 'trainer') {
             await db.query('INSERT INTO trainers (user_id) VALUES ($1)', [userId]);
-            // Notificar admin (lógica de notificação aqui se necessário)
         }
 
         await db.query('COMMIT');
         
-        req.flash('success', 'Cadastro realizado com sucesso! Faça login.');
+        req.flash('success', 'Cadastro realizado! Faça login.');
         res.redirect('/auth/login');
 
     } catch (err) {
         await db.query('ROLLBACK');
         console.error("Erro no registro:", err);
-        req.flash('error', 'Erro ao registrar. Tente novamente.');
+        req.flash('error', 'Erro ao registrar: ' + err.message);
         res.redirect('/auth/register');
     }
 });

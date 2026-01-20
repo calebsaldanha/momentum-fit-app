@@ -12,7 +12,6 @@ function isAdmin(req, res, next) {
 
 router.use(isAdmin);
 
-// === DASHBOARD ===
 router.get('/dashboard', async (req, res) => {
     try {
         const totalClients = await db.query("SELECT COUNT(*) FROM users WHERE role = 'client'");
@@ -27,15 +26,12 @@ router.get('/dashboard', async (req, res) => {
             revenue: revenue.rows[0].total,
             pending: pendingPayments.rows[0].count
         };
-
         res.render('pages/admin-dashboard', { stats, recentUsers: recentUsers.rows });
     } catch (err) {
-        console.error(err);
         res.render('pages/admin-dashboard', { stats: { clients:0, trainers:0, revenue:0, pending:0 }, recentUsers: [] });
     }
 });
 
-// === USUÁRIOS ===
 router.get('/users', async (req, res) => {
     try {
         const result = await db.query("SELECT * FROM users ORDER BY created_at DESC");
@@ -60,8 +56,9 @@ router.get('/users/:id', async (req, res) => {
             details = trainerRes.rows[0] || {};
         }
 
-        // Buscar TODOS os planos ativos para o dropdown
+        // Buscar Planos Ativos
         const plans = await db.query("SELECT * FROM plans WHERE is_active = true ORDER BY price ASC");
+        
         const trainers = await db.query("SELECT id, name FROM users WHERE role = 'trainer' AND status = 'active'");
         
         let workouts = [], financials = [], activeSub = null;
@@ -81,7 +78,7 @@ router.get('/users/:id', async (req, res) => {
             financials = fRes.rows;
 
             const subRes = await db.query(`
-                SELECT s.*, p.name as plan_name, p.price 
+                SELECT s.*, p.name as plan_name, p.price, p.id as plan_id 
                 FROM subscriptions s 
                 JOIN plans p ON s.plan_id = p.id 
                 WHERE s.user_id = $1 AND s.status IN ('active', 'pending_payment', 'past_due')
@@ -92,7 +89,7 @@ router.get('/users/:id', async (req, res) => {
 
         res.render('pages/admin-user-details', { 
             targetUser, details, 
-            plans: plans.rows,  // Passando planos para a view
+            plans: plans.rows,  // CRUCIAL: Passa a lista de planos para o EJS
             trainers: trainers.rows,
             workouts,
             payments: financials,
@@ -100,34 +97,20 @@ router.get('/users/:id', async (req, res) => {
         });
 
     } catch(e) {
-        console.error(e);
+        console.error("Admin User Details Error:", e);
         res.redirect('/admin/users');
     }
 });
 
-// Ações de Usuário
-router.post('/users/:id/suspend', async (req, res) => {
-    try { await db.query("UPDATE users SET status = $1 WHERE id = $2", [req.body.status, req.params.id]); req.flash('success', 'Status atualizado.'); } catch(e){} res.redirect(`/admin/users/${req.params.id}`);
-});
-router.post('/users/:id/delete', async (req, res) => {
-    try { await db.query("DELETE FROM users WHERE id = $1", [req.params.id]); req.flash('success', 'Excluído.'); res.redirect('/admin/users'); } catch(e){ res.redirect(`/admin/users/${req.params.id}`); }
-});
-router.post('/users/:id/reset-password', async (req, res) => {
-    try { const hash = await bcrypt.hash(req.body.new_password, 10); await db.query("UPDATE users SET password = $1 WHERE id = $2", [hash, req.params.id]); req.flash('success', 'Senha alterada.'); } catch(e){} res.redirect(`/admin/users/${req.params.id}`);
-});
-router.post('/users/:id/change-plan', async (req, res) => {
-    try { 
-        await db.query("UPDATE subscriptions SET status = 'cancelled' WHERE user_id = $1", [req.params.id]);
-        await db.query("INSERT INTO subscriptions (user_id, plan_id, status, start_date) VALUES ($1, $2, 'active', NOW())", [req.params.id, req.body.plan_id]);
-        req.flash('success', 'Plano alterado.');
-    } catch(e){ req.flash('error', 'Erro ao mudar plano.'); } res.redirect(`/admin/users/${req.params.id}`);
-});
-router.post('/users/:id/assign-trainer', async (req, res) => {
-    try { await db.query("UPDATE users SET trainer_id = $1 WHERE id = $2", [req.body.trainer_id, req.params.id]); await db.query("UPDATE client_profiles SET assigned_trainer_id = $1 WHERE user_id = $2", [req.body.trainer_id, req.params.id]); req.flash('success', 'Personal atribuído.'); } catch(e){} res.redirect(`/admin/users/${req.params.id}`);
-});
+// Post routes...
+router.post('/users/:id/suspend', async (req, res) => { try { await db.query("UPDATE users SET status = $1 WHERE id = $2", [req.body.status, req.params.id]); req.flash('success', 'Status atualizado.'); } catch(e){} res.redirect(`/admin/users/${req.params.id}`); });
+router.post('/users/:id/delete', async (req, res) => { try { await db.query("DELETE FROM users WHERE id = $1", [req.params.id]); req.flash('success', 'Excluído.'); res.redirect('/admin/users'); } catch(e){ res.redirect(`/admin/users/${req.params.id}`); } });
+router.post('/users/:id/reset-password', async (req, res) => { try { const hash = await bcrypt.hash(req.body.new_password, 10); await db.query("UPDATE users SET password = $1 WHERE id = $2", [hash, req.params.id]); req.flash('success', 'Senha alterada.'); } catch(e){} res.redirect(`/admin/users/${req.params.id}`); });
+router.post('/users/:id/change-plan', async (req, res) => { try { await db.query("UPDATE subscriptions SET status = 'cancelled' WHERE user_id = $1", [req.params.id]); await db.query("INSERT INTO subscriptions (user_id, plan_id, status, start_date) VALUES ($1, $2, 'active', NOW())", [req.params.id, req.body.plan_id]); req.flash('success', 'Plano alterado.'); } catch(e){ req.flash('error', 'Erro ao mudar plano.'); } res.redirect(`/admin/users/${req.params.id}`); });
+router.post('/users/:id/assign-trainer', async (req, res) => { try { await db.query("UPDATE users SET trainer_id = $1 WHERE id = $2", [req.body.trainer_id, req.params.id]); await db.query("UPDATE client_profiles SET assigned_trainer_id = $1 WHERE user_id = $2", [req.body.trainer_id, req.params.id]); req.flash('success', 'Personal atribuído.'); } catch(e){} res.redirect(`/admin/users/${req.params.id}`); });
 router.post('/users/:id/send-reminder', async (req, res) => { req.flash('success', 'Lembrete enviado.'); res.redirect(`/admin/users/${req.params.id}`); });
 
-// === FINANCEIRO ===
+// Financeiro
 router.get('/finance', async (req, res) => {
     try {
         const pending = await db.query("SELECT py.*, u.name as user_name, u.email, pl.name as plan_name FROM payments py JOIN users u ON py.user_id = u.id LEFT JOIN subscriptions s ON py.subscription_id = s.id LEFT JOIN plans pl ON s.plan_id = pl.id WHERE py.status = 'pending' ORDER BY py.created_at ASC");
@@ -140,57 +123,15 @@ router.post('/finance/reject', async (req, res) => { try{await db.query("UPDATE 
 router.post('/finance/suspend', async (req, res) => { try{await db.query("UPDATE subscriptions SET status='suspended' WHERE id=$1",[req.body.subscription_id]); req.flash('success','Suspenso');}catch(e){} res.redirect('/admin/finance'); });
 router.post('/finance/downgrade', async (req, res) => { try{await db.query("UPDATE subscriptions SET status='cancelled' WHERE id=$1",[req.body.subscription_id]); req.flash('success','Cancelado');}catch(e){} res.redirect('/admin/finance'); });
 
-// === CONTEÚDO (ARTIGOS) ===
-router.get('/content', async (req, res) => {
-    try {
-        const result = await db.query("SELECT a.*, u.name as author_name FROM articles a LEFT JOIN users u ON a.author_id = u.id ORDER BY a.created_at DESC");
-        res.render('pages/admin-content', { articles: result.rows });
-    } catch (e) {
-        res.render('pages/admin-content', { articles: [] });
-    }
-});
+// Content
+router.get('/content', async (req, res) => { try { const r = await db.query("SELECT a.*, u.name as author_name FROM articles a LEFT JOIN users u ON a.author_id = u.id ORDER BY a.created_at DESC"); res.render('pages/admin-content', { articles: r.rows }); } catch(e){ res.render('pages/admin-content', { articles: [] }); } });
+router.get('/content/create', (req, res) => { res.render('pages/create-article'); });
+router.post('/content/create', async (req, res) => { const { title, category, content, image_url } = req.body; try { await db.query("INSERT INTO articles (title, category, content, image_url, author_id, status) VALUES ($1, $2, $3, $4, $5, 'published')", [title, category, content, image_url, req.session.user.id]); req.flash('success', 'Artigo publicado!'); res.redirect('/admin/content'); } catch (e) { req.flash('error', 'Erro ao publicar.'); res.redirect('/admin/content/create'); } });
+router.post('/content/delete', async (req, res) => { try { await db.query("DELETE FROM articles WHERE id = $1", [req.body.article_id]); req.flash('success', 'Excluído.'); } catch(e){} res.redirect('/admin/content'); });
+router.post('/content/suspend', async (req, res) => { try { await db.query("UPDATE articles SET status = 'suspended' WHERE id = $1", [req.body.article_id]); req.flash('success', 'Suspenso.'); } catch(e){} res.redirect('/admin/content'); });
+router.post('/content/approve', async (req, res) => { try { await db.query("UPDATE articles SET status = 'published' WHERE id = $1", [req.body.article_id]); req.flash('success', 'Publicado.'); } catch(e){} res.redirect('/admin/content'); });
 
-// Criar Artigo (Página)
-router.get('/content/create', (req, res) => {
-    res.render('pages/create-article');
-});
-
-// Salvar Artigo
-router.post('/content/create', async (req, res) => {
-    const { title, category, content, image_url } = req.body;
-    try {
-        await db.query(
-            "INSERT INTO articles (title, category, content, image_url, author_id, status) VALUES ($1, $2, $3, $4, $5, 'published')",
-            [title, category, content, image_url, req.session.user.id]
-        );
-        req.flash('success', 'Artigo publicado!');
-        res.redirect('/admin/content');
-    } catch (e) {
-        console.error(e);
-        req.flash('error', 'Erro ao publicar.');
-        res.redirect('/admin/content/create');
-    }
-});
-
-// Ações de Artigo
-router.post('/content/delete', async (req, res) => {
-    try { await db.query("DELETE FROM articles WHERE id = $1", [req.body.article_id]); req.flash('success', 'Artigo excluído.'); } catch(e){} res.redirect('/admin/content');
-});
-router.post('/content/suspend', async (req, res) => {
-    try { await db.query("UPDATE articles SET status = 'suspended' WHERE id = $1", [req.body.article_id]); req.flash('success', 'Artigo suspenso.'); } catch(e){} res.redirect('/admin/content');
-});
-router.post('/content/approve', async (req, res) => {
-    try { await db.query("UPDATE articles SET status = 'published' WHERE id = $1", [req.body.article_id]); req.flash('success', 'Artigo publicado.'); } catch(e){} res.redirect('/admin/content');
-});
-
-// IA Audit
-router.get('/ia-audit', async (req, res) => {
-    try {
-        const result = await db.query("SELECT l.*, u.name as user_name FROM ia_logs l LEFT JOIN users u ON l.user_id = u.id ORDER BY l.created_at DESC LIMIT 100");
-        res.render('pages/admin-ia-audit', { logs: result.rows });
-    } catch (e) { res.render('pages/admin-ia-audit', { logs: [] }); }
-});
-
+router.get('/ia-audit', async (req, res) => { try { const r = await db.query("SELECT l.*, u.name as user_name FROM ia_logs l LEFT JOIN users u ON l.user_id = u.id ORDER BY l.created_at DESC LIMIT 100"); res.render('pages/admin-ia-audit', { logs: r.rows }); } catch(e){ res.render('pages/admin-ia-audit', { logs: [] }); } });
 router.get('/approvals', (req, res) => res.render('pages/admin-approvals', { pendingTrainers: [] }));
 router.get('/settings', (req, res) => res.render('pages/admin-settings'));
 
