@@ -13,9 +13,13 @@
                 <h3>Resumo</h3>
                 <div class="price-tag">R$ <%= plan.price %> <span class="period">/mês</span></div>
                 <ul class="features-list">
-                    <% if (plan.features && plan.features.length) { %>
+                    <% if (plan.features && Array.isArray(plan.features) && plan.features.length > 0) { %>
                         <% plan.features.forEach(f => { %>
                             <li>✅ <%= f %></li>
+                        <% }) %>
+                    <% } else if (typeof plan.features === 'string') { %>
+                        <% plan.features.split(',').forEach(f => { %>
+                            <li>✅ <%= f.trim() %></li>
                         <% }) %>
                     <% } else { %>
                         <li>✅ Acesso a treinos</li>
@@ -42,7 +46,7 @@
 
                 <hr>
 
-                <form action="/client/checkout" method="POST" enctype="application/x-www-form-urlencoded">
+                <form action="/client/checkout" method="POST">
                     <input type="hidden" name="plan_id" value="<%= plan.id %>">
                     
                     <div class="form-group">
