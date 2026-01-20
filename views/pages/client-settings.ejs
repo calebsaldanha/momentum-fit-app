@@ -9,7 +9,7 @@
 
         <div class="page-header">
             <h1>Minha <span class="text-neon">Conta</span></h1>
-            <p>Gerencie suas credenciais de acesso.</p>
+            <p>Gerencie acesso e segurança.</p>
         </div>
 
         <% if(messages && messages.success) { %><div class="alert alert-success"><%= messages.success %></div><% } %>
@@ -22,30 +22,29 @@
                 <h3 style="color:white; margin-bottom:20px; border-bottom:1px solid #333; padding-bottom:10px;">Acesso</h3>
                 
                 <div style="margin-bottom: 20px;">
-                    <label style="color:#888; display:block; margin-bottom:5px;">E-mail</label>
-                    <input type="email" name="email" value="<%= user.email %>" class="form-control" style="width:100%; padding:12px; background:#222; border:1px solid #444; color:white; border-radius:6px;">
-                    <small style="color:#666">Alterar o e-mail requer confirmação da senha atual.</small>
+                    <label style="color:#888;">E-mail</label>
+                    <input type="email" name="email" value="<%= user.email %>" class="form-control" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;">
                 </div>
 
                 <h3 style="color:white; margin-top:30px; margin-bottom:20px; border-bottom:1px solid #333; padding-bottom:10px;">Segurança</h3>
 
                 <div style="margin-bottom: 15px;">
-                    <label style="color:#888; display:block; margin-bottom:5px;">Senha Atual</label>
-                    <input type="password" name="current_password" placeholder="Necessário para fazer alterações" style="width:100%; padding:12px; background:#222; border:1px solid #444; color:white; border-radius:6px;">
+                    <label style="color:#888;">Senha Atual</label>
+                    <input type="password" name="current_password" placeholder="Necessário para alterações" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;">
                 </div>
 
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:20px;">
                     <div>
-                        <label style="color:#888; display:block; margin-bottom:5px;">Nova Senha</label>
-                        <input type="password" name="new_password" placeholder="Opcional" style="width:100%; padding:12px; background:#222; border:1px solid #444; color:white; border-radius:6px;">
+                        <label style="color:#888;">Nova Senha</label>
+                        <input type="password" name="new_password" placeholder="Opcional" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;">
                     </div>
                     <div>
-                        <label style="color:#888; display:block; margin-bottom:5px;">Confirmar Nova</label>
-                        <input type="password" name="confirm_password" placeholder="Repita a nova senha" style="width:100%; padding:12px; background:#222; border:1px solid #444; color:white; border-radius:6px;">
+                        <label style="color:#888;">Confirmar</label>
+                        <input type="password" name="confirm_password" placeholder="Repita a nova" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;">
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-primary btn-lg" style="width:100%;">Salvar Alterações</button>
+                <button type="submit" class="btn btn-primary btn-lg" style="width:100%;">Salvar</button>
             </form>
         </div>
     </main>

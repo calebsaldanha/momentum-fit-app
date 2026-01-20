@@ -8,32 +8,81 @@
         </div>
 
         <div class="page-header">
-            <h1>Pagamento <span class="text-neon">Pendente</span></h1>
-            <p>Seu plano <strong><%= subscription.plan_name %></strong> aguarda ativação.</p>
+            <h1>Meu <span class="text-neon">Plano</span></h1>
+            <p>Detalhes da sua assinatura e histórico.</p>
         </div>
 
-        <% if(messages.success) { %><div class="alert alert-success"><%= messages.success %></div><% } %>
-
-        <div class="card-box" style="text-align: center; max-width: 600px; margin: 0 auto; border: 2px solid var(--primary-color);">
-            <h2 style="color: white; margin-bottom: 5px;">Valor: R$ <%= subscription.price %></h2>
-            <p class="text-neon" style="font-weight: bold; margin-bottom: 20px;">Vencimento todo dia: <%= subscription.payment_due_day || 10 %></p>
+        <div style="display: grid; gap: 30px; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));">
             
-            <p class="text-muted" style="margin-bottom: 20px;">Escaneie o QR Code abaixo:</p>
-            
-            <div style="background: white; padding: 15px; border-radius: 12px; display: inline-block; margin-bottom: 20px;">
-                <img src="<%= qrCodeUrl %>" alt="QR Code PIX" style="width: 200px; height: 200px;">
+            <div class="card-box" style="border: 1px solid var(--primary-color);">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                    <h3 style="color:white; margin:0;">Assinatura Ativa</h3>
+                    <span style="background:rgba(190,242,2,0.2); color:var(--primary-color); padding:5px 10px; border-radius:15px; font-size:0.8rem; font-weight:bold;">ATIVO</span>
+                </div>
+                
+                <% if (subscription) { %>
+                    <h2 style="font-size:2.5rem; color:white; margin-bottom:10px;"><%= subscription.plan_name %></h2>
+                    <p style="color:#aaa; margin-bottom:20px;"><%= subscription.features %></p>
+                    <div style="background:#222; padding:15px; border-radius:8px; margin-bottom:20px;">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                            <span style="color:#888;">Valor</span>
+                            <span style="color:white; font-weight:bold;">R$ <%= parseFloat(subscription.price).toFixed(2) %>/mês</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between;">
+                            <span style="color:#888;">Renovação</span>
+                            <span style="color:white;">
+                                <%= subscription.next_billing_date ? new Date(subscription.next_billing_date).toLocaleDateString() : 'Automática' %>
+                            </span>
+                        </div>
+                    </div>
+                    <button class="btn btn-outline" style="width:100%;">Gerenciar Assinatura</button>
+                <% } else { %>
+                    <p style="color:#ccc;">Você ainda não possui um plano ativo.</p>
+                    <a href="/plans" class="btn btn-primary" style="width:100%; margin-top:20px;">Escolher Plano</a>
+                <% } %>
             </div>
 
-            <div style="background: #222; padding: 15px; border-radius: 8px; word-break: break-all; margin-bottom: 20px;">
-                <p style="color: #888; font-size: 0.8rem; margin-bottom: 5px;">Chave PIX (Copia e Cola):</p>
-                <code style="color: white; font-size: 1rem;"><%= pixKey %></code>
+            <div class="card-box" style="grid-column: 1 / -1;">
+                <h3 style="color:white; margin-bottom:20px;">Histórico de Pagamentos</h3>
+                <% if (payments && payments.length > 0) { %>
+                    <div class="table-responsive">
+                        <table style="width:100%; text-align:left; border-collapse: collapse;">
+                            <thead>
+                                <tr style="border-bottom:1px solid #333;">
+                                    <th style="padding:15px; color:#888;">Data</th>
+                                    <th style="padding:15px; color:#888;">Descrição</th>
+                                    <th style="padding:15px; color:#888;">Valor</th>
+                                    <th style="padding:15px; color:#888;">Status</th>
+                                    <th style="padding:15px; color:#888;"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% payments.forEach(pay => { %>
+                                    <tr style="border-bottom:1px solid #222;">
+                                        <td style="padding:15px; color:white;"><%= new Date(pay.created_at).toLocaleDateString() %></td>
+                                        <td style="padding:15px; color:white;"><%= pay.plan_name || 'Serviço' %></td>
+                                        <td style="padding:15px; color:white;">R$ <%= parseFloat(pay.amount).toFixed(2) %></td>
+                                        <td style="padding:15px;">
+                                            <% if(pay.status === 'paid') { %>
+                                                <span style="color:#bef202;">Pago</span>
+                                            <% } else if(pay.status === 'pending') { %>
+                                                <span style="color:orange;">Pendente</span>
+                                            <% } else { %>
+                                                <span style="color:red;">Falha</span>
+                                            <% } %>
+                                        </td>
+                                        <td style="padding:15px; text-align:right;">
+                                            <button class="btn btn-outline btn-sm"><i class="fas fa-file-invoice"></i></button>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                <% } else { %>
+                    <p style="color:#666; font-style:italic;">Nenhum pagamento registrado.</p>
+                <% } %>
             </div>
-
-            <div class="alert alert-info" style="font-size: 0.9rem; background: rgba(0, 255, 255, 0.1); border-color: cyan; color: cyan;">
-                <i class="fas fa-clock"></i> Após o pagamento, envie o comprovante para liberação.
-            </div>
-
-            <a href="/client/dashboard" class="btn btn-outline" style="margin-top: 20px;">Voltar ao Dashboard</a>
         </div>
     </main>
 </div>

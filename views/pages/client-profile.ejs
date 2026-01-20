@@ -9,7 +9,7 @@
 
         <div class="page-header">
             <h1>Ficha de <span class="text-neon">Anamnese</span></h1>
-            <p>Mantenha seus dados atualizados.</p>
+            <p>Mantenha seus dados completos para um treino melhor.</p>
         </div>
 
         <% if(messages && messages.success) { %><div class="alert alert-success"><%= messages.success %></div><% } %>
@@ -22,42 +22,46 @@
                 
                 <div class="card-box">
                     <h3 style="color: white; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px;">Pessoal</h3>
-                    <div style="margin-bottom: 15px;">
-                        <label style="color:#888">Nome</label>
-                        <input type="text" name="name" value="<%= clientData.name || '' %>" class="form-control" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;">
-                    </div>
-                    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                    <div style="margin-bottom: 15px;"><label style="color:#888">Nome</label><input type="text" name="name" value="<%= clientData.name || '' %>" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"></div>
+                    <div style="display: flex; gap: 10px;">
                         <div style="flex:1"><label style="color:#888">Telefone</label><input type="text" name="phone" value="<%= clientData.phone || '' %>" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"></div>
                         <div style="flex:1">
                             <label style="color:#888">Nascimento</label>
-                            <% 
-                                let birthVal = '';
-                                if(clientData.birth_date) {
-                                    try { birthVal = new Date(clientData.birth_date).toISOString().split('T')[0]; } catch(e){}
-                                }
-                            %>
+                            <% let birthVal = clientData.birth_date ? new Date(clientData.birth_date).toISOString().split('T')[0] : ''; %>
                             <input type="date" name="birth_date" value="<%= birthVal %>" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;">
                         </div>
-                    </div>
-                    <div style="display: flex; gap: 10px;">
-                        <div style="flex:1"><label style="color:#888">Peso (kg)</label><input type="number" step="0.1" name="weight" value="<%= clientData.weight || '' %>" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"></div>
-                        <div style="flex:1"><label style="color:#888">Altura (cm)</label><input type="number" name="height" value="<%= clientData.height || '' %>" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"></div>
                     </div>
                 </div>
 
                 <div class="card-box">
-                    <h3 style="color: #bef202; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px;">Objetivo</h3>
+                    <h3 style="color: #bef202; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px;">Corpo & Medidas</h3>
+                    <div style="display: flex; gap: 10px; margin-bottom:15px;">
+                        <div style="flex:1"><label style="color:#888">Peso (kg)</label><input type="number" step="0.1" name="weight" value="<%= clientData.current_weight || clientData.weight || '' %>" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"></div>
+                        <div style="flex:1"><label style="color:#888">Altura (cm)</label><input type="number" name="height" value="<%= clientData.height || '' %>" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"></div>
+                    </div>
+                    <label style="color:#888; font-size:0.9rem; margin-bottom:5px; display:block;">Circunferências (cm)</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                        <input type="number" name="meas_chest" placeholder="Peito" value="<%= clientData.body_measurements.chest || '' %>" style="padding:8px; background:#222; border:1px solid #444; color:white;">
+                        <input type="number" name="meas_waist" placeholder="Cintura" value="<%= clientData.body_measurements.waist || '' %>" style="padding:8px; background:#222; border:1px solid #444; color:white;">
+                        <input type="number" name="meas_hips" placeholder="Quadril" value="<%= clientData.body_measurements.hips || '' %>" style="padding:8px; background:#222; border:1px solid #444; color:white;">
+                        <input type="number" name="meas_arms" placeholder="Braço" value="<%= clientData.body_measurements.arms || '' %>" style="padding:8px; background:#222; border:1px solid #444; color:white;">
+                        <input type="number" name="meas_thighs" placeholder="Coxa" value="<%= clientData.body_measurements.thighs || '' %>" style="padding:8px; background:#222; border:1px solid #444; color:white;">
+                    </div>
+                </div>
+
+                <div class="card-box">
+                    <h3 style="color: #bef202; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px;">Objetivo & Preferências</h3>
                     <div style="margin-bottom: 15px;">
                         <label style="color:#888">Meta Principal</label>
                         <select name="goal" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;">
                             <option value="emagrecimento" <%= clientData.goal == 'emagrecimento' ? 'selected' : '' %>>Emagrecimento</option>
                             <option value="hipertrofia" <%= clientData.goal == 'hipertrofia' ? 'selected' : '' %>>Hipertrofia</option>
-                            <option value="saude" <%= clientData.goal == 'saude' ? 'selected' : '' %>>Saúde</option>
+                            <option value="saude" <%= clientData.goal == 'saude' ? 'selected' : '' %>>Saúde/Condicionamento</option>
+                            <option value="performance" <%= clientData.goal == 'performance' ? 'selected' : '' %>>Performance Atlética</option>
                         </select>
                     </div>
-                    <div style="margin-bottom: 15px;"><label style="color:#888">Descrição</label><textarea name="goal_description" rows="2" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"><%= clientData.goal_description || '' %></textarea></div>
-                    <div style="display:flex; gap:10px;">
-                        <div style="flex:1"><label style="color:#888">Experiência</label>
+                    <div style="display:flex; gap:10px; margin-bottom:15px;">
+                        <div style="flex:1"><label style="color:#888">Nível</label>
                             <select name="training_experience" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;">
                                 <option value="iniciante" <%= clientData.training_experience == 'iniciante' ? 'selected' : '' %>>Iniciante</option>
                                 <option value="intermediario" <%= clientData.training_experience == 'intermediario' ? 'selected' : '' %>>Intermediário</option>
@@ -72,28 +76,39 @@
                             </select>
                         </div>
                     </div>
+                    <div style="margin-bottom: 10px;"><label style="color:#888">Exercícios que GOSTA</label><input type="text" name="liked_exercises" value="<%= clientData.liked_exercises || '' %>" placeholder="Ex: Agachamento, Corrida..." style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"></div>
+                    <div style="margin-bottom: 10px;"><label style="color:#888">Exercícios que EVITA</label><input type="text" name="disliked_exercises" value="<%= clientData.disliked_exercises || '' %>" placeholder="Ex: Burpees, Saltos..." style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"></div>
                 </div>
 
                 <div class="card-box">
-                    <h3 style="color: #ff4d4d; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px;">Saúde</h3>
-                    <div style="margin-bottom: 15px;"><label style="color:#888">Histórico Médico</label><textarea name="medical_history" rows="2" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"><%= clientData.medical_history || '' %></textarea></div>
-                    <div style="margin-bottom: 15px;"><label style="color:#888">Medicamentos</label><textarea name="medications" rows="2" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"><%= clientData.medications || '' %></textarea></div>
-                    <div style="margin-bottom: 15px;"><label style="color:#888">Lesões</label><textarea name="injuries" rows="2" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"><%= clientData.injuries || '' %></textarea></div>
-                    <div style="display:flex; gap:10px;">
-                        <div style="flex:1"><label style="color:#ff4d4d">Contato Emerg.</label><input type="text" name="emergency_contact" value="<%= clientData.emergency_contact || '' %>" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"></div>
-                        <div style="flex:1"><label style="color:#ff4d4d">Telefone</label><input type="text" name="emergency_phone" value="<%= clientData.emergency_phone || '' %>" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"></div>
-                    </div>
+                    <h3 style="color: #ff4d4d; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px;">Saúde & Restrições</h3>
+                    <div style="margin-bottom: 10px;"><label style="color:#888">Histórico Médico</label><textarea name="medical_history" rows="2" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"><%= clientData.medical_history || '' %></textarea></div>
+                    <div style="margin-bottom: 10px;"><label style="color:#888">Medicamentos</label><textarea name="medications" rows="2" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"><%= clientData.medications || '' %></textarea></div>
+                    <div style="margin-bottom: 10px;"><label style="color:#888">Lesões</label><textarea name="injuries" rows="2" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"><%= clientData.injuries || '' %></textarea></div>
+                    <div style="margin-bottom: 10px;"><label style="color:#ff4d4d">Restrições Alimentares</label><input type="text" name="dietary_restrictions" value="<%= clientData.dietary_restrictions || '' %>" placeholder="Alergias, Intolerâncias..." style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"></div>
                 </div>
 
                 <div class="card-box">
                     <h3 style="color: #4da6ff; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px;">Estilo de Vida</h3>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom:15px;">
                         <div><label style="color:#888">Sono</label><select name="sleep_quality" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"><option value="boa">Boa</option><option value="regular">Regular</option><option value="ruim">Ruim</option></select></div>
                         <div><label style="color:#888">Estresse</label><select name="stress_level" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"><option value="baixo">Baixo</option><option value="medio">Médio</option><option value="alto">Alto</option></select></div>
-                        <div><label style="color:#888">Água</label><select name="water_intake" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"><option value="<1L">< 1L</option><option value="2L">~ 2L</option><option value=">3L">> 3L</option></select></div>
-                        <div><label style="color:#888">Fumo</label><select name="smoking_status" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"><option value="nao">Não</option><option value="sim">Sim</option></select></div>
+                        <div><label style="color:#888">Rotina Diária</label>
+                            <select name="daily_activity_level" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;">
+                                <option value="sedentario" <%= clientData.daily_activity_level == 'sedentario' ? 'selected' : '' %>>Sedentário</option>
+                                <option value="ativo" <%= clientData.daily_activity_level == 'ativo' ? 'selected' : '' %>>Moderado</option>
+                                <option value="muito_ativo" <%= clientData.daily_activity_level == 'muito_ativo' ? 'selected' : '' %>>Muito Ativo/Braçal</option>
+                            </select>
+                        </div>
+                        <div><label style="color:#888">Álcool</label>
+                            <select name="alcohol_consumption" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;">
+                                <option value="nunca" <%= clientData.alcohol_consumption == 'nunca' ? 'selected' : '' %>>Nunca</option>
+                                <option value="socialmente" <%= clientData.alcohol_consumption == 'socialmente' ? 'selected' : '' %>>Socialmente</option>
+                                <option value="frequentemente" <%= clientData.alcohol_consumption == 'frequentemente' ? 'selected' : '' %>>Frequentemente</option>
+                            </select>
+                        </div>
                     </div>
-                    <div style="margin-top: 15px;"><label style="color:#888">Equipamentos</label><input type="text" name="available_equipment" value="<%= clientData.available_equipment || '' %>" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"></div>
+                    <div style="margin-top: 15px;"><label style="color:#888">Equipamentos Disponíveis</label><input type="text" name="available_equipment" value="<%= clientData.available_equipment || '' %>" placeholder="Halteres, Banco, Academia completa..." style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"></div>
                 </div>
 
                 <div style="grid-column: 1 / -1; text-align: right;">
