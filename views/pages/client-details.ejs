@@ -1,12 +1,22 @@
 <%- include('../partials/header.ejs') %>
-<div class="page-content-wrapper">
-    <div style="margin-bottom: 2rem;">
-        <a href="/admin/clients" class="text-muted" style="text-decoration: none; font-size: 0.9rem;"><i class="fas fa-arrow-left"></i> Voltar</a>
-        <h2 class="text-neon" style="margin-top: 10px;">Detalhes do Aluno</h2>
-    </div>
-    
-    <div class="card-modern">
-        <p>Perfil do aluno carregado.</p>
-    </div>
+<div class="dashboard-container">
+    <%- include('../partials/sidebar.ejs', { path: '/clients' }) %> <main class="dashboard-main">
+        <div class="page-header">
+            <a href="javascript:history.back()" class="btn btn-outline btn-sm" style="float:right"><i class="fas fa-arrow-left"></i> Voltar</a>
+            <h1>Detalhes do <span class="text-neon">Aluno</span></h1>
+            <p><%= client.name %> (<%= client.email %>)</p>
+        </div>
+
+        <h3 style="margin: 30px 0 20px;">Ficha de Anamnese</h3>
+        <%- include('../partials/client-anamnesis-view.ejs', { client: client }) %>
+
+        <div style="margin-top: 30px;">
+            <h3 style="margin-bottom: 20px;">Ações Rápidas</h3>
+            <div style="display: flex; gap: 15px;">
+                <a href="/chat?user=<%= client.user_id %>" class="btn btn-primary"><i class="fas fa-comment"></i> Enviar Mensagem</a>
+                <a href="/workouts/create?client_id=<%= client.id %>" class="btn btn-outline"><i class="fas fa-dumbbell"></i> Criar Treino</a>
+            </div>
+        </div>
+    </main>
 </div>
 <%- include('../partials/footer.ejs') %>
