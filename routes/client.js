@@ -22,8 +22,6 @@ router.get('/profile', async (req, res) => {
         
         const clientData = result.rows[0] || {};
         clientData.goal = clientData.fitness_goals || clientData.goal; 
-        
-        // Garantir que body_measurements seja um objeto
         if (!clientData.body_measurements) clientData.body_measurements = {};
 
         res.render('pages/client-profile', { clientData });
@@ -38,20 +36,14 @@ router.post('/profile', async (req, res) => {
     try {
         await db.query('BEGIN');
         
-        // Atualizar User
         await db.query('UPDATE users SET name=$1, phone=$2, birth_date=$3 WHERE id=$4', 
             [data.name, data.phone, data.birth_date || null, req.session.user.id]);
 
-        // Preparar JSON de medidas
         const measurements = {
-            chest: data.meas_chest,
-            waist: data.meas_waist,
-            hips: data.meas_hips,
-            arms: data.meas_arms,
-            thighs: data.meas_thighs
+            chest: data.meas_chest, waist: data.meas_waist, hips: data.meas_hips,
+            arms: data.meas_arms, thighs: data.meas_thighs
         };
 
-        // Upsert Client
         const check = await db.query('SELECT 1 FROM clients WHERE user_id=$1', [req.session.user.id]);
         
         const fields = [
@@ -59,31 +51,32 @@ router.post('/profile', async (req, res) => {
             data.training_experience, data.preferred_training_time, data.medical_history, data.medications,
             data.injuries, data.emergency_contact, data.emergency_phone, data.sleep_quality, data.stress_level,
             data.water_intake, data.smoking_status, data.available_equipment,
-            // Novos campos
             data.daily_activity_level, data.alcohol_consumption, data.dietary_restrictions, 
             data.liked_exercises, data.disliked_exercises, JSON.stringify(measurements)
         ];
 
+        const insertQuery = `INSERT INTO clients (
+            user_id, current_weight, height, fitness_goals, goal_description, 
+            training_experience, preferred_training_time, medical_history, medications, 
+            injuries, emergency_contact, emergency_phone, sleep_quality, stress_level, 
+            water_intake, smoking_status, available_equipment,
+            daily_activity_level, alcohol_consumption, dietary_restrictions,
+            liked_exercises, disliked_exercises, body_measurements
+           ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23)`;
+           
+        const updateQuery = `UPDATE clients SET 
+            current_weight=$2, height=$3, fitness_goals=$4, goal_description=$5, 
+            training_experience=$6, preferred_training_time=$7, medical_history=$8, medications=$9, 
+            injuries=$10, emergency_contact=$11, emergency_phone=$12, sleep_quality=$13, stress_level=$14, 
+            water_intake=$15, smoking_status=$16, available_equipment=$17,
+            daily_activity_level=$18, alcohol_consumption=$19, dietary_restrictions=$20,
+            liked_exercises=$21, disliked_exercises=$22, body_measurements=$23
+           WHERE user_id=$1`;
+
         if(check.rows.length === 0) {
-            await db.query(`INSERT INTO clients (
-                user_id, current_weight, height, fitness_goals, goal_description, 
-                training_experience, preferred_training_time, medical_history, medications, 
-                injuries, emergency_contact, emergency_phone, sleep_quality, stress_level, 
-                water_intake, smoking_status, available_equipment,
-                daily_activity_level, alcohol_consumption, dietary_restrictions,
-                liked_exercises, disliked_exercises, body_measurements
-               ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23)`, 
-               fields);
+            await db.query(insertQuery, fields);
         } else {
-            await db.query(`UPDATE clients SET 
-                current_weight=$2, height=$3, fitness_goals=$4, goal_description=$5, 
-                training_experience=$6, preferred_training_time=$7, medical_history=$8, medications=$9, 
-                injuries=$10, emergency_contact=$11, emergency_phone=$12, sleep_quality=$13, stress_level=$14, 
-                water_intake=$15, smoking_status=$16, available_equipment=$17,
-                daily_activity_level=$18, alcohol_consumption=$19, dietary_restrictions=$20,
-                liked_exercises=$21, disliked_exercises=$22, body_measurements=$23
-               WHERE user_id=$1`, 
-               fields);
+            await db.query(updateQuery, fields);
         }
 
         await db.query('COMMIT');
@@ -101,7 +94,8 @@ router.post('/profile', async (req, res) => {
 router.get('/settings', async (req, res) => {
     try {
         const result = await db.query('SELECT name, email FROM users WHERE id = $1', [req.session.user.id]);
-        res.render('pages/client-settings', { user: result.rows[0] });
+        // CORREÇÃO: Usar settingsUser para não conflitar com req.session.user (res.locals.user)
+        res.render('pages/client-settings', { settingsUser: result.rows[0] });
     } catch (e) {
         console.error(e);
         res.redirect('/client/dashboard');
@@ -142,7 +136,6 @@ router.get('/financial', async (req, res) => {
     try {
         const userId = req.session.user.id;
         
-        // Buscar assinatura ativa
         const subRes = await db.query(`
             SELECT s.*, p.name as plan_name, p.price, p.features 
             FROM subscriptions s 
@@ -150,7 +143,6 @@ router.get('/financial', async (req, res) => {
             WHERE s.user_id = $1 AND s.status = 'active'
         `, [userId]);
 
-        // Buscar histórico de pagamentos
         const payRes = await db.query(`
             SELECT py.*, p.name as plan_name 
             FROM payments py

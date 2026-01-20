@@ -3,7 +3,8 @@
 <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
         <span class="brand-logo" style="font-size: 1rem;">
-            <i class="fas fa-bars text-neon"></i> &nbsp; Navegação
+            <i class="fas fa-bars text-neon"></i> &nbsp;
+            Navegação
         </span>
         <button class="close-btn mobile-only" id="sidebarCloseBtn" style="margin-left: auto; font-size: 1.2rem;">
             <i class="fas fa-times"></i>
@@ -11,12 +12,12 @@
     </div>
 
     <nav class="sidebar-nav">
-        <% if (user.role === 'client') { %>
+        <% if (user && user.role === 'client') { %>
             <div class="menu-category">TREINO</div>
             <a href="/client/dashboard" class="nav-item <%= path === '/client/dashboard' ? 'active' : '' %>">
                 <i class="fas fa-home"></i> <span>Início</span>
             </a>
-            <a href="/client/workouts" class="nav-item <%= path.includes('/workouts') ? 'active' : '' %>">
+            <a href="/client/workouts" class="nav-item <%= path && path.includes('/workouts') ? 'active' : '' %>">
                 <i class="fas fa-dumbbell"></i> <span>Meus Treinos</span>
             </a>
             <a href="/client/evolution" class="nav-item <%= path === '/client/evolution' ? 'active' : '' %>">
@@ -30,6 +31,9 @@
             <a href="/client/profile" class="nav-item <%= path === '/client/profile' ? 'active' : '' %>">
                 <i class="fas fa-user"></i> <span>Perfil</span>
             </a>
+            <a href="/client/financial" class="nav-item <%= path === '/client/financial' ? 'active' : '' %>">
+                <i class="fas fa-wallet"></i> <span>Financeiro</span>
+            </a>
             <a href="/chat" class="nav-item <%= path === '/chat' ? 'active' : '' %>">
                 <i class="fas fa-comments"></i> <span>Chat</span>
             </a>
@@ -38,12 +42,12 @@
             </a>
         <% } %>
 
-        <% if (user.role === 'trainer') { %>
+        <% if (user && user.role === 'trainer') { %>
             <div class="menu-category">GESTÃO</div>
             <a href="/trainer/dashboard" class="nav-item <%= path === '/trainer/dashboard' ? 'active' : '' %>">
                 <i class="fas fa-tachometer-alt"></i> <span>Painel</span>
             </a>
-            <a href="/trainer/clients" class="nav-item <%= path.includes('/trainer/clients') ? 'active' : '' %>">
+            <a href="/trainer/clients" class="nav-item <%= path && path.includes('/trainer/clients') ? 'active' : '' %>">
                 <i class="fas fa-users"></i> <span>Alunos</span>
             </a>
             <a href="/trainer/schedule" class="nav-item <%= path === '/trainer/schedule' ? 'active' : '' %>">
@@ -71,7 +75,7 @@
             </a>
         <% } %>
 
-        <% if (user.role === 'admin' || user.role === 'superadmin') { %>
+        <% if (user && (user.role === 'admin' || user.role === 'superadmin')) { %>
             <div class="menu-category">ADMIN</div>
             <a href="/admin/dashboard" class="nav-item <%= path === '/admin/dashboard' ? 'active' : '' %>">
                 <i class="fas fa-chart-pie"></i> <span>Visão Geral</span>
@@ -79,7 +83,7 @@
             <a href="/admin/approvals" class="nav-item <%= path === '/admin/approvals' ? 'active' : '' %>">
                 <i class="fas fa-check-circle"></i> <span>Aprovações</span>
             </a>
-            <a href="/admin/users" class="nav-item <%= path.includes('/admin/users') ? 'active' : '' %>">
+            <a href="/admin/users" class="nav-item <%= path && path.includes('/admin/users') ? 'active' : '' %>">
                 <i class="fas fa-users-cog"></i> <span>Usuários</span>
             </a>
             <a href="/admin/content" class="nav-item <%= path === '/admin/content' ? 'active' : '' %>">
