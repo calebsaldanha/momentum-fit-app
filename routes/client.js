@@ -19,7 +19,7 @@ router.use(isClient);
 function generatePixPayload(key, name, city, txId, price) {
     const formatField = (id, value) => {
         const len = value.length.toString().padStart(2, '0');
-        return \`\${id}\${len}\${value}\`;
+        return `${id}${len}${value}`;
     };
 
     let payload = 
@@ -65,12 +65,12 @@ function generatePixPayload(key, name, city, txId, price) {
 router.get('/profile', async (req, res) => {
     try {
         const userId = req.session.user.id;
-        const result = await db.query(\`
+        const result = await db.query(`
             SELECT u.name, u.email, u.phone as user_phone, u.birth_date as user_birth_date, c.*
             FROM users u
             LEFT JOIN clients c ON u.id = c.user_id
             WHERE u.id = $1
-        \`, [userId]);
+        `, [userId]);
         
         let clientData = result.rows[0] || {};
         clientData.name = clientData.name || req.session.user.name;
@@ -111,32 +111,32 @@ router.post('/profile', async (req, res) => {
         ];
 
         if(check.rows.length === 0) {
-             await db.query(\`
+             await db.query(`
                 INSERT INTO clients (
                     user_id, weight, current_weight, height, goal, phone, birth_date, body_measurements,
                     goal_description, training_experience, preferred_training_time,
                     medical_history, medications, injuries, emergency_contact, emergency_phone
                 ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
-             \`, clientParams);
+             `, clientParams);
         } else {
-             await db.query(\`
+             await db.query(`
                 UPDATE clients SET 
                     weight=$2, current_weight=$3, height=$4, goal=$5, phone=$6, birth_date=$7, body_measurements=$8,
                     goal_description=$9, training_experience=$10, preferred_training_time=$11,
                     medical_history=$12, medications=$13, injuries=$14, emergency_contact=$15, emergency_phone=$16
                 WHERE user_id=$1
-             \`, clientParams);
+             `, clientParams);
         }
 
         await db.query('COMMIT');
         
-        const subRes = await db.query(\`
+        const subRes = await db.query(`
             SELECT s.id as sub_id, p.price, p.id as plan_id, p.name 
             FROM subscriptions s 
             JOIN plans p ON s.plan_id = p.id 
             WHERE s.user_id = $1 AND s.status = 'active' 
             ORDER BY s.start_date DESC LIMIT 1
-        \`, [req.session.user.id]);
+        `, [req.session.user.id]);
 
         if (subRes.rows.length > 0) {
             const subscription = subRes.rows[0];
@@ -144,7 +144,7 @@ router.post('/profile', async (req, res) => {
             
             if (price > 0 && subscription.plan_id) {
                 req.flash('success', 'Perfil salvo! Finalize o pagamento para ativar sua conta.');
-                return res.redirect(\`/client/checkout/\${subscription.plan_id}\`);
+                return res.redirect(`/client/checkout/${subscription.plan_id}`);
             }
         }
 
@@ -173,20 +173,20 @@ router.get('/checkout/:planId', async (req, res) => {
 
         const plan = planResult.rows[0];
         
-        // Defina aqui sua chave PIX real (CPF, CNPJ, Email, Tel ou Aleatória)
+        // Chave PIX
         const pixKey = '084dee93-9dc5-44e7-aa2e-3eff8623651d'; 
         const merchantName = 'Momentum Fit';
         const merchantCity = 'SAO PAULO';
-        const txId = 'MOMENTUM' + Date.now().toString().slice(-6); // ID único curto
+        const txId = 'MOMENTUM' + Date.now().toString().slice(-6);
         const price = parseFloat(plan.price);
 
-        // Gera o Payload oficial (BR Code) para o QR Code funcionar nos bancos
+        // Gera o Payload oficial (BR Code)
         const pixPayload = generatePixPayload(pixKey, merchantName, merchantCity, txId, price);
         
         res.render('pages/client-checkout', { 
             plan: plan,
-            pixKey: pixKey,          // Para o botão "Copiar Chave"
-            pixPayload: pixPayload   // Para o QR Code
+            pixKey: pixKey,
+            pixPayload: pixPayload
         });
 
     } catch (e) {
@@ -207,21 +207,21 @@ router.post('/checkout', async (req, res) => {
 
         await db.query("UPDATE subscriptions SET status = 'cancelled' WHERE user_id = $1 AND status = 'pending_payment'", [req.session.user.id]);
         
-        const subRes = await db.query(\`
+        const subRes = await db.query(`
             INSERT INTO subscriptions (user_id, plan_id, status, start_date, payment_due_day, auto_renew) 
             VALUES ($1, $2, 'pending_payment', NOW(), $3, true) 
-            RETURNING id\`, 
+            RETURNING id`, 
             [req.session.user.id, plan_id, due_day]
         );
         
-        await db.query(\`
+        await db.query(`
             INSERT INTO payments (user_id, amount, status, payment_date, subscription_id, proof_url) 
-            VALUES ($1, $2, 'pending', NOW(), $3, 'pix_manual_verify')\`, 
+            VALUES ($1, $2, 'pending', NOW(), $3, 'pix_manual_verify')`, 
             [req.session.user.id, plan.price, subRes.rows[0].id]
         );
 
         try {
-            await createNotification(null, 'Pagamento Pendente', \`Usuário \${req.session.user.name} enviou comprovante.\`, '/admin/finance', 'alert');
+            await createNotification(null, 'Pagamento Pendente', `Usuário ${req.session.user.name} enviou comprovante.`, '/admin/finance', 'alert');
             await createNotification(req.session.user.id, 'Pagamento em Análise', 'Aguarde a validação.', '/client/financial', 'info');
             sendPaymentPendingEmail(req.session.user.email, req.session.user.name, plan.name).catch(console.error);
         } catch(nErr) { console.error("Erro notificação:", nErr); }
@@ -242,8 +242,8 @@ router.post('/checkout', async (req, res) => {
 router.get('/financial', async (req, res) => {
     try {
         const userId = req.session.user.id;
-        const subRes = await db.query(\`SELECT s.*, p.name as plan_name, p.price, p.features FROM subscriptions s JOIN plans p ON s.plan_id = p.id WHERE s.user_id = $1 AND s.status IN ('active', 'pending_payment', 'past_due') ORDER BY s.start_date DESC LIMIT 1\`, [userId]);
-        const payRes = await db.query(\`SELECT py.*, pl.name as plan_name FROM payments py LEFT JOIN subscriptions s ON py.subscription_id = s.id LEFT JOIN plans pl ON s.plan_id = pl.id WHERE py.user_id = $1 ORDER BY py.created_at DESC\`, [userId]);
+        const subRes = await db.query(`SELECT s.*, p.name as plan_name, p.price, p.features FROM subscriptions s JOIN plans p ON s.plan_id = p.id WHERE s.user_id = $1 AND s.status IN ('active', 'pending_payment', 'past_due') ORDER BY s.start_date DESC LIMIT 1`, [userId]);
+        const payRes = await db.query(`SELECT py.*, pl.name as plan_name FROM payments py LEFT JOIN subscriptions s ON py.subscription_id = s.id LEFT JOIN plans pl ON s.plan_id = pl.id WHERE py.user_id = $1 ORDER BY py.created_at DESC`, [userId]);
         res.render('pages/client-financial', { subscription: subRes.rows[0] || null, payments: payRes.rows });
     } catch (err) { 
         console.error("Erro Financial:", err);
