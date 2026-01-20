@@ -16,11 +16,12 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Configuração de Sessão
+// Configuração de Sessão (CORRIGIDO: usa db.pool)
 app.use(session({
     store: new pgSession({
-        pool: db,
-        tableName: 'session'
+        pool: db.pool, // Agora acessamos a propriedade .pool exportada
+        tableName: 'session',
+        createTableIfMissing: true // Garante que a tabela session seja criada se não existir
     }),
     secret: process.env.SESSION_SECRET || 'secret_dev_key',
     resave: false,
@@ -33,7 +34,7 @@ app.use(flash());
 // Middleware Global de Variáveis
 app.use((req, res, next) => {
     res.locals.user = req.session.user || null;
-    res.locals.isAuthenticated = !!req.session.user; // CRUCIAL: Define a variável usada no index.ejs
+    res.locals.isAuthenticated = !!req.session.user; 
     res.locals.messages = req.flash();
     res.locals.csrfToken = 'token-mock-safe'; 
     next();
