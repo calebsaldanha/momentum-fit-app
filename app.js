@@ -10,7 +10,6 @@ const db = require('./database/db');
 // Configuração do View Engine (EJS)
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
-// IMPORTANTE: Não usar app.set('view options', ...) pois causa conflitos no EJS 3
 
 // Middlewares Básicos
 app.use(express.static(path.join(__dirname, 'public')));
@@ -31,12 +30,11 @@ app.use(session({
 
 app.use(flash());
 
-// Middleware Global de Variáveis (User, Messages, etc)
+// Middleware Global de Variáveis
 app.use((req, res, next) => {
     res.locals.user = req.session.user || null;
-    res.locals.isAuthenticated = !!req.session.user; // Correção: Define isAuthenticated
+    res.locals.isAuthenticated = !!req.session.user; // CRUCIAL: Define a variável usada no index.ejs
     res.locals.messages = req.flash();
-    // CSRF Mock simples para evitar erros se csurf não estiver ativo
     res.locals.csrfToken = 'token-mock-safe'; 
     next();
 });
