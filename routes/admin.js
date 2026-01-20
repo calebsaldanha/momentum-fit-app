@@ -11,209 +11,108 @@ function isAdmin(req, res, next) {
 
 router.use(isAdmin);
 
-// --- DASHBOARD ---
-router.get('/dashboard', async (req, res) => {
+router.get('/dashboard', (req, res) => res.render('pages/admin-dashboard'));
+
+// === FINANCEIRO ADMIN ===
+router.get('/finance', async (req, res) => {
     try {
-        const totalUsers = await db.query('SELECT COUNT(*) FROM users');
-        const pending = await db.query('SELECT COUNT(*) FROM trainers WHERE is_approved = false');
-        let activePlansCount = 0;
-        try {
-            const activePlans = await db.query("SELECT COUNT(*) FROM subscriptions WHERE status = 'active'");
-            activePlansCount = activePlans.rows[0].count;
-        } catch(e) {}
-        
-        res.render('pages/admin-dashboard', { 
-            stats: { 
-                totalUsers: totalUsers.rows[0].count, 
-                pendingApprovals: pending.rows[0].count,
-                activePlans: activePlansCount
-            } 
+        // Pagamentos Pendentes
+        const pending = await db.query(`
+            SELECT py.*, u.name as user_name, u.email, pl.name as plan_name 
+            FROM payments py
+            JOIN users u ON py.user_id = u.id
+            LEFT JOIN subscriptions s ON py.subscription_id = s.id
+            LEFT JOIN plans pl ON s.plan_id = pl.id
+            WHERE py.status = 'pending'
+            ORDER BY py.created_at ASC
+        `);
+
+        // Assinaturas Ativas
+        const activeSubs = await db.query(`
+            SELECT s.*, u.name as user_name, pl.name as plan_name 
+            FROM subscriptions s
+            JOIN users u ON s.user_id = u.id
+            JOIN plans pl ON s.plan_id = pl.id
+            WHERE s.status = 'active'
+        `);
+
+        res.render('pages/admin-finance', { 
+            pendingPayments: pending.rows,
+            activeSubscriptions: activeSubs.rows
         });
     } catch (err) {
-        res.render('pages/admin-dashboard', { stats: { totalUsers: 0, pendingApprovals: 0, activePlans: 0 } });
+        console.error(err);
+        res.redirect('/admin/dashboard');
     }
 });
 
-// --- USUÁRIOS ---
-router.get('/users', async (req, res) => {
-    try {
-        const result = await db.query("SELECT id, name, email, role, active, created_at FROM users ORDER BY created_at DESC");
-        res.render('pages/admin-clients', { users: result.rows });
-    } catch (err) {
-        res.render('pages/admin-clients', { users: [], messages: { error: 'Erro ao carregar lista.' } });
-    }
-});
-
-router.get('/users/:id', async (req, res) => {
-    try {
-        const userId = req.params.id;
-        const userRes = await db.query("SELECT * FROM users WHERE id = $1", [userId]);
-        if (userRes.rows.length === 0) return res.redirect('/admin/users');
-        const targetUser = userRes.rows[0];
-
-        let data = { targetUser, details: {}, bi: {}, history: [], workouts: [] };
-
-        // DADOS DE ALUNO
-        if (targetUser.role === 'client') {
-            const clientRes = await db.query("SELECT * FROM clients WHERE user_id = $1", [userId]);
-            data.details = clientRes.rows[0] || {};
-            
-            if (targetUser.trainer_id) {
-                const trainerRes = await db.query("SELECT name FROM users WHERE id = $1", [targetUser.trainer_id]);
-                data.details.trainerName = trainerRes.rows[0]?.name;
-            }
-
-            const allTrainers = await db.query(`SELECT u.id, u.name, t.is_approved FROM users u JOIN trainers t ON u.id = t.user_id WHERE u.role = 'trainer' ORDER BY u.name ASC`);
-            data.allTrainers = allTrainers.rows;
-
-            // Financeiro
-            try {
-                const activePlan = await db.query("SELECT * FROM subscriptions WHERE user_id = $1 AND status = 'active' LIMIT 1", [userId]);
-                data.activePlan = activePlan.rows[0];
-                const planHistory = await db.query("SELECT * FROM payments WHERE user_id = $1 ORDER BY created_at DESC", [userId]);
-                data.financialHistory = planHistory.rows;
-            } catch (e) { data.financialHistory = []; }
-
-            // TREINOS (Ativos e Histórico)
-            try {
-                // Aqui buscamos TODOS os treinos.
-                // Como o banco não tem flag "active" no workout, consideramos todos na tabela 'workouts' como a ficha atual/ativa.
-                // Futuramente, uma tabela 'workout_history' guardaria os arquivados.
-                const workoutsRes = await db.query(`
-                    SELECT w.*, 
-                    (SELECT COUNT(*) FROM workout_exercises WHERE workout_id = w.id) as exercise_count
-                    FROM workouts w 
-                    WHERE user_id = $1 
-                    ORDER BY w.created_at DESC
-                `, [userId]);
-                data.workouts = workoutsRes.rows; 
-                
-                data.bi = { 
-                    totalWorkouts: workoutsRes.rows.length, 
-                    attendanceRate: 85 // Mock placeholder
-                };
-            } catch (e) { data.workouts = []; }
-
-        // DADOS DE TREINADOR
-        } else if (targetUser.role === 'trainer') {
-            const trainerRes = await db.query("SELECT * FROM trainers WHERE user_id = $1", [userId]);
-            data.details = trainerRes.rows[0] || { is_approved: false };
-            const students = await db.query("SELECT COUNT(*) FROM users WHERE trainer_id = $1", [userId]);
-            data.bi = { activeStudents: students.rows[0].count, totalRevenue: 0 };
-        }
-
-        res.render('pages/admin-user-details', data);
-
-    } catch (err) {
-        console.error("Erro Admin Details:", err);
-        res.redirect('/admin/users');
-    }
-});
-
-// Ações Usuário
-router.post('/users/:id/toggle-status', async (req, res) => {
-    await db.query("UPDATE users SET active = NOT active WHERE id = $1", [req.params.id]);
-    res.redirect(`/admin/users/${req.params.id}`);
-});
-
-router.post('/users/:id/approve-trainer', async (req, res) => {
-    await db.query('UPDATE trainers SET is_approved = true WHERE user_id = $1', [req.params.id]);
-    req.flash('success', 'Treinador aprovado!');
-    res.redirect(`/admin/users/${req.params.id}`);
-});
-
-router.post('/users/:id/assign-trainer', async (req, res) => {
-    const { trainer_id } = req.body;
-    await db.query("UPDATE users SET trainer_id = $1 WHERE id = $2", [trainer_id === 'none' ? null : trainer_id, req.params.id]);
-    res.redirect(`/admin/users/${req.params.id}`);
-});
-
-router.post('/users/:id/delete', async (req, res) => {
-    const userId = req.params.id;
+// Aprovar Pagamento
+router.post('/finance/approve', async (req, res) => {
+    const { payment_id } = req.body;
     try {
         await db.query('BEGIN');
-        await db.query("DELETE FROM workout_exercises WHERE workout_id IN (SELECT id FROM workouts WHERE user_id = $1)", [userId]);
-        await db.query("DELETE FROM workouts WHERE user_id = $1", [userId]);
-        try { await db.query("DELETE FROM payments WHERE user_id = $1", [userId]); } catch(e){}
-        try { await db.query("DELETE FROM subscriptions WHERE user_id = $1", [userId]); } catch(e){}
-        await db.query("DELETE FROM clients WHERE user_id = $1", [userId]);
-        await db.query("DELETE FROM trainers WHERE user_id = $1", [userId]);
-        await db.query("DELETE FROM users WHERE id = $1", [userId]);
+        
+        // 1. Atualizar Pagamento para 'paid'
+        const payRes = await db.query(`
+            UPDATE payments SET status = 'paid', payment_date = NOW() 
+            WHERE id = $1 RETURNING subscription_id
+        `, [payment_id]);
+        
+        const subId = payRes.rows[0].subscription_id;
+
+        // 2. Ativar Assinatura
+        await db.query(`UPDATE subscriptions SET status = 'active' WHERE id = $1`, [subId]);
+
         await db.query('COMMIT');
-        res.redirect('/admin/users');
-    } catch (err) {
+        req.flash('success', 'Pagamento aprovado e plano ativado.');
+    } catch (e) {
         await db.query('ROLLBACK');
-        res.redirect(`/admin/users/${userId}`);
+        req.flash('error', 'Erro ao aprovar.');
     }
+    res.redirect('/admin/finance');
 });
 
-// --- GESTÃO DE CONTEÚDO (NOVO) ---
-router.get('/content', async (req, res) => {
+// Rejeitar Pagamento
+router.post('/finance/reject', async (req, res) => {
+    const { payment_id } = req.body;
     try {
-        const result = await db.query(`
-            SELECT a.*, u.name as author_name 
-            FROM articles a 
-            LEFT JOIN users u ON a.author_id = u.id 
-            ORDER BY a.created_at DESC
-        `);
-        res.render('pages/admin-content', { articles: result.rows });
-    } catch (e) { res.render('pages/admin-content', { articles: [] }); }
-});
-
-router.post('/content/create', async (req, res) => {
-    const { title, summary, content } = req.body;
-    try {
-        // Admin publica direto
-        await db.query(
-            "INSERT INTO articles (title, summary, content, author_id, status) VALUES ($1, $2, $3, $4, 'published')",
-            [title, summary, content, req.session.user.id]
-        );
-        req.flash('success', 'Artigo publicado com sucesso!');
-    } catch (err) {
-        req.flash('error', 'Erro ao publicar artigo.');
+        await db.query("UPDATE payments SET status = 'rejected' WHERE id = $1", [payment_id]);
+        req.flash('success', 'Pagamento rejeitado.');
+    } catch (e) {
+        req.flash('error', 'Erro ao rejeitar.');
     }
-    res.redirect('/admin/content');
+    res.redirect('/admin/finance');
 });
 
-router.post('/content/:id/delete', async (req, res) => {
-    await db.query("DELETE FROM articles WHERE id = $1", [req.params.id]);
-    req.flash('success', 'Artigo removido.');
-    res.redirect('/admin/content');
-});
-
-// --- AUDITORIA IA (SEM DADOS FALSOS) ---
-router.get('/ia-audit', async (req, res) => {
+// Suspender Plano
+router.post('/finance/suspend', async (req, res) => {
+    const { subscription_id } = req.body;
     try {
-        // Busca APENAS dados reais do banco. Se a tabela estiver vazia, retorna array vazio.
-        const logs = await db.query(`
-            SELECT l.*, u.name as user_name 
-            FROM ia_logs l 
-            LEFT JOIN users u ON l.user_id = u.id 
-            ORDER BY l.created_at DESC LIMIT 50
-        `);
-        res.render('pages/admin-ia-audit', { logs: logs.rows });
-    } catch(e) { 
-        // Em caso de erro (tabela não existe), renderiza vazio, sem dados fake.
-        res.render('pages/admin-ia-audit', { logs: [] }); 
+        await db.query("UPDATE subscriptions SET status = 'suspended' WHERE id = $1", [subscription_id]);
+        req.flash('success', 'Assinatura suspensa.');
+    } catch (e) {
+        req.flash('error', 'Erro ao suspender.');
     }
+    res.redirect('/admin/finance');
 });
 
-// Outras
-router.get('/finance', (req, res) => res.render('pages/admin-finance', { revenue: { total: 0 } }));
+// Rebaixar para Free (Cancelar Assinatura Atual)
+router.post('/finance/downgrade', async (req, res) => {
+    const { subscription_id } = req.body;
+    try {
+        await db.query("UPDATE subscriptions SET status = 'cancelled' WHERE id = $1", [subscription_id]);
+        req.flash('success', 'Assinatura cancelada (Downgrade para Free).');
+    } catch (e) {
+        req.flash('error', 'Erro ao realizar downgrade.');
+    }
+    res.redirect('/admin/finance');
+});
+
+// Outras rotas Admin (Mock)
+router.get('/approvals', (req, res) => res.render('pages/admin-approvals', { pendingTrainers: [] }));
+router.get('/users', (req, res) => res.render('pages/admin-user-details', { users: [] }));
+router.get('/content', (req, res) => res.render('pages/admin-content'));
+router.get('/ia-audit', (req, res) => res.render('pages/admin-ia-audit'));
 router.get('/settings', (req, res) => res.render('pages/admin-settings'));
-router.get('/approvals', async (req, res) => {
-    try {
-        const result = await db.query("SELECT t.id, u.name FROM trainers t JOIN users u ON t.user_id = u.id WHERE t.is_approved = false");
-        res.render('pages/admin-approvals', { pendingTrainers: result.rows });
-    } catch (e) { res.render('pages/admin-approvals', { pendingTrainers: [] }); }
-});
-router.post('/approve/:id', async (req, res) => {
-    await db.query('UPDATE trainers SET is_approved = true WHERE id = $1', [req.params.id]);
-    res.redirect('/admin/approvals');
-});
-router.get('/plans', async (req, res) => {
-    try { const plans = await db.query("SELECT * FROM plans"); res.render('pages/admin-plans', { plans: plans.rows }); }
-    catch(e) { res.render('pages/admin-plans', { plans: [] }); }
-});
 
 module.exports = router;
