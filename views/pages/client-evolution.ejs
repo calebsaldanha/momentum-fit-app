@@ -3,14 +3,17 @@
     <%- include('../partials/sidebar.ejs', { path: '/client/evolution' }) %>
     <main class="dashboard-main">
         <div class="mobile-dash-header">
-            <button id="sidebarOpenBtn" class="btn btn-outline btn-sm"><i class="fas fa-bars"></i> Menu</button>
+            <button id="sidebarOpenBtn" class="btn btn-outline btn-sm"><i class="fas fa-bars"></i></button>
             <span>Evolução</span>
         </div>
         <div class="page-header">
             <h1>Minha <span class="text-neon">Evolução</span></h1>
         </div>
-        <div class="card-box">
-            <p>Gráficos e histórico de peso virão aqui.</p>
+        
+        <div class="card-box" style="text-align: center; padding: 40px;">
+            <i class="fas fa-chart-line fa-3x" style="color: var(--primary-color); margin-bottom: 20px;"></i>
+            <h3>Gráficos em Breve</h3>
+            <p class="text-muted">Estamos coletando dados dos seus treinos para gerar relatórios de progresso.</p>
         </div>
     </main>
 </div>
