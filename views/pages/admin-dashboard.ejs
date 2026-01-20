@@ -2,23 +2,66 @@
 <div class="dashboard-container">
     <%- include('../partials/sidebar.ejs', { path: '/admin/dashboard' }) %>
     <main class="dashboard-main">
-        <div class="mobile-dash-header">
-            <button id="sidebarOpenBtn" class="btn btn-outline btn-sm"><i class="fas fa-bars"></i> Menu</button>
-            <span>Admin</span>
-        </div>
-
         <div class="page-header">
-            <h1>Visão Geral <span class="text-neon">Admin</span></h1>
+            <h1>Painel <span class="text-neon">Administrativo</span></h1>
+            <p>Visão geral do desempenho do sistema.</p>
         </div>
 
-        <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
-            <div class="card-box">
-                <h3>Usuários</h3>
-                <p style="font-size: 2rem; font-weight: bold;"><%= typeof stats !== 'undefined' ? stats.totalUsers : 0 %></p>
+        <div class="dashboard-grid">
+            <div class="stat-card">
+                <div class="icon" style="color: #bef202;"><i class="fas fa-users"></i></div>
+                <div class="info">
+                    <h3><%= stats.totalClients %></h3>
+                    <p>Total de Clientes</p>
+                </div>
             </div>
+            <div class="stat-card">
+                <div class="icon" style="color: #4da6ff;"><i class="fas fa-check-circle"></i></div>
+                <div class="info">
+                    <h3><%= stats.activeSubs %></h3>
+                    <p>Planos Ativos</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="icon" style="color: #ff4d4d;"><i class="fas fa-dollar-sign"></i></div>
+                <div class="info">
+                    <h3>R$ <%= parseFloat(stats.monthlyRevenue).toFixed(2) %></h3>
+                    <p>Receita (30 dias)</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="icon" style="color: orange;"><i class="fas fa-exclamation-circle"></i></div>
+                <div class="info">
+                    <h3><%= stats.pendingPayments %></h3>
+                    <p>Pendências Financeiras</p>
+                </div>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 30px; margin-top: 30px;">
             <div class="card-box">
-                <h3>Pendentes</h3>
-                <p style="font-size: 2rem; font-weight: bold; color: orange;"><%= typeof stats !== 'undefined' ? stats.pendingApprovals : 0 %></p>
+                <h3 style="color: white; margin-bottom: 20px;">Novos Usuários</h3>
+                <table style="width: 100%; text-align: left;">
+                    <thead><tr style="color: #888;"><th style="padding: 10px;">Nome</th><th style="padding: 10px;">Função</th><th style="padding: 10px;">Data</th></tr></thead>
+                    <tbody>
+                        <% recentUsers.forEach(u => { %>
+                            <tr style="border-bottom: 1px solid #333;">
+                                <td style="padding: 10px; color: white;"><%= u.name %></td>
+                                <td style="padding: 10px; color: #ccc;"><%= u.role %></td>
+                                <td style="padding: 10px; color: #ccc;"><%= new Date(u.created_at).toLocaleDateString() %></td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card-box">
+                <h3 style="color: white; margin-bottom: 20px;">Ações Rápidas</h3>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <a href="/admin/users" class="btn btn-outline" style="text-align: center;">Gerenciar Usuários</a>
+                    <a href="/admin/finance" class="btn btn-outline" style="text-align: center;">Validações Financeiras</a>
+                    <a href="/admin/content" class="btn btn-outline" style="text-align: center;">Publicar Artigo</a>
+                </div>
             </div>
         </div>
     </main>
