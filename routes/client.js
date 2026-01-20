@@ -13,12 +13,12 @@ router.use(isClient);
 // === PROFILE (ANAMNESE) ===
 router.get('/profile', async (req, res) => {
     try {
-        const result = await db.query(\`
+        const result = await db.query(`
             SELECT u.name, u.email, u.phone, u.birth_date, c.*
             FROM users u
             LEFT JOIN clients c ON u.id = c.user_id
             WHERE u.id = $1
-        \`, [req.session.user.id]);
+        `, [req.session.user.id]);
         
         const clientData = result.rows[0] || {};
         clientData.goal = clientData.fitness_goals || clientData.goal; 
@@ -65,24 +65,24 @@ router.post('/profile', async (req, res) => {
         ];
 
         if(check.rows.length === 0) {
-            await db.query(\`INSERT INTO clients (
+            await db.query(`INSERT INTO clients (
                 user_id, current_weight, height, fitness_goals, goal_description, 
                 training_experience, preferred_training_time, medical_history, medications, 
                 injuries, emergency_contact, emergency_phone, sleep_quality, stress_level, 
                 water_intake, smoking_status, available_equipment,
                 daily_activity_level, alcohol_consumption, dietary_restrictions,
                 liked_exercises, disliked_exercises, body_measurements
-               ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23)\`, 
+               ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23)`, 
                fields);
         } else {
-            await db.query(\`UPDATE clients SET 
+            await db.query(`UPDATE clients SET 
                 current_weight=$2, height=$3, fitness_goals=$4, goal_description=$5, 
                 training_experience=$6, preferred_training_time=$7, medical_history=$8, medications=$9, 
                 injuries=$10, emergency_contact=$11, emergency_phone=$12, sleep_quality=$13, stress_level=$14, 
                 water_intake=$15, smoking_status=$16, available_equipment=$17,
                 daily_activity_level=$18, alcohol_consumption=$19, dietary_restrictions=$20,
                 liked_exercises=$21, disliked_exercises=$22, body_measurements=$23
-               WHERE user_id=$1\`, 
+               WHERE user_id=$1`, 
                fields);
         }
 
@@ -143,21 +143,21 @@ router.get('/financial', async (req, res) => {
         const userId = req.session.user.id;
         
         // Buscar assinatura ativa
-        const subRes = await db.query(\`
+        const subRes = await db.query(`
             SELECT s.*, p.name as plan_name, p.price, p.features 
             FROM subscriptions s 
             JOIN plans p ON s.plan_id = p.id 
             WHERE s.user_id = $1 AND s.status = 'active'
-        \`, [userId]);
+        `, [userId]);
 
         // Buscar histórico de pagamentos
-        const payRes = await db.query(\`
+        const payRes = await db.query(`
             SELECT py.*, p.name as plan_name 
             FROM payments py
             LEFT JOIN plans p ON py.plan_id = p.id
             WHERE py.user_id = $1
             ORDER BY py.created_at DESC
-        \`, [userId]);
+        `, [userId]);
 
         res.render('pages/client-financial', { 
             subscription: subRes.rows[0] || null,

@@ -8,12 +8,12 @@ async function updateSchema() {
 
         // 1. Adicionar colunas de Anamnese Completa na tabela clients
         const newColumns = [
-            'ADD COLUMN IF NOT EXISTS daily_activity_level VARCHAR(50)', // Sedentário, Ativo...
-            'ADD COLUMN IF NOT EXISTS alcohol_consumption VARCHAR(50)',   // Nunca, Socialmente...
-            'ADD COLUMN IF NOT EXISTS dietary_restrictions TEXT',         // Alergias, dietas...
-            'ADD COLUMN IF NOT EXISTS liked_exercises TEXT',              // O que gosta
-            'ADD COLUMN IF NOT EXISTS disliked_exercises TEXT',           // O que não gosta
-            'ADD COLUMN IF NOT EXISTS body_measurements JSONB'            // Medidas (Peito, Cintura...)
+            'ADD COLUMN IF NOT EXISTS daily_activity_level VARCHAR(50)', 
+            'ADD COLUMN IF NOT EXISTS alcohol_consumption VARCHAR(50)',   
+            'ADD COLUMN IF NOT EXISTS dietary_restrictions TEXT',         
+            'ADD COLUMN IF NOT EXISTS liked_exercises TEXT',              
+            'ADD COLUMN IF NOT EXISTS disliked_exercises TEXT',           
+            'ADD COLUMN IF NOT EXISTS body_measurements JSONB'            
         ];
 
         for (let col of newColumns) {
@@ -27,7 +27,7 @@ async function updateSchema() {
                 name VARCHAR(100) NOT NULL,
                 price DECIMAL(10,2) NOT NULL,
                 features TEXT,
-                billing_cycle VARCHAR(20) DEFAULT 'monthly', -- monthly, quarterly, yearly
+                billing_cycle VARCHAR(20) DEFAULT 'monthly',
                 active BOOLEAN DEFAULT TRUE
             );
         `);
@@ -38,10 +38,10 @@ async function updateSchema() {
                 user_id INTEGER REFERENCES users(id),
                 plan_id INTEGER REFERENCES plans(id),
                 amount DECIMAL(10,2) NOT NULL,
-                status VARCHAR(50) DEFAULT 'pending', -- paid, pending, failed
+                status VARCHAR(50) DEFAULT 'pending', 
                 payment_date TIMESTAMP,
                 due_date TIMESTAMP DEFAULT NOW(),
-                method VARCHAR(50), -- credit_card, pix
+                method VARCHAR(50), 
                 invoice_url TEXT,
                 created_at TIMESTAMP DEFAULT NOW()
             );
@@ -52,7 +52,7 @@ async function updateSchema() {
                 id SERIAL PRIMARY KEY,
                 user_id INTEGER REFERENCES users(id),
                 plan_id INTEGER REFERENCES plans(id),
-                status VARCHAR(50) DEFAULT 'active', -- active, cancelled, expired
+                status VARCHAR(50) DEFAULT 'active', 
                 start_date TIMESTAMP DEFAULT NOW(),
                 next_billing_date TIMESTAMP,
                 created_at TIMESTAMP DEFAULT NOW()
