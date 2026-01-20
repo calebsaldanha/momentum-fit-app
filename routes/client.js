@@ -1,24 +1,21 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../database/db');
-const bcrypt = require('bcryptjs');
 const { createNotification } = require('../utils/notificationService');
 const { sendPaymentPendingEmail } = require('../utils/emailService');
 
-// Middleware de Autenticação Robusto
+// Middleware de Autenticação
 function isClient(req, res, next) {
-    // Verifica se sessão existe antes de tentar acessar user
     if (req.session && req.session.user && req.session.user.role === 'client') {
         return next();
     }
-    // Se não tiver sessão ou não for cliente, manda pro login
-    req.flash('error', 'Sessão expirada ou inválida. Faça login novamente.');
+    req.flash('error', 'Sessão expirada. Faça login novamente.');
     res.redirect('/auth/login');
 }
 
 router.use(isClient);
 
-// === PROFILE (ANAMNESE) ===
+// === ANAMNESE (PROFILE) ===
 router.get('/profile', async (req, res) => {
     try {
         const userId = req.session.user.id;
@@ -35,77 +32,120 @@ router.get('/profile', async (req, res) => {
         clientData.phone = clientData.user_phone || clientData.phone || '';
         clientData.birth_date = clientData.user_birth_date || clientData.birth_date || null;
         
-        const stressMapRev = { 1: 'baixo', 2: 'medio', 3: 'alto' };
-        clientData.stress_level_text = stressMapRev[clientData.stress_level] || 'baixo';
+        // Garante que o campo de medidas seja um objeto
         if (!clientData.body_measurements) clientData.body_measurements = {};
 
         res.render('pages/client-profile', { clientData });
     } catch (err) {
-        console.error("Erro no Profile:", err);
+        console.error("Erro GET Profile:", err);
         res.render('pages/client-profile', { clientData: { body_measurements: {} }, messages: { error: "Erro ao carregar dados." } });
     }
 });
 
 router.post('/profile', async (req, res) => {
-    // ... (Lógica de profile mantida, simplificada aqui para focar no problema do checkout)
-    // O código original de post profile estava funcional, focaremos na correção da sessão e checkout
     const data = req.body;
     try {
         await db.query('BEGIN');
-        await db.query('UPDATE users SET name=$1, phone=$2, birth_date=$3 WHERE id=$4', [data.name, data.phone, data.birth_date || null, req.session.user.id]);
         
+        // 1. Atualiza Dados Básicos
+        await db.query('UPDATE users SET name=$1, phone=$2, birth_date=$3 WHERE id=$4', 
+            [data.name, data.phone, data.birth_date || null, req.session.user.id]);
+
+        // 2. Prepara Medidas e Dados do Cliente
+        const measurements = JSON.stringify({ 
+            chest: data.meas_chest, waist: data.meas_waist, hips: data.meas_hips, 
+            arms: data.meas_arms, thighs: data.meas_thighs 
+        });
+
         const check = await db.query('SELECT 1 FROM clients WHERE user_id=$1', [req.session.user.id]);
-        // ... (Query simplificada de Insert/Update) ...
-        const measurements = JSON.stringify({ chest: data.meas_chest, waist: data.meas_waist, hips: data.meas_hips, arms: data.meas_arms, thighs: data.meas_thighs });
         
+        const clientParams = [
+            req.session.user.id, data.weight||0, data.weight||0, data.height||0, data.goal, 
+            data.phone, data.birth_date||null, measurements,
+            // Campos adicionais para evitar null
+            data.goal_description || '', data.training_experience || '', data.preferred_training_time || '',
+            data.medical_history || '', data.medications || '', data.injuries || '',
+            data.emergency_contact || '', data.emergency_phone || ''
+        ];
+
+        // Lógica Upsert simplificada para garantir funcionamento
         if(check.rows.length === 0) {
-             await db.query(`INSERT INTO clients (user_id, weight, current_weight, height, goal, phone, birth_date, body_measurements) VALUES ($1, $2, $2, $3, $4, $5, $6, $7)`, 
-             [req.session.user.id, data.weight||0, data.height||0, data.goal, data.phone, data.birth_date||null, measurements]);
+             await db.query(`
+                INSERT INTO clients (
+                    user_id, weight, current_weight, height, goal, phone, birth_date, body_measurements,
+                    goal_description, training_experience, preferred_training_time,
+                    medical_history, medications, injuries, emergency_contact, emergency_phone
+                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+             `, clientParams);
         } else {
-             await db.query(`UPDATE clients SET weight=$2, current_weight=$2, height=$3, goal=$4, phone=$5, birth_date=$6, body_measurements=$7 WHERE user_id=$1`, 
-             [req.session.user.id, data.weight||0, data.height||0, data.goal, data.phone, data.birth_date||null, measurements]);
+             await db.query(`
+                UPDATE clients SET 
+                    weight=$2, current_weight=$3, height=$4, goal=$5, phone=$6, birth_date=$7, body_measurements=$8,
+                    goal_description=$9, training_experience=$10, preferred_training_time=$11,
+                    medical_history=$12, medications=$13, injuries=$14, emergency_contact=$15, emergency_phone=$16
+                WHERE user_id=$1
+             `, clientParams);
         }
 
         await db.query('COMMIT');
         
-        const subRes = await db.query(`SELECT p.price, p.id as plan_id FROM subscriptions s JOIN plans p ON s.plan_id = p.id WHERE s.user_id = $1 AND s.status = 'active' ORDER BY s.start_date DESC LIMIT 1`, [req.session.user.id]);
-        if (subRes.rows.length > 0 && parseFloat(subRes.rows[0].price) > 0) {
-            req.flash('success', 'Perfil salvo! Realize o pagamento.');
-            return res.redirect('/client/checkout/' + subRes.rows[0].plan_id);
+        // 3. Lógica de Redirecionamento (CORREÇÃO DO ERRO)
+        // Verifica se existe assinatura ativa e qual o preço do plano
+        const subRes = await db.query(`
+            SELECT s.id as sub_id, p.price, p.id as plan_id, p.name 
+            FROM subscriptions s 
+            JOIN plans p ON s.plan_id = p.id 
+            WHERE s.user_id = $1 AND s.status = 'active' 
+            ORDER BY s.start_date DESC LIMIT 1
+        `, [req.session.user.id]);
+
+        if (subRes.rows.length > 0) {
+            const subscription = subRes.rows[0];
+            const price = parseFloat(subscription.price);
+            
+            // Se o plano é pago (preço > 0) e ainda não foi pago (aqui assumimos que 'active' foi setado na criação, mas vamos forçar o checkout se necessário)
+            // Lógica ajustada: Redireciona para checkout SE for pago.
+            if (price > 0 && subscription.plan_id) {
+                req.flash('success', 'Perfil salvo! Vamos finalizar seu pagamento.');
+                return res.redirect(`/client/checkout/${subscription.plan_id}`);
+            }
         }
+
+        req.flash('success', 'Perfil atualizado com sucesso!');
         res.redirect('/client/dashboard');
+
     } catch(e) {
         await db.query('ROLLBACK');
-        console.error(e);
+        console.error("Erro POST Profile:", e);
+        req.flash('error', 'Erro ao salvar perfil. Tente novamente.');
         res.redirect('/client/profile');
     }
 });
 
-// === CHECKOUT & FINANCEIRO (CORRIGIDO) ===
+// === CHECKOUT (CORREÇÃO DE VARIÁVEIS) ===
 router.get('/checkout/:planId', async (req, res) => {
     try {
         const planId = req.params.planId;
-        console.log(`[CHECKOUT] Iniciando checkout para plano ID: ${planId}`);
-
+        
+        // Busca o plano
         const planResult = await db.query('SELECT * FROM plans WHERE id = $1', [planId]);
         
         if (planResult.rows.length === 0) {
-            console.log(`[CHECKOUT] Plano ${planId} não encontrado.`);
+            console.log(`Plano ${planId} não encontrado.`);
             req.flash('error', 'Plano não encontrado.');
             return res.redirect('/client/plans');
         }
         
         const pixKey = '084dee93-9dc5-44e7-aa2e-3eff8623651d';
-        console.log(`[CHECKOUT] Renderizando página para plano: ${planResult.rows[0].name}`);
         
         res.render('pages/client-checkout', { 
             plan: planResult.rows[0],
-            pixKey: pixKey
+            pixKey: pixKey // Garante que a variável existe
         });
 
     } catch (e) {
-        console.error("[CHECKOUT ERROR]", e);
-        req.flash('error', 'Erro ao carregar checkout: ' + e.message);
+        console.error("Erro Checkout:", e);
+        req.flash('error', 'Erro ao carregar checkout.');
         res.redirect('/client/plans');
     }
 });
@@ -114,41 +154,62 @@ router.post('/checkout', async (req, res) => {
     const { plan_id, due_day } = req.body;
     try {
         await db.query('BEGIN');
+        
         const planRes = await db.query('SELECT name, price FROM plans WHERE id = $1', [plan_id]);
+        if (planRes.rows.length === 0) throw new Error("Plano inválido");
         const plan = planRes.rows[0];
 
+        // Atualiza status anteriores
         await db.query("UPDATE subscriptions SET status = 'cancelled' WHERE user_id = $1 AND status = 'pending_payment'", [req.session.user.id]);
-        const subRes = await db.query(`INSERT INTO subscriptions (user_id, plan_id, status, start_date, payment_due_day, auto_renew) VALUES ($1, $2, 'pending_payment', NOW(), $3, true) RETURNING id`, [req.session.user.id, plan_id, due_day]);
-        await db.query(`INSERT INTO payments (user_id, amount, status, payment_date, subscription_id, proof_url, created_at) VALUES ($1, $2, 'pending', NOW(), $3, 'pix_manual_verify', NOW())`, [req.session.user.id, plan.price, subRes.rows[0].id]);
+        
+        // Cria nova subscrição pendente
+        const subRes = await db.query(`
+            INSERT INTO subscriptions (user_id, plan_id, status, start_date, payment_due_day, auto_renew) 
+            VALUES ($1, $2, 'pending_payment', NOW(), $3, true) 
+            RETURNING id`, 
+            [req.session.user.id, plan_id, due_day]
+        );
+        
+        // Registra tentativa de pagamento
+        await db.query(`
+            INSERT INTO payments (user_id, amount, status, payment_date, subscription_id, proof_url) 
+            VALUES ($1, $2, 'pending', NOW(), $3, 'pix_manual_verify')`, 
+            [req.session.user.id, plan.price, subRes.rows[0].id]
+        );
 
-        // Notificações
+        // Tenta notificar (sem quebrar se falhar)
         try {
             await createNotification(null, 'Pagamento Pendente', `Usuário ${req.session.user.name} enviou comprovante.`, '/admin/finance', 'alert');
-            await createNotification(req.session.user.id, 'Pagamento em Análise', 'Aguarde aprovação.', '/client/financial', 'info');
-            sendPaymentPendingEmail(req.session.user.email, req.session.user.name, plan.name).catch(e => console.error(e));
-        } catch(notifError) { console.error("Erro notificação checkout:", notifError); }
+            await createNotification(req.session.user.id, 'Pagamento em Análise', 'Aguarde a validação.', '/client/financial', 'info');
+            sendPaymentPendingEmail(req.session.user.email, req.session.user.name, plan.name).catch(console.error);
+        } catch(nErr) { console.error("Erro notificação:", nErr); }
 
         await db.query('COMMIT');
-        req.flash('success', 'Enviado para análise.');
+        req.flash('success', 'Comprovante enviado! Aguarde a aprovação.');
         res.redirect('/client/financial');
+
     } catch (e) {
         await db.query('ROLLBACK');
         console.error("Erro Checkout POST:", e);
-        req.flash('error', 'Erro ao processar: ' + e.message);
+        req.flash('error', 'Erro ao processar pagamento.');
         res.redirect('/client/plans');
     }
 });
 
+// === FINANCEIRO ===
 router.get('/financial', async (req, res) => {
     try {
         const userId = req.session.user.id;
         const subRes = await db.query(`SELECT s.*, p.name as plan_name, p.price, p.features FROM subscriptions s JOIN plans p ON s.plan_id = p.id WHERE s.user_id = $1 AND s.status IN ('active', 'pending_payment', 'past_due') ORDER BY s.start_date DESC LIMIT 1`, [userId]);
         const payRes = await db.query(`SELECT py.*, pl.name as plan_name FROM payments py LEFT JOIN subscriptions s ON py.subscription_id = s.id LEFT JOIN plans pl ON s.plan_id = pl.id WHERE py.user_id = $1 ORDER BY py.created_at DESC`, [userId]);
         res.render('pages/client-financial', { subscription: subRes.rows[0] || null, payments: payRes.rows });
-    } catch (err) { res.redirect('/client/dashboard'); }
+    } catch (err) { 
+        console.error("Erro Financial:", err);
+        res.render('pages/client-financial', { subscription: null, payments: [], error: 'Erro ao carregar dados.' });
+    }
 });
 
-// Outras rotas...
+// Outras rotas (Dashboard, Plans, etc)
 router.get('/dashboard', (req, res) => res.render('pages/client-dashboard', { stats: {} }));
 router.get('/plans', async (req, res) => { try { const p = await db.query("SELECT * FROM plans WHERE is_active = true ORDER BY price ASC"); res.render('pages/client-plans', { plans: p.rows }); } catch(e) { res.render('pages/client-plans', { plans: [] }); } });
 router.get('/content', (req, res) => res.render('pages/client-content', { articles: [] }));

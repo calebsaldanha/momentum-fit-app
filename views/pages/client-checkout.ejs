@@ -5,41 +5,43 @@
     <main class="main-content">
         <div class="page-header">
             <h1>Finalizar Assinatura</h1>
-            <p>Plano Selecionado: <strong><%= plan.name %></strong></p>
+            <% if (plan) { %>
+                <p>Plano Selecionado: <strong><%= plan.name %></strong></p>
+            <% } else { %>
+                <p>Plano Selecionado: <strong>Desconhecido</strong></p>
+            <% } %>
         </div>
 
+        <% if (messages && messages.error) { %>
+            <div class="alert alert-danger"><%= messages.error %></div>
+        <% } %>
+
+        <% if (plan) { %>
         <div class="checkout-grid">
             <div class="card plan-summary">
                 <h3>Resumo</h3>
                 <div class="price-tag">R$ <%= plan.price %> <span class="period">/mês</span></div>
                 <ul class="features-list">
-                    <% if (plan.features && Array.isArray(plan.features) && plan.features.length > 0) { %>
-                        <% plan.features.forEach(f => { %>
-                            <li>✅ <%= f %></li>
-                        <% }) %>
-                    <% } else if (typeof plan.features === 'string') { %>
-                        <% plan.features.split(',').forEach(f => { %>
-                            <li>✅ <%= f.trim() %></li>
-                        <% }) %>
-                    <% } else { %>
-                        <li>✅ Acesso a treinos</li>
-                        <li>✅ Chat com IA</li>
-                    <% } %>
+                    <li>✅ Acesso à plataforma</li>
+                    <li>✅ Treinos personalizados</li>
+                    <li>✅ Suporte via Chat e IA</li>
                 </ul>
             </div>
 
             <div class="card payment-details">
                 <h3>Pagamento via PIX</h3>
-                <p>Escaneie o QR Code ou use a chave abaixo para realizar o pagamento.</p>
+                <p>Use o QR Code ou a chave abaixo.</p>
                 
                 <div style="text-align: center; margin: 20px 0;">
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=<%= pixKey %>" alt="QR Code Pix" style="border: 2px solid #eee; padding: 10px; border-radius: 8px;">
+                    <% if (typeof pixKey !== 'undefined') { %>
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=<%= pixKey %>" alt="QR Code" style="border: 2px solid #eee; padding: 10px; border-radius: 8px;">
+                    <% } %>
                 </div>
 
                 <div class="form-group">
-                    <label>Chave Pix (Copia e Cola):</label>
+                    <label>Chave Pix:</label>
                     <div style="display: flex; gap: 10px;">
-                        <input type="text" value="<%= pixKey %>" id="pixKeyInput" readonly class="form-control">
+                        <input type="text" value="<%= typeof pixKey !== 'undefined' ? pixKey : '' %>" id="pixKeyInput" readonly class="form-control">
                         <button type="button" onclick="copyPix()" class="btn-secondary">Copiar</button>
                     </div>
                 </div>
@@ -48,9 +50,10 @@
 
                 <form action="/client/checkout" method="POST">
                     <input type="hidden" name="plan_id" value="<%= plan.id %>">
+                    <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
                     
                     <div class="form-group">
-                        <label>Melhor dia para vencimento:</label>
+                        <label>Dia de vencimento:</label>
                         <select name="due_day" required>
                             <option value="5">Dia 05</option>
                             <option value="10">Dia 10</option>
@@ -59,24 +62,26 @@
                         </select>
                     </div>
 
-                    <div class="alert alert-info">
-                        Após pagar, clique em "Confirmar Pagamento". Seu plano será ativado após conferência.
-                    </div>
-
                     <button type="submit" class="btn-primary btn-block">Confirmar Pagamento Enviado</button>
                 </form>
             </div>
         </div>
+        <% } else { %>
+            <div class="alert alert-warning">
+                Erro ao carregar detalhes do plano. <a href="/client/plans">Voltar aos planos</a>.
+            </div>
+        <% } %>
     </main>
 </div>
 
 <script>
     function copyPix() {
         var copyText = document.getElementById("pixKeyInput");
-        copyText.select();
-        copyText.setSelectionRange(0, 99999); 
-        navigator.clipboard.writeText(copyText.value);
-        alert("Chave Pix copiada: " + copyText.value);
+        if(copyText) {
+            copyText.select();
+            navigator.clipboard.writeText(copyText.value);
+            alert("Chave copiada!");
+        }
     }
 </script>
 <%- include('../partials/footer') %>
