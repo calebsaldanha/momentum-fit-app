@@ -1,0 +1,57 @@
+<%- include('../partials/header.ejs') %>
+<div class="dashboard-container">
+    <%- include('../partials/sidebar.ejs', { path: '/client/plans' }) %>
+    <main class="dashboard-main">
+        <div class="page-header">
+            <a href="/client/plans" class="btn btn-outline btn-sm" style="float:right"><i class="fas fa-arrow-left"></i> Voltar</a>
+            <h1>Finalizar <span class="text-neon">Assinatura</span></h1>
+            <p>Confira os dados e realize o pagamento.</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+            <div class="card-box">
+                <h3 style="color:white; margin-bottom:20px; border-bottom:1px solid #333; padding-bottom:10px;">Resumo do Pedido</h3>
+                <div style="background:#222; padding:20px; border-radius:10px; text-align:center; margin-bottom:20px;">
+                    <h2 style="color: var(--primary-color); font-size: 2rem;"><%= plan.name %></h2>
+                    <p style="color:#ccc; margin:10px 0;"><%= plan.description || plan.features %></p>
+                    <hr style="border-color:#444; margin:15px 0;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="color:#888; font-size:1.2rem;">Total:</span>
+                        <span style="color:white; font-size:1.8rem; font-weight:bold;">R$ <%= parseFloat(plan.price).toFixed(2) %></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-box">
+                <form action="/client/checkout" method="POST">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <input type="hidden" name="plan_id" value="<%= plan.id %>">
+
+                    <h3 style="color:white; margin-bottom:20px;">Configuração da Cobrança</h3>
+                    
+                    <div style="margin-bottom:20px;">
+                        <label style="color:#888; display:block; margin-bottom:5px;">Dia de Vencimento Mensal</label>
+                        <select name="due_day" class="form-control" style="width:100%; padding:12px; background:#222; border:1px solid #444; color:white; border-radius:6px;">
+                            <option value="5">Dia 05</option>
+                            <option value="10" selected>Dia 10</option>
+                            <option value="15">Dia 15</option>
+                            <option value="20">Dia 20</option>
+                            <option value="25">Dia 25</option>
+                        </select>
+                    </div>
+
+                    <h3 style="color:white; margin-bottom:15px;">Pagamento via Pix</h3>
+                    <div style="text-align:center; background:white; padding:20px; border-radius:10px; margin-bottom:20px;">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=00020126580014BR.GOV.BCB.PIX0136123e4567-e89b-12d3-a456-4266141740005204000053039865405<%= parseFloat(plan.price).toFixed(2) %>5802BR5913Momentum Fit6008Sao Paulo62070503***6304CFCF" alt="QR Code Pix" style="width:180px;">
+                        <p style="color:#333; font-weight:bold; margin-top:10px;">Escaneie para pagar</p>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg" style="width:100%;">
+                        <i class="fas fa-check-circle"></i> Confirmar Pagamento e Ativar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </main>
+</div>
+<%- include('../partials/footer.ejs') %>

@@ -1,27 +1,36 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <title>Meus Planos | Momentum Fit</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/styles.css">
-</head>
-<body>
-    <div class="dashboard-container">
-        <%- include('../partials/sidebar') %>
-        <main class="dashboard-main">
-            <div class="page-header" style="text-align: left; background: transparent; padding-left: 0;">
-                <h1><i class="fas fa-credit-card text-neon"></i> Meus Planos</h1>
-            </div>
-            
-            <div class="card-box" style="padding: 40px; text-align: center;">
-                <i class="fas fa-credit-card" style="font-size: 3rem; color: #333; margin-bottom: 20px;"></i>
-                <h3>Em Desenvolvimento</h3>
-                <p style="color: #888;">Esta funcionalidade estará disponível em breve na plataforma.</p>
-            </div>
-        </main>
-    </div>
-    <script src="/js/main.js"></script>
-</body>
-</html>
+<%- include('../partials/header.ejs') %>
+<div class="dashboard-container">
+    <%- include('../partials/sidebar.ejs', { path: '/client/plans' }) %>
+    <main class="dashboard-main">
+        <div class="mobile-dash-header">
+            <button id="sidebarOpenBtn" class="btn btn-outline btn-sm"><i class="fas fa-bars"></i></button>
+            <span>Planos</span>
+        </div>
+
+        <div class="page-header">
+            <h1>Nossos <span class="text-neon">Planos</span></h1>
+            <p>Escolha a melhor opção para atingir seus objetivos.</p>
+        </div>
+
+        <div class="plans-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:30px;">
+            <% if (plans && plans.length > 0) { %>
+                <% plans.forEach(plan => { %>
+                    <div class="card-box plan-card" style="text-align:center; padding:30px; display:flex; flex-direction:column; <%= plan.name.includes('Premium') ? 'border: 1px solid var(--primary-color); box-shadow: 0 0 15px rgba(190, 242, 2, 0.2);' : '' %>">
+                        <h2 style="color:white; font-size:1.8rem; margin-bottom:10px;"><%= plan.name %></h2>
+                        <h3 style="color: var(--primary-color); font-size:2.5rem; margin-bottom:20px;">
+                            <small style="font-size:1rem; color:#888;">R$</small> <%= parseFloat(plan.price).toFixed(2) %>
+                        </h3>
+                        <p style="color:#aaa; flex-grow:1; margin-bottom:30px;"><%= plan.description || plan.features %></p>
+                        
+                        <a href="/client/checkout/<%= plan.id %>" class="btn <%= plan.name.includes('Premium') ? 'btn-primary' : 'btn-outline' %> btn-lg">
+                            Assinar Agora
+                        </a>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <p>Nenhum plano disponível no momento.</p>
+            <% } %>
+        </div>
+    </main>
+</div>
+<%- include('../partials/footer.ejs') %>
