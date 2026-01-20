@@ -44,9 +44,11 @@
                             <div style="display: flex; gap: 10px;">
                                 <select name="trainer_id" class="form-control" style="flex:1; padding: 8px; background: #333; border: 1px solid #444; color: white;">
                                     <option value="">-- Nenhum --</option>
-                                    <% trainers.forEach(t => { %>
-                                        <option value="<%= t.id %>" <%= targetUser.trainer_id === t.id ? 'selected' : '' %>><%= t.name %></option>
-                                    <% }) %>
+                                    <% if(trainers && trainers.length > 0) { %>
+                                        <% trainers.forEach(t => { %>
+                                            <option value="<%= t.id %>" <%= targetUser.trainer_id === t.id ? 'selected' : '' %>><%= t.name %></option>
+                                        <% }) %>
+                                    <% } %>
                                 </select>
                                 <button class="btn btn-primary btn-sm">Atribuir</button>
                             </div>
@@ -81,9 +83,15 @@
                                 <form action="/admin/users/<%= targetUser.id %>/change-plan" method="POST" style="margin-top: 10px;">
                                     <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                                     <select name="plan_id" class="form-control" style="width: 100%; margin-bottom: 10px; padding: 8px; background: #333; border: 1px solid #444; color: white;">
-                                        <% plans.forEach(p => { %>
-                                            <option value="<%= p.id %>" <%= subscription && subscription.plan_id === p.id ? 'selected' : '' %>><%= p.name %></option>
-                                        <% }) %>
+                                        <% if (plans && plans.length > 0) { %>
+                                            <% plans.forEach(p => { %>
+                                                <option value="<%= p.id %>" <%= subscription && subscription.plan_id === p.id ? 'selected' : '' %>>
+                                                    <%= p.name %> - R$ <%= parseFloat(p.price).toFixed(2) %>
+                                                </option>
+                                            <% }) %>
+                                        <% } else { %>
+                                            <option value="" disabled>Nenhum plano cadastrado</option>
+                                        <% } %>
                                     </select>
                                     <button class="btn btn-sm btn-primary" style="width: 100%;">Aplicar</button>
                                 </form>
