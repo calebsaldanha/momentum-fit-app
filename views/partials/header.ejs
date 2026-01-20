@@ -31,7 +31,8 @@
                 <span class="user-greeting">Olá, <strong><%= user.name.split(' ')[0] %></strong></span>
                 <a href="/auth/logout" class="btn btn-outline btn-sm">Sair</a>
             <% } else { %>
-                <a href="/auth/login" class="btn btn-primary btn-sm">Entrar</a>
+                <a href="/auth/login" class="btn btn-outline btn-sm">Entrar</a>
+                <a href="/auth/register" class="btn btn-primary btn-sm">Cadastrar</a>
             <% } %>
         </div>
 
@@ -56,7 +57,9 @@
             <a href="/client/dashboard" style="color: var(--primary-color);">Meu Dashboard</a>
             <a href="/auth/logout">Sair</a>
         <% } else { %>
-            <a href="/auth/login" style="color: var(--primary-color);">Entrar / Cadastrar</a>
+            <hr style="border-color: #333; margin: 10px 0;">
+            <a href="/auth/login">Entrar</a>
+            <a href="/auth/register" style="color: var(--primary-color);">Criar Conta</a>
         <% } %>
     </div>
 </div>
