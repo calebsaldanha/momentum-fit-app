@@ -2,9 +2,12 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const db = require('../database/db');
+const { sendNewUserEmail } = require('../utils/emailService');
+const { createNotification } = require('../utils/notificationService');
 
 // GET Login
 router.get('/login', (req, res) => {
+    if (req.session.user) return res.redirect(req.session.user.role === 'client' ? '/client/dashboard' : '/trainer/dashboard');
     res.render('pages/login');
 });
 
@@ -30,9 +33,16 @@ router.post('/login', async (req, res) => {
 
                 req.session.user = user;
                 
-                // Redirecionamento
+                // Redirecionamento baseado em Role
                 if (user.role === 'admin' || user.role === 'superadmin') return res.redirect('/admin/dashboard');
                 if (user.role === 'trainer') return res.redirect('/trainer/dashboard');
+                
+                // Verificar se o cliente já preencheu a anamnese
+                const clientProfile = await db.query('SELECT goal FROM clients WHERE user_id = $1', [user.id]);
+                if (clientProfile.rows.length === 0 || !clientProfile.rows[0].goal) {
+                    return res.redirect('/client/profile'); // Força anamnese
+                }
+                
                 return res.redirect('/client/dashboard');
             }
         }
@@ -48,19 +58,28 @@ router.post('/login', async (req, res) => {
 
 // GET Register
 router.get('/register', (req, res) => {
-    // CORREÇÃO: Passar 'plan' para a view para evitar ReferenceError se ela usar essa variável
-    const plan = req.query.plan || '';
+    const plan = req.query.plan || 'Free'; // Default para Free se não vier nada
     res.render('pages/register', { plan: plan });
 });
 
-// POST Register
+// POST Register (Com validação e fluxo corrigido)
 router.post('/register', async (req, res) => {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, confirm_password, role, plan } = req.body;
     
+    // 1. Validação de Senha Backend
+    if (password.length < 6) {
+        req.flash('error', 'A senha deve ter no mínimo 6 caracteres.');
+        return res.redirect(`/auth/register?plan=${plan}`);
+    }
+    if (password !== confirm_password) {
+        req.flash('error', 'As senhas não coincidem.');
+        return res.redirect(`/auth/register?plan=${plan}`);
+    }
+
     try {
         await db.query('BEGIN');
 
-        // 1. Verificar duplicação
+        // 2. Verificar duplicação
         const userCheck = await db.query('SELECT id FROM users WHERE email = $1', [email]);
         if (userCheck.rows.length > 0) {
             await db.query('ROLLBACK');
@@ -68,54 +87,71 @@ router.post('/register', async (req, res) => {
             return res.redirect('/auth/register');
         }
 
-        // 2. Criar Usuário
+        // 3. Criar Usuário
         const hashedPassword = await bcrypt.hash(password, 10);
         const userRole = role === 'trainer' ? 'trainer' : 'client';
         const userStatus = userRole === 'trainer' ? 'pending_approval' : 'active';
         
         const newUser = await db.query(
-            'INSERT INTO users (name, email, password, role, status) VALUES ($1, $2, $3, $4, $5) RETURNING id, role',
+            'INSERT INTO users (name, email, password, role, status) VALUES ($1, $2, $3, $4, $5) RETURNING id, role, name, email',
             [name, email, hashedPassword, userRole, userStatus]
         );
-        const userId = newUser.rows[0].id;
+        const user = newUser.rows[0];
 
-        // 3. Configurar Perfil
+        // 4. Configurar Perfil e Plano
         if (userRole === 'client') {
-            await db.query('INSERT INTO clients (user_id) VALUES ($1)', [userId]);
+            await db.query('INSERT INTO clients (user_id) VALUES ($1)', [user.id]);
             
-            // CORREÇÃO CRÍTICA: Buscar ID do plano correto para inserir na tabela subscriptions
-            // A tabela aceita plan_id (int), não plan_name (string)
-            let planRes = await db.query("SELECT id FROM plans WHERE price = 0 OR name ILIKE '%Gratuito%' LIMIT 1");
+            // Lógica de Plano Selecionado
+            let planRes;
+            if (plan) {
+                // Tenta buscar o plano pelo nome exato vindo do form (ex: "Premium", "Pro")
+                planRes = await db.query("SELECT id, price, name FROM plans WHERE name ILIKE $1 LIMIT 1", [plan]);
+            }
             
+            // Fallback: Se não achou ou não veio, pega o gratuito
+            if (!planRes || planRes.rows.length === 0) {
+                planRes = await db.query("SELECT id, price, name FROM plans WHERE price = 0 OR name ILIKE '%Gratuito%' LIMIT 1");
+            }
+            
+            // Fallback Extremo: Pega o mais barato
             if (planRes.rows.length === 0) {
-                // Fallback para o plano mais barato se não houver gratuito
-                planRes = await db.query("SELECT id FROM plans ORDER BY price ASC LIMIT 1");
+                planRes = await db.query("SELECT id, price, name FROM plans ORDER BY price ASC LIMIT 1");
             }
 
             if (planRes.rows.length > 0) {
-                const planId = planRes.rows[0].id;
-                // Inserção corrigida usando plan_id
+                const selectedPlan = planRes.rows[0];
+                // Cria a assinatura
                 await db.query(
                     "INSERT INTO subscriptions (user_id, plan_id, status, start_date) VALUES ($1, $2, 'active', NOW())",
-                    [userId, planId]
-                );
-            } else {
-                // Se nenhum plano existir no banco, cria um default
-                const newPlan = await db.query("INSERT INTO plans (name, price, description) VALUES ('Básico', 0, 'Plano Inicial') RETURNING id");
-                await db.query(
-                    "INSERT INTO subscriptions (user_id, plan_id, status, start_date) VALUES ($1, $2, 'active', NOW())",
-                    [userId, newPlan.rows[0].id]
+                    [user.id, selectedPlan.id]
                 );
             }
-
         } else if (userRole === 'trainer') {
-            await db.query('INSERT INTO trainers (user_id) VALUES ($1)', [userId]);
+            await db.query('INSERT INTO trainers (user_id) VALUES ($1)', [user.id]);
+        }
+
+        // 5. Notificações
+        try {
+            await createNotification(user.id, 'Bem-vindo ao Momentum Fit!', 'Seu cadastro foi realizado com sucesso. Complete seu perfil para começar.', '/client/profile');
+            // Enviar e-mail (Assíncrono)
+            sendNewUserEmail(user.email, user.name, user.email, userRole).catch(e => console.error("Erro email welcome:", e));
+        } catch (notifError) {
+            console.error("Erro ao criar notificação inicial:", notifError);
         }
 
         await db.query('COMMIT');
+
+        // 6. Auto-Login e Redirecionamento de Fluxo
+        req.session.user = user;
         
-        req.flash('success', 'Cadastro realizado! Faça login.');
-        res.redirect('/auth/login');
+        if (userRole === 'client') {
+            req.flash('success', 'Cadastro realizado! Vamos configurar seu perfil.');
+            return res.redirect('/client/profile'); // Direciona para Anamnese
+        } else {
+            req.flash('success', 'Cadastro realizado! Aguarde a aprovação do administrador.');
+            return res.redirect('/trainer/dashboard');
+        }
 
     } catch (err) {
         await db.query('ROLLBACK');

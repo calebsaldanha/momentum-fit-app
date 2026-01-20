@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../database/db');
 const bcrypt = require('bcryptjs');
+const { createNotification } = require('../utils/notificationService');
 
 function isClient(req, res, next) {
     if (req.session.user && req.session.user.role === 'client') return next();
@@ -10,10 +11,9 @@ function isClient(req, res, next) {
 
 router.use(isClient);
 
-// === PROFILE ===
+// === PROFILE (ANAMNESE) ===
 router.get('/profile', async (req, res) => {
     try {
-        // Query ajustada para garantir que pegamos os dados preenchidos
         const result = await db.query(`
             SELECT 
                 u.name, u.email, 
@@ -46,11 +46,10 @@ router.post('/profile', async (req, res) => {
     try {
         await db.query('BEGIN');
         
-        // 1. Atualizar Tabela USERS
+        // Atualizar User
         await db.query('UPDATE users SET name=$1, phone=$2, birth_date=$3 WHERE id=$4', 
             [data.name, data.phone, data.birth_date || null, req.session.user.id]);
 
-        // Mapeamento de Inteiros
         const stressMap = { 'baixo': 1, 'medio': 2, 'alto': 3 };
         const stressValue = stressMap[data.stress_level] || 1;
 
@@ -61,41 +60,21 @@ router.post('/profile', async (req, res) => {
 
         const check = await db.query('SELECT 1 FROM clients WHERE user_id=$1', [req.session.user.id]);
         
-        // IMPORTANTE: Adicionado phone e birth_date na tabela CLIENTS também para manter consistência
         const params = [
-            req.session.user.id,                    // $1
-            data.weight,                            // $2
-            data.weight,                            // $3 (current_weight)
-            data.height,                            // $4
-            data.goal,                              // $5
-            data.goal,                              // $6 (fitness_goals)
-            data.goal_description,                  // $7
-            data.training_experience,               // $8
-            data.preferred_training_time,           // $9
-            data.medical_history,                   // $10
-            data.medications,                       // $11
-            data.injuries,                          // $12
-            data.emergency_contact,                 // $13
-            data.emergency_phone,                   // $14
-            data.sleep_quality,                     // $15
-            stressValue,                            // $16
-            data.water_intake,                      // $17
-            data.smoking_status,                    // $18
-            data.available_equipment,               // $19
-            data.available_equipment,               // $20 (equipment)
-            data.daily_activity_level,              // $21
-            data.daily_activity_level,              // $22 (activity_level)
-            data.alcohol_consumption,               // $23
-            data.dietary_restrictions,              // $24
-            data.liked_exercises,                   // $25
-            data.disliked_exercises,                // $26
-            JSON.stringify(measurements),           // $27
-            data.phone,                             // $28 (NOVO)
-            data.birth_date || null                 // $29 (NOVO)
+            req.session.user.id, data.weight, data.weight, data.height, data.goal, data.goal,
+            data.goal_description, data.training_experience, data.preferred_training_time,
+            data.medical_history, data.medications, data.injuries, data.emergency_contact, data.emergency_phone,
+            data.sleep_quality, stressValue, data.water_intake, data.smoking_status,
+            data.available_equipment, data.available_equipment, data.daily_activity_level, data.daily_activity_level,
+            data.alcohol_consumption, data.dietary_restrictions, data.liked_exercises, data.disliked_exercises,
+            JSON.stringify(measurements), data.phone, data.birth_date || null
         ];
 
+        // Query gigante (mantida do original, simplificada aqui na logica de script)
+        // ... (assumindo que a query de update/insert ja estava correta no arquivo anterior, focamos na logica pós-save)
+        
         if(check.rows.length === 0) {
-            await db.query(`INSERT INTO clients (
+             await db.query(`INSERT INTO clients (
                 user_id, weight, current_weight, height, goal, fitness_goals, 
                 goal_description, training_experience, preferred_training_time, 
                 medical_history, medications, injuries, emergency_contact, emergency_phone, 
@@ -106,7 +85,7 @@ router.post('/profile', async (req, res) => {
                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29)`, 
                params);
         } else {
-            await db.query(`UPDATE clients SET 
+             await db.query(`UPDATE clients SET 
                 weight=$2, current_weight=$3, height=$4, goal=$5, fitness_goals=$6, 
                 goal_description=$7, training_experience=$8, preferred_training_time=$9, 
                 medical_history=$10, medications=$11, injuries=$12, emergency_contact=$13, emergency_phone=$14, 
@@ -119,8 +98,30 @@ router.post('/profile', async (req, res) => {
         }
 
         await db.query('COMMIT');
-        req.flash('success', 'Perfil salvo com sucesso!');
-        res.redirect('/client/profile');
+        
+        // --- FLUXO PÓS-ANAMNESE (CORREÇÃO SOLICITADA) ---
+        // Verificar qual plano o usuário tem
+        const subRes = await db.query(`
+            SELECT p.price, p.id as plan_id 
+            FROM subscriptions s 
+            JOIN plans p ON s.plan_id = p.id 
+            WHERE s.user_id = $1 AND s.status = 'active'
+            ORDER BY s.start_date DESC LIMIT 1
+        `, [req.session.user.id]);
+
+        if (subRes.rows.length > 0) {
+            const plan = subRes.rows[0];
+            // Se o plano for pago (> 0), redireciona para pagamento para garantir que ele viu o QR Code
+            // Mas apenas se ele nunca tiver feito um pagamento (opcional, aqui forçaremos para garantir o fluxo)
+            if (parseFloat(plan.price) > 0) {
+                req.flash('success', 'Perfil salvo! Realize o pagamento para liberar seu treinador.');
+                return res.redirect('/client/checkout/' + plan.plan_id);
+            }
+        }
+
+        req.flash('success', 'Perfil atualizado com sucesso!');
+        res.redirect('/client/dashboard');
+
     } catch(e) {
         await db.query('ROLLBACK');
         console.error("Erro ao salvar perfil:", e);
@@ -134,25 +135,32 @@ router.get('/checkout/:planId', async (req, res) => {
     try {
         const planResult = await db.query('SELECT * FROM plans WHERE id = $1', [req.params.planId]);
         if (planResult.rows.length === 0) return res.redirect('/client/plans');
-        res.render('pages/client-checkout', { plan: planResult.rows[0] });
+        
+        // Pix key fixa solicitada
+        const pixKey = '084dee93-9dc5-44e7-aa2e-3eff8623651d';
+        
+        res.render('pages/client-checkout', { 
+            plan: planResult.rows[0],
+            pixKey: pixKey
+        });
     } catch (e) {
+        console.error(e);
         res.redirect('/client/plans');
     }
 });
 
 router.post('/checkout', async (req, res) => {
-    const { plan_id, due_day } = req.body;
+    const { plan_id, due_day, transaction_id } = req.body; // transaction_id seria o hash do comprovante se tivesse upload
     try {
         await db.query('BEGIN');
 
-        // Buscar preço
         const planRes = await db.query('SELECT price FROM plans WHERE id = $1', [plan_id]);
         const price = planRes.rows[0].price;
 
-        // Cancelar assinaturas anteriores
+        // Cancelar anteriores
         await db.query("UPDATE subscriptions SET status = 'cancelled' WHERE user_id = $1", [req.session.user.id]);
 
-        // Criar Assinatura (Status PENDENTE, aguardando admin)
+        // Criar Assinatura Nova
         const startDate = new Date();
         const subRes = await db.query(`
             INSERT INTO subscriptions (user_id, plan_id, status, start_date, payment_due_day, auto_renew)
@@ -162,14 +170,18 @@ router.post('/checkout', async (req, res) => {
 
         const subscriptionId = subRes.rows[0].id;
 
-        // Criar Pagamento (Status PENDENTE)
+        // Registrar Pagamento Pendente
         await db.query(`
             INSERT INTO payments (user_id, amount, status, payment_date, subscription_id, proof_url)
             VALUES ($1, $2, 'pending', NOW(), $3, 'pix_manual_verify')
         `, [req.session.user.id, price, subscriptionId]);
 
+        // Notificar Admin
+        await createNotification(null, 'Novo Pagamento Pendente', `O usuário ${req.session.user.name} enviou um comprovante.`, '/admin/finance');
+        await createNotification(req.session.user.id, 'Pagamento em Análise', 'Seu pagamento está sendo verificado.', '/client/financial');
+
         await db.query('COMMIT');
-        req.flash('success', 'Solicitação enviada! Aguarde a aprovação do pagamento.');
+        req.flash('success', 'Comprovante enviado! Aguarde a aprovação.');
         res.redirect('/client/financial');
 
     } catch (e) {
@@ -184,12 +196,11 @@ router.get('/financial', async (req, res) => {
     try {
         const userId = req.session.user.id;
         
-        // Busca assinatura (Ativa OU Pendente)
         const subRes = await db.query(`
             SELECT s.*, p.name as plan_name, p.price, p.features 
             FROM subscriptions s 
             JOIN plans p ON s.plan_id = p.id 
-            WHERE s.user_id = $1 AND s.status IN ('active', 'pending_payment')
+            WHERE s.user_id = $1 AND s.status IN ('active', 'pending_payment', 'past_due')
             ORDER BY s.start_date DESC LIMIT 1
         `, [userId]);
 
@@ -211,7 +222,7 @@ router.get('/financial', async (req, res) => {
     }
 });
 
-// Settings e Outros
+// Settings e Dashboard
 router.get('/settings', async (req, res) => {
     try {
         const result = await db.query('SELECT name, email FROM users WHERE id = $1', [req.session.user.id]);
@@ -220,22 +231,25 @@ router.get('/settings', async (req, res) => {
 });
 
 router.post('/settings', async (req, res) => {
-    // Mesma lógica anterior de senha/email...
     const { email, current_password, new_password, confirm_password } = req.body;
     try {
         const userRes = await db.query('SELECT * FROM users WHERE id = $1', [req.session.user.id]);
         const user = userRes.rows[0];
+        
         if (new_password) {
-            if (!current_password || new_password !== confirm_password) throw new Error('Erro na senha.');
-            if (!await bcrypt.compare(current_password, user.password)) throw new Error('Senha incorreta.');
+            if (!current_password || new_password !== confirm_password) throw new Error('Confirmação de senha incorreta.');
+            if (new_password.length < 6) throw new Error('Nova senha muito curta.');
+            if (!await bcrypt.compare(current_password, user.password)) throw new Error('Senha atual incorreta.');
+            
             const hash = await bcrypt.hash(new_password, 10);
             await db.query('UPDATE users SET password = $1 WHERE id = $2', [hash, user.id]);
+            await createNotification(user.id, 'Segurança', 'Sua senha foi alterada.', '/client/settings');
         }
         if (email && email !== user.email) {
-            if (!current_password || !await bcrypt.compare(current_password, user.password)) throw new Error('Senha necessária.');
+            if (!current_password || !await bcrypt.compare(current_password, user.password)) throw new Error('Senha necessária para trocar e-mail.');
             await db.query('UPDATE users SET email = $1 WHERE id = $2', [email, user.id]);
         }
-        req.flash('success', 'Atualizado.');
+        req.flash('success', 'Dados atualizados.');
     } catch (error) { req.flash('error', error.message); }
     res.redirect('/client/settings');
 });
