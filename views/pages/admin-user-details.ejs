@@ -2,38 +2,183 @@
 <div class="dashboard-container">
     <%- include('../partials/sidebar.ejs', { path: '/admin/users' }) %>
     <main class="dashboard-main">
-        <div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
+        
+        <div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
             <div>
-                <a href="/admin/users" class="btn btn-outline btn-sm" style="margin-bottom: 10px;"><i class="fas fa-arrow-left"></i> Voltar</a>
-                <h1>Detalhes de <span class="text-neon"><%= targetUser.name %></span></h1>
+                <a href="/admin/users" class="btn btn-outline btn-sm" style="margin-bottom: 10px;"><i class="fas fa-arrow-left"></i> Voltar para Lista</a>
+                <h1><span class="text-neon"><%= targetUser.name %></span></h1>
+                <p class="text-muted"><%= targetUser.email %> | ID: <%= targetUser.id %></p>
             </div>
-            <span class="badge" style="background: #333; padding: 5px 10px; border-radius: 4px;"><%= targetUser.role %></span>
+            <div style="text-align:right;">
+                <span class="badge" style="background: <%= targetUser.status === 'active' ? 'green' : 'red' %>; padding: 5px 10px; border-radius: 4px; font-size: 0.9rem;">
+                    <%= targetUser.status.toUpperCase() %>
+                </span>
+                <div style="margin-top: 5px;">
+                    <span class="badge" style="background: #333; padding: 5px 10px;"><%= targetUser.role %></span>
+                </div>
+            </div>
         </div>
 
-        <div class="card-box" style="margin-bottom: 20px;">
-            <h3 style="color: white; margin-bottom: 15px;">Dados da Conta</h3>
-            <p><strong style="color:#888">Email:</strong> <%= targetUser.email %></p>
-            <p><strong style="color:#888">Status:</strong> <%= targetUser.status %></p>
-            <p><strong style="color:#888">Criado em:</strong> <%= new Date(targetUser.created_at).toLocaleDateString() %></p>
-        </div>
+        <% if(messages && messages.success) { %><div class="alert alert-success"><%= messages.success %></div><% } %>
+        <% if(messages && messages.error) { %><div class="alert alert-danger"><%= messages.error %></div><% } %>
 
-        <% if (targetUser.role === 'client' && details) { %>
-            <h3 style="margin-bottom: 20px;">Ficha do Aluno</h3>
-            <%- include('../partials/client-anamnesis-view.ejs', { client: details }) %>
-        <% } %>
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+            
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+                
+                <% if (targetUser.role === 'client' && details) { %>
+                    <div class="card-box">
+                        <h3 style="color: white; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px;">Ficha do Aluno</h3>
+                        <%- include('../partials/client-anamnesis-view.ejs', { client: details }) %>
+                    </div>
+                <% } %>
 
-        <% if (targetUser.role === 'trainer' && details) { %>
-            <div class="card-box">
-                <h3 style="color: #4da6ff;">Perfil Profissional</h3>
-                <p><strong>Especialização:</strong> <%= details.specialization || '-' %></p>
-                <p><strong>Bio:</strong> <%= details.bio || '-' %></p>
-                <p><strong>Certificações:</strong> <%= details.certifications || '-' %></p>
+                <% if (targetUser.role === 'client') { %>
+                    <div class="card-box">
+                        <h3 style="color: #bef202; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px;">
+                            <i class="fas fa-dumbbell"></i> Treinos & Personal
+                        </h3>
+                        
+                        <form action="/admin/users/<%= targetUser.id %>/assign-trainer" method="POST" style="margin-bottom: 20px; background: #222; padding: 15px; border-radius: 8px;">
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                            <label style="color:#888; display:block; margin-bottom:5px;">Personal Trainer Responsável</label>
+                            <div style="display: flex; gap: 10px;">
+                                <select name="trainer_id" class="form-control" style="flex:1; padding: 8px; background: #333; border: 1px solid #444; color: white;">
+                                    <option value="">-- Selecione um Treinador --</option>
+                                    <% trainers.forEach(t => { %>
+                                        <option value="<%= t.id %>" <%= targetUser.trainer_id === t.id ? 'selected' : '' %>><%= t.name %></option>
+                                    <% }) %>
+                                </select>
+                                <button class="btn btn-primary btn-sm">Salvar</button>
+                            </div>
+                        </form>
+
+                        <h4 style="color: white; margin-bottom: 10px;">Treinos Criados</h4>
+                        <% if (workouts && workouts.length > 0) { %>
+                            <div class="table-responsive">
+                                <table style="width:100%; text-align:left;">
+                                    <thead><tr style="color:#888;"><th style="padding:5px;">Título</th><th style="padding:5px;">Data</th><th style="padding:5px;">Status</th></tr></thead>
+                                    <tbody>
+                                        <% workouts.forEach(w => { %>
+                                            <tr style="border-bottom: 1px solid #333;">
+                                                <td style="padding:8px; color:white;"><%= w.title %></td>
+                                                <td style="padding:8px; color:#ccc;"><%= new Date(w.created_at).toLocaleDateString() %></td>
+                                                <td style="padding:8px;"><span style="color: <%= w.status === 'active' ? '#bef202' : '#ccc' %>"><%= w.status %></span></td>
+                                            </tr>
+                                        <% }) %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <% } else { %>
+                            <p style="color:#666; font-style:italic;">Nenhum treino criado ainda.</p>
+                        <% } %>
+                    </div>
+                <% } %>
+
+                <div class="card-box">
+                    <h3 style="color: #4da6ff; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px;">
+                        <i class="fas fa-wallet"></i> Financeiro
+                    </h3>
+                    
+                    <div style="display: flex; gap: 20px; margin-bottom: 20px;">
+                        <div style="flex: 1; background: #222; padding: 15px; border-radius: 8px;">
+                            <label style="color:#888;">Plano Atual</label>
+                            <% if (subscription) { %>
+                                <h4 style="color: white; font-size: 1.2rem; margin: 5px 0;"><%= subscription.plan_name %></h4>
+                                <p style="color: <%= subscription.status === 'active' ? '#bef202' : 'orange' %>; font-weight: bold;"><%= subscription.status.toUpperCase() %></p>
+                                <p style="color: #ccc; font-size: 0.9rem;">Renova em: <%= subscription.next_billing_date ? new Date(subscription.next_billing_date).toLocaleDateString() : 'Manual' %></p>
+                                
+                                <% if (subscription.status === 'past_due' || subscription.status === 'pending_payment') { %>
+                                    <form action="/admin/users/<%= targetUser.id %>/send-reminder" method="POST" style="margin-top: 10px;">
+                                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                        <button class="btn btn-sm btn-outline" style="width: 100%; border-color: orange; color: orange;"><i class="fas fa-envelope"></i> Enviar Cobrança</button>
+                                    </form>
+                                <% } %>
+                            <% } else { %>
+                                <h4 style="color: #ccc;">Nenhum plano ativo (Free)</h4>
+                            <% } %>
+                        </div>
+
+                        <div style="flex: 1; background: #222; padding: 15px; border-radius: 8px;">
+                            <label style="color:#888;">Alterar Plano Manualmente</label>
+                            <form action="/admin/users/<%= targetUser.id %>/change-plan" method="POST" style="margin-top: 10px;">
+                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                <select name="plan_id" class="form-control" style="width: 100%; margin-bottom: 10px; padding: 8px; background: #333; border: 1px solid #444; color: white;">
+                                    <% plans.forEach(p => { %>
+                                        <option value="<%= p.id %>" <%= subscription && subscription.plan_id === p.id ? 'selected' : '' %>><%= p.name %> - R$ <%= parseFloat(p.price).toFixed(0) %></option>
+                                    <% }) %>
+                                </select>
+                                <button class="btn btn-sm btn-primary" style="width: 100%;">Aplicar Mudança</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <h4 style="color: white; margin-bottom: 10px;">Histórico de Transações</h4>
+                    <div class="table-responsive" style="max-height: 200px; overflow-y: auto;">
+                        <table style="width:100%; text-align:left;">
+                            <thead><tr style="color:#888;"><th style="padding:5px;">Data</th><th style="padding:5px;">Valor</th><th style="padding:5px;">Status</th></tr></thead>
+                            <tbody>
+                                <% if (payments && payments.length > 0) { %>
+                                    <% payments.forEach(p => { %>
+                                        <tr style="border-bottom: 1px solid #333;">
+                                            <td style="padding:8px; color:#ccc;"><%= new Date(p.created_at).toLocaleDateString() %></td>
+                                            <td style="padding:8px; color:white;">R$ <%= parseFloat(p.amount).toFixed(2) %></td>
+                                            <td style="padding:8px; color: <%= p.status === 'paid' ? '#bef202' : (p.status === 'pending' ? 'orange' : 'red') %>"><%= p.status %></td>
+                                        </tr>
+                                    <% }) %>
+                                <% } else { %>
+                                    <tr><td colspan="3" style="padding:10px; color:#666;">Sem histórico.</td></tr>
+                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
             </div>
-        <% } %>
 
-        <div style="margin-top: 30px;">
-            <h3 style="color:red;">Zona de Perigo</h3>
-            <button class="btn btn-outline" style="border-color: red; color: red;">Bloquear Usuário</button>
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+                
+                <div class="card-box">
+                    <h3 style="color: white; margin-bottom: 15px;">Gestão de Acesso</h3>
+                    
+                    <form action="/admin/users/<%= targetUser.id %>/suspend" method="POST" style="margin-bottom: 15px;">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <% if (targetUser.status === 'active') { %>
+                            <input type="hidden" name="status" value="suspended">
+                            <button class="btn btn-outline" style="width: 100%; border-color: orange; color: orange;">
+                                <i class="fas fa-ban"></i> Suspender Usuário
+                            </button>
+                        <% } else { %>
+                            <input type="hidden" name="status" value="active">
+                            <button class="btn btn-outline" style="width: 100%; border-color: #bef202; color: #bef202;">
+                                <i class="fas fa-check"></i> Reativar Usuário
+                            </button>
+                        <% } %>
+                    </form>
+
+                    <hr style="border-color: #333; margin: 15px 0;">
+
+                    <h4 style="color: #ccc; font-size: 0.9rem; margin-bottom: 5px;">Redefinir Senha</h4>
+                    <form action="/admin/users/<%= targetUser.id %>/reset-password" method="POST">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <input type="text" name="new_password" placeholder="Nova Senha" required style="width: 100%; padding: 8px; margin-bottom: 10px; background: #333; border: 1px solid #444; color: white;">
+                        <button class="btn btn-sm btn-primary" style="width: 100%;">Salvar Senha</button>
+                    </form>
+                </div>
+
+                <div class="card-box" style="border: 1px solid rgba(255,0,0,0.3);">
+                    <h3 style="color: red; margin-bottom: 15px;">Zona de Perigo</h3>
+                    <p style="color: #888; font-size: 0.8rem; margin-bottom: 15px;">A exclusão é irreversível e remove todos os dados do cliente.</p>
+                    
+                    <form action="/admin/users/<%= targetUser.id %>/delete" method="POST" onsubmit="return confirm('Tem certeza absoluta que deseja excluir este usuário?');">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <button class="btn btn-outline" style="width: 100%; background: rgba(255,0,0,0.1); border-color: red; color: red;">
+                            <i class="fas fa-trash"></i> Excluir Usuário
+                        </button>
+                    </form>
+                </div>
+
+            </div>
         </div>
     </main>
 </div>
