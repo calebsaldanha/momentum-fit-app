@@ -1,61 +1,55 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastro - Momentum Fit</title>
-    <link rel="stylesheet" href="/css/styles.css">
-</head>
-<body style="background: #000; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px;">
-    
-    <div class="auth-container" style="background: #111; padding: 40px; border-radius: 12px; width: 100%; max-width: 450px; border: 1px solid #333;">
-        <div style="text-align: center; margin-bottom: 20px;">
+<%- include('../partials/header.ejs') %>
+
+<main class="auth-wrapper">
+    <div class="auth-card">
+        <div style="text-align: center; margin-bottom: 30px;">
             <img src="/images/momentum-fit-icon.png" alt="Logo" style="width: 60px; margin-bottom: 10px;">
-            <h2 style="color: white;">Criar Conta</h2>
+            <h2 style="color: white; font-weight: 700;">Crie sua Conta</h2>
+            <p class="text-muted">Comece sua jornada hoje mesmo.</p>
         </div>
 
         <% if (locals.messages && messages.error) { %>
-            <div class="alert alert-danger" style="color: #ff4d4d; background: rgba(255,0,0,0.1); padding: 10px; border-radius: 5px; margin-bottom: 20px; text-align: center; border: 1px solid #ff4d4d;">
-                <%= messages.error %>
+            <div class="alert alert-danger" style="margin-bottom: 20px;">
+                <i class="fas fa-exclamation-circle"></i> <%= messages.error %>
             </div>
         <% } %>
 
         <form action="/auth/register" method="POST">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
             
-            <div style="margin-bottom: 15px;">
-                <label style="color: #888; display: block; margin-bottom: 5px;">Nome Completo</label>
-                <input type="text" name="name" required style="width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #333; background: #222; color: white;">
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label style="color: #ccc; font-size: 0.9rem; margin-bottom: 5px; display: block;">Nome Completo</label>
+                <input type="text" name="name" required class="form-control" style="width: 100%; padding: 12px; background: #222; border: 1px solid #444; color: white; border-radius: 6px;">
             </div>
 
-            <div style="margin-bottom: 15px;">
-                <label style="color: #888; display: block; margin-bottom: 5px;">Email</label>
-                <input type="email" name="email" required style="width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #333; background: #222; color: white;">
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label style="color: #ccc; font-size: 0.9rem; margin-bottom: 5px; display: block;">Email</label>
+                <input type="email" name="email" required class="form-control" style="width: 100%; padding: 12px; background: #222; border: 1px solid #444; color: white; border-radius: 6px;">
             </div>
 
-            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <div style="display: flex; gap: 15px; margin-bottom: 15px;">
                 <div style="flex: 1;">
-                    <label style="color: #888; display: block; margin-bottom: 5px;">Senha</label>
-                    <input type="password" name="password" required style="width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #333; background: #222; color: white;">
+                    <label style="color: #ccc; font-size: 0.9rem; margin-bottom: 5px; display: block;">Senha</label>
+                    <input type="password" name="password" required class="form-control" style="width: 100%; padding: 12px; background: #222; border: 1px solid #444; color: white; border-radius: 6px;">
                 </div>
                 <div style="flex: 1;">
-                    <label style="color: #888; display: block; margin-bottom: 5px;">Confirmar</label>
-                    <input type="password" name="confirmPassword" required style="width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #333; background: #222; color: white;">
+                    <label style="color: #ccc; font-size: 0.9rem; margin-bottom: 5px; display: block;">Confirmar</label>
+                    <input type="password" name="confirmPassword" required class="form-control" style="width: 100%; padding: 12px; background: #222; border: 1px solid #444; color: white; border-radius: 6px;">
                 </div>
             </div>
 
-            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+            <div style="display: flex; gap: 15px; margin-bottom: 25px;">
                 <div style="flex: 2;">
-                    <label style="color: #888; display: block; margin-bottom: 5px;">Plano</label>
-                    <select name="plan" style="width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #333; background: #222; color: white;">
-                        <option value="basic" <%= plan === 'basic' ? 'selected' : '' %>>Básico (R$ 10,00)</option>
-                        <option value="free" <%= plan === 'free' ? 'selected' : '' %>>Gratuito</option>
-                        <option value="pro" <%= plan === 'pro' ? 'selected' : '' %>>PRO (R$ 89,90)</option>
+                    <label style="color: #ccc; font-size: 0.9rem; margin-bottom: 5px; display: block;">Plano Escolhido</label>
+                    <select name="plan" class="form-control" style="width: 100%; padding: 12px; background: #222; border: 1px solid #444; color: white; border-radius: 6px;">
+                        <option value="basic" <%= plan === 'basic' ? 'selected' : '' %>>Momentum Básico (R$ 10,00)</option>
+                        <option value="free" <%= plan === 'free' ? 'selected' : '' %>>Gratuito (Acesso Limitado)</option>
+                        <option value="pro" <%= plan === 'pro' ? 'selected' : '' %>>Momentum PRO (R$ 89,90)</option>
                     </select>
                 </div>
                 <div style="flex: 1;">
-                    <label style="color: #888; display: block; margin-bottom: 5px;">Vencimento</label>
-                    <select name="paymentDay" style="width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #333; background: #222; color: white;">
+                    <label style="color: #ccc; font-size: 0.9rem; margin-bottom: 5px; display: block;">Vencimento</label>
+                    <select name="paymentDay" class="form-control" style="width: 100%; padding: 12px; background: #222; border: 1px solid #444; color: white; border-radius: 6px;">
                         <option value="5">Dia 05</option>
                         <option value="10" selected>Dia 10</option>
                         <option value="15">Dia 15</option>
@@ -64,21 +58,21 @@
                     </select>
                 </div>
             </div>
+            
+            <input type="hidden" name="role" value="client">
 
-            <div style="margin-bottom: 20px;">
-                <label style="color: #888; display: block; margin-bottom: 5px;">Sou um</label>
-                <select name="role" style="width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #333; background: #222; color: white;">
-                    <option value="client">Aluno</option>
-                    <option value="trainer">Personal Trainer</option>
-                </select>
-            </div>
-
-            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 14px; font-weight: bold; font-size: 1rem;">Finalizar Cadastro</button>
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 14px; font-weight: bold; font-size: 1.1rem; text-transform: uppercase;">
+                Finalizar Cadastro <i class="fas fa-arrow-right"></i>
+            </button>
         </form>
 
-        <p style="text-align: center; color: #666; margin-top: 20px;">
-            Já tem conta? <a href="/auth/login" style="color: var(--primary-color);">Entrar</a>
-        </p>
+        <div style="text-align: center; margin-top: 25px; padding-top: 20px; border-top: 1px solid #333;">
+            <p style="color: #888;">Já tem uma conta?</p>
+            <a href="/auth/login" class="text-neon" style="font-weight: bold;">Fazer Login</a>
+            <br><br>
+            <a href="/auth/register?role=trainer" style="color: #666; font-size: 0.85rem;">Sou Personal Trainer</a>
+        </div>
     </div>
-</body>
-</html>
+</main>
+
+<%- include('../partials/footer.ejs') %>

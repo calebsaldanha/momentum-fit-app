@@ -235,3 +235,37 @@ th { color: white; font-weight: 600; }
     /* Footer */
     .footer-wrapper { flex-direction: column; text-align: center; }
 }
+
+/* --- FIX: BACKGROUND AUTH --- */
+.auth-wrapper {
+    background: url('/images/auth-bg.png') no-repeat center center fixed;
+    background-size: cover;
+    min-height: calc(100vh - 80px); /* Desconta altura do header aprox */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    position: relative;
+}
+
+/* Camada escura para melhorar leitura */
+.auth-wrapper::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 1;
+}
+
+.auth-card {
+    position: relative;
+    z-index: 2;
+    background: rgba(17, 17, 17, 0.95);
+    padding: 40px;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 480px;
+    border: 1px solid #333;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    backdrop-filter: blur(10px);
+}

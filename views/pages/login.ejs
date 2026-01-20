@@ -1,41 +1,49 @@
 <%- include('../partials/header.ejs') %>
 
-<main class="page-content" style="display: flex; align-items: center; justify-content: center; min-height: 80vh;">
-    <div class="card-box" style="width: 100%; max-width: 400px; padding: 40px;">
+<main class="auth-wrapper">
+    <div class="auth-card">
         <div style="text-align: center; margin-bottom: 30px;">
-            <h1 style="color: white; font-size: 2rem; margin-bottom: 10px;">Login</h1>
-            <p class="text-muted">Acesse sua conta Momentum</p>
+            <img src="/images/momentum-fit-icon.png" alt="Logo" style="width: 60px; margin-bottom: 10px;">
+            <h2 style="color: white; font-weight: 700;">Bem-vindo de volta</h2>
+            <p class="text-muted">Acesse sua conta para continuar.</p>
         </div>
 
-        <% if(messages.error) { %>
-            <div class="alert alert-danger" style="background: rgba(255,0,0,0.1); color: #ff4d4d; padding: 10px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #ff4d4d;">
-                <%= messages.error %>
-            </div>
-        <% } %>
-        <% if(messages.success) { %>
-            <div class="alert alert-success" style="background: rgba(0,255,0,0.1); color: #bef202; padding: 10px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #bef202;">
-                <%= messages.success %>
+        <% if (locals.messages && messages.error) { %>
+            <div class="alert alert-danger" style="margin-bottom: 20px;">
+                <i class="fas fa-exclamation-triangle"></i> <%= messages.error %>
             </div>
         <% } %>
 
         <form action="/auth/login" method="POST">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; color: #aaa; margin-bottom: 8px;">Email</label>
-                <input type="email" name="email" required class="form-control" style="width: 100%; padding: 12px; background: #0a0a0a; border: 1px solid #333; color: white; border-radius: 8px;">
+            
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label style="color: #ccc; font-size: 0.9rem; margin-bottom: 5px; display: block;">Email</label>
+                <div style="position: relative;">
+                    <i class="fas fa-envelope" style="position: absolute; left: 15px; top: 14px; color: #666;"></i>
+                    <input type="email" name="email" required class="form-control" placeholder="seu@email.com" style="width: 100%; padding: 12px 12px 12px 45px; background: #222; border: 1px solid #444; color: white; border-radius: 6px;">
+                </div>
             </div>
 
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; color: #aaa; margin-bottom: 8px;">Senha</label>
-                <input type="password" name="password" required class="form-control" style="width: 100%; padding: 12px; background: #0a0a0a; border: 1px solid #333; color: white; border-radius: 8px;">
+            <div class="form-group" style="margin-bottom: 25px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                    <label style="color: #ccc; font-size: 0.9rem;">Senha</label>
+                    <a href="/auth/forgot-password" style="color: var(--primary-color); font-size: 0.8rem;">Esqueceu?</a>
+                </div>
+                <div style="position: relative;">
+                    <i class="fas fa-lock" style="position: absolute; left: 15px; top: 14px; color: #666;"></i>
+                    <input type="password" name="password" required class="form-control" placeholder="••••••••" style="width: 100%; padding: 12px 12px 12px 45px; background: #222; border: 1px solid #444; color: white; border-radius: 6px;">
+                </div>
             </div>
 
-            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 14px;">Entrar</button>
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 14px; font-weight: bold; font-size: 1.1rem; text-transform: uppercase;">
+                Entrar <i class="fas fa-sign-in-alt"></i>
+            </button>
         </form>
 
-        <div style="text-align: center; margin-top: 20px;">
-            <a href="/auth/register" class="text-neon" style="font-size: 0.9rem;">Não tem conta? Cadastre-se</a>
+        <div style="text-align: center; margin-top: 30px;">
+            <p style="color: #888;">Ainda não tem conta?</p>
+            <a href="/auth/register" class="btn btn-outline" style="width: 100%; margin-top: 10px;">Criar Conta Grátis</a>
         </div>
     </div>
 </main>
