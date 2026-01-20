@@ -1,0 +1,48 @@
+<%- include('../partials/header.ejs') %>
+<div class="dashboard-container">
+    <%- include('../partials/sidebar.ejs', { path: '/admin/users' }) %>
+    <main class="dashboard-main">
+        <div class="page-header">
+            <h1>Gerenciar <span class="text-neon">Usuários</span></h1>
+            <p>Visão geral de todos os cadastros do sistema.</p>
+        </div>
+
+        <div class="card-box">
+            <div class="table-responsive">
+                <table style="width:100%; text-align:left; border-collapse: collapse;">
+                    <thead>
+                        <tr style="border-bottom:1px solid #333; color:#888;">
+                            <th style="padding:15px;">Nome</th>
+                            <th style="padding:15px;">Email</th>
+                            <th style="padding:15px;">Função</th>
+                            <th style="padding:15px;">Status</th>
+                            <th style="padding:15px;">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% users.forEach(u => { %>
+                            <tr style="border-bottom:1px solid #222;">
+                                <td style="padding:15px; color:white;"><%= u.name %></td>
+                                <td style="padding:15px; color:#ccc;"><%= u.email %></td>
+                                <td style="padding:15px;">
+                                    <span style="padding:4px 8px; border-radius:4px; font-size:0.8rem; background:<%= u.role === 'admin' ? '#ff4d4d' : (u.role === 'trainer' ? '#4da6ff' : '#222') %>; color:white;">
+                                        <%= u.role.toUpperCase() %>
+                                    </span>
+                                </td>
+                                <td style="padding:15px;">
+                                    <span style="color:<%= u.status === 'active' ? '#bef202' : 'orange' %>">
+                                        <%= u.status %>
+                                    </span>
+                                </td>
+                                <td style="padding:15px;">
+                                    <a href="/admin/users/<%= u.id %>" class="btn btn-outline btn-sm">Detalhes</a>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+<%- include('../partials/footer.ejs') %>

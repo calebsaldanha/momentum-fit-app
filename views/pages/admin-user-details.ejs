@@ -1,47 +1,39 @@
 <%- include('../partials/header.ejs') %>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <div class="dashboard-container">
     <%- include('../partials/sidebar.ejs', { path: '/admin/users' }) %>
     <main class="dashboard-main">
-        <div class="page-header" style="display: flex; justify-content: space-between;">
-            <a href="/admin/users" class="btn btn-sm btn-outline"><i class="fas fa-arrow-left"></i> Voltar</a>
-            <h1><%= targetUser.name %></h1>
+        <div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <a href="/admin/users" class="btn btn-outline btn-sm" style="margin-bottom: 10px;"><i class="fas fa-arrow-left"></i> Voltar</a>
+                <h1>Detalhes de <span class="text-neon"><%= targetUser.name %></span></h1>
+            </div>
+            <span class="badge" style="background: #333; padding: 5px 10px; border-radius: 4px;"><%= targetUser.role %></span>
         </div>
 
-        <% if (targetUser.role === 'client') { %>
+        <div class="card-box" style="margin-bottom: 20px;">
+            <h3 style="color: white; margin-bottom: 15px;">Dados da Conta</h3>
+            <p><strong style="color:#888">Email:</strong> <%= targetUser.email %></p>
+            <p><strong style="color:#888">Status:</strong> <%= targetUser.status %></p>
+            <p><strong style="color:#888">Criado em:</strong> <%= new Date(targetUser.created_at).toLocaleDateString() %></p>
+        </div>
+
+        <% if (targetUser.role === 'client' && details) { %>
+            <h3 style="margin-bottom: 20px;">Ficha do Aluno</h3>
+            <%- include('../partials/client-anamnesis-view.ejs', { client: details }) %>
+        <% } %>
+
+        <% if (targetUser.role === 'trainer' && details) { %>
             <div class="card-box">
-                <h3>Gestão de Treinos</h3>
-                <a href="/workouts/create?userId=<%= targetUser.id %>" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> Criar Novo Treino
-                </a>
-            </div>
-            
-            <div class="card-box" style="margin-top: 20px;">
-                <h3>Treinos Existentes</h3>
-                <div class="table-responsive">
-                    <table style="width:100%">
-                        <thead><tr><th>Título</th><th>Dia</th><th>Ações</th></tr></thead>
-                        <tbody>
-                            <% if(workouts && workouts.length > 0) { workouts.forEach(w => { %>
-                                <tr>
-                                    <td><%= w.title %></td>
-                                    <td><%= w.day_of_week %></td>
-                                    <td><a href="/workouts/<%= w.id %>" class="btn btn-sm btn-outline">Ver</a></td>
-                                </tr>
-                            <% }) } else { %>
-                                <tr><td colspan="3">Sem treinos</td></tr>
-                            <% } %>
-                        </tbody>
-                    </table>
-                </div>
+                <h3 style="color: #4da6ff;">Perfil Profissional</h3>
+                <p><strong>Especialização:</strong> <%= details.specialization || '-' %></p>
+                <p><strong>Bio:</strong> <%= details.bio || '-' %></p>
+                <p><strong>Certificações:</strong> <%= details.certifications || '-' %></p>
             </div>
         <% } %>
 
-        <div class="card-box" style="margin-top:20px;">
-            <h3>Dados Básicos</h3>
-            <p>Email: <%= targetUser.email %></p>
-            <p>Status: <%= targetUser.active ? 'Ativo' : 'Suspenso' %></p>
+        <div style="margin-top: 30px;">
+            <h3 style="color:red;">Zona de Perigo</h3>
+            <button class="btn btn-outline" style="border-color: red; color: red;">Bloquear Usuário</button>
         </div>
     </main>
 </div>
