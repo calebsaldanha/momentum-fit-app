@@ -1,33 +1,68 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../database/db');
+const notificationService = require('../utils/notificationService');
 
-// Listagem de Artigos
-router.get('/', async (req, res) => {
+// Rota para Trainer Criar
+router.post('/create', async (req, res) => {
+    // Middleware de auth deve vir antes
+    if(!req.session.user) return res.redirect('/auth/login');
+
+    const { title, content, category } = req.body;
     try {
-        // Tenta buscar artigos, se a tabela não existir ou estiver vazia, envia array vazio
-        // Em produção real, você removeria o bloco try/catch "permissivo"
-        const result = await db.query("SELECT * FROM articles WHERE status = 'published' ORDER BY created_at DESC");
-        res.render('pages/articles', { articles: result.rows });
-    } catch (err) {
-        console.error("Erro ao buscar artigos (pode ser tabela inexistente):", err.message);
-        // Fallback: renderiza com lista vazia para não quebrar a página
-        res.render('pages/articles', { articles: [] });
-    }
+        await db.query(
+            "INSERT INTO articles (title, content, category, author_id, status) VALUES ($1, $2, $3, $4, 'pending')",
+            [title, content, category, req.session.user.id]
+        );
+
+        // Notificar Admin (Novo Artigo Pendente)
+        await notificationService.notify({
+            userId: 'ADMIN_GROUP',
+            type: 'new_article_admin', // Template genérico
+            title: 'Novo Artigo para Revisão',
+            message: `O treinador ${req.session.user.name} submeteu "${title}".`,
+            link: '/admin/content',
+            data: { name: req.session.user.name, role: 'Trainer' }
+        });
+
+        req.flash('success', 'Artigo enviado para aprovação.');
+        res.redirect('/trainer/content');
+    } catch(e) { res.redirect('/trainer/content'); }
 });
 
-// Detalhes do Artigo
-router.get('/:id', async (req, res) => {
+// Rota para Admin Aprovar (no Admin.js ou aqui se for modular, vamos por aqui para exemplo)
+router.post('/approve/:id', async (req, res) => {
+    if(req.session.user.role !== 'admin' && req.session.user.role !== 'superadmin') return res.redirect('/');
+    
     try {
-        const result = await db.query("SELECT * FROM articles WHERE id = $1", [req.params.id]);
-        if (result.rows.length > 0) {
-            res.render('pages/article-details', { article: result.rows[0] });
-        } else {
-            res.status(404).render('pages/error', { message: 'Artigo não encontrado', error: { status: 404 } });
-        }
-    } catch (err) {
-        res.redirect('/articles');
-    }
+        const articleRes = await db.query("UPDATE articles SET status='published' WHERE id=$1 RETURNING title, author_id", [req.params.id]);
+        const article = articleRes.rows[0];
+
+        // 1. Notificar Trainer (Aprovado)
+        await notificationService.notify({
+            userId: article.author_id,
+            type: 'article_approved',
+            title: 'Artigo Publicado',
+            message: `Seu artigo "${article.title}" está no ar!`,
+            link: `/articles/${req.params.id}`,
+            data: { articleTitle: article.title }
+        });
+
+        // 2. Broadcast para CLIENTES (Artigo Novo)
+        await notificationService.notify({
+            userId: 'ALL_CLIENTS',
+            type: 'new_article_broadcast',
+            title: 'Novo Conteúdo no Blog',
+            message: `Leia agora: "${article.title}"`,
+            link: `/articles/${req.params.id}`,
+            data: { articleTitle: article.title }
+        });
+
+        res.redirect('/admin/content');
+    } catch(e){ res.redirect('/admin/content'); }
 });
+
+router.get('/', (req, res) => res.render('pages/articles', { articles: [] }));
+router.get('/:id', (req, res) => res.render('pages/article-details', { article: {} }));
 
 module.exports = router;

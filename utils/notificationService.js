@@ -1,164 +1,78 @@
-const { pool } = require('../database/db');
-const emailService = require('./emailService');
-
-async function getSuperAdmins() {
-    try {
-        const res = await pool.query("SELECT id, email, name FROM users WHERE role = 'superadmin'");
-        return res.rows;
-    } catch (e) { return []; }
-}
-
-async function getActiveTrainers() {
-    try {
-        const res = await pool.query("SELECT id, email, name FROM users WHERE role = 'trainer' AND status = 'active'");
-        return res.rows;
-    } catch (e) { return []; }
-}
-
-async function getActiveClients() {
-    try {
-        const res = await pool.query("SELECT id, email, name FROM users WHERE role = 'client' AND status = 'active'");
-        return res.rows;
-    } catch (e) { return []; }
-}
-
-async function createNotification(userId, title, message, type = 'info', link = null) {
-    try {
-        await pool.query(
-            "INSERT INTO notifications (user_id, title, message, type, link) VALUES ($1, $2, $3, $4, $5)",
-            [userId, title, message, type, link]
-        );
-    } catch (err) { console.error("Erro Notif DB:", err); }
-}
+const db = require('../database/db');
+const { sendEmail } = require('./emailService');
+const templates = require('./emailTemplates');
 
 const notificationService = {
-    async notifyNewClient(clientName, clientId) {
+    // Função Principal
+    notify: async ({ userId, type, title, message, link, data }) => {
         try {
-            // Tenta obter e-mail do cliente para o template (opcional)
-            const clientRes = await pool.query("SELECT email FROM users WHERE id = $1", [clientId]);
-            const clientEmail = clientRes.rows[0]?.email || '';
-
-            const admins = await getSuperAdmins();
-            for (const admin of admins) {
-                await createNotification(admin.id, 'Novo Aluno', `${clientName} aguarda avaliação.`, 'warning', `/admin/clients/${clientId}`);
-                // Envia E-mail
-                await emailService.sendEmail(admin.email, 'pendingClient', 'admin', { name: clientName, email: clientEmail }, `/admin/clients/${clientId}`, 'Ver Perfil');
-            }
-        } catch (e) { console.error(e); }
-    },
-
-    async notifyNewTrainer(trainerName, trainerEmail) {
-        try {
-            const admins = await getSuperAdmins();
-            for (const admin of admins) {
-                await createNotification(admin.id, 'Novo Personal', `${trainerName} solicitou cadastro.`, 'warning', '/superadmin/manage');
-                // Envia E-mail
-                await emailService.sendEmail(admin.email, 'pendingTrainer', 'admin', { name: trainerName, email: trainerEmail || 'N/A' }, '/superadmin/manage', 'Aprovar');
-            }
-        } catch (e) { console.error(e); }
-    },
-
-    async notifyNewMessage(senderName, receiverId) {
-        try {
-            await createNotification(receiverId, 'Nova Mensagem', `${senderName} enviou uma mensagem.`, 'info', '/chat');
-            
-            const res = await pool.query("SELECT email, role FROM users WHERE id = $1", [receiverId]);
-            if(res.rows.length > 0) {
-                const { email, role } = res.rows[0];
-                let type = 'newMessage';
-                let data = {};
+            // 1. Salvar Notificação Interna (Plataforma)
+            if (userId === 'ADMIN_GROUP') {
+                // Enviar para todos os admins
+                const admins = await db.query("SELECT id, email FROM users WHERE role IN ('admin', 'superadmin')");
+                for (let admin of admins.rows) {
+                    await insertNotification(admin.id, title, message, link, 'info');
+                    // Opcional: E-mail para admin
+                    await handleEmail(admin.email, type, data);
+                }
+            } else if (userId === 'ALL_CLIENTS') {
+                // CUIDADO: Em produção, usar filas (queues). Aqui faremos um loop simples para o MVP.
+                const clients = await db.query("SELECT id, email, name FROM users WHERE role = 'client' AND status = 'active'");
+                for (let client of clients.rows) {
+                    await insertNotification(client.id, title, message, link, 'info');
+                    await handleEmail(client.email, type, { ...data, name: client.name });
+                }
+            } else {
+                // Usuário Específico
+                await insertNotification(userId, title, message, link, type.includes('error') ? 'alert' : 'info');
                 
-                if (role === 'admin' || role === 'superadmin') {
-                    data = { name: senderName, subject: 'Nova Mensagem no Chat' };
-                    await emailService.sendEmail(email, type, 'admin', data, '/chat', 'Ir para Chat');
-                } else if (role === 'trainer') {
-                    data = { clientName: senderName };
-                    await emailService.sendEmail(email, type, 'trainer', data, '/chat', 'Responder');
-                } else if (role === 'client') {
-                    data = { trainerName: senderName };
-                    await emailService.sendEmail(email, type, 'client', data, '/chat', 'Ler Mensagem');
+                // Buscar email do usuário para envio
+                const userRes = await db.query("SELECT email, name, role FROM users WHERE id = $1", [userId]);
+                if (userRes.rows.length > 0) {
+                    await handleEmail(userRes.rows[0].email, type, { ...data, name: userRes.rows[0].name, role: userRes.rows[0].role });
                 }
             }
-        } catch (e) { console.error(e); }
-    },
-
-    async notifyTrainerAssignment(trainerId, clientName, clientId) {
-        try {
-            const res = await pool.query("SELECT email, name FROM users WHERE id = $1", [trainerId]);
-            if (res.rows.length > 0) {
-                await createNotification(trainerId, 'Novo Aluno', `Você é o responsável por ${clientName}.`, 'info', `/admin/clients/${clientId}`);
-                await emailService.sendEmail(res.rows[0].email, 'clientAssigned', 'trainer', { clientName }, `/admin/clients/${clientId}`, 'Ver Aluno');
-            }
-        } catch (e) { console.error(e); }
-    },
-
-    async notifyClientApproval(clientId, trainerName) {
-        try {
-            await createNotification(clientId, 'Cadastro Aprovado!', `Seu treinador é ${trainerName}.`, 'success', '/client/dashboard');
-            const res = await pool.query("SELECT email FROM users WHERE id = $1", [clientId]);
-            if (res.rows.length > 0) {
-                await emailService.sendEmail(res.rows[0].email, 'registrationApproved', 'client', {}, '/client/dashboard', 'Acessar Painel');
-            }
-        } catch (e) { console.error(e); }
-    },
-
-    async notifyNewWorkout(workoutTitle, clientId, workoutId, trainerName) {
-        try {
-            // Notifica Aluno
-            await createNotification(clientId, 'Novo Treino', `Treino "${workoutTitle}" disponível.`, 'success', `/workouts/${workoutId}`);
-            const clientRes = await pool.query("SELECT email FROM users WHERE id = $1", [clientId]);
-            if (clientRes.rows.length > 0) {
-                await emailService.sendEmail(clientRes.rows[0].email, 'newWorkout', 'client', { workoutTitle }, `/workouts/${workoutId}`, 'Ver Treino');
-            }
-            
-            // Notifica Admins
-            const admins = await getSuperAdmins();
-            for (const admin of admins) {
-                await createNotification(admin.id, 'Novo Treino Criado', `${trainerName} criou "${workoutTitle}" para o aluno ID ${clientId}.`, 'info', `/admin/clients/${clientId}`);
-                await emailService.sendEmail(admin.email, 'newWorkoutCreated', 'admin', { trainerName, workoutTitle }, `/admin/clients/${clientId}`, 'Ver Detalhes');
-            }
-        } catch (e) { console.error(e); }
-    },
-
-    async notifyWorkoutUpdate(workoutTitle, clientId, trainerName) {
-        try {
-            // Notifica Aluno
-            await createNotification(clientId, 'Treino Atualizado', `Seu treino "${workoutTitle}" foi alterado.`, 'warning', '/client/workouts');
-            const clientRes = await pool.query("SELECT email FROM users WHERE id = $1", [clientId]);
-            if (clientRes.rows.length > 0) {
-                await emailService.sendEmail(clientRes.rows[0].email, 'workoutEdited', 'client', { workoutTitle }, '/client/workouts', 'Ver Treinos');
-            }
-
-            // Admin (Apenas DB para não spamar)
-            const admins = await getSuperAdmins();
-            for (const admin of admins) {
-                await createNotification(admin.id, 'Treino Modificado', `${trainerName} editou o treino "${workoutTitle}" do aluno ID ${clientId}.`, 'info', `/admin/clients/${clientId}`);
-            }
-        } catch (e) { console.error(e); }
-    },
-
-    async notifyNewArticle(articleTitle, articleId) {
-        try {
-            const clients = await getActiveClients();
-            for (const c of clients) {
-                await createNotification(c.id, 'Novo Artigo', `Leia: ${articleTitle}`, 'info', `/articles/${articleId}`);
-                await emailService.sendEmail(c.email, 'newArticle', 'client', { articleTitle }, `/articles/${articleId}`, 'Ler Artigo');
-            }
-            
-            const trainers = await getActiveTrainers();
-            for (const t of trainers) {
-                await createNotification(t.id, 'Novo Artigo', `Novo conteúdo: ${articleTitle}`, 'info', `/articles/${articleId}`);
-                await emailService.sendEmail(t.email, 'newArticle', 'trainer', { articleTitle }, `/articles/${articleId}`, 'Ler Artigo');
-            }
-        } catch (e) { console.error(e); }
-    },
-    
-    async notifyTrainerApproval(trainerId) {
-        try {
-            await createNotification(trainerId, 'Conta Aprovada', 'Acesse seu painel.', 'success', '/admin/dashboard');
-            // Template específico de aprovação de personal não definido, mantendo apenas DB ou usar genérico se desejar.
-        } catch (e) { console.error(e); }
+        } catch (e) {
+            console.error("Erro no NotificationService:", e);
+        }
     }
 };
+
+// Auxiliar: Insere no Banco
+async function insertNotification(userId, title, message, link, type) {
+    await db.query(
+        "INSERT INTO notifications (user_id, title, message, link, type, is_read, created_at) VALUES ($1, $2, $3, $4, $5, false, NOW())",
+        [userId, title, message, link, type]
+    );
+}
+
+// Auxiliar: Seleciona Template e Envia Email
+async function handleEmail(email, type, data) {
+    let content = null;
+    
+    // Mapeamento de Tipos para Templates
+    switch (type) {
+        case 'welcome_pending': content = templates.welcome_pending(data.name); break;
+        case 'welcome_active': content = templates.welcome_active(data.name); break;
+        case 'account_approved': content = templates.account_approved(data.name, data.role); break;
+        case 'account_rejected': content = templates.account_rejected(data.name); break;
+        case 'new_user_admin': content = templates.new_user_admin(data.name, data.role); break;
+        case 'payment_pending_admin': content = templates.payment_pending_admin(data.userName, data.planName); break;
+        case 'payment_reminder': content = templates.payment_reminder(data.name); break;
+        case 'trainer_assigned': content = templates.new_assignment(data.clientName, data.trainerName, true); break; // Para o Trainer
+        case 'client_assigned': content = templates.new_assignment(data.clientName, data.trainerName, false); break; // Para o Cliente
+        case 'workout_created': content = templates.workout_update(data.workoutTitle, 'Criado'); break;
+        case 'workout_edited': content = templates.workout_update(data.workoutTitle, 'Editado'); break;
+        case 'article_approved': content = templates.article_status(data.articleTitle, 'Aprovado'); break;
+        case 'article_rejected': content = templates.article_status(data.articleTitle, 'Rejeitado'); break;
+        case 'new_article_broadcast': content = templates.new_article_client(data.articleTitle); break;
+        case 'profile_reminder': content = templates.profile_reminder(data.name); break;
+        case 'ai_error': content = templates.ai_error(data.errorMsg); break;
+    }
+
+    if (content) {
+        await sendEmail(email, content.subject, content.html);
+    }
+}
 
 module.exports = notificationService;
