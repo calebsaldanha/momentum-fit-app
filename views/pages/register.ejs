@@ -6,18 +6,24 @@
     <title>Cadastro - Momentum Fit</title>
     <link rel="stylesheet" href="/css/styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body class="auth-page">
-    <div class="auth-container">
-        <div class="auth-left">
-            <div class="logo">
-                <img src="/images/momentum-fit-logo-completo.png" alt="Momentum Fit">
+<body>
+    
+    <%- include('../partials/header') %>
+
+    <div class="auth-wrapper">
+        <div class="auth-card">
+            <div class="auth-header text-center">
+                <img src="/images/momentum-fit-logo-completo.png" alt="Momentum Fit" class="auth-logo">
+                <h2>Crie sua conta</h2>
+                <p>Junte-se ao time e transforme sua rotina.</p>
             </div>
-            <h2>Crie sua conta</h2>
-            <p>Comece sua jornada de transformação hoje.</p>
-            
+
             <% if (messages.error) { %>
-                <div class="alert alert-danger"><%= messages.error %></div>
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle"></i> <%= messages.error %>
+                </div>
             <% } %>
 
             <form action="/auth/register" method="POST" id="registerForm">
@@ -25,44 +31,64 @@
 
                 <div class="form-group">
                     <label>Nome Completo</label>
-                    <input type="text" name="name" required placeholder="Seu nome">
+                    <div class="input-icon">
+                        <i class="fas fa-user"></i>
+                        <input type="text" name="name" required placeholder="Ex: Caleb Saldanha">
+                    </div>
                 </div>
                 
                 <div class="form-group">
                     <label>E-mail</label>
-                    <input type="email" name="email" required placeholder="seu@email.com">
-                </div>
-                
-                <div class="form-group">
-                    <label>Senha</label>
-                    <input type="password" name="password" id="password" required placeholder="Mínimo 6 caracteres">
-                    <small id="passwordHelp" style="color: red; display: none;">A senha deve ter pelo menos 6 caracteres.</small>
-                </div>
-
-                <div class="form-group">
-                    <label>Confirmar Senha</label>
-                    <input type="password" name="confirm_password" id="confirm_password" required placeholder="Repita a senha">
-                    <small id="confirmHelp" style="color: red; display: none;">As senhas não coincidem.</small>
+                    <div class="input-icon">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" name="email" required placeholder="seu@email.com">
+                    </div>
                 </div>
                 
                 <div class="form-group">
                     <label>Tipo de Conta</label>
-                    <select name="role">
-                        <option value="client">Aluno (Quero treinar)</option>
-                        <option value="trainer">Personal Trainer (Quero dar aulas)</option>
-                    </select>
+                    <div class="input-icon">
+                        <i class="fas fa-users"></i>
+                        <select name="role">
+                            <option value="client">Aluno (Quero treinar)</option>
+                            <option value="trainer">Personal Trainer (Quero dar aulas)</option>
+                        </select>
+                    </div>
                 </div>
 
-                <button type="submit" class="btn-primary btn-block">Cadastrar</button>
+                <div class="form-row">
+                    <div class="form-group half">
+                        <label>Senha</label>
+                        <div class="input-icon">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" name="password" id="password" required placeholder="Min. 6 carac.">
+                        </div>
+                    </div>
+
+                    <div class="form-group half">
+                        <label>Confirmar</label>
+                        <div class="input-icon">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" name="confirm_password" id="confirm_password" required placeholder="Repita">
+                        </div>
+                    </div>
+                </div>
+                
+                <small id="passwordHelp" class="validation-error" style="display: none;">A senha deve ter pelo menos 6 caracteres.</small>
+                <small id="confirmHelp" class="validation-error" style="display: none;">As senhas não coincidem.</small>
+
+                <button type="submit" class="btn btn-primary btn-block" style="width: 100%; margin-top: 20px;">
+                    Criar Conta <i class="fas fa-arrow-right"></i>
+                </button>
             </form>
             
-            <p class="auth-footer">
-                Já tem conta? <a href="/auth/login">Faça Login</a>
-            </p>
-        </div>
-        <div class="auth-right">
+            <div class="auth-footer-link">
+                Já tem uma conta? <a href="/auth/login">Fazer Login</a>
             </div>
+        </div>
     </div>
+
+    <%- include('../partials/footer') %>
 
     <script>
         const form = document.getElementById('registerForm');
@@ -76,16 +102,20 @@
             
             if (pass.value.length < 6) {
                 passHelp.style.display = 'block';
+                pass.style.borderColor = 'red';
                 valid = false;
             } else {
                 passHelp.style.display = 'none';
+                pass.style.borderColor = '#444';
             }
 
             if (pass.value !== confirm.value) {
                 confirmHelp.style.display = 'block';
+                confirm.style.borderColor = 'red';
                 valid = false;
             } else {
                 confirmHelp.style.display = 'none';
+                confirm.style.borderColor = '#444';
             }
 
             if (!valid) e.preventDefault();

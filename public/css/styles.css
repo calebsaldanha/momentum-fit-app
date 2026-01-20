@@ -321,3 +321,62 @@ th { color: white; font-weight: 600; }
         font-size: 16px; /* Evita zoom no iOS */
     }
 }
+
+/* =========================================
+   7. FORMULÁRIOS AUTH (Atualização)
+   ========================================= */
+.auth-header { margin-bottom: 25px; }
+.auth-logo { max-height: 50px; margin: 0 auto 15px; display: block; }
+.auth-header h2 { color: white; margin-bottom: 5px; }
+.auth-header p { color: #888; font-size: 0.9rem; }
+
+.form-group { margin-bottom: 15px; }
+.form-group label { display: block; color: #ccc; margin-bottom: 8px; font-size: 0.9rem; font-weight: 500; }
+
+.input-icon { position: relative; }
+.input-icon i { 
+    position: absolute; left: 15px; top: 50%; transform: translateY(-50%); 
+    color: var(--primary-color); opacity: 0.7; pointer-events: none;
+}
+
+.auth-card input, 
+.auth-card select {
+    width: 100%;
+    padding: 12px 15px 12px 45px; /* Espaço para o ícone */
+    background: #0a0a0a;
+    border: 1px solid #333;
+    border-radius: 8px;
+    color: white;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+.auth-card input:focus, 
+.auth-card select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(190, 242, 2, 0.1);
+    background: #000;
+}
+
+.form-row { display: flex; gap: 15px; }
+.form-group.half { flex: 1; }
+
+.auth-footer-link { 
+    text-align: center; margin-top: 20px; padding-top: 20px; 
+    border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.9rem; color: #888; 
+}
+.auth-footer-link a { color: var(--primary-color); font-weight: 600; }
+
+.alert {
+    padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9rem;
+    display: flex; align-items: center; gap: 10px;
+}
+.alert-danger { background: rgba(255, 0, 0, 0.1); color: #ff6b6b; border: 1px solid rgba(255, 0, 0, 0.2); }
+.validation-error { color: #ff6b6b; font-size: 0.8rem; margin-top: 5px; display: block; }
+
+/* Mobile ajustes para form */
+@media (max-width: 480px) {
+    .form-row { flex-direction: column; gap: 0; }
+    .auth-card { padding: 25px 20px; }
+}
