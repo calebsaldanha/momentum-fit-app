@@ -37,10 +37,9 @@ router.get('/dashboard', async (req, res) => {
     }
 });
 
-// === FINANCEIRO (CORRIGIDO) ===
+// === FINANCEIRO ===
 router.get('/finance', async (req, res) => {
     try {
-        // Busca pagamentos pendentes com detalhes do usuário e plano
         const pending = await db.query(`
             SELECT p.*, u.name as user_name, u.email as user_email, pl.name as plan_name 
             FROM payments p
@@ -50,10 +49,8 @@ router.get('/finance', async (req, res) => {
             WHERE p.status = 'pending'
             ORDER BY p.created_at DESC
         `);
-        
         res.render('pages/admin-finance', { pendingPayments: pending.rows });
     } catch(e) {
-        console.error("Erro Financeiro:", e);
         res.render('pages/admin-finance', { pendingPayments: [] });
     }
 });
@@ -74,7 +71,7 @@ router.post('/finance/approve/:id', async (req, res) => {
     res.redirect('/admin/finance');
 });
 
-// === AUDITORIA IA (CORRIGIDO) ===
+// === AUDITORIA IA ===
 router.get('/ia-audit', async (req, res) => {
     try {
         const logs = await db.query(`
@@ -89,15 +86,13 @@ router.get('/ia-audit', async (req, res) => {
     }
 });
 
-// === CONTEÚDO & ARTIGOS (ATUALIZADO) ===
+// === CONTEÚDO ===
 router.get('/content', async (req, res) => {
     try {
-        // Configurações do Site
         const settingsRes = await db.query('SELECT * FROM system_settings');
         const settings = {};
         settingsRes.rows.forEach(r => settings[r.key] = r.value);
 
-        // Lista de Artigos
         const articlesRes = await db.query(`
             SELECT a.*, u.name as author_name 
             FROM articles a 
@@ -107,12 +102,10 @@ router.get('/content', async (req, res) => {
 
         res.render('pages/admin-content', { settings, articles: articlesRes.rows });
     } catch(e) {
-        console.error(e);
         res.redirect('/admin/dashboard');
     }
 });
 
-// Atualizar Configurações do Site
 router.post('/content/update-settings', async (req, res) => {
     const { site_home_title, site_about_text } = req.body;
     await db.query('INSERT INTO system_settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = $2', ['site_home_title', site_home_title]);
@@ -121,21 +114,18 @@ router.post('/content/update-settings', async (req, res) => {
     res.redirect('/admin/content');
 });
 
-// Ações de Artigos
 router.post('/articles/status/:id', async (req, res) => {
-    const { status } = req.body; // 'published', 'draft', 'rejected'
+    const { status } = req.body;
     await db.query('UPDATE articles SET status = $1 WHERE id = $2', [status, req.params.id]);
-    req.flash('success', `Status do artigo atualizado para ${status}.`);
     res.redirect('/admin/content');
 });
 
 router.post('/articles/delete/:id', async (req, res) => {
     await db.query('DELETE FROM articles WHERE id = $1', [req.params.id]);
-    req.flash('success', 'Artigo removido.');
     res.redirect('/admin/content');
 });
 
-// === DETALHES DE USUÁRIO (NOVA ROTA) ===
+// === DETALHES DE USUÁRIO (CORRIGIDO targetUser) ===
 router.get('/users/:id', async (req, res) => {
     try {
         const userRes = await db.query('SELECT * FROM users WHERE id = $1', [req.params.id]);
@@ -150,8 +140,9 @@ router.get('/users/:id', async (req, res) => {
             ORDER BY s.start_date DESC
         `, [req.params.id]);
 
+        // FIX: Enviar como targetUser para corresponder à view
         res.render('pages/admin-user-details', { 
-            user: userRes.rows[0], 
+            targetUser: userRes.rows[0], 
             clientData: clientRes.rows[0] || {}, 
             history: subRes.rows 
         });
@@ -161,7 +152,7 @@ router.get('/users/:id', async (req, res) => {
     }
 });
 
-// === SETTINGS DO ADMIN ===
+// === SETTINGS ===
 router.get('/settings', async (req, res) => {
     try {
         const r = await db.query('SELECT * FROM system_settings');
@@ -187,25 +178,28 @@ router.post('/settings/password', async (req, res) => {
     res.redirect('/admin/settings');
 });
 
-// === RESTO DO CRUD ===
+// === USERS ===
 router.get('/users', async (req, res) => {
     const u = await db.query("SELECT * FROM users ORDER BY created_at DESC LIMIT 50");
     res.render('pages/admin-users', { users: u.rows });
 });
+
 router.get('/approvals', async (req, res) => {
     const p = await db.query("SELECT * FROM users WHERE role='trainer' AND status='pending_approval'");
     res.render('pages/admin-approvals', { pendingTrainers: p.rows });
 });
+
 router.post('/users/approve/:id', async (req, res) => {
     await db.query("UPDATE users SET status='active' WHERE id=$1", [req.params.id]);
     res.redirect('/admin/approvals');
 });
+
 router.post('/users/reject/:id', async (req, res) => {
     await db.query("UPDATE users SET status='rejected' WHERE id=$1", [req.params.id]);
     res.redirect('/admin/approvals');
 });
 
-// Plans & Exercises (Mantidos da versão anterior, apenas garantindo presença)
+// === PLANOS & EXERCÍCIOS ===
 router.get('/plans', async (req, res) => {
     const p = await db.query('SELECT * FROM plans ORDER BY price ASC');
     res.render('pages/admin-plans', { plans: p.rows });
@@ -219,6 +213,7 @@ router.post('/plans/delete/:id', async (req, res) => {
     await db.query('UPDATE plans SET is_active = false WHERE id = $1', [req.params.id]);
     res.redirect('/admin/plans');
 });
+
 router.get('/exercises', async (req, res) => {
     const e = await db.query("SELECT * FROM exercise_library ORDER BY name");
     res.render('pages/admin-exercises', { exercises: e.rows });
