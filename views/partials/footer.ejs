@@ -1,55 +1,51 @@
-    <footer class="main-footer compact-footer">
-        <div class="container">
-            <div class="footer-wrapper">
-                
-                <div class="footer-brand-section">
-                    <a href="/" class="footer-logo">
-                        <img src="/images/momentum-fit-icon.png" alt="Logo">
-                        <span>Momentum Fit</span>
-                    </a>
-                    <p class="copyright-text">&copy; 2026 Momentum Fit. Todos os direitos reservados.</p>
-                </div>
-
-                <div class="footer-contact-section">
-                    <a href="mailto:admin@momentumfitness.com.br" class="footer-link">
-                        <i class="fas fa-envelope"></i> admin@momentumfitness.com.br
-                    </a>
-                    <a href="https://instagram.com" target="_blank" class="footer-link">
-                        <i class="fab fa-instagram"></i> Instagram
-                    </a>
-                </div>
-
-            </div>
+<footer class="main-footer compact-footer">
+    <div class="footer-wrapper">
+        
+        <div class="footer-brand-section">
+            <a href="/" class="footer-logo">
+                <img src="/images/momentum-fit-icon.png" alt="Logo">
+                <span>Momentum Fit</span>
+            </a>
+            <p class="copyright-text">&copy; 2026 Momentum Fit. Todos os direitos reservados.</p>
         </div>
-    </footer>
 
-    <script>
-        // Lógica do Menu Mobile Global
-        document.addEventListener('DOMContentLoaded', () => {
-            const menuBtn = document.getElementById('mobileMenuBtn');
-            const closeBtn = document.getElementById('closeMenuBtn');
-            const menu = document.getElementById('mobileMenu');
+        <div class="footer-contact-section">
+            <a href="mailto:admin@momentumfitness.com.br" class="footer-link">
+                <i class="fas fa-envelope"></i> admin@momentumfitness.com.br
+            </a>
+            <a href="https://instagram.com" target="_blank" class="footer-link">
+                <i class="fab fa-instagram"></i> Instagram
+            </a>
+        </div>
+
+    </div>
+</footer>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const menuBtn = document.getElementById('mobileMenuBtn');
+        const closeBtn = document.getElementById('closeMenuBtn');
+        const menu = document.getElementById('mobileMenu');
+        
+        if(menuBtn && menu) {
+            menuBtn.addEventListener('click', () => {
+                menu.classList.add('active');
+                document.body.style.overflow = 'hidden'; 
+            });
+
+            const closeMenu = () => {
+                menu.classList.remove('active');
+                document.body.style.overflow = '';
+            };
+
+            if(closeBtn) closeBtn.addEventListener('click', closeMenu);
             
-            if(menuBtn && menu) {
-                menuBtn.addEventListener('click', () => {
-                    menu.classList.add('active');
-                    document.body.style.overflow = 'hidden'; 
-                });
-
-                const closeMenu = () => {
-                    menu.classList.remove('active');
-                    document.body.style.overflow = '';
-                };
-
-                if(closeBtn) closeBtn.addEventListener('click', closeMenu);
-                
-                // Fecha ao clicar fora
-                menu.addEventListener('click', (e) => {
-                    if(e.target === menu) closeMenu();
-                });
-            }
-        });
-    </script>
-    <script src="/js/main.js"></script>
+            menu.addEventListener('click', (e) => {
+                if(e.target === menu) closeMenu();
+            });
+        }
+    });
+</script>
+<script src="/js/main.js"></script>
 </body>
 </html>
