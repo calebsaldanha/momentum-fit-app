@@ -172,6 +172,9 @@ router.get('/checkout/:planId', async (req, res) => {
         }
 
         const plan = planResult.rows[0];
+
+        // Busca todos os planos ativos para permitir troca no checkout
+        const allPlansResult = await db.query('SELECT id, name, price FROM plans WHERE is_active = true ORDER BY price ASC');
         
         // Chave PIX
         const pixKey = '084dee93-9dc5-44e7-aa2e-3eff8623651d'; 
@@ -181,10 +184,16 @@ router.get('/checkout/:planId', async (req, res) => {
         const price = parseFloat(plan.price);
 
         // Gera o Payload oficial (BR Code)
-        const pixPayload = generatePixPayload(pixKey, merchantName, merchantCity, txId, price);
+        let pixPayload = '';
+        if (price > 0) {
+            pixPayload = generatePixPayload(pixKey, merchantName, merchantCity, txId, price);
+        } else {
+            pixPayload = null; // Plano Gratuito
+        }
         
         res.render('pages/client-checkout', { 
             plan: plan,
+            allPlans: allPlansResult.rows,
             pixKey: pixKey,
             pixPayload: pixPayload
         });
@@ -204,31 +213,45 @@ router.post('/checkout', async (req, res) => {
         const planRes = await db.query('SELECT name, price FROM plans WHERE id = $1', [plan_id]);
         if (planRes.rows.length === 0) throw new Error("Plano inválido");
         const plan = planRes.rows[0];
+        const price = parseFloat(plan.price);
 
         await db.query("UPDATE subscriptions SET status = 'cancelled' WHERE user_id = $1 AND status = 'pending_payment'", [req.session.user.id]);
         
+        const status = price === 0 ? 'active' : 'pending_payment';
+
         const subRes = await db.query(`
             INSERT INTO subscriptions (user_id, plan_id, status, start_date, payment_due_day, auto_renew) 
-            VALUES ($1, $2, 'pending_payment', NOW(), $3, true) 
+            VALUES ($1, $2, $3, NOW(), $4, true) 
             RETURNING id`, 
-            [req.session.user.id, plan_id, due_day]
+            [req.session.user.id, plan_id, status, due_day || 10]
         );
         
-        await db.query(`
-            INSERT INTO payments (user_id, amount, status, payment_date, subscription_id, proof_url) 
-            VALUES ($1, $2, 'pending', NOW(), $3, 'pix_manual_verify')`, 
-            [req.session.user.id, plan.price, subRes.rows[0].id]
-        );
+        // Se não for grátis, cria registro de pagamento pendente
+        if (price > 0) {
+            await db.query(`
+                INSERT INTO payments (user_id, amount, status, payment_date, subscription_id, proof_url) 
+                VALUES ($1, $2, 'pending', NOW(), $3, 'pix_manual_verify')`, 
+                [req.session.user.id, price, subRes.rows[0].id]
+            );
 
-        try {
-            await createNotification(null, 'Pagamento Pendente', `Usuário ${req.session.user.name} enviou comprovante.`, '/admin/finance', 'alert');
-            await createNotification(req.session.user.id, 'Pagamento em Análise', 'Aguarde a validação.', '/client/financial', 'info');
-            sendPaymentPendingEmail(req.session.user.email, req.session.user.name, plan.name).catch(console.error);
-        } catch(nErr) { console.error("Erro notificação:", nErr); }
+            try {
+                await createNotification(null, 'Pagamento Pendente', `Usuário ${req.session.user.name} iniciou assinatura do plano ${plan.name}.`, '/admin/finance', 'alert');
+                await createNotification(req.session.user.id, 'Pagamento em Análise', 'Aguarde a validação do seu pagamento.', '/client/financial', 'info');
+                sendPaymentPendingEmail(req.session.user.email, req.session.user.name, plan.name).catch(console.error);
+            } catch(nErr) { console.error("Erro notificação:", nErr); }
+        } else {
+             await createNotification(req.session.user.id, 'Plano Ativado', `O plano ${plan.name} foi ativado com sucesso.`, '/client/dashboard', 'success');
+        }
 
         await db.query('COMMIT');
-        req.flash('success', 'Comprovante enviado! Aguarde a aprovação.');
-        res.redirect('/client/financial');
+        
+        if (price > 0) {
+            req.flash('success', 'Pedido gerado! Aguarde a aprovação do pagamento.');
+            res.redirect('/client/financial');
+        } else {
+            req.flash('success', 'Plano gratuito ativado!');
+            res.redirect('/client/dashboard');
+        }
 
     } catch (e) {
         await db.query('ROLLBACK');
