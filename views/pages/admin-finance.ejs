@@ -1,104 +1,41 @@
-<%- include('../partials/header.ejs') %>
+<%- include('../partials/header') %>
 <div class="dashboard-container">
-    <%- include('../partials/sidebar.ejs', { path: '/admin/finance' }) %>
+    <%- include('../partials/sidebar', { path: '/admin/finance' }) %>
     <main class="dashboard-main">
         <div class="page-header">
-            <h1>Gestão <span class="text-neon">Financeira</span></h1>
-            <p>Validação manual de pagamentos e controle de planos.</p>
+            <h1>Financeiro</h1>
         </div>
-
-        <% if(messages && messages.success) { %><div class="alert alert-success"><%= messages.success %></div><% } %>
-        <% if(messages && messages.error) { %><div class="alert alert-danger"><%= messages.error %></div><% } %>
-
-        <div class="card-box" style="margin-bottom: 30px;">
-            <h3 style="color:orange; margin-bottom:20px; border-bottom:1px solid #333; padding-bottom:10px;">
-                <i class="fas fa-exclamation-triangle"></i> Pagamentos Aguardando Validação
-            </h3>
-            
-            <% if(pendingPayments && pendingPayments.length > 0) { %>
-                <div class="table-responsive">
-                    <table style="width:100%; border-collapse: collapse;">
-                        <thead>
-                            <tr style="color:#888; text-align:left;">
-                                <th style="padding:10px;">Data</th>
-                                <th style="padding:10px;">Cliente</th>
-                                <th style="padding:10px;">Plano</th>
-                                <th style="padding:10px;">Valor</th>
-                                <th style="padding:10px; text-align:right;">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% pendingPayments.forEach(pay => { %>
-                                <tr style="border-bottom:1px solid #333;">
-                                    <td style="padding:10px; color:white;"><%= new Date(pay.created_at).toLocaleDateString() %></td>
-                                    <td style="padding:10px; color:white;"><%= pay.user_name %> <br><small style="color:#666"><%= pay.email %></small></td>
-                                    <td style="padding:10px; color:white;"><%= pay.plan_name %></td>
-                                    <td style="padding:10px; color:#bef202;">R$ <%= parseFloat(pay.amount).toFixed(2) %></td>
-                                    <td style="padding:10px; text-align:right; display:flex; gap:10px; justify-content:flex-end;">
-                                        <form action="/admin/finance/approve" method="POST" style="display:inline;">
-                                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                            <input type="hidden" name="payment_id" value="<%= pay.id %>">
-                                            <button class="btn btn-primary btn-sm">Aprovar</button>
-                                        </form>
-                                        <form action="/admin/finance/reject" method="POST" style="display:inline;">
-                                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                            <input type="hidden" name="payment_id" value="<%= pay.id %>">
-                                            <button class="btn btn-outline btn-sm" style="border-color:red; color:red;">Rejeitar</button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            <% }) %>
-                        </tbody>
-                    </table>
-                </div>
-            <% } else { %>
-                <p style="color:#666;">Nenhum pagamento pendente no momento.</p>
-            <% } %>
-        </div>
+        
+        <% if (messages.success) { %><div class="alert alert-success"><%= messages.success %></div><% } %>
+        <% if (messages.error) { %><div class="alert alert-danger"><%= messages.error %></div><% } %>
 
         <div class="card-box">
-            <h3 style="color:white; margin-bottom:20px; border-bottom:1px solid #333; padding-bottom:10px;">
-                Assinaturas Ativas
-            </h3>
-            
-            <% if(activeSubscriptions && activeSubscriptions.length > 0) { %>
-                <div class="table-responsive">
-                    <table style="width:100%; border-collapse: collapse;">
-                        <thead>
-                            <tr style="color:#888; text-align:left;">
-                                <th style="padding:10px;">Cliente</th>
-                                <th style="padding:10px;">Plano</th>
-                                <th style="padding:10px;">Início</th>
-                                <th style="padding:10px; text-align:right;">Gerenciar</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% activeSubscriptions.forEach(sub => { %>
-                                <tr style="border-bottom:1px solid #333;">
-                                    <td style="padding:10px; color:white;"><%= sub.user_name %></td>
-                                    <td style="padding:10px; color:white;"><%= sub.plan_name %></td>
-                                    <td style="padding:10px; color:white;"><%= new Date(sub.start_date).toLocaleDateString() %></td>
-                                    <td style="padding:10px; text-align:right; display:flex; gap:10px; justify-content:flex-end;">
-                                        <form action="/admin/finance/suspend" method="POST" style="display:inline;">
-                                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                            <input type="hidden" name="subscription_id" value="<%= sub.id %>">
-                                            <button class="btn btn-outline btn-sm" title="Suspender Temporariamente">Suspender</button>
-                                        </form>
-                                        <form action="/admin/finance/downgrade" method="POST" style="display:inline;">
-                                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                            <input type="hidden" name="subscription_id" value="<%= sub.id %>">
-                                            <button class="btn btn-outline btn-sm" style="border-color:#666; color:#888;" title="Cancelar e voltar para Free">Downgrade</button>
+            <h3 style="color:white; margin-bottom:20px;">Pagamentos Pendentes (PIX Manual)</h3>
+            <div class="table-responsive">
+                <table style="width:100%; min-width:600px;">
+                    <thead><tr><th>Cliente</th><th>Plano</th><th>Valor</th><th>Data</th><th>Ação</th></tr></thead>
+                    <tbody>
+                        <% if(pendingPayments && pendingPayments.length > 0) { %>
+                            <% pendingPayments.forEach(p => { %>
+                                <tr>
+                                    <td><%= p.user_name %><br><small style="color:#666"><%= p.user_email %></small></td>
+                                    <td><%= p.plan_name %></td>
+                                    <td>R$ <%= p.amount %></td>
+                                    <td><%= new Date(p.created_at).toLocaleDateString() %></td>
+                                    <td>
+                                        <form action="/admin/finance/approve/<%= p.id %>" method="POST" onsubmit="return confirm('Confirmar recebimento do PIX?');">
+                                            <button class="btn btn-primary btn-sm">Aprovar</button>
                                         </form>
                                     </td>
                                 </tr>
                             <% }) %>
-                        </tbody>
-                    </table>
-                </div>
-            <% } else { %>
-                <p style="color:#666;">Nenhuma assinatura ativa encontrada.</p>
-            <% } %>
+                        <% } else { %>
+                            <tr><td colspan="5" style="text-align:center; padding:20px;">Nenhum pagamento pendente.</td></tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </main>
 </div>
-<%- include('../partials/footer.ejs') %>
+<%- include('../partials/footer') %>

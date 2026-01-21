@@ -1,39 +1,25 @@
-<%- include('../partials/header.ejs') %>
+<%- include('../partials/header') %>
 <div class="dashboard-container">
-    <%- include('../partials/sidebar.ejs', { path: '/admin/ia-audit' }) %>
+    <%- include('../partials/sidebar', { path: '/admin/ia-audit' }) %>
     <main class="dashboard-main">
-        <div class="page-header">
-            <h1>Auditoria <span class="text-neon">IA</span></h1>
-            <p>Monitoramento de uso da inteligência artificial.</p>
-        </div>
-
+        <div class="page-header"><h1>Auditoria IA</h1></div>
+        
         <div class="card-box">
             <div class="table-responsive">
-                <table style="width: 100%; border-collapse: collapse;">
-                    <thead>
-                        <tr style="color: #888; text-align: left;">
-                            <th style="padding: 10px;">Data</th>
-                            <th style="padding: 10px;">Usuário</th>
-                            <th style="padding: 10px;">Modelo</th>
-                            <th style="padding: 10px;">Tokens</th>
-                            <th style="padding: 10px;">Prompt (Resumo)</th>
-                        </tr>
-                    </thead>
+                <table style="width:100%; min-width:600px;">
+                    <thead><tr><th>Data</th><th>Usuário</th><th>Ação</th><th>Detalhes</th></tr></thead>
                     <tbody>
                         <% if (logs && logs.length > 0) { %>
                             <% logs.forEach(log => { %>
-                                <tr style="border-bottom: 1px solid #333;">
-                                    <td style="padding: 10px; color: #ccc;"><%= new Date(log.created_at).toLocaleString() %></td>
-                                    <td style="padding: 10px; color: white;"><%= log.user_name || 'Desconhecido' %></td>
-                                    <td style="padding: 10px; color: #ccc;"><%= log.model %></td>
-                                    <td style="padding: 10px; color: #ccc;"><%= log.tokens_used %></td>
-                                    <td style="padding: 10px; color: #888; font-style: italic;">
-                                        <%= log.prompt ? log.prompt.substring(0, 50) + '...' : '-' %>
-                                    </td>
+                                <tr>
+                                    <td><%= new Date(log.created_at).toLocaleString() %></td>
+                                    <td><%= log.user_name || 'Sistema' %></td>
+                                    <td><%= log.action %></td>
+                                    <td><%= log.details %></td>
                                 </tr>
                             <% }) %>
                         <% } else { %>
-                            <tr><td colspan="5" style="padding: 20px; text-align: center; color: #666;">Nenhum registro de uso de IA.</td></tr>
+                            <tr><td colspan="4">Nenhum registro de auditoria.</td></tr>
                         <% } %>
                     </tbody>
                 </table>
@@ -41,4 +27,4 @@
         </div>
     </main>
 </div>
-<%- include('../partials/footer.ejs') %>
+<%- include('../partials/footer') %>
