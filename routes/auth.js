@@ -21,7 +21,6 @@ router.post('/login', async (req, res) => {
             
             if (await bcrypt.compare(password, user.password_hash)) {
                 
-                // Verifica status
                 if (user.status === 'pending_approval') {
                     req.flash('error', 'Sua conta ainda está aguardando aprovação.');
                     return res.redirect('/auth/login');
@@ -31,7 +30,6 @@ router.post('/login', async (req, res) => {
                     return res.redirect('/auth/login');
                 }
 
-                // Cria sessão
                 req.session.user = {
                     id: user.id,
                     name: user.name,
@@ -52,7 +50,7 @@ router.post('/login', async (req, res) => {
         res.redirect('/auth/login');
 
     } catch (err) {
-        console.error(err);
+        console.error("Login Error:", err);
         req.flash('error', 'Erro interno no servidor.');
         res.redirect('/auth/login');
     }
@@ -67,12 +65,10 @@ router.get('/register', (req, res) => {
 // POST Register
 router.post('/register', async (req, res) => {
     const { name, email, password, role, plan } = req.body;
-    // Validação básica de role para segurança
     const safeRole = (role === 'trainer') ? 'trainer' : 'client';
-    const status = (safeRole === 'trainer') ? 'pending_approval' : 'active'; // Trainers precisam de aprovação
+    const status = (safeRole === 'trainer') ? 'pending_approval' : 'active'; 
 
     try {
-        // Verifica duplicação
         const check = await db.query('SELECT id FROM users WHERE email = $1', [email]);
         if (check.rows.length > 0) {
             req.flash('error', 'Email já cadastrado.');
@@ -89,34 +85,28 @@ router.post('/register', async (req, res) => {
 
         const userId = result.rows[0].id;
 
-        // Cria registros auxiliares
         if (safeRole === 'client') {
             await db.query('INSERT INTO clients (user_id) VALUES ($1)', [userId]);
-            
-            // Notifica Admins sobre novo cliente
+            // Correção aqui: createNotification
             try {
                 await notificationService.createNotification(
-                    null, // null = Todos Admins
-                    'Novo Cliente Cadastrado', 
-                    `O usuário ${name} se cadastrou como cliente.`,
-                    `/admin/users`
+                    null, 
+                    'Novo Cliente', 
+                    `${name} se cadastrou na plataforma.`,
+                    '/admin/users'
                 );
-            } catch (notifErr) {
-                console.error("Erro notif auth:", notifErr);
-            }
+            } catch (nErr) { console.error("Erro notif:", nErr); }
 
         } else if (safeRole === 'trainer') {
             await db.query('INSERT INTO trainers (user_id) VALUES ($1)', [userId]);
-            
-            // Notifica Admins sobre novo trainer
             try {
                 await notificationService.createNotification(
                     null, 
                     'Solicitação de Personal', 
-                    `O personal ${name} solicitou cadastro e aguarda aprovação.`,
-                    `/admin/approvals`
+                    `${name} solicitou acesso como treinador.`,
+                    '/admin/approvals'
                 );
-            } catch (notifErr) { console.error("Erro notif auth:", notifErr); }
+            } catch (nErr) { console.error("Erro notif:", nErr); }
         }
 
         req.flash('success', 'Cadastro realizado! Faça login.');
@@ -124,12 +114,11 @@ router.post('/register', async (req, res) => {
 
     } catch (err) {
         console.error(err);
-        req.flash('error', 'Erro ao cadastrar. Tente novamente.');
+        req.flash('error', 'Erro ao cadastrar.');
         res.redirect('/auth/register');
     }
 });
 
-// Logout
 router.get('/logout', (req, res) => {
     req.session.destroy();
     res.redirect('/auth/login');

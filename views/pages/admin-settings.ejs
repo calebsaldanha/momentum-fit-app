@@ -2,43 +2,26 @@
 <div class="dashboard-container">
     <%- include('../partials/sidebar', { path: '/admin/settings' }) %>
     <main class="dashboard-main">
-        <div class="page-header">
-            <h1>Configurações <span class="text-neon">Gerais</span></h1>
-        </div>
-
+        <div class="page-header"><h1>Configurações</h1></div>
         <% if (messages.success) { %><div class="alert alert-success"><%= messages.success %></div><% } %>
-        <% if (messages.error) { %><div class="alert alert-danger"><%= messages.error %></div><% } %>
-
+        
         <div class="features-grid">
             <div class="card-box">
-                <h3 style="color:white; margin-bottom:20px;">Dados da Plataforma</h3>
+                <h3>Geral</h3>
                 <form action="/admin/settings/general" method="POST">
                     <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
-                    <div class="form-group">
-                        <label>Chave Pix (Para receber pagamentos)</label>
-                        <input type="text" name="pix_key" value="<%= settings.pix_key || '' %>" placeholder="CPF, Email ou Aleatória">
-                    </div>
-                    <div class="form-group">
-                        <label>Email de Contato (Rodapé)</label>
-                        <input type="email" name="site_contact_email" value="<%= settings.site_contact_email || '' %>">
-                    </div>
-                    <button class="btn btn-primary">Salvar Geral</button>
+                    <label>Chave Pix</label>
+                    <input type="text" name="pix_key" value="<%= settings.pix_key || '' %>" style="width:100%; padding:10px; margin:10px 0;">
+                    <button class="btn btn-primary">Salvar</button>
                 </form>
             </div>
-
             <div class="card-box">
-                <h3 style="color:white; margin-bottom:20px;">Alterar Minha Senha</h3>
+                <h3>Senha</h3>
                 <form action="/admin/settings/password" method="POST">
                     <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
-                    <div class="form-group">
-                        <label>Nova Senha</label>
-                        <input type="password" name="new_password" required minlength="6">
-                    </div>
-                    <div class="form-group">
-                        <label>Confirmar Senha</label>
-                        <input type="password" name="confirm_password" required minlength="6">
-                    </div>
-                    <button class="btn btn-outline">Atualizar Senha</button>
+                    <label>Nova Senha</label>
+                    <input type="password" name="new_password" style="width:100%; padding:10px; margin:10px 0;">
+                    <button class="btn btn-outline">Alterar</button>
                 </form>
             </div>
         </div>

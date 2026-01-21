@@ -227,3 +227,42 @@ input, select, textarea { width: 100%; padding: 12px; background: #0a0a0a; borde
 .auth-footer-link a { color: var(--primary-color); font-weight: 600; }
 .alert { padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9rem; display: flex; align-items: center; gap: 10px; }
 .alert-danger { background: rgba(255, 0, 0, 0.1); color: #ff6b6b; border: 1px solid rgba(255, 0, 0, 0.2); }
+
+/* --- FIXES FINAIS DE OVERFLOW E MOBILE --- */
+html, body {
+    overflow-x: hidden !important;
+    width: 100vw !important;
+    position: relative;
+}
+
+.dashboard-main {
+    max-width: 100vw;
+    overflow-x: hidden;
+}
+
+/* Tabelas com scroll suave */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 20px;
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+}
+
+/* Ajustes Login Mobile */
+@media (max-width: 480px) {
+    .auth-card {
+        padding: 20px;
+        width: 100%;
+        border: none;
+        background: transparent;
+        box-shadow: none;
+    }
+    .auth-wrapper {
+        align-items: flex-start;
+        padding-top: 40px;
+        background: #000; /* Fundo sólido no mobile para performance */
+    }
+    .auth-wrapper::before { display: none; }
+}

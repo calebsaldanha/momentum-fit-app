@@ -1,18 +1,13 @@
 <%- include('../partials/header.ejs') %>
 <div class="dashboard-container">
     <%- include('../partials/sidebar.ejs', { path: '/chat' }) %>
-    
-    <main class="dashboard-main" style="display: flex; flex-direction: column; height: calc(100vh - 80px);">
+    <main class="dashboard-main">
         <div class="page-header">
             <h1>Chat <span class="text-neon">Integrado</span></h1>
         </div>
-
-        <div class="card-box" style="flex: 1; display: flex; align-items: center; justify-content: center; color: #666;">
-            <div style="text-align: center;">
-                <i class="fas fa-comments" style="font-size: 3rem; margin-bottom: 15px; color: #333;"></i>
-                <p>Selecione uma conversa ou inicie um novo atendimento.</p>
-                <small>Funcionalidade em desenvolvimento.</small>
-            </div>
+        <div class="card-box" style="text-align:center; padding:50px; color:#666;">
+            <i class="fas fa-comments" style="font-size:3rem; margin-bottom:15px;"></i>
+            <p>Sistema de chat em tempo real.</p>
         </div>
     </main>
 </div>

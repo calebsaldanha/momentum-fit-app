@@ -2,27 +2,16 @@
 <div class="dashboard-container">
     <%- include('../partials/sidebar', { path: '/admin/content' }) %>
     <main class="dashboard-main">
-        <div class="page-header">
-            <h1>Conteúdo do <span class="text-neon">Site</span></h1>
-        </div>
-
+        <div class="page-header"><h1>Editor de Conteúdo</h1></div>
         <% if (messages.success) { %><div class="alert alert-success"><%= messages.success %></div><% } %>
-
+        
         <div class="card-box">
-            <h3 style="color:white; margin-bottom:20px;">Textos da Landing Page</h3>
             <form action="/admin/content/update" method="POST">
                 <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
-                
-                <div class="form-group">
-                    <label>Título Principal (Hero)</label>
-                    <input type="text" name="site_home_title" value="<%= settings.site_home_title || '' %>" placeholder="Ex: Transforme seu corpo...">
-                </div>
-
-                <div class="form-group">
-                    <label>Texto da Página Sobre</label>
-                    <textarea name="site_about_text" rows="6" placeholder="História da Momentum..."><%= settings.site_about_text || '' %></textarea>
-                </div>
-
+                <label>Título Home</label>
+                <input type="text" name="site_home_title" value="<%= settings.site_home_title || '' %>" style="width:100%; padding:10px; margin:10px 0;">
+                <label>Texto Sobre</label>
+                <textarea name="site_about_text" rows="5" style="width:100%; padding:10px; margin:10px 0;"><%= settings.site_about_text || '' %></textarea>
                 <button class="btn btn-primary">Atualizar Site</button>
             </form>
         </div>
