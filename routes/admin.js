@@ -125,29 +125,38 @@ router.post('/articles/delete/:id', async (req, res) => {
     res.redirect('/admin/content');
 });
 
-// === DETALHES DE USUÁRIO (CORRIGIDO targetUser) ===
+// === DETALHES DE USUÁRIO (RESTORED FULL) ===
 router.get('/users/:id', async (req, res) => {
     try {
+        // 1. Dados Básicos
         const userRes = await db.query('SELECT * FROM users WHERE id = $1', [req.params.id]);
         if(userRes.rows.length === 0) return res.redirect('/admin/users');
         
+        // 2. Dados Completos da Anamnese (Clients)
         const clientRes = await db.query('SELECT * FROM clients WHERE user_id = $1', [req.params.id]);
+        
+        // 3. Histórico de Assinaturas
         const subRes = await db.query(`
-            SELECT s.*, p.name as plan_name 
+            SELECT s.*, p.name as plan_name, p.price 
             FROM subscriptions s 
             LEFT JOIN plans p ON s.plan_id = p.id 
             WHERE s.user_id = $1 
             ORDER BY s.start_date DESC
         `, [req.params.id]);
 
-        // FIX: Enviar como targetUser para corresponder à view
+        // 4. Histórico de Pagamentos (Novo)
+        const payRes = await db.query(`
+            SELECT * FROM payments WHERE user_id = $1 ORDER BY created_at DESC
+        `, [req.params.id]);
+
         res.render('pages/admin-user-details', { 
             targetUser: userRes.rows[0], 
             clientData: clientRes.rows[0] || {}, 
-            history: subRes.rows 
+            subscriptions: subRes.rows,
+            payments: payRes.rows
         });
     } catch(e) {
-        console.error(e);
+        console.error("Erro User Details:", e);
         res.redirect('/admin/users');
     }
 });

@@ -3,61 +3,229 @@
     <%- include('../partials/sidebar', { path: '/admin/users' }) %>
     <main class="dashboard-main">
         
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; margin-bottom: 30px; gap: 15px;">
             <div>
-                <a href="/admin/users" class="btn btn-outline btn-sm" style="margin-bottom: 10px;"><i class="fas fa-arrow-left"></i> Voltar</a>
-                <h1><span class="text-neon"><%= targetUser.name %></span></h1>
-                <p style="color: #888;"><%= targetUser.email %> | ID: <%= targetUser.id %></p>
+                <a href="/admin/users" class="btn btn-outline btn-sm" style="margin-bottom: 10px; border-radius: 20px;">
+                    <i class="fas fa-arrow-left"></i> Voltar
+                </a>
+                <h1 style="margin: 0;">Perfil de <span class="text-neon"><%= targetUser.name %></span></h1>
+                <p style="color: #888; margin-top: 5px;">
+                    <%= targetUser.email %> <span style="margin: 0 10px;">|</span> ID: #<%= targetUser.id %>
+                </p>
             </div>
-            <div>
+            
+            <div style="display: flex; gap: 10px;">
                 <span class="badge-status" style="
-                    padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 0.9rem;
-                    background: <%= targetUser.status === 'active' ? 'rgba(16,185,129,0.2)' : 'rgba(239,68,68,0.2)' %>;
-                    color: <%= targetUser.status === 'active' ? '#10b981' : '#ef4444' %>;">
-                    <%= targetUser.status.toUpperCase() %>
+                    padding: 8px 16px; border-radius: 30px; font-weight: bold; font-size: 0.9rem; display: flex; align-items: center; gap: 8px;
+                    background: <%= targetUser.status === 'active' ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)' %>;
+                    color: <%= targetUser.status === 'active' ? '#10b981' : '#ef4444' %>;
+                    border: 1px solid <%= targetUser.status === 'active' ? '#10b981' : '#ef4444' %>;">
+                    <i class="fas fa-circle" style="font-size: 0.6rem;"></i> <%= targetUser.status.toUpperCase() %>
                 </span>
             </div>
         </div>
 
-        <div class="financial-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+        <div class="grid-layout" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 25px;">
             
-            <div class="card-box">
-                <h3 style="color: white; margin-bottom: 15px;">Ficha Técnica</h3>
-                <% if (clientData && clientData.id) { %>
-                    <p style="color:#ccc;"><strong>Idade:</strong> <%= clientData.age || 'N/A' %> anos</p>
-                    <p style="color:#ccc;"><strong>Peso:</strong> <%= clientData.current_weight || clientData.weight %> kg</p>
-                    <p style="color:#ccc;"><strong>Objetivo:</strong> <%= clientData.goal %></p>
-                    <p style="color:#ccc;"><strong>Nível:</strong> <%= clientData.training_experience %></p>
-                <% } else { %>
-                    <p style="color: #666;">Ficha de anamnese não preenchida.</p>
-                <% } %>
-            </div>
-
-            <div class="card-box">
-                <h3 style="color: white; margin-bottom: 15px;">Histórico Financeiro</h3>
-                <div class="table-responsive">
-                    <table style="width: 100%;">
-                        <thead>
-                            <tr><th>Plano</th><th>Início</th><th>Status</th></tr>
-                        </thead>
-                        <tbody>
-                            <% if (history && history.length > 0) { %>
-                                <% history.forEach(sub => { %>
-                                    <tr style="border-bottom: 1px solid #333;">
-                                        <td><%= sub.plan_name %></td>
-                                        <td><%= new Date(sub.start_date).toLocaleDateString() %></td>
-                                        <td><%= sub.status %></td>
-                                    </tr>
-                                <% }) %>
-                            <% } else { %>
-                                <tr><td colspan="3" style="text-align: center;">Sem histórico.</td></tr>
-                            <% } %>
-                        </tbody>
-                    </table>
+            <div style="display: flex; flex-direction: column; gap: 25px;">
+                
+                <div class="card-box">
+                    <h3 style="color: white; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px;">
+                        <i class="fas fa-id-card text-neon"></i> Dados Pessoais
+                    </h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div>
+                            <label style="color: #666; font-size: 0.85rem;">Telefone</label>
+                            <div style="color: white;"><%= clientData.phone || 'Não informado' %></div>
+                        </div>
+                        <div>
+                            <label style="color: #666; font-size: 0.85rem;">Nascimento</label>
+                            <div style="color: white;">
+                                <%= clientData.birth_date ? new Date(clientData.birth_date).toLocaleDateString() : 'Não informado' %>
+                            </div>
+                        </div>
+                        <div>
+                            <label style="color: #666; font-size: 0.85rem;">Cadastro</label>
+                            <div style="color: white;"><%= new Date(targetUser.created_at).toLocaleDateString() %></div>
+                        </div>
+                        <div>
+                            <label style="color: #666; font-size: 0.85rem;">Perfil</label>
+                            <div style="color: white; text-transform: capitalize;"><%= targetUser.role %></div>
+                        </div>
+                    </div>
                 </div>
+
+                <div class="card-box">
+                    <h3 style="color: white; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px;">
+                        <i class="fas fa-ruler-combined text-neon"></i> Ficha Técnica
+                    </h3>
+                    <% if (clientData && clientData.id) { %>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                            <div style="background: #1a1a1a; padding: 10px; border-radius: 8px; text-align: center;">
+                                <div style="color: #888; font-size: 0.8rem;">PESO</div>
+                                <div style="color: white; font-weight: bold; font-size: 1.1rem;"><%= clientData.current_weight || clientData.weight || '-' %> kg</div>
+                            </div>
+                            <div style="background: #1a1a1a; padding: 10px; border-radius: 8px; text-align: center;">
+                                <div style="color: #888; font-size: 0.8rem;">ALTURA</div>
+                                <div style="color: white; font-weight: bold; font-size: 1.1rem;"><%= clientData.height || '-' %> cm</div>
+                            </div>
+                            <div style="background: #1a1a1a; padding: 10px; border-radius: 8px; text-align: center;">
+                                <div style="color: #888; font-size: 0.8rem;">NÍVEL</div>
+                                <div style="color: var(--primary-color); font-weight: bold; font-size: 1rem; text-transform: capitalize;">
+                                    <%= clientData.training_experience || '-' %>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 15px;">
+                            <label style="color: #bef202;">Objetivo Principal:</label>
+                            <div style="color: white; font-size: 1.1rem;"><%= clientData.goal || 'Não definido' %></div>
+                            <p style="color: #888; font-size: 0.9rem; margin-top: 5px;">"<%= clientData.goal_description || 'Sem descrição detalhada.' %>"</p>
+                        </div>
+
+                        <div style="background: #222; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                            <h4 style="color: #ccc; margin-bottom: 10px; font-size: 0.95rem;">Medidas (cm)</h4>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 10px;">
+                                <% 
+                                    const meas = clientData.body_measurements || {};
+                                %>
+                                <div><small style="color:#666">Peito</small><div><%= meas.chest || '-' %></div></div>
+                                <div><small style="color:#666">Cintura</small><div><%= meas.waist || '-' %></div></div>
+                                <div><small style="color:#666">Quadril</small><div><%= meas.hips || '-' %></div></div>
+                                <div><small style="color:#666">Braço</small><div><%= meas.arms || '-' %></div></div>
+                                <div><small style="color:#666">Coxa</small><div><%= meas.thighs || '-' %></div></div>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; gap: 10px;">
+                            <div>
+                                <span style="color: #ff6b6b; font-weight: bold;">Histórico Médico:</span>
+                                <span style="color: #ccc;"><%= clientData.medical_history || 'Nenhum' %></span>
+                            </div>
+                            <div>
+                                <span style="color: #ff6b6b; font-weight: bold;">Lesões:</span>
+                                <span style="color: #ccc;"><%= clientData.injuries || 'Nenhuma' %></span>
+                            </div>
+                            <div>
+                                <span style="color: #ff6b6b; font-weight: bold;">Medicamentos:</span>
+                                <span style="color: #ccc;"><%= clientData.medications || 'Nenhum' %></span>
+                            </div>
+                        </div>
+
+                    <% } else { %>
+                        <div style="text-align: center; padding: 30px; color: #666;">
+                            <i class="fas fa-clipboard" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                            <p>O cliente ainda não preencheu a ficha de anamnese.</p>
+                        </div>
+                    <% } %>
+                </div>
+
             </div>
 
+            <div style="display: flex; flex-direction: column; gap: 25px;">
+                
+                <div class="card-box">
+                    <h3 style="color: white; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px;">
+                        <i class="fas fa-wallet text-neon"></i> Assinaturas
+                    </h3>
+                    <div class="table-responsive">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: #111; color: #888; font-size: 0.85rem;">
+                                    <th style="padding: 10px; text-align: left;">Plano</th>
+                                    <th style="padding: 10px; text-align: left;">Início</th>
+                                    <th style="padding: 10px; text-align: left;">Vencimento</th>
+                                    <th style="padding: 10px; text-align: left;">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% if (subscriptions && subscriptions.length > 0) { %>
+                                    <% subscriptions.forEach(sub => { %>
+                                        <tr style="border-bottom: 1px solid #222;">
+                                            <td style="padding: 10px; color: white;"><%= sub.plan_name %></td>
+                                            <td style="padding: 10px; color: #ccc;"><%= new Date(sub.start_date).toLocaleDateString() %></td>
+                                            <td style="padding: 10px; color: #ccc;">Dia <%= sub.payment_due_day %></td>
+                                            <td style="padding: 10px;">
+                                                <span style="color: <%= sub.status === 'active' ? '#10b981' : '#f59e0b' %>">
+                                                    <%= sub.status %>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    <% }) %>
+                                <% } else { %>
+                                    <tr><td colspan="4" style="padding: 20px; text-align: center; color: #666;">Nenhuma assinatura.</td></tr>
+                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card-box">
+                    <h3 style="color: white; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px;">
+                        <i class="fas fa-history text-neon"></i> Histórico de Pagamentos
+                    </h3>
+                    <div class="table-responsive">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: #111; color: #888; font-size: 0.85rem;">
+                                    <th style="padding: 10px; text-align: left;">Data</th>
+                                    <th style="padding: 10px; text-align: left;">Valor</th>
+                                    <th style="padding: 10px; text-align: left;">Status</th>
+                                    <th style="padding: 10px; text-align: left;">ID</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% if (payments && payments.length > 0) { %>
+                                    <% payments.forEach(pay => { %>
+                                        <tr style="border-bottom: 1px solid #222;">
+                                            <td style="padding: 10px; color: white;"><%= new Date(pay.created_at).toLocaleDateString() %></td>
+                                            <td style="padding: 10px; color: white;">R$ <%= pay.amount %></td>
+                                            <td style="padding: 10px;">
+                                                <% if(pay.status === 'paid') { %>
+                                                    <span style="color: #10b981;"><i class="fas fa-check"></i> Pago</span>
+                                                <% } else if(pay.status === 'pending') { %>
+                                                    <span style="color: #f59e0b;"><i class="fas fa-clock"></i> Pendente</span>
+                                                <% } else { %>
+                                                    <span style="color: #ef4444;"><%= pay.status %></span>
+                                                <% } %>
+                                            </td>
+                                            <td style="padding: 10px; color: #666; font-size: 0.8rem;">#<%= pay.id %></td>
+                                        </tr>
+                                    <% }) %>
+                                <% } else { %>
+                                    <tr><td colspan="4" style="padding: 20px; text-align: center; color: #666;">Nenhum pagamento registrado.</td></tr>
+                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card-box" style="border: 1px solid #333;">
+                    <h3 style="color: #ccc; font-size: 1rem; margin-bottom: 15px;">Zona de Perigo</h3>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <% if (targetUser.status === 'active') { %>
+                            <form action="/admin/users/reject/<%= targetUser.id %>" method="POST" onsubmit="return confirm('Tem certeza que deseja SUSPENDER este usuário?');">
+                                <button class="btn btn-outline btn-sm" style="color: #f59e0b; border-color: #f59e0b;">
+                                    <i class="fas fa-ban"></i> Suspender Acesso
+                                </button>
+                            </form>
+                        <% } else { %>
+                            <form action="/admin/users/approve/<%= targetUser.id %>" method="POST">
+                                <button class="btn btn-primary btn-sm">
+                                    <i class="fas fa-check"></i> Reativar Acesso
+                                </button>
+                            </form>
+                        <% } %>
+                        
+                        <button class="btn btn-outline btn-sm" style="color: #ccc;" onclick="alert('Funcionalidade de reset de senha em desenvolvimento.')">
+                            <i class="fas fa-key"></i> Resetar Senha
+                        </button>
+                    </div>
+                </div>
+
+            </div>
         </div>
+
     </main>
 </div>
 <%- include('../partials/footer') %>
