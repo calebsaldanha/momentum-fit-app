@@ -17,6 +17,13 @@
     --transition: all 0.3s ease;
 }
 
+/* Ajuste Mobile: Header menor para reduzir espaço preto */
+@media (max-width: 992px) {
+    :root {
+        --header-height: 60px; 
+    }
+}
+
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
@@ -48,12 +55,12 @@ img { max-width: 100%; display: block; }
 }
 
 .header-container {
-    max-width: 1400px; margin: 0 auto; padding: 0 30px;
+    max-width: 1400px; margin: 0 auto; padding: 0 20px;
     height: 100%; display: flex; align-items: center; justify-content: space-between;
 }
 
-.brand-logo { display: flex; align-items: center; gap: 10px; font-weight: 800; color: white; font-size: 1.2rem; }
-.logo-icon { height: 32px; width: auto; }
+.brand-logo { display: flex; align-items: center; gap: 10px; font-weight: 800; color: white; font-size: 1.1rem; }
+.logo-icon { height: 28px; width: auto; }
 
 .desktop-nav { display: flex; gap: 30px; }
 .nav-link { color: var(--text-muted); font-weight: 500; font-size: 0.95rem; }
@@ -62,7 +69,7 @@ img { max-width: 100%; display: block; }
 .desktop-actions { display: flex; gap: 15px; align-items: center; }
 
 /* Mobile Menu */
-.hamburger-btn { display: none; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
+.hamburger-btn { display: none; background: none; border: none; color: white; font-size: 1.4rem; cursor: pointer; padding: 5px; }
 .mobile-menu {
     position: fixed; top: 0; right: -100%; width: 100%; height: 100vh;
     background: #000; z-index: 2000; transition: var(--transition);
@@ -76,10 +83,9 @@ img { max-width: 100%; display: block; }
 /* =========================================
    3. LAYOUT PÚBLICO (Home, About, Auth)
    ========================================= */
-/* Wrapper específico para páginas públicas - evita conflito com dashboard */
 .public-content {
     margin-top: var(--header-height);
-    flex: 1; /* Empurra o footer */
+    flex: 1;
     display: flex;
     flex-direction: column;
     width: 100%;
@@ -131,11 +137,10 @@ img { max-width: 100%; display: block; }
 /* =========================================
    4. LAYOUT DASHBOARD (Logado)
    ========================================= */
-/* Wrapper específico para área logada - estrutura de Sidebar */
 .dashboard-container {
     display: flex;
     flex: 1;
-    margin-top: var(--header-height);
+    margin-top: var(--header-height); /* Usa a variável ajustada */
     width: 100%;
     align-items: stretch;
 }
@@ -162,7 +167,7 @@ img { max-width: 100%; display: block; }
     overflow-x: hidden;
 }
 
-/* UI Components (Buttons, Inputs) */
+/* UI Components */
 .btn {
     display: inline-flex; align-items: center; justify-content: center; gap: 8px;
     padding: 12px 24px; border-radius: 50px; font-weight: 600; cursor: pointer; border: none; transition: var(--transition);
@@ -179,7 +184,6 @@ img { max-width: 100%; display: block; }
 .page-header { margin-bottom: 30px; border-bottom: 1px solid var(--border-light); padding-bottom: 20px; }
 .page-header h1 { font-size: 2rem; color: white; font-weight: 700; }
 
-/* Tables */
 .table-responsive { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; min-width: 600px; color: #ccc; }
 th, td { padding: 15px; text-align: left; border-bottom: 1px solid var(--border-light); }
@@ -204,16 +208,13 @@ th { color: white; font-weight: 600; }
 .sidebar-overlay { display: none; }
 
 @media (max-width: 992px) {
-    /* UI Geral */
     .desktop-nav, .desktop-actions { display: none !important; }
     .mobile-only { display: block !important; }
     .hamburger-btn { display: block !important; }
     
-    /* Home */
     .hero-title { font-size: 2.8rem; }
     .hero-content { padding: 40px 0; }
     
-    /* Dashboard */
     .dashboard-container { flex-direction: column; }
     .sidebar {
         position: fixed; top: 0; left: -100%; bottom: 0; width: 280px; height: 100vh;
@@ -226,157 +227,54 @@ th { color: white; font-weight: 600; }
     }
     .sidebar-overlay.active { display: block; }
     
+    /* Header secundário do Dashboard - Restaurado */
     .mobile-dash-header {
         display: flex; align-items: center; justify-content: space-between;
-        padding: 15px 20px; background: #111; border-bottom: 1px solid var(--border-light); margin-bottom: 20px;
+        padding: 10px 0; /* Padding reduzido */
+        border-bottom: 1px solid var(--border-light); 
+        margin-bottom: 20px;
     }
-    .dashboard-main { padding: 20px; padding-top: 0; }
     
-    /* Footer */
+    .dashboard-main { padding: 20px; padding-top: 0; }
     .footer-wrapper { flex-direction: column; text-align: center; }
 }
 
-/* --- FIX: BACKGROUND AUTH --- */
+/* Auth e Mobile Fixes */
 .auth-wrapper {
     background: url('/images/auth-bg.png') no-repeat center center fixed;
     background-size: cover;
-    min-height: calc(100vh - 80px); /* Desconta altura do header aprox */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 40px 20px;
-    position: relative;
+    min-height: calc(100vh - 80px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 40px 20px; position: relative;
 }
+.auth-wrapper::before { content: ''; position: absolute; inset: 0; background: rgba(0, 0, 0, 0.7); z-index: 1; }
+.auth-card { position: relative; z-index: 2; background: rgba(17, 17, 17, 0.95); padding: 40px; border-radius: 16px; width: 100%; max-width: 480px; border: 1px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.5); backdrop-filter: blur(10px); }
 
-/* Camada escura para melhorar leitura */
-.auth-wrapper::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.7);
-    z-index: 1;
-}
-
-.auth-card {
-    position: relative;
-    z-index: 2;
-    background: rgba(17, 17, 17, 0.95);
-    padding: 40px;
-    border-radius: 16px;
-    width: 100%;
-    max-width: 480px;
-    border: 1px solid #333;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    backdrop-filter: blur(10px);
-}
-
-/* --- MOBILE FIXES & RESPONSIVIDADE --- */
 @media (max-width: 768px) {
-    .dashboard-container {
-        flex-direction: column;
-    }
-
-    /* Sidebar Mobile */
-    .sidebar {
-        width: 100%;
-        height: auto;
-        padding: 1rem;
-        position: relative;
-    }
+    .dashboard-container { flex-direction: column; }
+    .sidebar { width: 100%; height: auto; padding: 1rem; position: relative; } /* Fallback se JS falhar, mas o sidebar fixed acima deve prevalecer */
+    .sidebar { position: fixed; height: 100vh; top: 0; left: -100%; } /* Força fixed */
     
-    .sidebar nav ul {
-        display: flex;
-        overflow-x: auto;
-        padding-bottom: 10px;
-    }
-    
-    .sidebar nav ul li {
-        margin: 0 10px 0 0;
-        white-space: nowrap;
-    }
-    
-    .sidebar .logout {
-        margin-top: 10px;
-        position: static;
-    }
-
-    /* Tabelas Responsivas */
-    table {
-        display: block;
-        overflow-x: auto;
-        white-space: nowrap;
-    }
-
-    /* Checkout Grid */
-    .checkout-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .financial-section {
-        grid-template-columns: 1fr;
-    }
-
-    /* Inputs Mobile */
-    input, select, textarea {
-        font-size: 16px; /* Evita zoom no iOS */
-    }
+    table { display: block; overflow-x: auto; white-space: nowrap; }
+    .checkout-grid { grid-template-columns: 1fr; }
+    .financial-section { grid-template-columns: 1fr; }
+    input, select, textarea { font-size: 16px; }
 }
 
-/* =========================================
-   7. FORMULÁRIOS AUTH (Atualização)
-   ========================================= */
+/* Form Styles */
 .auth-header { margin-bottom: 25px; }
 .auth-logo { max-height: 50px; margin: 0 auto 15px; display: block; }
-.auth-header h2 { color: white; margin-bottom: 5px; }
-.auth-header p { color: #888; font-size: 0.9rem; }
-
 .form-group { margin-bottom: 15px; }
 .form-group label { display: block; color: #ccc; margin-bottom: 8px; font-size: 0.9rem; font-weight: 500; }
-
 .input-icon { position: relative; }
-.input-icon i { 
-    position: absolute; left: 15px; top: 50%; transform: translateY(-50%); 
-    color: var(--primary-color); opacity: 0.7; pointer-events: none;
-}
-
-.auth-card input, 
-.auth-card select {
-    width: 100%;
-    padding: 12px 15px 12px 45px; /* Espaço para o ícone */
-    background: #0a0a0a;
-    border: 1px solid #333;
-    border-radius: 8px;
-    color: white;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-    outline: none;
-}
-
-.auth-card input:focus, 
-.auth-card select:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 2px rgba(190, 242, 2, 0.1);
-    background: #000;
-}
-
+.input-icon i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--primary-color); opacity: 0.7; pointer-events: none; }
+.auth-card input, .auth-card select { width: 100%; padding: 12px 15px 12px 45px; background: #0a0a0a; border: 1px solid #333; border-radius: 8px; color: white; font-size: 1rem; transition: all 0.3s ease; outline: none; }
+.auth-card input:focus, .auth-card select:focus { border-color: var(--primary-color); box-shadow: 0 0 0 2px rgba(190, 242, 2, 0.1); background: #000; }
 .form-row { display: flex; gap: 15px; }
 .form-group.half { flex: 1; }
-
-.auth-footer-link { 
-    text-align: center; margin-top: 20px; padding-top: 20px; 
-    border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.9rem; color: #888; 
-}
+.auth-footer-link { text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.9rem; color: #888; }
 .auth-footer-link a { color: var(--primary-color); font-weight: 600; }
-
-.alert {
-    padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9rem;
-    display: flex; align-items: center; gap: 10px;
-}
+.alert { padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9rem; display: flex; align-items: center; gap: 10px; }
 .alert-danger { background: rgba(255, 0, 0, 0.1); color: #ff6b6b; border: 1px solid rgba(255, 0, 0, 0.2); }
 .validation-error { color: #ff6b6b; font-size: 0.8rem; margin-top: 5px; display: block; }
-
-/* Mobile ajustes para form */
-@media (max-width: 480px) {
-    .form-row { flex-direction: column; gap: 0; }
-    .auth-card { padding: 25px 20px; }
-}
+@media (max-width: 480px) { .form-row { flex-direction: column; gap: 0; } .auth-card { padding: 25px 20px; } }
