@@ -1,46 +1,66 @@
-<%- include('../partials/header.ejs') %>
-
+<%- include('../partials/header') %>
 <div class="dashboard-container">
-    <%- include('../partials/sidebar.ejs', { path: '/admin/plans' }) %>
-
+    <%- include('../partials/sidebar', { path: '/admin/plans' }) %>
     <main class="dashboard-main">
-        <div class="mobile-dash-header">
-            <button id="sidebarOpenBtn" class="btn btn-outline btn-sm"><i class="fas fa-bars"></i> Menu</button>
-            <span class="text-muted">Planos</span>
+        <div class="page-header">
+            <h1>Gerenciar <span class="text-neon">Planos</span></h1>
         </div>
 
-        <div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
-            <div>
-                <h1>Gerenciar <span class="text-neon">Planos</span></h1>
-                <p>Configure os planos de assinatura disponíveis.</p>
-            </div>
-            <button class="btn btn-primary">Novo Plano</button>
-        </div>
+        <% if (messages.success) { %><div class="alert alert-success"><%= messages.success %></div><% } %>
 
-        <div class="features-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
-            <% if (typeof plans !== 'undefined' && plans.length > 0) { %>
-                <% plans.forEach(plan => { %>
-                    <div class="card-box">
-                        <h3><%= plan.name %></h3>
-                        <p class="text-neon" style="font-size: 1.5rem; font-weight: bold; margin: 10px 0;">R$ <%= plan.price %></p>
-                        <p class="text-muted"><%= plan.description %></p>
-                        <div style="margin-top: 20px;">
-                            <button class="btn btn-outline btn-sm">Editar</button>
-                        </div>
-                    </div>
-                <% }) %>
-            <% } else { %>
-                <div class="card-box">
-                    <h3>Plano Básico</h3>
-                    <p class="text-neon" style="font-size: 1.5rem; font-weight: bold; margin: 10px 0;">R$ 49,90</p>
-                    <p class="text-muted">Acesso completo à plataforma.</p>
-                    <div style="margin-top: 20px;">
-                        <button class="btn btn-outline btn-sm">Editar</button>
-                    </div>
+        <div class="card-box" style="margin-bottom: 30px;">
+            <h3 style="color:white;">Adicionar Novo Plano</h3>
+            <form action="/admin/plans/create" method="POST" style="margin-top:15px;">
+                <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+                <div class="form-row">
+                    <input type="text" name="name" placeholder="Nome do Plano" required style="flex:2;">
+                    <input type="number" step="0.01" name="price" placeholder="Preço (R$)" required style="flex:1;">
                 </div>
-            <% } %>
+                <div class="form-group" style="margin-top:10px;">
+                    <textarea name="description" placeholder="Descrição curta" rows="2"></textarea>
+                </div>
+                <div class="form-group">
+                    <textarea name="features" placeholder="Funcionalidades (separadas por vírgula)" rows="2"></textarea>
+                </div>
+                <button class="btn btn-primary">Criar Plano</button>
+            </form>
+        </div>
+
+        <div class="card-box">
+            <h3 style="color:white; margin-bottom:15px;">Planos Existentes</h3>
+            <div class="table-responsive">
+                <table style="width:100%; min-width:600px;">
+                    <thead>
+                        <tr style="background:#222;">
+                            <th>Nome</th>
+                            <th>Preço</th>
+                            <th>Descrição</th>
+                            <th>Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if(plans.length > 0) { %>
+                            <% plans.forEach(p => { %>
+                                <tr style="opacity: <%= p.is_active ? 1 : 0.5 %>">
+                                    <td><%= p.name %> <%= !p.is_active ? '(Inativo)' : '' %></td>
+                                    <td>R$ <%= p.price %></td>
+                                    <td><%= p.description %></td>
+                                    <td>
+                                        <% if(p.is_active) { %>
+                                            <form action="/admin/plans/delete/<%= p.id %>" method="POST" onsubmit="return confirm('Desativar este plano?');">
+                                                <button class="btn btn-outline btn-sm" style="color:#ff4d4d; border-color:#ff4d4d;">Desativar</button>
+                                            </form>
+                                        <% } %>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr><td colspan="4">Nenhum plano cadastrado.</td></tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </main>
 </div>
-
-<%- include('../partials/footer.ejs') %>
+<%- include('../partials/footer') %>

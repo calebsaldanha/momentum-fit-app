@@ -1,31 +1,47 @@
-<%- include('../partials/header.ejs') %>
+<%- include('../partials/header') %>
 <div class="dashboard-container">
-    <%- include('../partials/sidebar.ejs', { path: '/admin/settings' }) %>
+    <%- include('../partials/sidebar', { path: '/admin/settings' }) %>
     <main class="dashboard-main">
-        <div class="mobile-dash-header">
-            <button id="sidebarOpenBtn" class="btn btn-outline btn-sm"><i class="fas fa-bars"></i></button>
-            <span>Sistema</span>
-        </div>
         <div class="page-header">
-            <h1>Configurações <span class="text-neon">Globais</span></h1>
+            <h1>Configurações <span class="text-neon">Gerais</span></h1>
         </div>
-        <div class="card-box">
-            <form>
-                <h3>Parâmetros do Sistema</h3>
-                <div style="margin-bottom: 20px;">
-                    <label>Taxa da Plataforma (%)</label>
-                    <input type="number" value="15" style="width: 100px; padding: 8px; background: #222; border: 1px solid #444; color: white; border-radius: 4px;">
-                </div>
-                <div style="margin-bottom: 20px;">
-                    <label>Manutenção do Sistema</label>
-                    <div style="margin-top: 5px;">
-                        <input type="radio" name="maintenance" value="off" checked> Online &nbsp;
-                        <input type="radio" name="maintenance" value="on"> Modo Manutenção
+
+        <% if (messages.success) { %><div class="alert alert-success"><%= messages.success %></div><% } %>
+        <% if (messages.error) { %><div class="alert alert-danger"><%= messages.error %></div><% } %>
+
+        <div class="features-grid">
+            <div class="card-box">
+                <h3 style="color:white; margin-bottom:20px;">Dados da Plataforma</h3>
+                <form action="/admin/settings/general" method="POST">
+                    <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+                    <div class="form-group">
+                        <label>Chave Pix (Para receber pagamentos)</label>
+                        <input type="text" name="pix_key" value="<%= settings.pix_key || '' %>" placeholder="CPF, Email ou Aleatória">
                     </div>
-                </div>
-                <button class="btn btn-primary">Salvar Alterações</button>
-            </form>
+                    <div class="form-group">
+                        <label>Email de Contato (Rodapé)</label>
+                        <input type="email" name="site_contact_email" value="<%= settings.site_contact_email || '' %>">
+                    </div>
+                    <button class="btn btn-primary">Salvar Geral</button>
+                </form>
+            </div>
+
+            <div class="card-box">
+                <h3 style="color:white; margin-bottom:20px;">Alterar Minha Senha</h3>
+                <form action="/admin/settings/password" method="POST">
+                    <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+                    <div class="form-group">
+                        <label>Nova Senha</label>
+                        <input type="password" name="new_password" required minlength="6">
+                    </div>
+                    <div class="form-group">
+                        <label>Confirmar Senha</label>
+                        <input type="password" name="confirm_password" required minlength="6">
+                    </div>
+                    <button class="btn btn-outline">Atualizar Senha</button>
+                </form>
+            </div>
         </div>
     </main>
 </div>
-<%- include('../partials/footer.ejs') %>
+<%- include('../partials/footer') %>

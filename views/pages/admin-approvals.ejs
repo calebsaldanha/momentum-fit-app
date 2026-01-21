@@ -1,17 +1,55 @@
 <%- include('../partials/header.ejs') %>
 <div class="dashboard-container">
     <%- include('../partials/sidebar.ejs', { path: '/admin/approvals' }) %>
+    
     <main class="dashboard-main">
-        <div class="mobile-dash-header">
-            <button id="sidebarOpenBtn" class="btn btn-outline btn-sm"><i class="fas fa-bars"></i> Menu</button>
-            <span>Aprovações</span>
-        </div>
         <div class="page-header">
-            <h1>Treinadores <span class="text-neon">Pendentes</span></h1>
+            <h1>Aprovações <span class="text-neon">Pendentes</span></h1>
+            <p style="color: #a0a0a0;">Gerencie solicitações de acesso de treinadores e pagamentos.</p>
         </div>
+
+        <% if (messages.success) { %> <div class="alert alert-success"><%= messages.success %></div> <% } %>
+        <% if (messages.error) { %> <div class="alert alert-danger"><%= messages.error %></div> <% } %>
+
         <div class="card-box">
-            <p>Lista de treinadores aguardando aprovação.</p>
+            <h3 style="color: white; margin-bottom: 20px;">
+                <i class="fas fa-user-shield text-neon"></i> Treinadores Aguardando
+            </h3>
+            
+            <div class="table-responsive">
+                <table style="width: 100%; min-width: 600px;">
+                    <thead>
+                        <tr style="background: #1a1a1a;">
+                            <th>Nome</th>
+                            <th>Email</th>
+                            <th>Data Cadastro</th>
+                            <th>Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (pendingTrainers && pendingTrainers.length > 0) { %>
+                            <% pendingTrainers.forEach(t => { %>
+                                <tr style="border-bottom: 1px solid #222;">
+                                    <td><%= t.name %></td>
+                                    <td><%= t.email %></td>
+                                    <td><%= new Date(t.created_at).toLocaleDateString() %></td>
+                                    <td>
+                                        <form action="/admin/users/approve/<%= t.id %>" method="POST" style="display:inline;">
+                                            <button class="btn btn-primary btn-sm"><i class="fas fa-check"></i> Aprovar</button>
+                                        </form>
+                                        <form action="/admin/users/reject/<%= t.id %>" method="POST" style="display:inline;">
+                                            <button class="btn btn-outline btn-sm" style="color: #ef4444; border-color: #ef4444;"><i class="fas fa-times"></i></button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr><td colspan="4" style="text-align: center; padding: 20px;">Nenhuma solicitação pendente.</td></tr>
+                        <% } %>
+                    </tbody>
+                </table>
             </div>
+        </div>
     </main>
 </div>
 <%- include('../partials/footer.ejs') %>

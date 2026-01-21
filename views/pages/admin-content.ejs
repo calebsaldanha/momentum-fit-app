@@ -1,87 +1,31 @@
-<%- include('../partials/header.ejs') %>
+<%- include('../partials/header') %>
 <div class="dashboard-container">
-    <%- include('../partials/sidebar.ejs', { path: '/admin/content' }) %>
+    <%- include('../partials/sidebar', { path: '/admin/content' }) %>
     <main class="dashboard-main">
-        <div class="page-header" style="display: flex; justify-content: space-between; align-items:center;">
-            <div>
-                <h1>Gestão de <span class="text-neon">Conteúdo</span></h1>
-                <p>Artigos e publicações do blog.</p>
-            </div>
-            <a href="/admin/content/create" class="btn btn-primary"><i class="fas fa-plus"></i> Novo Artigo</a>
+        <div class="page-header">
+            <h1>Conteúdo do <span class="text-neon">Site</span></h1>
         </div>
 
-        <% if(messages && messages.success) { %><div class="alert alert-success"><%= messages.success %></div><% } %>
-        <% if(messages && messages.error) { %><div class="alert alert-danger"><%= messages.error %></div><% } %>
+        <% if (messages.success) { %><div class="alert alert-success"><%= messages.success %></div><% } %>
 
         <div class="card-box">
-            <div class="table-responsive">
-                <table style="width: 100%; border-collapse: collapse;">
-                    <thead>
-                        <tr style="color: #888; text-align: left; border-bottom: 1px solid #333;">
-                            <th style="padding: 15px;">Título</th>
-                            <th style="padding: 15px;">Autor</th>
-                            <th style="padding: 15px;">Categoria</th>
-                            <th style="padding: 15px;">Status</th>
-                            <th style="padding: 15px;">Data</th>
-                            <th style="padding: 15px; text-align: right;">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% if (articles && articles.length > 0) { %>
-                            <% articles.forEach(a => { %>
-                                <tr style="border-bottom: 1px solid #222;">
-                                    <td style="padding: 15px; color: white;"><%= a.title %></td>
-                                    <td style="padding: 15px; color: #ccc;"><%= a.author_name || 'Admin' %></td>
-                                    <td style="padding: 15px; color: #ccc;"><%= a.category %></td>
-                                    <td style="padding: 15px;">
-                                        <% if(a.status === 'published') { %>
-                                            <span style="color: #bef202;">Publicado</span>
-                                        <% } else if (a.status === 'suspended') { %>
-                                            <span style="color: red;">Suspenso</span>
-                                        <% } else { %>
-                                            <span style="color: orange;">Rascunho</span>
-                                        <% } %>
-                                    </td>
-                                    <td style="padding: 15px; color: #ccc;"><%= new Date(a.created_at).toLocaleDateString() %></td>
-                                    <td style="padding: 15px; text-align: right; display: flex; gap: 5px; justify-content: flex-end;">
-                                        
-                                        <% if (a.status !== 'published') { %>
-                                            <form action="/admin/content/approve" method="POST" style="display:inline;">
-                                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                                <input type="hidden" name="article_id" value="<%= a.id %>">
-                                                <button class="btn btn-outline btn-sm" style="border-color: green; color: green;" title="Publicar">
-                                                    <i class="fas fa-check"></i>
-                                                </button>
-                                            </form>
-                                        <% } %>
+            <h3 style="color:white; margin-bottom:20px;">Textos da Landing Page</h3>
+            <form action="/admin/content/update" method="POST">
+                <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+                
+                <div class="form-group">
+                    <label>Título Principal (Hero)</label>
+                    <input type="text" name="site_home_title" value="<%= settings.site_home_title || '' %>" placeholder="Ex: Transforme seu corpo...">
+                </div>
 
-                                        <% if (a.status === 'published') { %>
-                                            <form action="/admin/content/suspend" method="POST" style="display:inline;">
-                                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                                <input type="hidden" name="article_id" value="<%= a.id %>">
-                                                <button class="btn btn-outline btn-sm" style="border-color: orange; color: orange;" title="Suspender">
-                                                    <i class="fas fa-ban"></i>
-                                                </button>
-                                            </form>
-                                        <% } %>
+                <div class="form-group">
+                    <label>Texto da Página Sobre</label>
+                    <textarea name="site_about_text" rows="6" placeholder="História da Momentum..."><%= settings.site_about_text || '' %></textarea>
+                </div>
 
-                                        <form action="/admin/content/delete" method="POST" onsubmit="return confirm('Excluir artigo?');" style="display:inline;">
-                                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                            <input type="hidden" name="article_id" value="<%= a.id %>">
-                                            <button class="btn btn-outline btn-sm" style="border-color: red; color: red;" title="Excluir">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            <% }) %>
-                        <% } else { %>
-                            <tr><td colspan="6" style="padding: 20px; text-align: center; color: #666;">Nenhum artigo encontrado.</td></tr>
-                        <% } %>
-                    </tbody>
-                </table>
-            </div>
+                <button class="btn btn-primary">Atualizar Site</button>
+            </form>
         </div>
     </main>
 </div>
-<%- include('../partials/footer.ejs') %>
+<%- include('../partials/footer') %>

@@ -3,172 +3,171 @@ const router = express.Router();
 const db = require('../database/db');
 const bcrypt = require('bcryptjs');
 
+// Middleware Admin
 function isAdmin(req, res, next) {
-    if (req.session.user && (req.session.user.role === 'admin' || req.session.user.role === 'superadmin')) {
+    if (req.session && req.session.user && (req.session.user.role === 'admin' || req.session.user.role === 'superadmin')) {
         return next();
     }
+    req.flash('error', 'Acesso negado.');
     res.redirect('/auth/login');
 }
 
 router.use(isAdmin);
 
-router.get('/dashboard', async (req, res) => {
+// Dashboard
+router.get('/dashboard', (req, res) => res.render('pages/admin-dashboard', { stats: {} }));
+
+// === CONFIGURAÇÕES & SENHA ===
+router.get('/settings', async (req, res) => {
     try {
-        const totalClients = await db.query("SELECT COUNT(*) FROM users WHERE role = 'client'");
-        const totalTrainers = await db.query("SELECT COUNT(*) FROM users WHERE role = 'trainer'");
-        const revenue = await db.query(`SELECT COALESCE(SUM(amount), 0) as total FROM payments WHERE status = 'paid' AND payment_date > NOW() - INTERVAL '30 days'`);
-        const pendingPayments = await db.query("SELECT COUNT(*) FROM payments WHERE status = 'pending'");
-        const recentUsers = await db.query("SELECT id, name, email, role, created_at, status FROM users ORDER BY created_at DESC LIMIT 5");
-
-        const stats = {
-            clients: totalClients.rows[0].count,
-            trainers: totalTrainers.rows[0].count,
-            revenue: revenue.rows[0].total,
-            pending: pendingPayments.rows[0].count
-        };
-        res.render('pages/admin-dashboard', { stats, recentUsers: recentUsers.rows });
-    } catch (err) {
-        res.render('pages/admin-dashboard', { stats: { clients:0, trainers:0, revenue:0, pending:0 }, recentUsers: [] });
-    }
-});
-
-router.get('/users', async (req, res) => {
-    try {
-        const result = await db.query("SELECT * FROM users ORDER BY created_at DESC");
-        res.render('pages/admin-users', { users: result.rows });
-    } catch(e) { res.redirect('/admin/dashboard'); }
-});
-
-router.get('/users/:id', async (req, res) => {
-    try {
-        const { id } = req.params;
-        const userRes = await db.query("SELECT * FROM users WHERE id = $1", [id]);
-        if (userRes.rows.length === 0) return res.redirect('/admin/users');
-        const targetUser = userRes.rows[0];
-
-        let details = {};
-        if (targetUser.role === 'client') {
-            const clientRes = await db.query("SELECT * FROM clients WHERE user_id = $1", [id]);
-            details = clientRes.rows[0] || {};
-            details.goal = details.fitness_goals || details.goal || ''; 
-        } else if (targetUser.role === 'trainer') {
-            const trainerRes = await db.query("SELECT * FROM trainers WHERE user_id = $1", [id]);
-            details = trainerRes.rows[0] || {};
-        }
-
-        const plans = await db.query("SELECT * FROM plans WHERE is_active = true ORDER BY price ASC");
-        const trainers = await db.query("SELECT id, name FROM users WHERE role = 'trainer' AND status = 'active'");
+        const settingsRes = await db.query('SELECT * FROM system_settings');
+        const settings = {};
+        settingsRes.rows.forEach(r => settings[r.key] = r.value);
         
-        let workouts = [], financials = [], activeSub = null;
-
-        if (targetUser.role === 'client') {
-            const wRes = await db.query("SELECT * FROM workouts WHERE client_id = $1 ORDER BY created_at DESC", [id]);
-            workouts = wRes.rows;
-
-            const fRes = await db.query(`
-                SELECT p.*, pl.name as plan_name 
-                FROM payments p 
-                LEFT JOIN subscriptions s ON p.subscription_id = s.id 
-                LEFT JOIN plans pl ON s.plan_id = pl.id 
-                WHERE p.user_id = $1 
-                ORDER BY p.created_at DESC
-            `, [id]);
-            financials = fRes.rows;
-
-            const subRes = await db.query(`
-                SELECT s.*, p.name as plan_name, p.price, p.id as plan_id 
-                FROM subscriptions s 
-                JOIN plans p ON s.plan_id = p.id 
-                WHERE s.user_id = $1 AND s.status IN ('active', 'pending_payment', 'past_due')
-                ORDER BY s.start_date DESC LIMIT 1
-            `, [id]);
-            activeSub = subRes.rows[0] || null;
-        }
-
-        res.render('pages/admin-user-details', { 
-            targetUser, details, 
-            plans: plans.rows,
-            trainers: trainers.rows,
-            workouts,
-            payments: financials,
-            subscription: activeSub
-        });
-
+        res.render('pages/admin-settings', { settings });
     } catch(e) {
-        console.error("Admin User Details Error:", e);
-        res.redirect('/admin/users');
+        console.error(e);
+        res.render('pages/admin-settings', { settings: {} });
     }
 });
 
-// Ações POST
-router.post('/users/:id/suspend', async (req, res) => { try { await db.query("UPDATE users SET status = $1 WHERE id = $2", [req.body.status, req.params.id]); req.flash('success', 'Status atualizado.'); } catch(e){} res.redirect(`/admin/users/${req.params.id}`); });
-
-// CORREÇÃO: Rota de Exclusão Robusta
-router.post('/users/:id/delete', async (req, res) => {
-    const userId = req.params.id;
+router.post('/settings/general', async (req, res) => {
+    const { pix_key, site_contact_email } = req.body;
     try {
-        await db.query('BEGIN');
-        
-        // 1. Limpar dependências para evitar erro de Foreign Key
-        // (Remove registros filhos antes do pai)
-        await db.query("DELETE FROM notifications WHERE user_id = $1", [userId]);
-        await db.query("DELETE FROM ia_logs WHERE user_id = $1", [userId]);
-        await db.query("DELETE FROM payments WHERE user_id = $1", [userId]);
-        await db.query("DELETE FROM subscriptions WHERE user_id = $1", [userId]);
-        
-        // Tenta remover treinos onde o usuário é cliente ou treinador
-        // (Dependendo do schema, workout_exercises podem precisar sair primeiro)
-        await db.query("DELETE FROM workout_exercises WHERE workout_id IN (SELECT id FROM workouts WHERE client_id = $1 OR trainer_id = $1)", [userId]);
-        await db.query("DELETE FROM workouts WHERE client_id = $1 OR trainer_id = $1", [userId]);
-        
-        await db.query("DELETE FROM clients WHERE user_id = $1", [userId]);
-        await db.query("DELETE FROM trainers WHERE user_id = $1", [userId]);
-        await db.query("DELETE FROM articles WHERE author_id = $1", [userId]);
-        
-        // 2. Excluir o Usuário
-        await db.query("DELETE FROM users WHERE id = $1", [userId]);
-        
-        await db.query('COMMIT');
-        req.flash('success', 'Usuário e dados vinculados excluídos com sucesso.');
-        res.redirect('/admin/users');
-
-    } catch (err) {
-        await db.query('ROLLBACK');
-        console.error("Erro ao excluir usuário:", err);
-        // Agora mostramos o erro para o Admin saber o que houve
-        req.flash('error', 'Erro ao excluir: ' + err.message);
-        res.redirect(`/admin/users/${userId}`);
+        await db.query('INSERT INTO system_settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = $2', ['pix_key', pix_key]);
+        await db.query('INSERT INTO system_settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = $2', ['site_contact_email', site_contact_email]);
+        req.flash('success', 'Configurações gerais atualizadas.');
+        res.redirect('/admin/settings');
+    } catch(e) {
+        console.error(e);
+        req.flash('error', 'Erro ao salvar.');
+        res.redirect('/admin/settings');
     }
 });
 
-router.post('/users/:id/reset-password', async (req, res) => { try { const hash = await bcrypt.hash(req.body.new_password, 10); await db.query("UPDATE users SET password = $1 WHERE id = $2", [hash, req.params.id]); req.flash('success', 'Senha alterada.'); } catch(e){} res.redirect(`/admin/users/${req.params.id}`); });
-router.post('/users/:id/change-plan', async (req, res) => { try { await db.query("UPDATE subscriptions SET status = 'cancelled' WHERE user_id = $1", [req.params.id]); await db.query("INSERT INTO subscriptions (user_id, plan_id, status, start_date) VALUES ($1, $2, 'active', NOW())", [req.params.id, req.body.plan_id]); req.flash('success', 'Plano alterado.'); } catch(e){ req.flash('error', 'Erro ao mudar plano.'); } res.redirect(`/admin/users/${req.params.id}`); });
-router.post('/users/:id/assign-trainer', async (req, res) => { try { await db.query("UPDATE users SET trainer_id = $1 WHERE id = $2", [req.body.trainer_id, req.params.id]); await db.query("UPDATE client_profiles SET assigned_trainer_id = $1 WHERE user_id = $2", [req.body.trainer_id, req.params.id]); req.flash('success', 'Personal atribuído.'); } catch(e){} res.redirect(`/admin/users/${req.params.id}`); });
-router.post('/users/:id/send-reminder', async (req, res) => { req.flash('success', 'Lembrete enviado.'); res.redirect(`/admin/users/${req.params.id}`); });
-
-// Financeiro
-router.get('/finance', async (req, res) => {
+router.post('/settings/password', async (req, res) => {
+    const { new_password, confirm_password } = req.body;
+    if (new_password !== confirm_password) {
+        req.flash('error', 'As senhas não coincidem.');
+        return res.redirect('/admin/settings');
+    }
     try {
-        const pending = await db.query("SELECT py.*, u.name as user_name, u.email, pl.name as plan_name FROM payments py JOIN users u ON py.user_id = u.id LEFT JOIN subscriptions s ON py.subscription_id = s.id LEFT JOIN plans pl ON s.plan_id = pl.id WHERE py.status = 'pending' ORDER BY py.created_at ASC");
-        const activeSubs = await db.query("SELECT s.*, u.name as user_name, pl.name as plan_name FROM subscriptions s JOIN users u ON s.user_id = u.id JOIN plans pl ON s.plan_id = pl.id WHERE s.status = 'active'");
-        res.render('pages/admin-finance', { pendingPayments: pending.rows, activeSubscriptions: activeSubs.rows });
-    } catch (e) { res.redirect('/admin/dashboard'); }
+        const hash = await bcrypt.hash(new_password, 10);
+        await db.query('UPDATE users SET password_hash = $1 WHERE id = $2', [hash, req.session.user.id]);
+        req.flash('success', 'Sua senha foi alterada com sucesso.');
+        res.redirect('/admin/settings');
+    } catch(e) {
+        console.error(e);
+        req.flash('error', 'Erro ao alterar senha.');
+        res.redirect('/admin/settings');
+    }
 });
-router.post('/finance/approve', async (req, res) => { try { await db.query('BEGIN'); const r = await db.query(`UPDATE payments SET status='paid', payment_date=NOW() WHERE id=$1 RETURNING subscription_id`,[req.body.payment_id]); if(r.rows.length) await db.query("UPDATE subscriptions SET status='active' WHERE id=$1",[r.rows[0].subscription_id]); await db.query('COMMIT'); req.flash('success','Aprovado'); } catch(e){await db.query('ROLLBACK');} res.redirect('/admin/finance'); });
-router.post('/finance/reject', async (req, res) => { try{await db.query("UPDATE payments SET status='rejected' WHERE id=$1",[req.body.payment_id]); req.flash('success','Rejeitado');}catch(e){} res.redirect('/admin/finance'); });
-router.post('/finance/suspend', async (req, res) => { try{await db.query("UPDATE subscriptions SET status='suspended' WHERE id=$1",[req.body.subscription_id]); req.flash('success','Suspenso');}catch(e){} res.redirect('/admin/finance'); });
-router.post('/finance/downgrade', async (req, res) => { try{await db.query("UPDATE subscriptions SET status='cancelled' WHERE id=$1",[req.body.subscription_id]); req.flash('success','Cancelado');}catch(e){} res.redirect('/admin/finance'); });
 
-// Content
-router.get('/content', async (req, res) => { try { const r = await db.query("SELECT a.*, u.name as author_name FROM articles a LEFT JOIN users u ON a.author_id = u.id ORDER BY a.created_at DESC"); res.render('pages/admin-content', { articles: r.rows }); } catch(e){ res.render('pages/admin-content', { articles: [] }); } });
-router.get('/content/create', (req, res) => { res.render('pages/create-article'); });
-router.post('/content/create', async (req, res) => { const { title, category, content, image_url } = req.body; try { await db.query("INSERT INTO articles (title, category, content, image_url, author_id, status) VALUES ($1, $2, $3, $4, $5, 'published')", [title, category, content, image_url, req.session.user.id]); req.flash('success', 'Artigo publicado!'); res.redirect('/admin/content'); } catch (e) { req.flash('error', 'Erro ao publicar.'); res.redirect('/admin/content/create'); } });
-router.post('/content/delete', async (req, res) => { try { await db.query("DELETE FROM articles WHERE id = $1", [req.body.article_id]); req.flash('success', 'Excluído.'); } catch(e){} res.redirect('/admin/content'); });
-router.post('/content/suspend', async (req, res) => { try { await db.query("UPDATE articles SET status = 'suspended' WHERE id = $1", [req.body.article_id]); req.flash('success', 'Suspenso.'); } catch(e){} res.redirect('/admin/content'); });
-router.post('/content/approve', async (req, res) => { try { await db.query("UPDATE articles SET status = 'published' WHERE id = $1", [req.body.article_id]); req.flash('success', 'Publicado.'); } catch(e){} res.redirect('/admin/content'); });
+// === CONTEÚDO DO SITE ===
+router.get('/content', async (req, res) => {
+    try {
+        const settingsRes = await db.query('SELECT * FROM system_settings');
+        const settings = {};
+        settingsRes.rows.forEach(r => settings[r.key] = r.value);
+        
+        res.render('pages/admin-content', { settings });
+    } catch(e) {
+        res.redirect('/admin/dashboard');
+    }
+});
 
-router.get('/ia-audit', async (req, res) => { try { const r = await db.query("SELECT l.*, u.name as user_name FROM ia_logs l LEFT JOIN users u ON l.user_id = u.id ORDER BY l.created_at DESC LIMIT 100"); res.render('pages/admin-ia-audit', { logs: r.rows }); } catch(e){ res.render('pages/admin-ia-audit', { logs: [] }); } });
-router.get('/approvals', (req, res) => res.render('pages/admin-approvals', { pendingTrainers: [] }));
-router.get('/settings', (req, res) => res.render('pages/admin-settings'));
+router.post('/content/update', async (req, res) => {
+    const { site_home_title, site_about_text } = req.body;
+    try {
+        await db.query('INSERT INTO system_settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = $2', ['site_home_title', site_home_title]);
+        await db.query('INSERT INTO system_settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = $2', ['site_about_text', site_about_text]);
+        req.flash('success', 'Conteúdo do site atualizado.');
+        res.redirect('/admin/content');
+    } catch(e) {
+        req.flash('error', 'Erro ao atualizar conteúdo.');
+        res.redirect('/admin/content');
+    }
+});
+
+// === PLANOS (CRUD) ===
+router.get('/plans', async (req, res) => {
+    const plans = await db.query('SELECT * FROM plans ORDER BY price ASC');
+    res.render('pages/admin-plans', { plans: plans.rows });
+});
+
+router.post('/plans/create', async (req, res) => {
+    const { name, price, description, features } = req.body;
+    try {
+        await db.query('INSERT INTO plans (name, price, description, features, is_active) VALUES ($1, $2, $3, $4, true)', 
+            [name, price, description, features]);
+        req.flash('success', 'Plano criado.');
+        res.redirect('/admin/plans');
+    } catch(e) { console.error(e); res.redirect('/admin/plans'); }
+});
+
+router.post('/plans/delete/:id', async (req, res) => {
+    try {
+        await db.query('UPDATE plans SET is_active = false WHERE id = $1', [req.params.id]);
+        req.flash('success', 'Plano desativado.');
+        res.redirect('/admin/plans');
+    } catch(e) { res.redirect('/admin/plans'); }
+});
+
+// === EXERCÍCIOS (LIBRARY) ===
+router.get('/exercises', async (req, res) => {
+    try {
+        const exercises = await db.query("SELECT * FROM exercise_library ORDER BY name ASC");
+        res.render('pages/admin-exercises', { exercises: exercises.rows });
+    } catch (e) {
+        console.error(e);
+        res.redirect('/admin/dashboard');
+    }
+});
+
+router.post('/exercises/create', async (req, res) => {
+    const { name, muscle_group, equipment, difficulty, video_url } = req.body;
+    try {
+        await db.query(
+            "INSERT INTO exercise_library (name, muscle_group, equipment, difficulty, video_url) VALUES ($1, $2, $3, $4, $5)",
+            [name, muscle_group, equipment, difficulty, video_url]
+        );
+        req.flash('success', 'Exercício adicionado.');
+        res.redirect('/admin/exercises');
+    } catch(e) { req.flash('error', 'Erro ao adicionar exercício.'); res.redirect('/admin/exercises'); }
+});
+
+router.post('/exercises/delete/:id', async (req, res) => {
+    try {
+        await db.query("DELETE FROM exercise_library WHERE id = $1", [req.params.id]);
+        req.flash('success', 'Exercício removido.');
+        res.redirect('/admin/exercises');
+    } catch(e) { req.flash('error', 'Erro ao remover (pode estar em uso).'); res.redirect('/admin/exercises'); }
+});
+
+// === USUÁRIOS E APROVAÇÕES ===
+router.get('/users', async (req, res) => {
+    const users = await db.query("SELECT * FROM users ORDER BY created_at DESC LIMIT 50");
+    res.render('pages/admin-users', { users: users.rows });
+});
+
+router.get('/approvals', async (req, res) => {
+    const pending = await db.query("SELECT u.id, u.name, u.email, u.created_at FROM users u WHERE u.role = 'trainer' AND u.status = 'pending_approval'");
+    res.render('pages/admin-approvals', { pendingTrainers: pending.rows });
+});
+
+router.post('/users/approve/:id', async (req, res) => {
+    await db.query("UPDATE users SET status = 'active' WHERE id = $1", [req.params.id]);
+    req.flash('success', 'Usuário aprovado.');
+    res.redirect('/admin/approvals');
+});
+
+router.post('/users/reject/:id', async (req, res) => {
+    await db.query("UPDATE users SET status = 'rejected' WHERE id = $1", [req.params.id]);
+    req.flash('success', 'Usuário rejeitado.');
+    res.redirect('/admin/approvals');
+});
+
+router.get('/finance', (req, res) => res.render('pages/admin-finance'));
+router.get('/ia-audit', (req, res) => res.render('pages/admin-ia-audit'));
 
 module.exports = router;
