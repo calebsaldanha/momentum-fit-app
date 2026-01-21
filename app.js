@@ -8,6 +8,7 @@ const flash = require('connect-flash');
 const db = require('./database/db');
 
 // --- VERCEL SPECIFIC: Trust Proxy ---
+// Essencial para cookies seguros (https) atrás do proxy da Vercel
 app.set('trust proxy', 1);
 
 app.set('view engine', 'ejs');
@@ -17,19 +18,27 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Session Config
+// Session Config Robust
+const sessionStore = new pgSession({
+    pool: db.pool,
+    tableName: 'session',
+    createTableIfMissing: true,
+    pruneSessionInterval: 60 * 15 // Limpa sessões expiradas a cada 15min
+});
+
+// Tratamento de erro na store de sessão para não crashar o app
+sessionStore.on('error', function(err) {
+    console.error('❌ ERRO NA SESSÃO (Connect-PG-Simple):', err);
+});
+
 app.use(session({
-    store: new pgSession({
-        pool: db.pool,
-        tableName: 'session',
-        createTableIfMissing: true
-    }),
-    secret: process.env.SESSION_SECRET || 'dev_secret_key',
+    store: sessionStore,
+    secret: process.env.SESSION_SECRET || 'dev_secret_key_change_in_prod',
     resave: false,
     saveUninitialized: false,
     cookie: { 
-        maxAge: 30 * 24 * 60 * 60 * 1000,
-        secure: process.env.NODE_ENV === 'production', 
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 dias
+        secure: process.env.NODE_ENV === 'production', // Secure apenas em produção (HTTPS)
         httpOnly: true,
         sameSite: 'lax'
     }
@@ -37,17 +46,13 @@ app.use(session({
 
 app.use(flash());
 
-// Middleware Global de Variáveis (AQUI ESTAVA O PROBLEMA)
+// Middleware Global
 app.use((req, res, next) => {
     res.locals.user = req.session.user || null;
     res.locals.isAuthenticated = !!req.session.user; 
     res.locals.messages = req.flash();
     res.locals.csrfToken = 'token-mock-safe'; 
-    
-    // --- CORREÇÃO: Disponibilizar 'path' para a Sidebar ---
-    res.locals.path = req.path; 
-    // -----------------------------------------------------
-    
+    res.locals.path = req.path; // Para Sidebar Ativa
     next();
 });
 
@@ -64,6 +69,10 @@ app.use('/api', require('./routes/api'));
 app.use('/chat', require('./routes/chat'));
 
 app.use((req, res) => {
+    // Evita loop de redirecionamento se assets falharem
+    if (req.url.includes('/css/') || req.url.includes('/images/')) {
+        return res.status(404).end();
+    }
     res.status(404).render('pages/error', { message: 'Página não encontrada' });
 });
 
