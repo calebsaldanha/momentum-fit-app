@@ -19,8 +19,20 @@ router.post('/login', async (req, res) => {
         if (result.rows.length > 0) {
             const user = result.rows[0];
             
-            if (await bcrypt.compare(password, user.password_hash)) {
+            // --- PROTEÇÃO CONTRA FALHA DE SCHEMA ---
+            // Se password_hash não existir, tenta usar 'password' (fallback) ou define string vazia para evitar crash
+            const storedHash = user.password_hash || user.password;
+
+            if (!storedHash) {
+                console.error(`LOGIN ERRO CRÍTICO: Usuário ID ${user.id} (${user.email}) não possui hash de senha no banco.`);
+                req.flash('error', 'Erro de integridade na conta. Contate o suporte.');
+                return res.redirect('/auth/login');
+            }
+            // ----------------------------------------
+            
+            if (await bcrypt.compare(password, storedHash)) {
                 
+                // Verificações de Status
                 if (user.status === 'pending_approval') {
                     req.flash('error', 'Sua conta ainda está aguardando aprovação.');
                     return res.redirect('/auth/login');
@@ -30,6 +42,7 @@ router.post('/login', async (req, res) => {
                     return res.redirect('/auth/login');
                 }
 
+                // Sessão
                 req.session.user = {
                     id: user.id,
                     name: user.name,
@@ -50,7 +63,7 @@ router.post('/login', async (req, res) => {
         res.redirect('/auth/login');
 
     } catch (err) {
-        console.error("Login Error:", err);
+        console.error("Login Exception:", err);
         req.flash('error', 'Erro interno no servidor.');
         res.redirect('/auth/login');
     }
@@ -87,7 +100,6 @@ router.post('/register', async (req, res) => {
 
         if (safeRole === 'client') {
             await db.query('INSERT INTO clients (user_id) VALUES ($1)', [userId]);
-            // Correção aqui: createNotification
             try {
                 await notificationService.createNotification(
                     null, 
