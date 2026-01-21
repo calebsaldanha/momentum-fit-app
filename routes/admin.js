@@ -12,9 +12,39 @@ function isAdmin(req, res, next) {
 }
 router.use(isAdmin);
 
-router.get('/dashboard', (req, res) => res.render('pages/admin-dashboard', { stats: {} }));
+// === DASHBOARD (CORRIGIDO) ===
+router.get('/dashboard', async (req, res) => {
+    try {
+        // Busca estatísticas em paralelo
+        const [usersRes, subsRes, trainersRes, recentRes] = await Promise.all([
+            db.query("SELECT COUNT(*) FROM users"),
+            db.query("SELECT COUNT(*) FROM subscriptions WHERE status = 'active'"),
+            db.query("SELECT COUNT(*) FROM users WHERE role = 'trainer' AND status = 'pending_approval'"),
+            db.query("SELECT id, name, email, role, status, created_at FROM users ORDER BY created_at DESC LIMIT 8")
+        ]);
 
-// === SETTINGS (Senha & Pix) ===
+        const stats = {
+            totalUsers: usersRes.rows[0].count,
+            activeSubs: subsRes.rows[0].count,
+            pendingTrainers: trainersRes.rows[0].count
+        };
+
+        res.render('pages/admin-dashboard', { 
+            stats, 
+            recentUsers: recentRes.rows 
+        });
+
+    } catch (err) {
+        console.error("Dashboard Error:", err);
+        // Fallback para não quebrar a página se o banco falhar
+        res.render('pages/admin-dashboard', { 
+            stats: { totalUsers: 0, activeSubs: 0, pendingTrainers: 0 }, 
+            recentUsers: [] 
+        });
+    }
+});
+
+// === SETTINGS ===
 router.get('/settings', async (req, res) => {
     try {
         const r = await db.query('SELECT * FROM system_settings');
@@ -42,10 +72,12 @@ router.post('/settings/password', async (req, res) => {
 
 // === CONTENT ===
 router.get('/content', async (req, res) => {
-    const r = await db.query('SELECT * FROM system_settings');
-    const settings = {};
-    r.rows.forEach(i => settings[i.key] = i.value);
-    res.render('pages/admin-content', { settings });
+    try {
+        const r = await db.query('SELECT * FROM system_settings');
+        const settings = {};
+        r.rows.forEach(i => settings[i.key] = i.value);
+        res.render('pages/admin-content', { settings });
+    } catch(e) { res.redirect('/admin/dashboard'); }
 });
 
 router.post('/content/update', async (req, res) => {
@@ -97,6 +129,10 @@ router.get('/approvals', async (req, res) => {
 });
 router.post('/users/approve/:id', async (req, res) => {
     await db.query("UPDATE users SET status='active' WHERE id=$1", [req.params.id]);
+    res.redirect('/admin/approvals');
+});
+router.post('/users/reject/:id', async (req, res) => {
+    await db.query("UPDATE users SET status='rejected' WHERE id=$1", [req.params.id]);
     res.redirect('/admin/approvals');
 });
 
