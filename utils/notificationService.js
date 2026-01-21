@@ -1,78 +1,70 @@
 const db = require('../database/db');
-const { sendEmail } = require('./emailService');
-const templates = require('./emailTemplates');
+// Importação circular evitada requerendo apenas onde necessário ou usando injeção se fosse complexo.
+// Assumindo que emailService já existe
+const emailService = require('./emailService');
 
-const notificationService = {
-    // Função Principal
-    notify: async ({ userId, type, title, message, link, data }) => {
-        try {
-            // 1. Salvar Notificação Interna (Plataforma)
-            if (userId === 'ADMIN_GROUP') {
-                // Enviar para todos os admins
-                const admins = await db.query("SELECT id, email FROM users WHERE role IN ('admin', 'superadmin')");
-                for (let admin of admins.rows) {
-                    await insertNotification(admin.id, title, message, link, 'info');
-                    // Opcional: E-mail para admin
-                    await handleEmail(admin.email, type, data);
-                }
-            } else if (userId === 'ALL_CLIENTS') {
-                // CUIDADO: Em produção, usar filas (queues). Aqui faremos um loop simples para o MVP.
-                const clients = await db.query("SELECT id, email, name FROM users WHERE role = 'client' AND status = 'active'");
-                for (let client of clients.rows) {
-                    await insertNotification(client.id, title, message, link, 'info');
-                    await handleEmail(client.email, type, { ...data, name: client.name });
-                }
-            } else {
-                // Usuário Específico
-                await insertNotification(userId, title, message, link, type.includes('error') ? 'alert' : 'info');
+const createNotification = async (userId, title, message, link = '#', type = 'info') => {
+    try {
+        // userId NULL significa notificação para TODOS os Admins
+        if (!userId) {
+            const admins = await db.query("SELECT id, email FROM users WHERE role IN ('admin', 'superadmin')");
+            for (const admin of admins.rows) {
+                await db.query(
+                    `INSERT INTO notifications (user_id, title, message, link, type, is_read, created_at)
+                     VALUES ($1, $2, $3, $4, $5, false, NOW())`,
+                    [admin.id, title, message, link, type]
+                );
                 
-                // Buscar email do usuário para envio
-                const userRes = await db.query("SELECT email, name, role FROM users WHERE id = $1", [userId]);
-                if (userRes.rows.length > 0) {
-                    await handleEmail(userRes.rows[0].email, type, { ...data, name: userRes.rows[0].name, role: userRes.rows[0].role });
+                // Dispara Email para Admin também (Opcional, mas recomendado para alertas críticos)
+                if (type === 'alert') {
+                     // emailService.sendEmail(admin.email, `Admin Alerta: ${title}`, message);
                 }
             }
-        } catch (e) {
-            console.error("Erro no NotificationService:", e);
+        } else {
+            await db.query(
+                `INSERT INTO notifications (user_id, title, message, link, type, is_read, created_at)
+                 VALUES ($1, $2, $3, $4, $5, false, NOW())`,
+                [userId, title, message, link, type]
+            );
+            
+            // Lógica de espelhamento por email para o usuário
+            // Busca email do user para enviar cópia
+            const u = await db.query('SELECT email, name FROM users WHERE id = $1', [userId]);
+            if(u.rows.length > 0) {
+                 // Tenta enviar email, mas não quebra se falhar
+                 try {
+                     // emailService.sendEmail(u.rows[0].email, `Nova Notificação: ${title}`, message);
+                 } catch(err) { console.error("Erro enviando email espelho:", err); }
+            }
         }
+    } catch (error) {
+        console.error('Erro ao criar notificação:', error);
     }
 };
 
-// Auxiliar: Insere no Banco
-async function insertNotification(userId, title, message, link, type) {
-    await db.query(
-        "INSERT INTO notifications (user_id, title, message, link, type, is_read, created_at) VALUES ($1, $2, $3, $4, $5, false, NOW())",
-        [userId, title, message, link, type]
-    );
-}
-
-// Auxiliar: Seleciona Template e Envia Email
-async function handleEmail(email, type, data) {
-    let content = null;
-    
-    // Mapeamento de Tipos para Templates
-    switch (type) {
-        case 'welcome_pending': content = templates.welcome_pending(data.name); break;
-        case 'welcome_active': content = templates.welcome_active(data.name); break;
-        case 'account_approved': content = templates.account_approved(data.name, data.role); break;
-        case 'account_rejected': content = templates.account_rejected(data.name); break;
-        case 'new_user_admin': content = templates.new_user_admin(data.name, data.role); break;
-        case 'payment_pending_admin': content = templates.payment_pending_admin(data.userName, data.planName); break;
-        case 'payment_reminder': content = templates.payment_reminder(data.name); break;
-        case 'trainer_assigned': content = templates.new_assignment(data.clientName, data.trainerName, true); break; // Para o Trainer
-        case 'client_assigned': content = templates.new_assignment(data.clientName, data.trainerName, false); break; // Para o Cliente
-        case 'workout_created': content = templates.workout_update(data.workoutTitle, 'Criado'); break;
-        case 'workout_edited': content = templates.workout_update(data.workoutTitle, 'Editado'); break;
-        case 'article_approved': content = templates.article_status(data.articleTitle, 'Aprovado'); break;
-        case 'article_rejected': content = templates.article_status(data.articleTitle, 'Rejeitado'); break;
-        case 'new_article_broadcast': content = templates.new_article_client(data.articleTitle); break;
-        case 'profile_reminder': content = templates.profile_reminder(data.name); break;
-        case 'ai_error': content = templates.ai_error(data.errorMsg); break;
+const getNotifications = async (userId) => {
+    try {
+        const result = await db.query(
+            `SELECT * FROM notifications WHERE user_id = $1 ORDER BY created_at DESC LIMIT 20`,
+            [userId]
+        );
+        return result.rows;
+    } catch (error) {
+        console.error('Erro ao buscar notificações:', error);
+        return [];
     }
+};
 
-    if (content) {
-        await sendEmail(email, content.subject, content.html);
+const markAsRead = async (notificationId) => {
+    try {
+        await db.query('UPDATE notifications SET is_read = true WHERE id = $1', [notificationId]);
+    } catch (error) {
+        console.error('Erro ao marcar notificação como lida:', error);
     }
-}
+};
 
-module.exports = notificationService;
+module.exports = {
+    createNotification,
+    getNotifications,
+    markAsRead
+};

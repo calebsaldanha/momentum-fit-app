@@ -1,23 +1,17 @@
 <%- include('../partials/header') %>
 <div class="dashboard-container">
-    <%- include('../partials/sidebar') %>
+    <%- include('../partials/sidebar', { path: '/client/financial' }) %>
     
-    <main class="main-content">
+    <main class="dashboard-main">
         <div class="page-header">
             <h1>Minha Assinatura</h1>
-            <p style="color: #a0a0a0;">Gerencie seu plano e visualize seu histórico de pagamentos.</p>
+            <p style="color: #a0a0a0;">Gerencie seu plano e visualize histórico.</p>
         </div>
 
         <% if (messages.success) { %>
             <div class="alert alert-success"><i class="fas fa-check-circle"></i> <%= messages.success %></div>
         <% } %>
         
-        <% if (messages.info) { %>
-            <div class="alert" style="background: rgba(59, 130, 246, 0.1); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3);">
-                <i class="fas fa-info-circle"></i> <%= messages.info %>
-            </div>
-        <% } %>
-
         <div class="financial-grid" style="display: grid; grid-template-columns: 1fr; gap: 30px;">
             
             <div class="card-box" style="border-left: 4px solid var(--primary-color);">
@@ -25,95 +19,71 @@
                     <div>
                         <h3 style="color: white; margin-bottom: 5px;">Plano Atual</h3>
                         <% if (subscription) { %>
-                            <h2 style="font-size: 2rem; color: var(--primary-color); margin-bottom: 5px;"><%= subscription.plan_name %></h2>
+                            <h2 style="font-size: 1.8rem; color: var(--primary-color); margin-bottom: 5px;"><%= subscription.plan_name %></h2>
                             <p style="color: #888;">
-                                Valor: <strong style="color: white;">R$ <%= subscription.price %>/mês</strong>
-                                <% if (subscription.start_date) { %>
-                                    • Início: <%= new Date(subscription.start_date).toLocaleDateString() %>
-                                <% } %>
+                                R$ <%= subscription.price %>/mês • Vencimento dia <%= subscription.payment_due_day %>
                             </p>
-                            
                             <div style="margin-top: 15px;">
-                                <span class="badge-status <%= subscription.status %>" 
+                                <span class="badge-status" 
                                       style="padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; text-transform: uppercase;
                                       background: <%= subscription.status === 'active' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)' %>;
                                       color: <%= subscription.status === 'active' ? '#10b981' : '#ef4444' %>;">
-                                    <%= subscription.status === 'active' ? '● Ativo' : (subscription.status === 'pending_payment' ? '● Pagamento Pendente' : '● Inativo') %>
+                                    <%= subscription.status === 'active' ? '● Ativo' : '● Pendente/Inativo' %>
                                 </span>
                             </div>
                         <% } else { %>
-                            <p style="color: #ccc; margin-top: 10px;">Você não possui uma assinatura ativa no momento.</p>
+                            <p style="color: #ccc;">Nenhuma assinatura ativa.</p>
                         <% } %>
                     </div>
-
-                    <div style="display: flex; gap: 10px; align-items: center;">
+                    
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                         <% if (subscription && subscription.status === 'pending_payment') { %>
-                            <a href="/client/checkout/<%= subscription.plan_id %>" class="btn btn-primary">
-                                <i class="fas fa-qrcode"></i> Pagar Agora
+                            <a href="/client/checkout/<%= subscription.plan_id %>" class="btn btn-primary btn-sm">
+                                <i class="fas fa-qrcode"></i> Pagar
                             </a>
                         <% } %>
-                        <a href="/client/plans" class="btn btn-outline">
-                            <%= subscription ? 'Trocar de Plano' : 'Escolher Plano' %>
-                        </a>
+                        <a href="/client/plans" class="btn btn-outline btn-sm">Mudar Plano</a>
                     </div>
                 </div>
             </div>
 
             <div class="card-box">
                 <h3 style="color: white; margin-bottom: 20px; border-bottom: 1px solid var(--border-light); padding-bottom: 15px;">
-                    <i class="fas fa-history" style="color: var(--primary-color); margin-right: 8px;"></i> Histórico Financeiro
+                    Histórico
                 </h3>
                 
-                <div class="table-responsive" style="overflow-x: auto;">
-                    <table style="width: 100%; border-collapse: collapse; min-width: 600px;">
+                <div class="table-responsive">
+                    <table style="width: 100%; min-width: 600px;">
                         <thead>
                             <tr style="background: #1a1a1a;">
-                                <th style="padding: 15px; text-align: left; color: #888; font-weight: 600;">Data</th>
-                                <th style="padding: 15px; text-align: left; color: #888; font-weight: 600;">Plano</th>
-                                <th style="padding: 15px; text-align: left; color: #888; font-weight: 600;">Valor</th>
-                                <th style="padding: 15px; text-align: left; color: #888; font-weight: 600;">Status</th>
-                                <th style="padding: 15px; text-align: center; color: #888; font-weight: 600;">Ação</th>
+                                <th>Data</th>
+                                <th>Valor</th>
+                                <th>Status</th>
+                                <th>Ação</th>
                             </tr>
                         </thead>
                         <tbody>
                             <% if (payments && payments.length > 0) { %>
                                 <% payments.forEach(pay => { %>
                                     <tr style="border-bottom: 1px solid #222;">
-                                        <td style="padding: 15px; color: white;">
-                                            <%= new Date(pay.created_at).toLocaleDateString() %>
-                                            <div style="font-size: 0.8rem; color: #666;"><%= new Date(pay.created_at).toLocaleTimeString().slice(0,5) %></div>
-                                        </td>
-                                        <td style="padding: 15px; color: white;"><%= pay.plan_name %></td>
-                                        <td style="padding: 15px; color: white;">R$ <%= pay.amount %></td>
-                                        <td style="padding: 15px;">
-                                            <% 
-                                                let statusColor = '#9ca3af'; // default gray
-                                                let statusLabel = pay.status;
-                                                if(pay.status === 'paid' || pay.status === 'completed') { statusColor = '#10b981'; statusLabel = 'Pago'; }
-                                                if(pay.status === 'pending') { statusColor = '#f59e0b'; statusLabel = 'Pendente'; }
-                                                if(pay.status === 'rejected') { statusColor = '#ef4444'; statusLabel = 'Rejeitado'; }
-                                            %>
-                                            <span style="color: <%= statusColor %>; font-weight: 600;">
-                                                <%= statusLabel %>
+                                        <td><%= new Date(pay.created_at).toLocaleDateString() %></td>
+                                        <td>R$ <%= pay.amount %></td>
+                                        <td>
+                                            <span style="color: <%= pay.status === 'paid' ? '#10b981' : '#f59e0b' %>">
+                                                <%= pay.status === 'paid' ? 'Pago' : 'Pendente' %>
                                             </span>
                                         </td>
-                                        <td style="padding: 15px; text-align: center;">
+                                        <td>
                                             <% if (pay.status === 'pending') { %>
-                                                <a href="/client/checkout/<%= subscription ? subscription.plan_id : 1 %>" title="Ver PIX" style="color: var(--primary-color);">
+                                                <a href="/client/checkout/<%= subscription ? subscription.plan_id : 1 %>" style="color: var(--primary-color);">
                                                     <i class="fas fa-external-link-alt"></i>
                                                 </a>
-                                            <% } else { %>
-                                                <span style="color: #333;">-</span>
-                                            <% } %>
+                                            <% } else { %> - <% } %>
                                         </td>
                                     </tr>
                                 <% }) %>
                             <% } else { %>
-                                <tr>
-                                    <td colspan="5" style="padding: 30px; text-align: center; color: #666;">
-                                        Nenhum registro encontrado.
-                                    </td>
-                                </tr>
+                                <tr><td colspan="4" style="text-align:center; padding: 20px;">Sem registros.</td></tr>
                             <% } %>
                         </tbody>
                     </table>
