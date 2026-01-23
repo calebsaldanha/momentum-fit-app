@@ -1,65 +1,65 @@
-<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMenu()"></div>
 
-<aside class="sidebar" id="appSidebar">
+<aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
-        <a href="/" class="brand">
-            <img src="/images/momentum-fit-icon.png" alt="M" style="height: 28px;">
-            <span>Momentum</span>
-        </a>
+        <a href="/" class="logo-text">Momentum<span>Fit</span></a>
     </div>
 
     <div class="sidebar-menu">
-        <% const role = user.role; %>
+        <% const r = user.role; %>
         
-        <% if (role === 'client') { %>
-            <div class="menu-label">Principal</div>
-            <a href="/client/dashboard" class="menu-link <%= path.includes('/dashboard') ? 'active' : '' %>">
+        <div class="menu-group">
+            <div class="menu-title">Performance</div>
+            <a href="/client/dashboard" class="menu-link <%= path.includes('dashboard') ? 'active' : '' %>">
                 <i class="fas fa-th-large"></i> Dashboard
             </a>
-            <a href="/client/workouts" class="menu-link <%= path.includes('/workouts') ? 'active' : '' %>">
+            <a href="/client/workouts" class="menu-link <%= path.includes('workouts') ? 'active' : '' %>">
                 <i class="fas fa-dumbbell"></i> Meus Treinos
             </a>
-            <a href="/client/evolution" class="menu-link <%= path.includes('/evolution') ? 'active' : '' %>">
+            <a href="/client/evolution" class="menu-link <%= path.includes('evolution') ? 'active' : '' %>">
                 <i class="fas fa-chart-line"></i> Evolução
             </a>
+        </div>
 
-            <div class="menu-label">IA & Nutrição</div>
-            <a href="/client/ai-coach" class="menu-link <%= path.includes('/ai-coach') ? 'active' : '' %>">
+        <div class="menu-group">
+            <div class="menu-title">Inteligência</div>
+            <a href="/client/ai-coach" class="menu-link <%= path.includes('ai-coach') ? 'active' : '' %>">
                 <i class="fas fa-robot"></i> Coach IA
             </a>
-            <a href="/client/diet" class="menu-link <%= path.includes('/diet') ? 'active' : '' %>">
-                <i class="fas fa-apple-alt"></i> Dieta
+            <a href="/client/diet" class="menu-link <%= path.includes('diet') ? 'active' : '' %>">
+                <i class="fas fa-carrot"></i> Nutrição
             </a>
-        <% } %>
+        </div>
 
-        <% if (role === 'trainer') { %>
-            <div class="menu-label">Gestão</div>
-            <a href="/trainer/dashboard" class="menu-link <%= path.includes('/dashboard') ? 'active' : '' %>">
-                <i class="fas fa-columns"></i> Painel Geral
+        <div class="menu-group">
+            <div class="menu-title">Conta</div>
+            <a href="/client/settings" class="menu-link <%= path.includes('settings') ? 'active' : '' %>">
+                <i class="fas fa-cog"></i> Ajustes
             </a>
-            <a href="/trainer/clients" class="menu-link <%= path.includes('/clients') ? 'active' : '' %>">
-                <i class="fas fa-users"></i> Alunos
-            </a>
-            <a href="/trainer/library" class="menu-link <%= path.includes('/library') ? 'active' : '' %>">
-                <i class="fas fa-book"></i> Biblioteca
-            </a>
-        <% } %>
-
-        <div class="menu-label">Conta</div>
-        <a href="/client/settings" class="menu-link <%= path.includes('/settings') ? 'active' : '' %>">
-            <i class="fas fa-cog"></i> Configurações
-        </a>
+        </div>
     </div>
 
     <div class="sidebar-footer">
-        <div class="user-info">
-            <div class="avatar-circle">
-                <%= user.name.charAt(0).toUpperCase() %>
-            </div>
-            <div style="flex:1; overflow:hidden;">
-                <h4 style="font-size:0.9rem; color:white; white-space:nowrap; text-overflow:ellipsis;"><%= user.name.split(' ')[0] %></h4>
-                <a href="/auth/logout" style="font-size:0.8rem; color:#ff4d4d;">Sair</a>
+        <div class="user-chip">
+            <div class="avatar"><%= user.name.charAt(0).toUpperCase() %></div>
+            <div style="flex: 1; overflow: hidden;">
+                <div style="font-weight: 700; color: white; font-size: 0.9rem;"><%= user.name.split(' ')[0] %></div>
+                <a href="/auth/logout" style="font-size: 0.75rem; color: #ff5555;">Sair</a>
             </div>
         </div>
     </div>
 </aside>
+
+<script>
+    function toggleMenu() {
+        document.getElementById('sidebar').classList.toggle('active');
+        const overlay = document.getElementById('sidebarOverlay');
+        if(overlay) overlay.classList.toggle('active');
+        
+        // Trava scroll no mobile se aberto
+        if (window.innerWidth <= 992) {
+            document.body.style.overflow = 
+                document.getElementById('sidebar').classList.contains('active') ? 'hidden' : '';
+        }
+    }
+</script>

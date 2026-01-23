@@ -6,136 +6,126 @@
     <title>Dashboard | Momentum Fit</title>
     <link rel="stylesheet" href="/css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
-<div class="app-container">
+<div class="app-wrapper">
     <%- include('../partials/sidebar.ejs') %>
 
     <main class="main-content">
         <%- include('../partials/app-header.ejs', { title: 'Visão Geral' }) %>
 
-        <div class="content-body">
+        <div class="dashboard-container">
             
-            <div style="margin-bottom: 30px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 20px;">
+            <div style="margin-bottom: 35px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 20px;">
                 <div>
-                    <h1 style="font-size: 2rem; color: white; margin-bottom: 5px;">Olá, <%= user.name.split(' ')[0] %>! ���</h1>
-                    <p style="color: #888;">Hoje é um ótimo dia para quebrar recordes.</p>
+                    <h1 style="font-size: 2rem; color: white; margin-bottom: 5px;">Olá, <%= user.name.split(' ')[0] %>! ��</h1>
+                    <p style="color: #888; font-size: 1rem;">O foco define o resultado. Vamos treinar?</p>
                 </div>
                 <a href="/client/workouts" class="btn btn-primary">
                     <i class="fas fa-play"></i> Iniciar Treino
                 </a>
             </div>
 
-            <div class="kpi-grid">
-                <div class="card kpi-card">
-                    <div class="kpi-icon"><i class="fas fa-dumbbell"></i></div>
-                    <div class="kpi-data">
+            <div class="grid-stats">
+                <div class="stat-box">
+                    <div class="stat-icon"><i class="fas fa-check"></i></div>
+                    <div class="stat-info">
                         <h3><%= stats.workoutsCompleted || 0 %></h3>
-                        <span>Treinos (Mês)</span>
+                        <span>Treinos Feitos</span>
                     </div>
                 </div>
-                <div class="card kpi-card">
-                    <div class="kpi-icon" style="color: #ff9f43; border-color: rgba(255,159,67,0.3); background: rgba(255,159,67,0.05);"><i class="fas fa-fire"></i></div>
-                    <div class="kpi-data">
+                <div class="stat-box">
+                    <div class="stat-icon" style="color: #ffaa00; background: rgba(255, 170, 0, 0.1);"><i class="fas fa-fire"></i></div>
+                    <div class="stat-info">
                         <h3><%= stats.streak || 0 %></h3>
                         <span>Dias Seguidos</span>
                     </div>
                 </div>
-                <div class="card kpi-card">
-                    <div class="kpi-icon" style="color: #00cec9; border-color: rgba(0,206,201,0.3); background: rgba(0,206,201,0.05);"><i class="fas fa-weight"></i></div>
-                    <div class="kpi-data">
+                <div class="stat-box">
+                    <div class="stat-icon" style="color: #00ccff; background: rgba(0, 204, 255, 0.1);"><i class="fas fa-weight-scale"></i></div>
+                    <div class="stat-info">
                         <h3><%= stats.currentWeight || '--' %>kg</h3>
                         <span>Peso Atual</span>
                     </div>
                 </div>
             </div>
 
-            <div class="dash-layout">
+            <div class="grid-main">
                 
                 <div style="display: flex; flex-direction: column; gap: 30px;">
                     
-                    <div class="card card-highlight">
+                    <div class="card card-featured">
                         <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
-                            <span class="badge badge-success">Sugerido para Hoje</span>
-                            <small style="color: #666;">Hipertrofia</small>
+                            <span class="badge badge-neon">HOJE</span>
+                            <small style="color: #888;">Hipertrofia</small>
                         </div>
                         
                         <% if (nextWorkout) { %>
-                            <h2 style="font-size: 1.6rem; color: white; margin-bottom: 10px;"><%= nextWorkout.title %></h2>
-                            <p style="color: #ccc; margin-bottom: 20px; font-size: 0.95rem;"><%= nextWorkout.description || 'Foco em execução controlada e carga progressiva.' %></p>
+                            <h2 style="font-size: 1.8rem; margin-bottom: 10px; color: white;"><%= nextWorkout.title %></h2>
+                            <p style="color: #ccc; margin-bottom: 25px;"><%= nextWorkout.description || 'Foco na técnica e controle de carga.' %></p>
                             
-                            <div style="display: flex; gap: 20px; color: #888; font-size: 0.9rem; margin-bottom: 25px;">
-                                <span><i class="far fa-clock" style="color: var(--primary);"></i> <%= nextWorkout.duration || 45 %> min</span>
-                                <span><i class="fas fa-list-ul" style="color: var(--primary);"></i> <%= nextWorkout.exerciseCount || 0 %> exercícios</span>
-                                <span><i class="fas fa-bolt" style="color: var(--primary);"></i> Intenso</span>
+                            <div style="display: flex; gap: 25px; margin-bottom: 25px; color: #999; font-size: 0.9rem;">
+                                <span><i class="far fa-clock" style="color: var(--primary);"></i> <%= nextWorkout.duration %> min</span>
+                                <span><i class="fas fa-dumbbell" style="color: var(--primary);"></i> <%= nextWorkout.exerciseCount %> exercícios</span>
                             </div>
 
                             <div style="display: flex; gap: 15px;">
-                                <a href="/workouts/start/<%= nextWorkout.id %>" class="btn btn-primary" style="flex: 1;">Começar Agora</a>
+                                <a href="/workouts/start/<%= nextWorkout.id %>" class="btn btn-primary" style="padding: 10px 30px;">Começar</a>
                                 <a href="/workouts/details/<%= nextWorkout.id %>" class="btn btn-outline">Detalhes</a>
                             </div>
                         <% } else { %>
-                            <div style="text-align: center; padding: 20px;">
-                                <p style="color: #888;">Tudo pronto! Você não tem treinos pendentes.</p>
-                                <a href="/client/workouts" class="btn btn-outline btn-sm" style="margin-top: 10px;">Ver Biblioteca</a>
-                            </div>
+                            <p style="color: #888;">Nenhum treino agendado.</p>
+                            <a href="/client/workouts" class="btn btn-outline btn-sm">Ver Biblioteca</a>
                         <% } %>
                     </div>
 
-                    <div class="card">
-                        <h3 style="color: white; font-size: 1.1rem; margin-bottom: 20px;">Atividades Recentes</h3>
-                        <div style="overflow-x: auto;">
-                            <table style="width: 100%; border-collapse: collapse; min-width: 400px;">
-                                <thead>
-                                    <tr style="text-align: left; color: #666; font-size: 0.85rem; border-bottom: 1px solid #222;">
-                                        <th style="padding-bottom: 10px;">Treino</th>
-                                        <th style="padding-bottom: 10px;">Data</th>
-                                        <th style="padding-bottom: 10px;">Duração</th>
-                                        <th style="padding-bottom: 10px; text-align: right;">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.02);">
-                                        <td style="padding: 15px 0; color: white;">Treino A (Peito)</td>
-                                        <td style="padding: 15px 0; color: #888;">Ontem</td>
-                                        <td style="padding: 15px 0; color: #888;">55 min</td>
-                                        <td style="padding: 15px 0; text-align: right;"><span style="color: var(--primary); font-size: 0.8rem;"><i class="fas fa-check"></i> Feito</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td style="padding: 15px 0; color: white;">Cardio Leve</td>
-                                        <td style="padding: 15px 0; color: #888;">18/01</td>
-                                        <td style="padding: 15px 0; color: #888;">30 min</td>
-                                        <td style="padding: 15px 0; text-align: right;"><span style="color: var(--primary); font-size: 0.8rem;"><i class="fas fa-check"></i> Feito</span></td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                    <div class="content-box">
+                        <div class="box-header">
+                            <h3 class="box-title">Histórico Recente</h3>
+                            <a href="/client/evolution" style="font-size: 0.8rem; color: var(--primary);">Ver tudo</a>
+                        </div>
+                        <div class="item-list">
+                            <div class="list-row">
+                                <div class="row-info">
+                                    <h4>Treino de Peito A</h4>
+                                    <div class="row-meta"><span>Ontem</span> • <span>55 min</span></div>
+                                </div>
+                                <span class="badge badge-dark">Concluído</span>
+                            </div>
+                            <div class="list-row">
+                                <div class="row-info">
+                                    <h4>Cardio HIIT</h4>
+                                    <div class="row-meta"><span>18/01</span> • <span>25 min</span></div>
+                                </div>
+                                <span class="badge badge-dark">Concluído</span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <div style="display: flex; flex-direction: column; gap: 30px;">
                     
-                    <div class="card" style="background: linear-gradient(180deg, rgba(190, 242, 2, 0.05) 0%, #111 100%); border-color: rgba(190, 242, 2, 0.2);">
+                    <div class="card" style="background: linear-gradient(180deg, rgba(190, 242, 2, 0.03) 0%, #111 100%); border-color: rgba(190, 242, 2, 0.15);">
                         <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
                             <i class="fas fa-robot" style="color: var(--primary);"></i>
-                            <h3 style="color: white; font-size: 1rem;">Insight IA</h3>
+                            <h3 style="color: white; font-size: 1rem; font-weight: 700;">Momentum AI</h3>
                         </div>
-                        <p style="color: #ccc; font-style: italic; font-size: 0.9rem; line-height: 1.5; margin-bottom: 20px;">
-                            "Sua consistência aumentou 20% esta semana! Continue assim para bater sua meta de peso até o fim do mês."
+                        <p style="color: #ccc; font-size: 0.9rem; font-style: italic; line-height: 1.5; margin-bottom: 20px;">
+                            "Sua carga no Supino aumentou 10% nas últimas 3 semanas. Sugiro aumentar o descanso em 30s hoje."
                         </p>
-                        <a href="/client/ai-coach" class="btn btn-outline btn-sm" style="width: 100%;">Conversar com Coach</a>
+                        <a href="/client/ai-coach" class="btn btn-outline btn-sm" style="width: 100%;">Conversar</a>
                     </div>
 
-                    <div class="card">
-                        <h3 style="color: white; font-size: 1rem; margin-bottom: 15px;">Acesso Rápido</h3>
+                    <div class="content-box">
+                        <h3 class="box-title" style="margin-bottom: 15px;">Acesso Rápido</h3>
                         <div style="display: flex; flex-direction: column; gap: 10px;">
-                            <a href="/client/evolution" class="btn btn-outline" style="justify-content: flex-start; text-align: left; border-color: #333; color: #aaa;">
-                                <i class="fas fa-weight-scale" style="width: 25px;"></i> Registrar Peso
+                            <a href="#" class="btn btn-outline" style="justify-content: flex-start; text-align: left; border-color: #333; color: #aaa;">
+                                <i class="fas fa-weight-scale" style="width: 25px;"></i> Atualizar Peso
                             </a>
                             <a href="#" class="btn btn-outline" style="justify-content: flex-start; text-align: left; border-color: #333; color: #aaa;">
-                                <i class="fas fa-camera" style="width: 25px;"></i> Foto de Progresso
+                                <i class="fas fa-camera" style="width: 25px;"></i> Foto do Shape
                             </a>
                         </div>
                     </div>

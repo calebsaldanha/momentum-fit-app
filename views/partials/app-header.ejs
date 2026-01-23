@@ -1,39 +1,20 @@
-<header class="top-header">
+<header class="app-header">
     <div style="display: flex; align-items: center;">
-        <button class="mobile-toggle" onclick="toggleSidebar()">
+        <button class="mobile-toggle" onclick="toggleMenu()">
             <i class="fas fa-bars"></i>
         </button>
-        <h2 class="page-title"><%= typeof title !== 'undefined' ? title : 'Momentum Fit' %></h2>
+        <h2 class="page-heading"><%= typeof title !== 'undefined' ? title : 'Painel' %></h2>
     </div>
 
-    <div class="header-tools">
-        <button class="tool-btn">
+    <div class="header-icons">
+        <button class="icon-btn">
             <i class="far fa-bell"></i>
             <% if (typeof notifications !== 'undefined' && notifications.length > 0) { %>
                 <span class="badge-dot"></span>
             <% } %>
         </button>
+        <button class="icon-btn">
+            <i class="far fa-envelope"></i>
+        </button>
     </div>
 </header>
-
-<script>
-    // Script Inline de Toggle para garantir funcionamento imediato
-    function toggleSidebar() {
-        const sidebar = document.getElementById('appSidebar');
-        const overlay = document.getElementById('sidebarOverlay');
-        const body = document.body;
-
-        sidebar.classList.toggle('active');
-        
-        if (overlay) {
-            overlay.classList.toggle('active');
-        }
-
-        // Bloqueia scroll no mobile quando menu aberto
-        if (window.innerWidth <= 992 && sidebar.classList.contains('active')) {
-            body.style.overflow = 'hidden';
-        } else {
-            body.style.overflow = '';
-        }
-    }
-</script>
