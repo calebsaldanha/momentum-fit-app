@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "rewrites": [
+    { "source": "/css/(.*)", "destination": "/public/css/$1" },
+    { "source": "/js/(.*)", "destination": "/public/js/$1" },
+    { "source": "/images/(.*)", "destination": "/public/images/$1" },
+    { "source": "/favicon.ico", "destination": "/public/favicon.ico" },
+    { "source": "/(.*)", "destination": "/api/index.js" }
+  ]
+}

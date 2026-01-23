@@ -1,0 +1,69 @@
+<%- include('../partials/header.ejs') %>
+<div class="dashboard-container">
+    <%- include('../partials/sidebar.ejs', { path: '/trainer/library' }) %>
+    <main class="dashboard-main">
+        <div class="mobile-dash-header">
+            <button id="sidebarOpenBtn" class="btn btn-outline btn-sm"><i class="fas fa-bars"></i></button>
+            <span>Biblioteca</span>
+        </div>
+        <div class="page-header" style="display: flex; justify-content: space-between;">
+            <h1>Biblioteca de <span class="text-neon">Exercícios</span></h1>
+            <button class="btn btn-primary" onclick="document.getElementById('exModal').style.display='flex'">
+                <i class="fas fa-plus"></i> Novo
+            </button>
+        </div>
+
+        <% if(messages.success) { %><div class="alert alert-success"><%= messages.success %></div><% } %>
+
+        <div class="card-box">
+            <% if (exercises && exercises.length > 0) { %>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr><th>Nome</th><th>Músculo</th><th>Link Vídeo</th></tr>
+                        </thead>
+                        <tbody>
+                            <% exercises.forEach(ex => { %>
+                                <tr>
+                                    <td><%= ex.name %></td>
+                                    <td><%= ex.muscle_group %></td>
+                                    <td><%= ex.video_url ? 'Sim' : 'Não' %></td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            <% } else { %>
+                <p class="text-muted" style="text-align: center;">Nenhum exercício cadastrado.</p>
+            <% } %>
+        </div>
+    </main>
+</div>
+
+<div id="exModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 2000; align-items: center; justify-content: center;">
+    <div style="background: #111; padding: 30px; border-radius: 12px; width: 90%; max-width: 400px; border: 1px solid #333;">
+        <h3 style="color: white; margin-bottom: 20px;">Novo Exercício</h3>
+        <form action="/trainer/library/create" method="POST">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <div style="margin-bottom: 15px;">
+                <label style="color: #888;">Nome</label>
+                <input type="text" name="name" required style="width: 100%; padding: 10px; background: #222; border: 1px solid #444; color: white;">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="color: #888;">Grupo Muscular</label>
+                <select name="muscle_group" style="width: 100%; padding: 10px; background: #222; border: 1px solid #444; color: white;">
+                    <option>Peito</option><option>Costas</option><option>Pernas</option><option>Ombros</option><option>Bíceps</option><option>Tríceps</option><option>Abdômen</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 20px;">
+                <label style="color: #888;">URL Vídeo (Youtube)</label>
+                <input type="text" name="video_url" placeholder="https://..." style="width: 100%; padding: 10px; background: #222; border: 1px solid #444; color: white;">
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button type="submit" class="btn btn-primary" style="flex: 1;">Salvar</button>
+                <button type="button" class="btn btn-outline" style="flex: 1;" onclick="document.getElementById('exModal').style.display='none'">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+<%- include('../partials/footer.ejs') %>

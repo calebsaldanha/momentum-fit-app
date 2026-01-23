@@ -1,0 +1,42 @@
+<%- include('../partials/header') %>
+<div class="dashboard-container">
+    <%- include('../partials/sidebar', { path: '/admin/exercises' }) %>
+    <main class="dashboard-main">
+        <div class="page-header"><h1>Exercícios</h1></div>
+        
+        <div class="card-box" style="margin-bottom:20px;">
+            <h3>Novo Exercício</h3>
+            <form action="/admin/exercises/create" method="POST" style="display:flex; gap:10px; flex-wrap:wrap;">
+                <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+                <input type="text" name="name" placeholder="Nome" required style="flex:1; padding:10px;">
+                <select name="muscle_group" style="padding:10px;">
+                    <option value="peito">Peito</option><option value="costas">Costas</option>
+                    <option value="pernas">Pernas</option><option value="braços">Braços</option>
+                </select>
+                <button class="btn btn-primary">Adicionar</button>
+            </form>
+        </div>
+
+        <div class="card-box">
+            <div class="table-responsive">
+                <table style="width:100%;">
+                    <thead><tr><th>Nome</th><th>Grupo</th><th>Ação</th></tr></thead>
+                    <tbody>
+                        <% exercises.forEach(e => { %>
+                            <tr>
+                                <td><%= e.name %></td>
+                                <td><%= e.muscle_group %></td>
+                                <td>
+                                    <form action="/admin/exercises/delete/<%= e.id %>" method="POST">
+                                        <button class="btn btn-outline btn-sm" style="color:red;">X</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+<%- include('../partials/footer') %>

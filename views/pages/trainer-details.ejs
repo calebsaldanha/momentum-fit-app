@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <%- include('../partials/header.ejs') %>
+    <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <%- include('../partials/sidebar', { user: user, currentPage: 'superadmin-manage' }) %>
+
+        <main class="dashboard-main">
+            <header class="page-header">
+                <div>
+                    <h1>Perfil do Profissional</h1>
+                    <p class="text-muted">Gerencie as informações e alunos de <%= trainer.name %></p>
+                </div>
+                <a href="/superadmin/manage" class="btn btn-ghost"><i class="fas fa-arrow-left"></i> Voltar</a>
+            </header>
+
+            <div class="grid-2-col">
+                <aside>
+                    <div class="card-modern text-center">
+                        <div class="position-relative d-inline-block mb-3">
+                            <img src="<%= trainer.profile_image || '/images/default-profile.png' %>" style="width: 120px; height: 120px; border-radius: 50%; border: 4px solid var(--bg-card); outline: 2px solid var(--primary); object-fit: cover;">
+                            <span class="position-absolute bottom-0 end-0 p-2 rounded-circle" style="background: <%= trainer.status === 'active' ? 'var(--success)' : 'var(--danger)' %>; border: 3px solid var(--bg-card);"></span>
+                        </div>
+                        
+                        <h2 class="h4 mb-1"><%= trainer.name %></h2>
+                        <p class="text-muted mb-4"><%= trainer.email %></p>
+
+                        <div class="d-grid gap-2 text-start">
+                            <hr style="border-color: var(--border);">
+                            
+                            <h4 class="h6 text-muted text-uppercase small mt-2">Ações da Conta</h4>
+                            
+                            <form action="/superadmin/users/<%= trainer.id %>/status" method="POST">
+                                <input type="hidden" name="status" value="<%= trainer.status === 'active' ? 'inactive' : 'active' %>">
+                                <button class="btn btn-ghost w-100 justify-content-start">
+                                    <i class="fas fa-<%= trainer.status === 'active' ? 'ban' : 'check' %>"></i>
+                                    <%= trainer.status === 'active' ? 'Bloquear Acesso' : 'Desbloquear' %>
+                                </button>
+                            </form>
+                            
+                            <form action="/superadmin/users/<%= trainer.id %>/delete" method="POST" onsubmit="return confirm('ATENÇÃO: Ação irreversível. Confirmar?');">
+                                <button class="btn btn-danger w-100 justify-content-start">
+                                    <i class="fas fa-trash"></i> Excluir Treinador
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </aside>
+
+                <section>
+                    <div class="card-modern h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h3 class="h5 m-0">Carteira de Alunos</h3>
+                            <span class="badge badge-neon"><%= clients.length %> Ativos</span>
+                        </div>
+
+                        <% if (clients.length > 0) { %>
+                            <div class="d-grid gap-2">
+                                <% clients.forEach(c => { %>
+                                    <div class="d-flex align-items-center justify-content-between p-3 rounded" style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle);">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <img src="<%= c.profile_image || '/images/default-profile.png' %>" width="40" height="40" class="rounded-circle">
+                                            <div>
+                                                <div class="fw-bold"><%= c.name %></div>
+                                                <small class="text-muted"><%= c.email %></small>
+                                            </div>
+                                        </div>
+                                        <a href="/superadmin/users/<%= c.id || c.client_real_id %>" class="btn btn-ghost btn-sm">Ver</a>
+                                    </div>
+                                <% }) %>
+                            </div>
+                        <% } else { %>
+                            <div class="text-center py-5">
+                                <div class="text-muted opacity-25 mb-3"><i class="fas fa-user-slash fa-3x"></i></div>
+                                <p class="text-muted">Nenhum aluno vinculado a este profissional.</p>
+                            </div>
+                        <% } %>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

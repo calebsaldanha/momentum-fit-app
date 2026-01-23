@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <%- include('../partials/header.ejs') %>
+    <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <%- include('../partials/sidebar', { user: user, currentPage: 'superadmin-manage' }) %>
+
+        <main class="dashboard-main">
+            <header class="page-header">
+                <div>
+                    <h1>Perfil do Aluno</h1>
+                    <p class="text-muted">Detalhes técnicos e atribuição de profissional.</p>
+                </div>
+                <a href="/superadmin/manage" class="btn btn-ghost"><i class="fas fa-arrow-left"></i> Voltar</a>
+            </header>
+
+            <div class="grid-2-col">
+                <aside>
+                    <div class="card-modern mb-4">
+                        <div class="text-center mb-4">
+                            <img src="<%= targetUser.profile_image || '/images/default-profile.png' %>" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary);">
+                            <h2 class="h4 mt-3 mb-1"><%= targetUser.name %></h2>
+                            <p class="text-muted"><%= targetUser.email %></p>
+                        </div>
+
+                        <div class="p-3 rounded mb-3" style="background: rgba(212, 255, 0, 0.05); border: 1px solid rgba(212, 255, 0, 0.2);">
+                            <h4 class="h6 text-neon mb-3"><i class="fas fa-dumbbell me-2"></i> Treinador Responsável</h4>
+                            <form action="/superadmin/assign-trainer" method="POST">
+                                <input type="hidden" name="user_id" value="<%= targetUser.id %>">
+                                <div class="d-flex gap-2">
+                                    <select name="trainer_id" class="select-modern" required>
+                                        <option value="">-- Selecione --</option>
+                                        <% trainers.forEach(t => { %>
+                                            <option value="<%= t.id %>" <%= targetUser.trainer_id === t.id ? 'selected' : '' %>>
+                                                <%= t.name %>
+                                            </option>
+                                        <% }) %>
+                                    </select>
+                                    <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-check"></i></button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <form action="/superadmin/users/<%= targetUser.id %>/status" method="POST" class="mb-2">
+                            <input type="hidden" name="status" value="<%= targetUser.status === 'active' ? 'inactive' : 'active' %>">
+                            <button class="btn btn-ghost w-100 justify-content-between">
+                                Status da Conta
+                                <span class="badge badge-<%= targetUser.status === 'active' ? 'active' : 'inactive' %>">
+                                    <%= targetUser.status === 'active' ? 'Ativo' : 'Bloqueado' %>
+                                </span>
+                            </button>
+                        </form>
+                    </div>
+                </aside>
+
+                <section>
+                    <div class="card-modern">
+                        <h3 class="h5 mb-4"><i class="fas fa-file-medical-alt me-2 text-muted"></i> Dados Físicos</h3>
+                        
+                        <div class="grid-stats mb-4" style="grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+                            <div class="text-center p-3 rounded" style="background: var(--bg-app);">
+                                <div class="h3 text-main mb-0"><%= clientProfile.current_weight || '--' %></div>
+                                <div class="small text-muted">Peso (kg)</div>
+                            </div>
+                            <div class="text-center p-3 rounded" style="background: var(--bg-app);">
+                                <div class="h3 text-main mb-0"><%= clientProfile.height || '--' %></div>
+                                <div class="small text-muted">Altura (cm)</div>
+                            </div>
+                            <div class="text-center p-3 rounded" style="background: var(--bg-app);">
+                                <div class="h3 text-main mb-0"><%= clientProfile.fitness_level || '--' %></div>
+                                <div class="small text-muted">Nível</div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="text-muted small text-uppercase fw-bold mb-2">Objetivo Principal</label>
+                            <div class="p-3 rounded" style="background: var(--bg-app); border: 1px solid var(--border-subtle);">
+                                <%= clientProfile.fitness_goals || 'Não informado' %>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="text-muted small text-uppercase fw-bold mb-2">Lesões ou Restrições</label>
+                            <div class="p-3 rounded" style="background: var(--bg-app); border: 1px solid var(--border-subtle); color: var(--text-secondary);">
+                                <%= clientProfile.injuries || 'Nenhuma restrição relatada.' %>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

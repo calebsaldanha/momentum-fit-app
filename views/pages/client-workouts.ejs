@@ -1,0 +1,69 @@
+<%- include('../partials/header.ejs') %>
+
+<div class="dashboard-container">
+    <%- include('../partials/sidebar.ejs') %>
+
+    <main class="dashboard-main">
+        <header class="page-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+            <div>
+                <h1 style="font-size: 1.8rem;">Meus Treinos</h1>
+                <p style="color: var(--text-muted);">Sua biblioteca pessoal de exercícios.</p>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-sm btn-primary">Ativos</button>
+                <button class="btn btn-sm btn-outline" style="opacity: 0.6;">Arquivados</button>
+            </div>
+        </header>
+
+        <% if (workouts.length > 0) { %>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px;">
+                <% workouts.forEach(workout => { %>
+                    <div class="card-box" style="display: flex; flex-direction: column; height: 100%; padding: 0; overflow: hidden; border: 1px solid <%= workout.status === 'active' ? 'var(--primary-color)' : '#333' %>;">
+                        
+                        <div style="padding: 20px; background: rgba(255,255,255,0.02); border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: flex-start;">
+                            <div>
+                                <h3 style="font-size: 1.2rem; margin-bottom: 5px; color: white;"><%= workout.title %></h3>
+                                <span style="font-size: 0.8rem; color: #888; text-transform: uppercase; letter-spacing: 1px;">
+                                    <%= workout.muscle_group || 'Geral' %>
+                                </span>
+                            </div>
+                            <% if (workout.status === 'active') { %>
+                                <span style="background: rgba(190, 242, 2, 0.2); color: var(--primary-color); font-size: 0.7rem; padding: 3px 8px; border-radius: 4px; font-weight: 700;">ATIVO</span>
+                            <% } else { %>
+                                <span style="background: #333; color: #888; font-size: 0.7rem; padding: 3px 8px; border-radius: 4px;">INATIVO</span>
+                            <% } %>
+                        </div>
+
+                        <div style="padding: 20px; flex: 1;">
+                            <p style="color: #999; font-size: 0.9rem; margin-bottom: 20px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+                                <%= workout.description || 'Sem descrição.' %>
+                            </p>
+                            
+                            <div style="display: flex; gap: 15px; font-size: 0.85rem; color: #ccc; margin-bottom: 20px;">
+                                <span><i class="fas fa-list-ul" style="color: var(--primary-color); margin-right: 5px;"></i> <%= workout.exercise_count %> Exercícios</span>
+                                <span><i class="far fa-clock" style="color: var(--primary-color); margin-right: 5px;"></i> ~45m</span>
+                            </div>
+                        </div>
+
+                        <div style="padding: 15px 20px; background: rgba(0,0,0,0.3); border-top: 1px solid #222;">
+                            <a href="/workouts/<%= workout.id %>" class="btn btn-outline btn-sm" style="width: 100%;">
+                                Ver Detalhes <i class="fas fa-arrow-right" style="margin-left: 5px;"></i>
+                            </a>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+        <% } else { %>
+            <div style="text-align: center; padding: 60px 20px; background: var(--bg-card); border-radius: 12px; border: 1px dashed #333;">
+                <div style="font-size: 3rem; color: #222; margin-bottom: 20px;"><i class="fas fa-dumbbell"></i></div>
+                <h3 style="margin-bottom: 10px; color: white;">Nenhum treino encontrado</h3>
+                <p style="color: #888; max-width: 400px; margin: 0 auto 30px;">
+                    Seu treinador ainda não criou um plano para você. Entre em contato via chat para solicitar.
+                </p>
+                <a href="/chat" class="btn btn-primary">Enviar Mensagem</a>
+            </div>
+        <% } %>
+    </main>
+</div>
+
+<%- include('../partials/footer.ejs') %>

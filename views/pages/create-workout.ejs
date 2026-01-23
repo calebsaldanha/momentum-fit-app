@@ -1,0 +1,165 @@
+<%- include('../partials/header.ejs') %>
+
+<div class="dashboard-container">
+    <%- include('../partials/sidebar.ejs') %>
+
+    <main class="dashboard-main">
+        <div class="page-header">
+            <h1 style="font-size: 1.8rem;">Novo Plano de Treino</h1>
+            <a href="/trainer/dashboard" class="btn btn-outline btn-sm" style="margin-top: 10px;">
+                <i class="fas fa-arrow-left"></i> Cancelar
+            </a>
+        </div>
+
+        <form action="/workouts/create" method="POST" id="workoutForm" style="max-width: 900px;">
+            
+            <div class="card-box">
+                <h3 style="margin-bottom: 20px; color: var(--primary-color); border-bottom: 1px solid #333; padding-bottom: 10px;">
+                    1. Informações Gerais
+                </h3>
+                
+                <div class="form-group">
+                    <label>Título do Treino</label>
+                    <input type="text" name="title" placeholder="Ex: Hipertrofia Pernas - Fase 1" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Aluno</label>
+                    <select name="client_id" required>
+                        <option value="">Selecione um aluno...</option>
+                        <% if (typeof clients !== 'undefined' && clients.length > 0) { %>
+                            <% clients.forEach(client => { %>
+                                <option value="<%= client.id %>"><%= client.name %></option>
+                            <% }); %>
+                        <% } else { %>
+                            <option disabled>Nenhum aluno encontrado</option>
+                        <% } %>
+                    </select>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label>Grupo Muscular Principal</label>
+                        <select name="muscle_group">
+                            <option value="Full Body">Full Body</option>
+                            <option value="Superiores">Superiores</option>
+                            <option value="Inferiores">Inferiores</option>
+                            <option value="Cardio">Cardio</option>
+                            <option value="Peito/Tríceps">Peito/Tríceps</option>
+                            <option value="Costas/Bíceps">Costas/Bíceps</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Dificuldade</label>
+                        <select name="difficulty">
+                            <option value="Iniciante">Iniciante</option>
+                            <option value="Intermediário">Intermediário</option>
+                            <option value="Avançado">Avançado</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Descrição / Observações</label>
+                    <textarea name="description" rows="3" placeholder="Instruções gerais para o aluno..."></textarea>
+                </div>
+            </div>
+
+            <div class="card-box">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px;">
+                    <h3 style="color: var(--primary-color);">2. Exercícios</h3>
+                    <button type="button" class="btn btn-sm btn-outline" id="addExerciseBtn">
+                        <i class="fas fa-plus"></i> Adicionar Exercício
+                    </button>
+                </div>
+
+                <div id="exercisesContainer">
+                    <p id="emptyState" style="text-align: center; color: #666; padding: 30px;">
+                        Nenhum exercício adicionado ainda. Clique no botão acima.
+                    </p>
+                </div>
+            </div>
+
+            <div style="text-align: right; margin-top: 20px;">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-save"></i> Salvar e Enviar Treino
+                </button>
+            </div>
+        </form>
+    </main>
+</div>
+
+<template id="exerciseTemplate">
+    <div class="exercise-row" style="background: #1a1a1a; padding: 20px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #333; position: relative;">
+        <button type="button" class="remove-btn" style="position: absolute; top: 10px; right: 10px; background: none; border: none; color: #ff6b6b; cursor: pointer;">
+            <i class="fas fa-trash"></i>
+        </button>
+        
+        <div class="form-group" style="margin-bottom: 15px;">
+            <label style="font-size: 0.9rem; color: #aaa;">Exercício</label>
+            <select name="exercises[][id]" class="exercise-select" required style="width: 100%;">
+                <option value="">Buscar na biblioteca...</option>
+                <% if (typeof exercises !== 'undefined') { %>
+                    <% exercises.forEach(ex => { %>
+                        <option value="<%= ex.id %>"><%= ex.name %> (<%= ex.muscle_group %>)</option>
+                    <% }); %>
+                <% } %>
+            </select>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+            <div class="form-group">
+                <label style="font-size: 0.8rem; color: #aaa;">Séries</label>
+                <input type="number" name="exercises[][sets]" value="3" min="1" placeholder="3">
+            </div>
+            <div class="form-group">
+                <label style="font-size: 0.8rem; color: #aaa;">Repetições</label>
+                <input type="text" name="exercises[][reps]" value="10-12" placeholder="10-12">
+            </div>
+            <div class="form-group">
+                <label style="font-size: 0.8rem; color: #aaa;">Carga (kg)</label>
+                <input type="text" name="exercises[][weight]" placeholder="Opcional">
+            </div>
+        </div>
+        
+        <div class="form-group" style="margin-bottom: 0;">
+            <input type="text" name="exercises[][notes]" placeholder="Nota técnica (ex: 'Segure 2s na descida')" style="font-size: 0.9rem; background: #111;">
+        </div>
+    </div>
+</template>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const container = document.getElementById('exercisesContainer');
+        const addBtn = document.getElementById('addExerciseBtn');
+        const template = document.getElementById('exerciseTemplate');
+        const emptyState = document.getElementById('emptyState');
+
+        let exerciseCount = 0;
+
+        addBtn.addEventListener('click', function() {
+            // Remove empty state if exists
+            if (emptyState) emptyState.style.display = 'none';
+
+            // Clone template
+            const clone = template.content.cloneNode(true);
+            
+            // Setup remove button
+            const removeBtn = clone.querySelector('.remove-btn');
+            removeBtn.addEventListener('click', function(e) {
+                e.target.closest('.exercise-row').remove();
+                if (container.children.length === 1) { // 1 because emptyState is hidden but there
+                    emptyState.style.display = 'block';
+                }
+            });
+
+            // Append to container
+            container.appendChild(clone);
+            
+            // Fix index names for array parsing (Optional if using extended body parser, but good for safety)
+            // Note: express body-parser extended:true handles 'exercises[]' automatically as array of objects
+        });
+    });
+</script>
+
+<%- include('../partials/footer.ejs') %>

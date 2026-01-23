@@ -1,0 +1,66 @@
+<%- include('../partials/header.ejs') %>
+<div class="dashboard-container">
+    <%- include('../partials/sidebar.ejs', { path: '/trainer/schedule' }) %>
+    <main class="dashboard-main">
+        <div class="mobile-dash-header">
+            <button id="sidebarOpenBtn" class="btn btn-outline btn-sm"><i class="fas fa-bars"></i></button>
+            <span>Agenda</span>
+        </div>
+        <div class="page-header" style="display: flex; justify-content: space-between;">
+            <h1>Minha <span class="text-neon">Agenda</span></h1>
+            <button class="btn btn-primary" onclick="document.getElementById('eventModal').style.display='flex'">
+                <i class="fas fa-plus"></i> Novo Evento
+            </button>
+        </div>
+
+        <% if(messages.success) { %><div class="alert alert-success"><%= messages.success %></div><% } %>
+
+        <div class="card-box">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
+                <% ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'].forEach(day => { %>
+                    <div style="background: #222; padding: 15px; border-radius: 8px;">
+                        <h4 style="color: var(--primary-color); border-bottom: 1px solid #444; margin-bottom: 10px;"><%= day %></h4>
+                        <% const dayEvents = events.filter(e => e.day_of_week === day); %>
+                        <% if(dayEvents.length > 0) { %>
+                            <% dayEvents.forEach(e => { %>
+                                <div style="background: #333; padding: 8px; border-radius: 4px; margin-bottom: 5px; font-size: 0.85rem;">
+                                    <strong><%= e.start_time.slice(0,5) %></strong> - <%= e.title %>
+                                </div>
+                            <% }) %>
+                        <% } else { %>
+                            <p class="text-muted" style="font-size: 0.8rem;">Livre</p>
+                        <% } %>
+                    </div>
+                <% }) %>
+            </div>
+        </div>
+    </main>
+</div>
+
+<div id="eventModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 2000; align-items: center; justify-content: center;">
+    <div style="background: #111; padding: 30px; border-radius: 12px; width: 90%; max-width: 400px; border: 1px solid #333;">
+        <h3 style="color: white; margin-bottom: 20px;">Adicionar na Agenda</h3>
+        <form action="/trainer/schedule/create" method="POST">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <div style="margin-bottom: 15px;">
+                <label style="color: #888;">Título</label>
+                <input type="text" name="title" required class="form-control" style="width: 100%; padding: 10px; background: #222; border: 1px solid #444; color: white;">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="color: #888;">Dia</label>
+                <select name="day" style="width: 100%; padding: 10px; background: #222; border: 1px solid #444; color: white;">
+                    <option>Segunda</option><option>Terça</option><option>Quarta</option><option>Quinta</option><option>Sexta</option>
+                </select>
+            </div>
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <div style="flex: 1;"><label style="color: #888;">Início</label><input type="time" name="start" required style="width: 100%; padding: 10px; background: #222; border: 1px solid #444; color: white;"></div>
+                <div style="flex: 1;"><label style="color: #888;">Fim</label><input type="time" name="end" style="width: 100%; padding: 10px; background: #222; border: 1px solid #444; color: white;"></div>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button type="submit" class="btn btn-primary" style="flex: 1;">Salvar</button>
+                <button type="button" class="btn btn-outline" style="flex: 1;" onclick="document.getElementById('eventModal').style.display='none'">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+<%- include('../partials/footer.ejs') %>

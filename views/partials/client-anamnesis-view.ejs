@@ -1,0 +1,41 @@
+<div class="anamnesis-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+    <div class="card-box">
+        <h4 style="color: #bef202; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 5px;">Objetivo & Treino</h4>
+        <p><strong style="color:#ccc">Meta:</strong> <%= client.fitness_goals || client.goal || 'Não definido' %></p>
+        <p><strong style="color:#ccc">Detalhes:</strong> <%= client.goal_description || '-' %></p>
+        <p><strong style="color:#ccc">Nível:</strong> <%= client.training_experience || client.fitness_level || '-' %></p>
+        <p><strong style="color:#ccc">Horário:</strong> <%= client.preferred_training_time || '-' %></p>
+        <p><strong style="color:#ccc">Equipamentos:</strong> <%= client.available_equipment || 'Nenhum' %></p>
+    </div>
+
+    <div class="card-box">
+        <h4 style="color: #ff4d4d; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 5px;">Saúde</h4>
+        <p><strong style="color:#ccc">Histórico:</strong> <%= client.medical_history || 'Nada consta' %></p>
+        <p><strong style="color:#ccc">Medicamentos:</strong> <%= client.medications || '-' %></p>
+        <p><strong style="color:#ccc">Lesões:</strong> <%= client.injuries || 'Nenhuma' %></p>
+        <hr style="border-color:#333; margin: 10px 0;">
+        <p><strong style="color:#ff4d4d">Emergência:</strong> <%= client.emergency_contact || '-' %></p>
+        <p><strong style="color:#ff4d4d">Tel. Emergência:</strong> <%= client.emergency_phone || '-' %></p>
+    </div>
+
+    <div class="card-box">
+        <h4 style="color: #4da6ff; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 5px;">Estilo de Vida</h4>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <p><strong style="color:#ccc">Sono:</strong> <%= client.sleep_quality || '-' %></p>
+            <p><strong style="color:#ccc">Estresse:</strong> <%= client.stress_level || '-' %></p>
+            <p><strong style="color:#ccc">Água:</strong> <%= client.water_intake || '-' %></p>
+            <p><strong style="color:#ccc">Fumo:</strong> <%= client.smoking_status || '-' %></p>
+        </div>
+    </div>
+    
+    <div class="card-box">
+        <h4 style="color: white; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 5px;">Biometria Atual</h4>
+        <p><strong style="color:#ccc">Peso:</strong> <%= client.current_weight || client.weight || '-' %> kg</p>
+        <p><strong style="color:#ccc">Altura:</strong> <%= client.height || '-' %> cm</p>
+        <p><strong style="color:#ccc">Idade:</strong> 
+            <% if(client.birth_date) { %>
+                <%= new Date().getFullYear() - new Date(client.birth_date).getFullYear() %> anos
+            <% } else { %> - <% } %>
+        </p>
+    </div>
+</div>

@@ -1,0 +1,90 @@
+<%- include('../partials/header') %>
+<div class="dashboard-container">
+    <%- include('../partials/sidebar', { path: '/admin/content' }) %>
+    <main class="dashboard-main">
+        <div class="page-header">
+            <h1>Gestão de Conteúdo</h1>
+        </div>
+
+        <% if (messages.success) { %><div class="alert alert-success"><%= messages.success %></div><% } %>
+
+        <div style="display:flex; gap:10px; margin-bottom:20px;">
+            <button onclick="showTab('settings')" class="btn btn-outline" id="btn-settings">Textos do Site</button>
+            <button onclick="showTab('articles')" class="btn btn-outline" id="btn-articles">Artigos & Blog</button>
+        </div>
+
+        <div id="tab-settings" class="card-box">
+            <h3 style="color:white; margin-bottom:20px;">Landing Page</h3>
+            <form action="/admin/content/update-settings" method="POST">
+                <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+                <div class="form-group">
+                    <label>Título Home</label>
+                    <input type="text" name="site_home_title" value="<%= settings.site_home_title || '' %>">
+                </div>
+                <div class="form-group">
+                    <label>Texto Sobre</label>
+                    <textarea name="site_about_text" rows="5"><%= settings.site_about_text || '' %></textarea>
+                </div>
+                <button class="btn btn-primary">Salvar Textos</button>
+            </form>
+        </div>
+
+        <div id="tab-articles" class="card-box" style="display:none;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+                <h3 style="color:white;">Artigos da Plataforma</h3>
+                <a href="/articles/create" class="btn btn-primary btn-sm">Escrever Novo</a>
+            </div>
+            
+            <div class="table-responsive">
+                <table style="width:100%; min-width:600px;">
+                    <thead><tr><th>Título</th><th>Autor</th><th>Status</th><th>Ações</th></tr></thead>
+                    <tbody>
+                        <% if(articles && articles.length > 0) { %>
+                            <% articles.forEach(a => { %>
+                                <tr>
+                                    <td><%= a.title %></td>
+                                    <td><%= a.author_name || 'Admin' %></td>
+                                    <td>
+                                        <span style="color: <%= a.status === 'published' ? '#bef202' : (a.status === 'rejected' ? 'red' : '#f59e0b') %>">
+                                            <%= a.status %>
+                                        </span>
+                                    </td>
+                                    <td style="display:flex; gap:5px;">
+                                        <% if(a.status !== 'published') { %>
+                                            <form action="/admin/articles/status/<%= a.id %>" method="POST">
+                                                <input type="hidden" name="status" value="published">
+                                                <button class="btn btn-primary btn-sm" title="Publicar"><i class="fas fa-check"></i></button>
+                                            </form>
+                                        <% } %>
+                                        <% if(a.status !== 'rejected') { %>
+                                            <form action="/admin/articles/status/<%= a.id %>" method="POST">
+                                                <input type="hidden" name="status" value="rejected">
+                                                <button class="btn btn-outline btn-sm" title="Rejeitar/Suspender"><i class="fas fa-ban"></i></button>
+                                            </form>
+                                        <% } %>
+                                        <form action="/admin/articles/delete/<%= a.id %>" method="POST" onsubmit="return confirm('Excluir permanentemente?');">
+                                            <button class="btn btn-outline btn-sm" style="color:red;"><i class="fas fa-trash"></i></button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr><td colspan="4">Nenhum artigo encontrado.</td></tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    function showTab(tabId) {
+        document.getElementById('tab-settings').style.display = 'none';
+        document.getElementById('tab-articles').style.display = 'none';
+        document.getElementById('tab-' + tabId).style.display = 'block';
+    }
+    // Default open
+    showTab('settings');
+</script>
+<%- include('../partials/footer') %>

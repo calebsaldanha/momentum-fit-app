@@ -1,0 +1,87 @@
+<%- include('../partials/header.ejs') %>
+
+<div class="dashboard-container">
+    <%- include('../partials/sidebar.ejs') %>
+
+    <main class="dashboard-main">
+        <div class="page-header" style="border:none;">
+            <a href="javascript:history.back()" class="btn btn-sm btn-outline" style="margin-bottom: 15px;">
+                <i class="fas fa-arrow-left"></i> Voltar
+            </a>
+            
+            <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 20px;">
+                <div>
+                    <h1 style="font-size: 2rem; margin-bottom: 5px;"><%= workout.title %></h1>
+                    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                        <span class="badge-neon" style="font-size: 0.8rem;"><%= workout.muscle_group || 'Geral' %></span>
+                        <span style="border: 1px solid #666; color: #ccc; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; text-transform: uppercase;">
+                            <%= workout.difficulty || 'N/A' %>
+                        </span>
+                    </div>
+                    <p style="color: #999; max-width: 600px;"><%= workout.description %></p>
+                </div>
+                
+                <% if (user.role === 'client') { %>
+                    <a href="/workouts/<%= workout.id %>/start" class="btn btn-primary btn-lg">
+                        <i class="fas fa-play"></i> Iniciar Agora
+                    </a>
+                <% } %>
+            </div>
+        </div>
+
+        <div class="card-box" style="padding: 0; overflow: hidden;">
+            <div style="padding: 20px; background: rgba(255,255,255,0.02); border-bottom: 1px solid #222;">
+                <h3 style="color: white; font-size: 1.2rem;">Sequência de Exercícios</h3>
+            </div>
+            
+            <% if (exercises && exercises.length > 0) { %>
+                <div style="display: flex; flex-direction: column;">
+                    <% exercises.forEach((ex, index) => { %>
+                        <div style="display: flex; gap: 20px; padding: 25px 20px; border-bottom: 1px solid #222; align-items: flex-start;">
+                            <div style="font-size: 1.2rem; font-weight: 700; color: #444; width: 30px;">
+                                <%= index + 1 %>
+                            </div>
+                            <div style="flex: 1;">
+                                <h4 style="font-size: 1.1rem; color: white; margin-bottom: 5px;">
+                                    <%= ex.custom_name || ex.original_name %>
+                                </h4>
+                                <% if (ex.notes) { %>
+                                    <p style="color: #ff6b6b; font-size: 0.9rem; margin-bottom: 10px; font-style: italic;">
+                                        <i class="fas fa-info-circle"></i> <%= ex.notes %>
+                                    </p>
+                                <% } %>
+                                
+                                <div style="display: flex; gap: 30px; margin-top: 10px;">
+                                    <div style="text-align: center;">
+                                        <span style="display: block; color: #666; font-size: 0.75rem;">SÉRIES</span>
+                                        <span style="color: white; font-weight: 700; font-size: 1.1rem;"><%= ex.sets %></span>
+                                    </div>
+                                    <div style="text-align: center;">
+                                        <span style="display: block; color: #666; font-size: 0.75rem;">REPS</span>
+                                        <span style="color: white; font-weight: 700; font-size: 1.1rem;"><%= ex.reps %></span>
+                                    </div>
+                                    <div style="text-align: center;">
+                                        <span style="display: block; color: #666; font-size: 0.75rem;">CARGA</span>
+                                        <span style="color: var(--primary-color); font-weight: 700; font-size: 1.1rem;"><%= ex.weight || '-' %></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <% if (ex.video_url) { %>
+                                <a href="<%= ex.video_url %>" target="_blank" class="btn btn-outline btn-sm" style="height: fit-content;">
+                                    <i class="fas fa-video"></i>
+                                </a>
+                            <% } %>
+                        </div>
+                    <% }); %>
+                </div>
+            <% } else { %>
+                <div style="padding: 40px; text-align: center; color: #666;">
+                    Nenhum exercício cadastrado neste treino.
+                </div>
+            <% } %>
+        </div>
+
+    </main>
+</div>
+
+<%- include('../partials/footer.ejs') %>

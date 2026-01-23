@@ -1,0 +1,28 @@
+<%- include('../partials/header.ejs') %>
+<div class="dashboard-container">
+    <%- include('../partials/sidebar.ejs', { path: '/trainer/settings' }) %>
+    <main class="dashboard-main">
+        <div class="mobile-dash-header">
+            <button id="sidebarOpenBtn" class="btn btn-outline btn-sm"><i class="fas fa-bars"></i></button>
+            <span>Configurações</span>
+        </div>
+        <div class="page-header">
+            <h1>Configurações da <span class="text-neon">Conta</span></h1>
+        </div>
+        <div class="card-box" style="max-width: 600px;">
+            <form>
+                <h3>Dados Bancários</h3>
+                <div style="margin-bottom: 15px;">
+                    <label>Chave PIX</label>
+                    <input type="text" class="form-control" value="caleb@email.com" style="width: 100%; padding: 10px; background: #222; border: 1px solid #444; color: white;">
+                </div>
+                <h3>Notificações</h3>
+                <div style="margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                    <input type="checkbox" checked> <label>Receber email quando aluno concluir treino</label>
+                </div>
+                <button type="button" class="btn btn-primary">Salvar</button>
+            </form>
+        </div>
+    </main>
+</div>
+<%- include('../partials/footer.ejs') %>

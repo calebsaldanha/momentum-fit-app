@@ -1,0 +1,37 @@
+<%- include('../partials/header.ejs') %>
+<div class="dashboard-container">
+    <%- include('../partials/sidebar.ejs', { path: '/admin/approvals' }) %>
+    <main class="dashboard-main">
+        <div class="page-header">
+            <h1>Aprovações</h1>
+        </div>
+        <% if (messages.success) { %><div class="alert alert-success"><%= messages.success %></div><% } %>
+        
+        <div class="card-box">
+            <h3>Solicitações Pendentes</h3>
+            <div class="table-responsive">
+                <table style="width:100%; min-width:500px;">
+                    <thead><tr><th>Nome</th><th>Email</th><th>Ação</th></tr></thead>
+                    <tbody>
+                        <% if (pendingTrainers && pendingTrainers.length > 0) { %>
+                            <% pendingTrainers.forEach(t => { %>
+                                <tr>
+                                    <td><%= t.name %></td>
+                                    <td><%= t.email %></td>
+                                    <td>
+                                        <form action="/admin/users/approve/<%= t.id %>" method="POST" style="display:inline;">
+                                            <button class="btn btn-primary btn-sm">Aprovar</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr><td colspan="3">Nenhuma pendência.</td></tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+<%- include('../partials/footer.ejs') %>

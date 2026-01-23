@@ -1,0 +1,41 @@
+<%- include('../partials/header') %>
+<div class="dashboard-container">
+    <%- include('../partials/sidebar', { path: '/admin/finance' }) %>
+    <main class="dashboard-main">
+        <div class="page-header">
+            <h1>Financeiro</h1>
+        </div>
+        
+        <% if (messages.success) { %><div class="alert alert-success"><%= messages.success %></div><% } %>
+        <% if (messages.error) { %><div class="alert alert-danger"><%= messages.error %></div><% } %>
+
+        <div class="card-box">
+            <h3 style="color:white; margin-bottom:20px;">Pagamentos Pendentes (PIX Manual)</h3>
+            <div class="table-responsive">
+                <table style="width:100%; min-width:600px;">
+                    <thead><tr><th>Cliente</th><th>Plano</th><th>Valor</th><th>Data</th><th>Ação</th></tr></thead>
+                    <tbody>
+                        <% if(pendingPayments && pendingPayments.length > 0) { %>
+                            <% pendingPayments.forEach(p => { %>
+                                <tr>
+                                    <td><%= p.user_name %><br><small style="color:#666"><%= p.user_email %></small></td>
+                                    <td><%= p.plan_name %></td>
+                                    <td>R$ <%= p.amount %></td>
+                                    <td><%= new Date(p.created_at).toLocaleDateString() %></td>
+                                    <td>
+                                        <form action="/admin/finance/approve/<%= p.id %>" method="POST" onsubmit="return confirm('Confirmar recebimento do PIX?');">
+                                            <button class="btn btn-primary btn-sm">Aprovar</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr><td colspan="5" style="text-align:center; padding:20px;">Nenhum pagamento pendente.</td></tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+<%- include('../partials/footer') %>

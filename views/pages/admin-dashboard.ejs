@@ -1,0 +1,53 @@
+<%- include('../partials/header') %>
+<div class="dashboard-container">
+    <%- include('../partials/sidebar', { path: '/admin/dashboard' }) %>
+    
+    <main class="dashboard-main">
+        <div class="page-header">
+            <h1>Painel <span class="text-neon">Administrativo</span></h1>
+        </div>
+
+        <div class="features-grid">
+            <div class="card-box">
+                <h3 style="color:white; font-size:2rem;"><%= stats.totalUsers || 0 %></h3>
+                <p style="color:#888;">Total Usuários</p>
+            </div>
+            <div class="card-box">
+                <h3 style="color:#bef202; font-size:2rem;"><%= stats.activeSubs || 0 %></h3>
+                <p style="color:#888;">Assinaturas Ativas</p>
+            </div>
+            <div class="card-box">
+                <h3 style="color:#f59e0b; font-size:2rem;"><%= stats.pendingTrainers || 0 %></h3>
+                <p style="color:#888;">Aprovações Pendentes</p>
+            </div>
+        </div>
+
+        <div class="card-box">
+            <h3 style="color:white; margin-bottom:15px;">Recentes</h3>
+            <div class="table-responsive">
+                <table style="width:100%;">
+                    <thead><tr><th>Nome</th><th>Role</th><th>Status</th><th>Data</th></tr></thead>
+                    <tbody>
+                        <% if (recentUsers && recentUsers.length > 0) { %>
+                            <% recentUsers.forEach(u => { %>
+                                <tr>
+                                    <td><%= u.name %></td>
+                                    <td><%= u.role %></td>
+                                    <td>
+                                        <% if(u.status === 'active') { %> <span style="color:#bef202">● Ativo</span> <% } %>
+                                        <% if(u.status === 'pending_approval') { %> <span style="color:#f59e0b">● Pendente</span> <% } %>
+                                        <% if(u.status === 'rejected' || u.status === 'inactive') { %> <span style="color:#ef4444">● Inativo</span> <% } %>
+                                    </td>
+                                    <td><%= new Date(u.created_at).toLocaleDateString() %></td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr><td colspan="4">Sem registros recentes.</td></tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+<%- include('../partials/footer') %>

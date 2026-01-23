@@ -1,0 +1,30 @@
+<%- include('../partials/header') %>
+<div class="dashboard-container">
+    <%- include('../partials/sidebar', { path: '/admin/ia-audit' }) %>
+    <main class="dashboard-main">
+        <div class="page-header"><h1>Auditoria IA</h1></div>
+        
+        <div class="card-box">
+            <div class="table-responsive">
+                <table style="width:100%; min-width:600px;">
+                    <thead><tr><th>Data</th><th>Usuário</th><th>Ação</th><th>Detalhes</th></tr></thead>
+                    <tbody>
+                        <% if (logs && logs.length > 0) { %>
+                            <% logs.forEach(log => { %>
+                                <tr>
+                                    <td><%= new Date(log.created_at).toLocaleString() %></td>
+                                    <td><%= log.user_name || 'Sistema' %></td>
+                                    <td><%= log.action %></td>
+                                    <td><%= log.details %></td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr><td colspan="4">Nenhum registro de auditoria.</td></tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+<%- include('../partials/footer') %>

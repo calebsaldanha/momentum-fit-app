@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Erro - Momentum Fit</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body style="justify-content: center; align-items: center; background: url('/images/auth-bg.png') no-repeat center center fixed; background-size: cover;">
+    
+    <div style="position: absolute; inset: 0; background: rgba(0,0,0,0.85); z-index: 1;"></div>
+
+    <div class="container" style="position: relative; z-index: 2; text-align: center; max-width: 600px;">
+        <div style="font-size: 8rem; font-weight: 800; color: var(--primary-color); line-height: 1; text-shadow: 0 0 20px rgba(190, 242, 2, 0.3);">
+            ops!
+        </div>
+        <h1 style="color: white; margin: 20px 0; font-size: 2rem;">Algo não saiu como planejado.</h1>
+        <p style="color: #ccc; font-size: 1.1rem; margin-bottom: 40px;">
+            <%= typeof message !== 'undefined' ? message : 'A página que você procura não existe ou ocorreu um erro interno.' %>
+        </p>
+
+        <div style="display: flex; gap: 15px; justify-content: center;">
+            <a href="/" class="btn btn-primary">
+                <i class="fas fa-home"></i> Voltar ao Início
+            </a>
+            <a href="javascript:history.back()" class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i> Voltar
+            </a>
+        </div>
+    </div>
+
+</body>
+</html>

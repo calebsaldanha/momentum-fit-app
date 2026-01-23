@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <%- include('../partials/header.ejs') %>
+    <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <%- include('../partials/sidebar', { user: user, currentPage: 'superadmin-manage' }) %>
+
+        <main class="dashboard-main">
+            <header class="page-header">
+                <div>
+                    <h1>Gerenciar Usuários</h1>
+                    <p>Controle total da base de treinadores e alunos.</p>
+                </div>
+                <a href="/superadmin/create-trainer" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Novo Treinador
+                </a>
+            </header>
+
+            <div class="grid-2-col" style="grid-template-columns: 1fr; gap: 3rem;">
+                
+                <section>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h3 class="fs-5 m-0"><i class="fas fa-chalkboard-teacher text-neon me-2"></i> Treinadores (<%= trainers.length %>)</h3>
+                    </div>
+                    <div class="table-container">
+                        <table class="table-modern">
+                            <thead>
+                                <tr>
+                                    <th>Profissional</th>
+                                    <th>Email</th>
+                                    <th>Status</th>
+                                    <th style="text-align: right;">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% trainers.forEach(t => { %>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <img src="<%= t.profile_image || '/images/default-profile.png' %>" class="avatar-ring">
+                                            <span class="fw-bold"><%= t.name %></span>
+                                        </div>
+                                    </td>
+                                    <td class="text-muted"><%= t.email %></td>
+                                    <td>
+                                        <span class="badge badge-<%= t.status === 'active' ? 'active' : 'inactive' %>">
+                                            <i class="fas fa-circle" style="font-size: 6px;"></i> <%= t.status === 'active' ? 'Ativo' : 'Inativo' %>
+                                        </span>
+                                    </td>
+                                    <td style="text-align: right;">
+                                        <a href="/superadmin/trainers/<%= t.id %>" class="btn btn-ghost btn-sm">Gerenciar</a>
+                                    </td>
+                                </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h3 class="fs-5 m-0"><i class="fas fa-users text-neon me-2"></i> Alunos (<%= clients.length %>)</h3>
+                    </div>
+                    <div class="table-container">
+                        <table class="table-modern">
+                            <thead>
+                                <tr>
+                                    <th>Aluno</th>
+                                    <th>Treinador Responsável</th>
+                                    <th>Status</th>
+                                    <th style="text-align: right;">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% clients.forEach(c => { %>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <img src="<%= c.profile_image || '/images/default-profile.png' %>" class="avatar-ring">
+                                            <div>
+                                                <div class="fw-bold"><%= c.name %></div>
+                                                <div class="small text-muted"><%= c.email %></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <% const tr = trainers.find(t => t.id === c.trainer_id); %>
+                                        <% if (tr) { %>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <img src="<%= tr.profile_image || '/images/default-profile.png' %>" style="width: 24px; height: 24px; border-radius: 50%;">
+                                                <span class="text-neon"><%= tr.name %></span>
+                                            </div>
+                                        <% } else { %>
+                                            <span class="text-muted opacity-50">-- Não atribuído --</span>
+                                        <% } %>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-<%= c.status === 'active' ? 'active' : 'inactive' %>">
+                                            <%= c.status === 'active' ? 'Ativo' : 'Inativo' %>
+                                        </span>
+                                    </td>
+                                    <td style="text-align: right;">
+                                        <a href="/superadmin/users/<%= c.id %>" class="btn btn-ghost btn-sm">Detalhes</a>
+                                    </td>
+                                </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+</body>
+</html>

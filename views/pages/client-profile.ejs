@@ -1,0 +1,126 @@
+<%- include('../partials/header.ejs') %>
+
+<div class="dashboard-container">
+    <%- include('../partials/sidebar.ejs') %>
+
+    <main class="dashboard-main">
+        <div class="page-header">
+            <h1 style="font-size: 1.8rem;">Anamnese Completa</h1>
+            <p style="color: var(--text-muted);">Quanto mais detalhes, melhor será o seu plano IA.</p>
+        </div>
+
+        <% const safeMeas = (clientData && clientData.body_measurements) ? clientData.body_measurements : {}; %>
+
+        <form action="/client/profile/update" method="POST" style="max-width: 900px;">
+            
+            <div class="card-box">
+                <h3 style="color: var(--primary-color); margin-bottom: 20px;"><i class="fas fa-ruler"></i> Biometria</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px;">
+                    <div><label>Peso (kg)</label><input type="number" step="0.1" name="current_weight" value="<%= clientData.current_weight || '' %>" required></div>
+                    <div><label>Altura (m)</label><input type="number" step="0.01" name="height" value="<%= clientData.height || '' %>" required></div>
+                </div>
+                
+                <label style="display:block; margin-top:15px; color:#888;">Circunferências (Opcional)</label>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap:10px;">
+                    <input type="number" name="meas_chest" placeholder="Peito" value="<%= safeMeas.chest || '' %>">
+                    <input type="number" name="meas_waist" placeholder="Cintura" value="<%= safeMeas.waist || '' %>">
+                    <input type="number" name="meas_hips" placeholder="Quadril" value="<%= safeMeas.hips || '' %>">
+                    <input type="number" name="meas_arms" placeholder="Braço" value="<%= safeMeas.arms || '' %>">
+                    <input type="number" name="meas_thighs" placeholder="Coxa" value="<%= safeMeas.thighs || '' %>">
+                </div>
+            </div>
+
+            <div class="card-box">
+                <h3 style="color: var(--primary-color); margin-bottom: 20px;"><i class="fas fa-heartbeat"></i> Estilo de Vida & Saúde</h3>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label>Média de Sono (horas/noite)</label>
+                        <select name="sleep_hours">
+                            <option value="Menos de 5h" <%= clientData.sleep_hours === 'Menos de 5h' ? 'selected' : '' %>>- 5h (Insuficiente)</option>
+                            <option value="5-6h" <%= clientData.sleep_hours === '5-6h' ? 'selected' : '' %>>5-6h</option>
+                            <option value="7-8h" <%= clientData.sleep_hours === '7-8h' ? 'selected' : '' %>>7-8h (Ideal)</option>
+                            <option value="Mais de 8h" <%= clientData.sleep_hours === 'Mais de 8h' ? 'selected' : '' %>>+ 8h</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Nível de Estresse Diário</label>
+                        <select name="stress_level">
+                            <option value="Baixo" <%= clientData.stress_level === 'Baixo' ? 'selected' : '' %>>Baixo</option>
+                            <option value="Moderado" <%= clientData.stress_level === 'Moderado' ? 'selected' : '' %>>Moderado</option>
+                            <option value="Alto" <%= clientData.stress_level === 'Alto' ? 'selected' : '' %>>Alto</option>
+                            <option value="Muito Alto" <%= clientData.stress_level === 'Muito Alto' ? 'selected' : '' %>>Muito Alto (Burnout)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Tipo de Dieta Atual</label>
+                    <input type="text" name="diet_type" value="<%= clientData.diet_type || '' %>" placeholder="Ex: Onívora, Vegana, Low Carb, Sem restrições...">
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label>Consumo de Água (Litros/dia)</label>
+                        <select name="hydration_level">
+                            <option value="Menos de 1L" <%= clientData.hydration_level === 'Menos de 1L' ? 'selected' : '' %>>Menos de 1L</option>
+                            <option value="1-2L" <%= clientData.hydration_level === '1-2L' ? 'selected' : '' %>>1 a 2 Litros</option>
+                            <option value="2-3L" <%= clientData.hydration_level === '2-3L' ? 'selected' : '' %>>2 a 3 Litros</option>
+                            <option value="Mais de 3L" <%= clientData.hydration_level === 'Mais de 3L' ? 'selected' : '' %>>Mais de 3 Litros</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Consumo de Álcool</label>
+                        <select name="alcohol_consumption">
+                            <option value="Nunca" <%= clientData.alcohol_consumption === 'Nunca' ? 'selected' : '' %>>Nunca</option>
+                            <option value="Socialmente (Raro)" <%= clientData.alcohol_consumption === 'Socialmente (Raro)' ? 'selected' : '' %>>Socialmente (Raro)</option>
+                            <option value="Semanalmente" <%= clientData.alcohol_consumption === 'Semanalmente' ? 'selected' : '' %>>Semanalmente</option>
+                            <option value="Diariamente" <%= clientData.alcohol_consumption === 'Diariamente' ? 'selected' : '' %>>Diariamente</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-box">
+                <h3 style="color: var(--primary-color); margin-bottom: 20px;"><i class="fas fa-dumbbell"></i> Treino e Objetivos</h3>
+                
+                <div class="form-group">
+                    <label>Objetivo Principal</label>
+                    <select name="fitness_goals">
+                        <option value="Emagrecimento" <%= clientData.fitness_goals === 'Emagrecimento' ? 'selected' : '' %>>Emagrecimento (Queimar Gordura)</option>
+                        <option value="Hipertrofia" <%= clientData.fitness_goals === 'Hipertrofia' ? 'selected' : '' %>>Hipertrofia (Ganhar Músculo)</option>
+                        <option value="Força" <%= clientData.fitness_goals === 'Força' ? 'selected' : '' %>>Ganho de Força Bruta</option>
+                        <option value="Resistência" <%= clientData.fitness_goals === 'Resistência' ? 'selected' : '' %>>Resistência Cardiovascular</option>
+                        <option value="Saúde" <%= clientData.fitness_goals === 'Saúde' ? 'selected' : '' %>>Longevidade e Saúde</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>O que te motiva hoje?</label>
+                    <textarea name="motivation_source" rows="2" placeholder="Ex: Quero correr uma maratona, quero caber na roupa do casamento, saúde..."><%= clientData.motivation_source || '' %></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Histórico de Lesões</label>
+                    <textarea name="injuries" rows="2" placeholder="Descreva dores ou cirurgias passadas..."><%= clientData.injuries || '' %></textarea>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label>Disponibilidade (Dias/Semana)</label>
+                        <input type="text" name="training_days" value="<%= clientData.training_days || '' %>" placeholder="Ex: Seg, Qua, Sex">
+                    </div>
+                    <div class="form-group">
+                        <label>Equipamentos</label>
+                        <input type="text" name="available_equipment" value="<%= clientData.available_equipment || '' %>" placeholder="Ex: Academia completa, Halteres...">
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: right; margin-top: 20px;">
+                <button type="submit" class="btn btn-primary btn-lg"><i class="fas fa-save"></i> Atualizar Anamnese</button>
+            </div>
+        </form>
+    </main>
+</div>
+<%- include('../partials/footer.ejs') %>

@@ -1,0 +1,113 @@
+<%- include('../partials/header.ejs') %>
+
+<style>
+    .chat-layout { display: grid; grid-template-columns: 300px 1fr; gap: 20px; height: calc(100vh - 140px); min-height: 500px; }
+    .user-list { background: #111; border-radius: 12px; overflow-y: auto; border: 1px solid #333; }
+    .user-item { padding: 15px; border-bottom: 1px solid #222; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: background 0.2s; }
+    .user-item:hover, .user-item.active { background: #222; }
+    .chat-window { background: #111; border-radius: 12px; border: 1px solid #333; display: flex; flex-direction: column; overflow: hidden; }
+    .chat-header { padding: 15px; background: #1a1a1a; border-bottom: 1px solid #333; font-weight: bold; color: white; }
+    .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+    .message { max-width: 70%; padding: 10px 15px; border-radius: 10px; font-size: 0.9rem; line-height: 1.4; position: relative; }
+    .msg-sent { align-self: flex-end; background: var(--primary-color); color: #000; border-bottom-right-radius: 2px; }
+    .msg-received { align-self: flex-start; background: #333; color: white; border-bottom-left-radius: 2px; }
+    .chat-input-area { padding: 15px; background: #1a1a1a; border-top: 1px solid #333; display: flex; gap: 10px; }
+    @media(max-width: 768px) { .chat-layout { grid-template-columns: 1fr; } .user-list { display: none; } .user-list.show { display: block; position: fixed; inset: 0; z-index: 100; } }
+</style>
+
+<div class="dashboard-container">
+    <%- include('../partials/sidebar.ejs') %>
+    <main class="dashboard-main">
+        <div class="chat-layout">
+            <div class="user-list" id="userList">
+                <div style="padding: 15px; color: #888; font-size: 0.8rem; text-transform: uppercase;">Contatos</div>
+                <% if(users.length === 0) { %>
+                    <div style="padding: 20px; color: #666; text-align: center;">Nenhum contato disponível.</div>
+                <% } %>
+                <% users.forEach(u => { %>
+                    <div class="user-item" onclick="selectUser(<%= u.id %>, '<%= u.name %>')">
+                        <div style="width: 40px; height: 40px; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white;">
+                            <%= u.name.charAt(0) %>
+                        </div>
+                        <div>
+                            <div style="color: white; font-weight: 500;"><%= u.name %></div>
+                            <div style="color: #666; font-size: 0.8rem;"><%= u.role %></div>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+
+            <div class="chat-window">
+                <div class="chat-header" id="chatHeader">Selecione um contato</div>
+                <div class="chat-messages" id="chatMessages">
+                    <div style="text-align: center; color: #666; margin-top: 50px;">
+                        <i class="fas fa-comments" style="font-size: 3rem; margin-bottom: 10px;"></i>
+                        <p>Inicie uma conversa</p>
+                    </div>
+                </div>
+                <div class="chat-input-area">
+                    <input type="text" id="msgInput" class="form-control" placeholder="Digite sua mensagem..." style="background: #222; border: none; color: white; flex: 1;" disabled>
+                    <button class="btn btn-primary" id="sendBtn" disabled onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    let currentReceiverId = null;
+    let pollingInterval = null;
+
+    function selectUser(id, name) {
+        currentReceiverId = id;
+        document.getElementById('chatHeader').innerText = 'Conversando com ' + name;
+        document.getElementById('msgInput').disabled = false;
+        document.getElementById('sendBtn').disabled = false;
+        
+        document.querySelectorAll('.user-item').forEach(el => el.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+
+        loadMessages();
+        if(pollingInterval) clearInterval(pollingInterval);
+        pollingInterval = setInterval(loadMessages, 3000);
+    }
+
+    async function loadMessages() {
+        if(!currentReceiverId) return;
+        const res = await fetch('/chat/api/messages/' + currentReceiverId);
+        const msgs = await res.json();
+        
+        const container = document.getElementById('chatMessages');
+        container.innerHTML = '';
+        
+        const myId = <%= currentUser.id %>;
+        
+        msgs.forEach(m => {
+            const div = document.createElement('div');
+            div.className = 'message ' + (m.sender_id === myId ? 'msg-sent' : 'msg-received');
+            div.innerText = m.content;
+            container.appendChild(div);
+        });
+        container.scrollTop = container.scrollHeight;
+    }
+
+    async function sendMessage() {
+        const input = document.getElementById('msgInput');
+        const content = input.value.trim();
+        if(!content || !currentReceiverId) return;
+
+        input.value = '';
+        await fetch('/chat/api/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ receiver_id: currentReceiverId, content })
+        });
+        loadMessages();
+    }
+
+    document.getElementById('msgInput').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') sendMessage();
+    });
+</script>
+
+<%- include('../partials/footer.ejs') %>

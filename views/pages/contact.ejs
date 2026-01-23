@@ -1,0 +1,37 @@
+<%- include('../partials/header.ejs', { title: 'Contato', currentPage: 'contact' }) %>
+<div class="header-spacer"></div>
+
+<section style="min-height: 80vh; display: flex; align-items: center; justify-content: center; padding: 40px 20px;">
+    <div class="container" style="text-align: center; max-width: 600px;">
+        <h1 class="text-neon" style="font-size: 2.5rem; margin-bottom: 20px;">Fale Conosco</h1>
+        <p style="color: #ccc; margin-bottom: 50px;">Estamos prontos para tirar suas dúvidas ou receber seu feedback.</p>
+
+        <div style="background: #111; padding: 40px; border-radius: 16px; border: 1px solid #333;">
+            <div style="display: flex; flex-direction: column; gap: 30px;">
+                
+                <a href="mailto:admin@momentumfitness.com.br" style="text-decoration: none; display: flex; align-items: center; gap: 20px; padding: 15px; background: rgba(255,255,255,0.03); border-radius: 12px; transition: 0.3s;">
+                    <div style="width: 50px; height: 50px; background: #222; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--primary-color); font-size: 1.2rem; flex-shrink: 0;">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div style="text-align: left; overflow-wrap: anywhere; word-break: break-word;">
+                        <span style="display: block; color: #666; font-size: 0.8rem; text-transform: uppercase;">Email Oficial</span>
+                        <span style="color: white; font-weight: 600;">admin@momentumfitness.com.br</span>
+                    </div>
+                </a>
+
+                <a href="https://instagram.com/_momentum.fit" target="_blank" style="text-decoration: none; display: flex; align-items: center; gap: 20px; padding: 15px; background: rgba(255,255,255,0.03); border-radius: 12px; transition: 0.3s;">
+                    <div style="width: 50px; height: 50px; background: #222; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--primary-color); font-size: 1.2rem; flex-shrink: 0;">
+                        <i class="fab fa-instagram"></i>
+                    </div>
+                    <div style="text-align: left;">
+                        <span style="display: block; color: #666; font-size: 0.8rem; text-transform: uppercase;">Siga no Instagram</span>
+                        <span style="color: white; font-weight: 600;">_momentum.fit</span>
+                    </div>
+                </a>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+<%- include('../partials/footer.ejs') %>

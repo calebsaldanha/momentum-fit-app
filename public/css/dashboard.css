@@ -1,0 +1,29 @@
+:root {
+    --sidebar-width: 260px;
+    --header-height: 70px;
+    --bg-body: #09090b;
+    --bg-card: #18181b;
+    --primary: #bef202;
+    --text-main: #ffffff;
+    --text-muted: #a1a1aa;
+    --border: rgba(255,255,255,0.1);
+}
+
+/* Garante que o container interno não estoure */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: 1fr; /* 1 coluna no mobile */
+    }
+    
+    .card-modern, .card-box {
+        padding: 1.2rem;
+    }
+}

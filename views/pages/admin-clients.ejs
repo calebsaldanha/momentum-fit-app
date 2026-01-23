@@ -1,0 +1,61 @@
+<%- include('../partials/header.ejs') %>
+
+<div class="dashboard-container">
+    <%- include('../partials/sidebar.ejs', { path: '/admin/users' }) %>
+
+    <main class="dashboard-main">
+        <div class="mobile-dash-header">
+            <button id="sidebarOpenBtn" class="btn btn-outline btn-sm"><i class="fas fa-bars"></i> Menu</button>
+            <span class="text-muted">Usuários</span>
+        </div>
+
+        <div class="page-header">
+            <h1>Gerenciar <span class="text-neon">Usuários</span></h1>
+        </div>
+
+        <% if(messages.error) { %> <div class="alert alert-danger" style="margin-bottom: 20px; color: #ff6b6b;"><%= messages.error %></div> <% } %>
+        
+        <div class="card-box">
+            <div class="table-responsive">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr>
+                            <th style="text-align: left; padding: 12px; border-bottom: 1px solid #333; color: #fff;">Nome</th>
+                            <th style="text-align: left; padding: 12px; border-bottom: 1px solid #333; color: #fff;">Email</th>
+                            <th style="text-align: left; padding: 12px; border-bottom: 1px solid #333; color: #fff;">Tipo</th>
+                            <th style="text-align: left; padding: 12px; border-bottom: 1px solid #333; color: #fff;">Status</th>
+                            <th style="text-align: left; padding: 12px; border-bottom: 1px solid #333; color: #fff;">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (typeof users !== 'undefined' && users.length > 0) { %>
+                            <% users.forEach(u => { %>
+                                <tr>
+                                    <td style="padding: 12px; border-bottom: 1px solid #222; color: #ccc;"><%= u.name %></td>
+                                    <td style="padding: 12px; border-bottom: 1px solid #222; color: #ccc;"><%= u.email %></td>
+                                    <td style="padding: 12px; border-bottom: 1px solid #222; color: #ccc;">
+                                        <span class="badge-neon" style="font-size: 0.7rem; padding: 2px 8px; background: rgba(255,255,255,0.1); color: #fff; border: 1px solid #444;">
+                                            <%= u.role.toUpperCase() %>
+                                        </span>
+                                    </td>
+                                    <td style="padding: 12px; border-bottom: 1px solid #222;">
+                                        <span style="color: <%= u.active ? '#bef202' : '#ff4d4d' %>;">
+                                            <%= u.active ? 'Ativo' : 'Suspenso' %>
+                                        </span>
+                                    </td>
+                                    <td style="padding: 12px; border-bottom: 1px solid #222;">
+                                        <a href="/admin/users/<%= u.id %>" class="btn btn-sm btn-outline">Detalhes</a>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr><td colspan="5" style="padding: 20px; text-align:center; color: #666;">Nenhum usuário encontrado.</td></tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+
+<%- include('../partials/footer.ejs') %>
