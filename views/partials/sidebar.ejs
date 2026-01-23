@@ -1,54 +1,71 @@
-<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<div class="sidebar-overlay" onclick="toggleAppSidebar()" id="sidebarOverlay"></div>
 
-<aside class="sidebar" id="appSidebar">
-    <div class="sidebar-brand">
-        <i class="fas fa-bolt" style="color: var(--primary-color); margin-right: 10px;"></i>
-        Momentum Fit
+<aside class="app-sidebar" id="appSidebar">
+    <div class="sidebar-header">
+        <a href="/" class="logo">
+            <img src="/images/momentum-fit-icon.png" alt="M" style="height: 30px;">
+            <span>Momentum</span>
+        </a>
     </div>
 
-    <nav class="sidebar-nav">
-        <% const r = user.role; %>
+    <div class="sidebar-content">
+        <% const role = user.role; %>
         
-        <% if (r === 'client') { %>
-            <div style="padding: 0 12px; margin-bottom: 10px; font-size: 0.75rem; color: #555; text-transform: uppercase; font-weight: bold;">Treino</div>
-            <a href="/client/dashboard" class="side-link <%= path.includes('dashboard') ? 'active' : '' %>">
-                <i class="fas fa-home"></i> Visão Geral
-            </a>
-            <a href="/client/workouts" class="side-link <%= path.includes('workouts') ? 'active' : '' %>">
-                <i class="fas fa-dumbbell"></i> Meus Treinos
-            </a>
-            
-            <div style="padding: 0 12px; margin-top: 20px; margin-bottom: 10px; font-size: 0.75rem; color: #555; text-transform: uppercase; font-weight: bold;">Dados</div>
-            <a href="/client/evolution" class="side-link <%= path.includes('evolution') ? 'active' : '' %>">
-                <i class="fas fa-chart-line"></i> Evolução
-            </a>
-            <a href="/client/ai-coach" class="side-link <%= path.includes('ai-coach') ? 'active' : '' %>">
-                <i class="fas fa-robot"></i> IA Coach
-            </a>
+        <% if (role === 'client') { %>
+            <div class="nav-group">
+                <div class="nav-title">Treino</div>
+                <a href="/client/dashboard" class="nav-link <%= path.includes('/dashboard') ? 'active' : '' %>">
+                    <i class="fas fa-home"></i> Visão Geral
+                </a>
+                <a href="/client/workouts" class="nav-link <%= path.includes('/workouts') ? 'active' : '' %>">
+                    <i class="fas fa-dumbbell"></i> Meus Treinos
+                </a>
+                <a href="/client/evolution" class="nav-link <%= path.includes('/evolution') ? 'active' : '' %>">
+                    <i class="fas fa-chart-line"></i> Evolução
+                </a>
+            </div>
+
+            <div class="nav-group">
+                <div class="nav-title">Coach Digital</div>
+                <a href="/client/ai-coach" class="nav-link <%= path.includes('/ai-coach') ? 'active' : '' %>">
+                    <i class="fas fa-robot"></i> IA Chat
+                </a>
+                <a href="/client/diet" class="nav-link <%= path.includes('/diet') ? 'active' : '' %>">
+                    <i class="fas fa-carrot"></i> Nutrição
+                </a>
+            </div>
         <% } %>
 
-        <% if (r === 'trainer') { %>
-            <a href="/trainer/dashboard" class="side-link <%= path.includes('dashboard') ? 'active' : '' %>">
-                <i class="fas fa-columns"></i> Painel
-            </a>
-            <a href="/trainer/clients" class="side-link <%= path.includes('clients') ? 'active' : '' %>">
-                <i class="fas fa-users"></i> Alunos
-            </a>
+        <% if (role === 'trainer') { %>
+            <div class="nav-group">
+                <div class="nav-title">Gestão</div>
+                <a href="/trainer/dashboard" class="nav-link <%= path.includes('/dashboard') ? 'active' : '' %>">
+                    <i class="fas fa-columns"></i> Painel
+                </a>
+                <a href="/trainer/clients" class="nav-link <%= path.includes('/clients') ? 'active' : '' %>">
+                    <i class="fas fa-users"></i> Alunos
+                </a>
+                <a href="/trainer/library" class="nav-link <%= path.includes('/library') ? 'active' : '' %>">
+                    <i class="fas fa-book"></i> Biblioteca
+                </a>
+            </div>
         <% } %>
 
-        <div style="margin-top: auto; padding-top: 20px; border-top: 1px solid #222;">
-            <a href="/auth/logout" class="side-link" style="color: #ff4d4d;">
-                <i class="fas fa-sign-out-alt"></i> Sair
+        <div class="nav-group">
+            <div class="nav-title">Conta</div>
+            <a href="/client/settings" class="nav-link <%= path.includes('/settings') ? 'active' : '' %>">
+                <i class="fas fa-cog"></i> Configurações
             </a>
         </div>
-    </nav>
-</aside>
+    </div>
 
-<script>
-    function toggleSidebar() {
-        const sb = document.getElementById('appSidebar');
-        const ov = document.getElementById('sidebarOverlay');
-        sb.classList.toggle('active');
-        ov.classList.toggle('active');
-    }
-</script>
+    <div class="sidebar-user">
+        <div class="user-avatar">
+            <%= user.name.charAt(0).toUpperCase() %>
+        </div>
+        <div style="flex: 1; overflow: hidden;">
+            <h4 style="font-size: 0.9rem; color: white; white-space: nowrap; text-overflow: ellipsis;"><%= user.name.split(' ')[0] %></h4>
+            <a href="/auth/logout" style="font-size: 0.8rem; color: #ff6b6b;">Sair</a>
+        </div>
+    </div>
+</aside>

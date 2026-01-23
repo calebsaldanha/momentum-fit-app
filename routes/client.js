@@ -1,8 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../database/db');
 
-// Middleware de segurança
 const isClient = (req, res, next) => {
     if (req.session.user && req.session.user.role === 'client') return next();
     if (req.session.user && req.session.user.role === 'trainer') return res.redirect('/trainer/dashboard');
@@ -11,45 +9,49 @@ const isClient = (req, res, next) => {
 
 router.use(isClient);
 
-// Rota Auxiliar para renderizar views com dados padrão
-const renderApp = (res, req, view, title, extraData = {}) => {
-    res.render(view, {
+router.get('/dashboard', (req, res) => {
+    // DADOS MOCKADOS PARA TESTE VISUAL
+    const stats = {
+        workoutsCompleted: 8,
+        streak: 3,
+        currentWeight: 71.2
+    };
+
+    const nextWorkout = {
+        id: 101,
+        title: 'Full Body Power',
+        description: 'Treino de corpo inteiro com foco em compostos.',
+        duration: 50,
+        exerciseCount: 6,
+        intensity: 'Alta'
+    };
+
+    res.render('pages/client-dashboard', {
         user: req.session.user,
-        path: req.originalUrl, // Usa originalUrl para garantir match correto no sidebar
-        title: title,
-        notifications: [], // Placeholder
-        ...extraData
+        path: req.originalUrl,
+        title: 'Visão Geral',
+        stats: stats,
+        nextWorkout: nextWorkout,
+        notifications: []
     });
+});
+
+// Outras rotas...
+const renderPlaceholder = (res, req, title) => {
+    res.render('pages/error', { message: title + ' - Em Breve' });
 };
 
-router.get('/dashboard', (req, res) => {
-    const stats = { workoutsCompleted: 12, streak: 4, currentWeight: 71.5 };
-    const nextWorkout = { 
-        id: 1, title: 'Hipertrofia A', category: 'Força', 
-        duration: 50, exerciseCount: 7, intensity: 'Alta' 
-    };
-    renderApp(res, req, 'pages/client-dashboard', 'Visão Geral', { stats, nextWorkout });
-});
-
-router.get('/workouts', (req, res) => {
-    renderApp(res, req, 'pages/client-workouts', 'Meus Treinos');
-});
-
-router.get('/evolution', (req, res) => {
-    renderApp(res, req, 'pages/client-evolution', 'Minha Evolução');
-});
-
-router.get('/ai-coach', (req, res) => {
-    renderApp(res, req, 'pages/client-ai-coach', 'IA Coach');
-});
-
-router.get('/diet', (req, res) => {
-    // Usando placeholder visual por enquanto
-    renderApp(res, req, 'pages/error', 'Nutrição', { message: 'Módulo de Nutrição será liberado na próxima atualização.' });
-});
-
+router.get('/workouts', (req, res) => renderPlaceholder(res, req, 'Treinos'));
+router.get('/evolution', (req, res) => renderPlaceholder(res, req, 'Evolução'));
+router.get('/ai-coach', (req, res) => renderPlaceholder(res, req, 'IA Coach'));
+router.get('/diet', (req, res) => renderPlaceholder(res, req, 'Dieta'));
 router.get('/settings', (req, res) => {
-    renderApp(res, req, 'pages/client-settings', 'Configurações');
+    res.render('pages/client-settings', {
+        user: req.session.user,
+        path: req.originalUrl,
+        title: 'Configurações',
+        notifications: []
+    });
 });
 
 module.exports = router;
