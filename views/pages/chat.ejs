@@ -1,14 +1,168 @@
 <%- include('../partials/header.ejs') %>
+
+<style>
+    .chat-layout { display: grid; grid-template-columns: 300px 1fr; gap: 20px; height: calc(100vh - 140px); min-height: 500px; }
+    .user-list { background: #111; border-radius: 12px; overflow-y: auto; border: 1px solid #333; }
+    .user-item { padding: 15px; border-bottom: 1px solid #222; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: background 0.2s; }
+    .user-item:hover, .user-item.active { background: #222; }
+    .chat-window { background: #111; border-radius: 12px; border: 1px solid #333; display: flex; flex-direction: column; overflow: hidden; }
+    .chat-header { padding: 15px; background: #1a1a1a; border-bottom: 1px solid #333; font-weight: bold; color: white; display: flex; align-items: center; gap: 10px; }
+    .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background-color: #0d0d0d; }
+    .message { max-width: 70%; padding: 10px 15px; border-radius: 10px; font-size: 0.95rem; line-height: 1.4; position: relative; word-wrap: break-word; }
+    .msg-sent { align-self: flex-end; background: var(--primary-color); color: #000; border-bottom-right-radius: 2px; }
+    .msg-received { align-self: flex-start; background: #2a2a2a; color: white; border-bottom-left-radius: 2px; }
+    .chat-input-area { padding: 15px; background: #1a1a1a; border-top: 1px solid #333; display: flex; gap: 10px; }
+    
+    @media(max-width: 768px) { 
+        .chat-layout { grid-template-columns: 1fr; } 
+        .user-list { display: block; }
+        .chat-window { display: none; }
+        .chat-layout.chat-active .user-list { display: none; }
+        .chat-layout.chat-active .chat-window { display: flex; height: 100%; }
+        .back-btn { display: inline-block !important; }
+    }
+    .back-btn { display: none; color: white; background: none; border: none; font-size: 1.2rem; cursor: pointer; margin-right: 10px; }
+</style>
+
 <div class="dashboard-container">
-    <%- include('../partials/sidebar.ejs', { path: '/chat' }) %>
+    <%- include('../partials/sidebar.ejs') %>
     <main class="dashboard-main">
-        <div class="page-header">
-            <h1>Chat <span class="text-neon">Integrado</span></h1>
-        </div>
-        <div class="card-box" style="text-align:center; padding:50px; color:#666;">
-            <i class="fas fa-comments" style="font-size:3rem; margin-bottom:15px;"></i>
-            <p>Sistema de chat em tempo real.</p>
+        <div class="chat-layout" id="chatLayout">
+            <div class="user-list">
+                <div style="padding: 15px; color: #888; font-size: 0.8rem; text-transform: uppercase; font-weight: 700; letter-spacing: 1px;">
+                    Seus Contatos
+                </div>
+                <% if(users.length === 0) { %>
+                    <div style="padding: 20px; color: #666; text-align: center;">Ninguém disponível para chat.</div>
+                <% } %>
+                <% users.forEach(u => { %>
+                    <div class="user-item" onclick="selectUser(<%= u.id %>, '<%= u.name %>')">
+                        <div style="width: 40px; height: 40px; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700;">
+                            <%= u.name.charAt(0) %>
+                        </div>
+                        <div>
+                            <div style="color: white; font-weight: 600;"><%= u.name %></div>
+                            <div style="color: #666; font-size: 0.8rem;"><%= u.role === 'trainer' ? 'Treinador' : (u.role === 'admin' ? 'Suporte' : 'Aluno') %></div>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+
+            <div class="chat-window">
+                <div class="chat-header">
+                    <button class="back-btn" onclick="closeChatMobile()"><i class="fas fa-arrow-left"></i></button>
+                    <span id="chatHeaderName">Selecione um contato</span>
+                </div>
+                
+                <div class="chat-messages" id="chatMessages">
+                    <div style="text-align: center; color: #444; margin-top: auto; margin-bottom: auto;">
+                        <i class="fas fa-comments" style="font-size: 3rem; margin-bottom: 15px;"></i>
+                        <p>Escolha alguém à esquerda para iniciar.</p>
+                    </div>
+                </div>
+                
+                <div class="chat-input-area">
+                    <input type="text" id="msgInput" class="form-control" placeholder="Digite sua mensagem..." style="background: #222; border: 1px solid #333; color: white; flex: 1; padding: 12px; border-radius: 20px;" disabled>
+                    <button class="btn btn-primary" id="sendBtn" disabled onclick="sendMessage()" style="border-radius: 50%; width: 45px; height: 45px; padding: 0; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
         </div>
     </main>
 </div>
+
+<script>
+    let currentReceiverId = null;
+    let pollingInterval = null;
+    const currentUserLayout = document.getElementById('chatLayout');
+
+    function selectUser(id, name) {
+        currentReceiverId = id;
+        document.getElementById('chatHeaderName').innerText = name;
+        document.getElementById('msgInput').disabled = false;
+        document.getElementById('sendBtn').disabled = false;
+        
+        // Mobile UX
+        currentUserLayout.classList.add('chat-active');
+
+        // Visual feedback
+        document.querySelectorAll('.user-item').forEach(el => el.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+
+        loadMessages();
+        // Polling para atualizações (simples e eficaz)
+        if(pollingInterval) clearInterval(pollingInterval);
+        pollingInterval = setInterval(loadMessages, 3000);
+    }
+
+    function closeChatMobile() {
+        currentUserLayout.classList.remove('chat-active');
+        if(pollingInterval) clearInterval(pollingInterval);
+    }
+
+    async function loadMessages() {
+        if(!currentReceiverId) return;
+        try {
+            const res = await fetch('/chat/api/messages/' + currentReceiverId);
+            const msgs = await res.json();
+            
+            const container = document.getElementById('chatMessages');
+            container.innerHTML = '';
+            
+            const myId = <%= currentUser.id %>;
+            
+            if (msgs.length === 0) {
+                container.innerHTML = '<div style="text-align: center; color: #666; margin-top: 20px; font-size: 0.9rem;">Nenhuma mensagem ainda. Diga olá! ���</div>';
+            }
+
+            msgs.forEach(m => {
+                const div = document.createElement('div');
+                div.className = 'message ' + (m.sender_id === myId ? 'msg-sent' : 'msg-received');
+                div.innerText = m.content;
+                
+                // Hora pequena
+                const timeSpan = document.createElement('span');
+                const date = new Date(m.created_at);
+                timeSpan.innerText = date.getHours() + ':' + String(date.getMinutes()).padStart(2, '0');
+                timeSpan.style.fontSize = '0.7rem';
+                timeSpan.style.opacity = '0.7';
+                timeSpan.style.display = 'block';
+                timeSpan.style.textAlign = 'right';
+                timeSpan.style.marginTop = '5px';
+                
+                div.appendChild(timeSpan);
+                container.appendChild(div);
+            });
+            container.scrollTop = container.scrollHeight;
+        } catch(e) {
+            console.error('Erro ao carregar mensagens', e);
+        }
+    }
+
+    async function sendMessage() {
+        const input = document.getElementById('msgInput');
+        const content = input.value.trim();
+        if(!content || !currentReceiverId) return;
+
+        input.value = ''; // Limpa input imediatamente
+        
+        try {
+            await fetch('/chat/api/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ receiver_id: currentReceiverId, content })
+            });
+            loadMessages(); // Recarrega para ver a msg
+        } catch(e) {
+            alert('Erro ao enviar mensagem.');
+        }
+    }
+
+    // Enviar com Enter
+    document.getElementById('msgInput').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') sendMessage();
+    });
+</script>
+
 <%- include('../partials/footer.ejs') %>

@@ -1,27 +1,81 @@
 <%- include('../partials/header.ejs') %>
+
 <div class="dashboard-container">
-    <%- include('../partials/sidebar.ejs', { path: '/client/dashboard' }) %>
+    <%- include('../partials/sidebar.ejs') %>
+
     <main class="dashboard-main">
-        <div class="mobile-dash-header">
-            <button id="sidebarOpenBtn" class="btn btn-outline btn-sm"><i class="fas fa-bars"></i> Menu</button>
-            <span class="text-muted">Dashboard</span>
-        </div>
-        
-        <div class="page-header">
-            <h1>Olá, <span class="text-neon"><%= user.name.split(' ')[0] %></span></h1>
-            <p>Resumo do seu progresso.</p>
+        <header class="page-header" style="border:none; padding-bottom: 10px;">
+            <h1 style="font-size: 1.8rem;">Olá, <%= user.name.split(' ')[0] %> ���</h1>
+            <p style="color: var(--text-muted);">Vamos conferir seu progresso hoje?</p>
+        </header>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
+            <div class="card-box" style="display: flex; align-items: center; gap: 20px;">
+                <div style="background: rgba(190, 242, 2, 0.1); width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--primary-color); font-size: 1.5rem;">
+                    <i class="fas fa-dumbbell"></i>
+                </div>
+                <div>
+                    <span style="display: block; font-size: 2rem; font-weight: 700; line-height: 1;"><%= workoutsThisWeek %></span>
+                    <small style="color: #888;">Treinos na semana</small>
+                </div>
+            </div>
+
+            <div class="card-box" style="display: flex; align-items: center; gap: 20px;">
+                <div style="background: rgba(255, 255, 255, 0.05); width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem;">
+                    <i class="fas fa-weight"></i>
+                </div>
+                <div>
+                    <span style="display: block; font-size: 2rem; font-weight: 700; line-height: 1;"><%= (clientProfile && clientProfile.current_weight) ? clientProfile.current_weight : '--' %></span>
+                    <small style="color: #888;">Kg Atuais</small>
+                </div>
+            </div>
+
+            <div class="card-box" style="display: flex; align-items: center; gap: 20px;">
+                <div style="background: rgba(255, 255, 255, 0.05); width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem;">
+                    <i class="fas fa-credit-card"></i>
+                </div>
+                <div>
+                    <% if (subscription) { %>
+                        <span style="display: block; font-size: 1rem; font-weight: 700; color: var(--primary-color);"><%= subscription.name %></span>
+                        <small style="color: #888;">Até <%= new Date(subscription.end_date).toLocaleDateString() %></small>
+                    <% } else { %>
+                        <span style="display: block; font-size: 1rem; font-weight: 700; color: #ff6b6b;">Inativo</span>
+                        <a href="/plans" style="font-size: 0.8rem; text-decoration: underline;">Assinar</a>
+                    <% } %>
+                </div>
+            </div>
         </div>
 
-        <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
-            <div class="card-box">
-                <h3 class="text-muted">Treinos Feitos</h3>
-                <p style="font-size: 2rem; font-weight: bold;"><%= stats ? stats.completedWorkouts : 0 %></p>
+        <h2 style="font-size: 1.2rem; margin-bottom: 20px; color: white;">⚡ Próximo Desafio</h2>
+        <% if (nextWorkout) { %>
+            <div class="card-box" style="background: linear-gradient(45deg, #111 0%, #1a1a1a 100%); border-left: 4px solid var(--primary-color);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                    <span style="background: var(--primary-color); color: black; font-weight: 700; font-size: 0.75rem; padding: 4px 10px; border-radius: 4px; text-transform: uppercase;">
+                        <%= nextWorkout.muscle_group || 'Geral' %>
+                    </span>
+                    <span style="color: #666; font-size: 0.9rem;"><i class="far fa-clock"></i> ~45 min</span>
+                </div>
+                
+                <h3 style="font-size: 1.8rem; margin-bottom: 10px;"><%= nextWorkout.title %></h3>
+                <p style="color: #999; margin-bottom: 25px;"><%= nextWorkout.description || 'Foco total na execução dos movimentos.' %></p>
+
+                <div style="display: flex; gap: 15px;">
+                    <a href="/workouts/<%= nextWorkout.id %>/start" class="btn btn-primary">
+                        <i class="fas fa-play"></i> Iniciar
+                    </a>
+                    <a href="/workouts/<%= nextWorkout.id %>" class="btn btn-outline">Detalhes</a>
+                </div>
             </div>
-            <div class="card-box">
-                <h3 class="text-muted">Check-ins</h3>
-                <p style="font-size: 2rem; font-weight: bold;"><%= stats ? stats.checkinsCount : 0 %></p>
+        <% } else { %>
+            <div class="card-box" style="text-align: center; padding: 40px;">
+                <i class="fas fa-check-circle" style="font-size: 3rem; color: #333; margin-bottom: 15px;"></i>
+                <h3 style="color: white; margin-bottom: 10px;">Tudo em dia!</h3>
+                <p style="color: #888; margin-bottom: 20px;">Você não tem treinos pendentes. Fale com seu treinador se precisar de um novo plano.</p>
+                <a href="/chat" class="btn btn-outline">Enviar Mensagem</a>
             </div>
-        </div>
+        <% } %>
+
     </main>
 </div>
+
 <%- include('../partials/footer.ejs') %>
