@@ -1,0 +1,21 @@
+<header class="app-header">
+    <div style="display: flex; align-items: center;">
+        <i class="fas fa-bars mobile-menu-btn" onclick="toggleSidebar()"></i>
+        <h2 class="page-title"><%= title %></h2>
+    </div>
+
+    <div class="header-tools">
+        <div style="position: relative;">
+            <button class="icon-btn">
+                <i class="far fa-bell"></i>
+                <% if (typeof notifications !== 'undefined' && notifications.length > 0) { %>
+                    <span class="badge-dot"></span>
+                <% } %>
+            </button>
+        </div>
+        
+        <a href="/chat" class="icon-btn">
+            <i class="far fa-comment-dots"></i>
+        </a>
+    </div>
+</header>
