@@ -1,139 +1,129 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../database/db');
 const bcrypt = require('bcryptjs');
-const notificationService = require('../utils/notificationService');
+const db = require('../database/db');
 
-// GET Login
+// --- LOGIN ---
 router.get('/login', (req, res) => {
-    res.render('pages/login', { csrfToken: 'token-mock-safe' }); 
+    // Se já estiver logado, redireciona
+    if (req.session.user) {
+        return res.redirect(req.session.user.role === 'trainer' ? '/trainer/dashboard' : '/client/dashboard');
+    }
+    res.render('pages/login', { 
+        title: 'Entrar',
+        path: '/auth/login',
+        query: req.query // Passando query params se houver
+    });
 });
 
-// POST Login
 router.post('/login', async (req, res) => {
     const { email, password } = req.body;
-    
     try {
         const result = await db.query('SELECT * FROM users WHERE email = $1', [email]);
-        
         if (result.rows.length > 0) {
             const user = result.rows[0];
-            
-            // --- PROTEÇÃO CONTRA FALHA DE SCHEMA ---
-            // Se password_hash não existir, tenta usar 'password' (fallback) ou define string vazia para evitar crash
-            const storedHash = user.password_hash || user.password;
-
-            if (!storedHash) {
-                console.error(`LOGIN ERRO CRÍTICO: Usuário ID ${user.id} (${user.email}) não possui hash de senha no banco.`);
-                req.flash('error', 'Erro de integridade na conta. Contate o suporte.');
-                return res.redirect('/auth/login');
-            }
-            // ----------------------------------------
-            
-            if (await bcrypt.compare(password, storedHash)) {
+            const match = await bcrypt.compare(password, user.password_hash);
+            if (match) {
+                req.session.user = user;
                 
-                // Verificações de Status
-                if (user.status === 'pending_approval') {
-                    req.flash('error', 'Sua conta ainda está aguardando aprovação.');
-                    return res.redirect('/auth/login');
-                }
-                if (user.status === 'rejected' || user.status === 'inactive') {
-                    req.flash('error', 'Conta desativada ou rejeitada.');
-                    return res.redirect('/auth/login');
-                }
+                // Atualizar Last Login (Silent fail se coluna nao existir ainda em prod)
+                try { await db.query('UPDATE users SET last_login = NOW() WHERE id = $1', [user.id]); } catch(e){}
 
-                // Sessão
-                req.session.user = {
-                    id: user.id,
-                    name: user.name,
-                    email: user.email,
-                    role: user.role
-                };
-
-                // Redirecionamento por Role
+                // Redirecionamento baseado na role
                 if (user.role === 'admin' || user.role === 'superadmin') return res.redirect('/admin/dashboard');
                 if (user.role === 'trainer') return res.redirect('/trainer/dashboard');
-                if (user.role === 'client') return res.redirect('/client/dashboard');
-                
-                return res.redirect('/');
+                return res.redirect('/client/dashboard');
             }
         }
-        
         req.flash('error', 'Email ou senha inválidos.');
         res.redirect('/auth/login');
-
     } catch (err) {
-        console.error("Login Exception:", err);
-        req.flash('error', 'Erro interno no servidor.');
+        console.error(err);
+        req.flash('error', 'Erro no servidor.');
         res.redirect('/auth/login');
     }
 });
 
-// GET Register
+// --- REGISTER ---
 router.get('/register', (req, res) => {
-    const plan = req.query.plan || 'free';
-    res.render('pages/register', { plan, csrfToken: 'token-mock-safe' });
+    if (req.session.user) return res.redirect('/');
+    
+    res.render('pages/register', { 
+        title: 'Criar Conta',
+        path: '/auth/register',
+        query: req.query // Importante: Passa ?role=trainer ou ?plan=free
+    });
 });
 
-// POST Register
 router.post('/register', async (req, res) => {
-    const { name, email, password, role, plan } = req.body;
-    const safeRole = (role === 'trainer') ? 'trainer' : 'client';
-    const status = (safeRole === 'trainer') ? 'pending_approval' : 'active'; 
+    const { name, email, password, confirmPassword, role } = req.body;
+    
+    // Validação básica
+    if (password !== confirmPassword) {
+        req.flash('error', 'As senhas não coincidem.');
+        // Mantém a query string no redirect para não perder o contexto (ex: role=trainer)
+        const roleParam = role === 'trainer' ? '?role=trainer' : '';
+        return res.redirect('/auth/register' + roleParam);
+    }
 
     try {
-        const check = await db.query('SELECT id FROM users WHERE email = $1', [email]);
-        if (check.rows.length > 0) {
+        // Verifica duplicidade
+        const existing = await db.query('SELECT id FROM users WHERE email = $1', [email]);
+        if (existing.rows.length > 0) {
             req.flash('error', 'Email já cadastrado.');
-            return res.redirect('/auth/register');
+            const roleParam = role === 'trainer' ? '?role=trainer' : '';
+            return res.redirect('/auth/register' + roleParam);
         }
 
+        // Hash
         const hashedPassword = await bcrypt.hash(password, 10);
         
-        const result = await db.query(
-            `INSERT INTO users (name, email, password_hash, role, status) 
-             VALUES ($1, $2, $3, $4, $5) RETURNING id`,
-            [name, email, hashedPassword, safeRole, status]
+        // Define role (segurança: garante que só aceita client ou trainer, padrão client)
+        const finalRole = (role === 'trainer') ? 'trainer' : 'client';
+        
+        // Status: Cliente entra ativo, Trainer entra pendente (se houver lógica de aprovação)
+        // Por enquanto, deixaremos ambos ativos para facilitar o teste, ou trainer pendente se preferir
+        const status = 'active'; 
+
+        const newUser = await db.query(
+            'INSERT INTO users (name, email, password_hash, role, status, created_at) VALUES ($1, $2, $3, $4, $5, NOW()) RETURNING *',
+            [name, email, hashedPassword, finalRole, status]
         );
 
-        const userId = result.rows[0].id;
-
-        if (safeRole === 'client') {
-            await db.query('INSERT INTO clients (user_id) VALUES ($1)', [userId]);
-            try {
-                await notificationService.createNotification(
-                    null, 
-                    'Novo Cliente', 
-                    `${name} se cadastrou na plataforma.`,
-                    '/admin/users'
-                );
-            } catch (nErr) { console.error("Erro notif:", nErr); }
-
-        } else if (safeRole === 'trainer') {
-            await db.query('INSERT INTO trainers (user_id) VALUES ($1)', [userId]);
-            try {
-                await notificationService.createNotification(
-                    null, 
-                    'Solicitação de Personal', 
-                    `${name} solicitou acesso como treinador.`,
-                    '/admin/approvals'
-                );
-            } catch (nErr) { console.error("Erro notif:", nErr); }
+        // Se for cliente, criar registro na tabela clients
+        if (finalRole === 'client') {
+            await db.query('INSERT INTO clients (user_id) VALUES ($1)', [newUser.rows[0].id]);
+        }
+        
+        // Se for trainer, criar registro na tabela trainers
+        if (finalRole === 'trainer') {
+            await db.query('INSERT INTO trainers (user_id, bio) VALUES ($1, $2)', [newUser.rows[0].id, 'Perfil em construção']);
         }
 
-        req.flash('success', 'Cadastro realizado! Faça login.');
-        res.redirect('/auth/login');
+        // Login automático
+        req.session.user = newUser.rows[0];
+        
+        req.flash('success', 'Conta criada com sucesso! Complete seu perfil.');
+        
+        if (finalRole === 'trainer') return res.redirect('/trainer/settings'); // Manda para settings para completar perfil
+        res.redirect('/client/settings'); // Manda para settings/anamnese
 
     } catch (err) {
-        console.error(err);
-        req.flash('error', 'Erro ao cadastrar.');
+        console.error("Erro no registro:", err);
+        req.flash('error', 'Erro ao criar conta. Tente novamente.');
         res.redirect('/auth/register');
     }
 });
 
+// --- LOGOUT ---
 router.get('/logout', (req, res) => {
     req.session.destroy();
-    res.redirect('/auth/login');
+    res.redirect('/');
+});
+
+// --- FORGOT PASSWORD (Placeholder) ---
+router.get('/forgot-password', (req, res) => {
+    res.render('pages/forgot-password', { title: 'Recuperar Senha', path: '/auth/forgot' });
 });
 
 module.exports = router;

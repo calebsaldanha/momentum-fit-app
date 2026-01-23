@@ -6,19 +6,12 @@
     
     <title><%= typeof title !== 'undefined' ? title + ' | Momentum Fit' : 'Momentum Fit | A Evolução do Seu Treino' %></title>
     <meta name="description" content="Conecte-se com personal trainers de elite e use nossa IA para evoluir seu treino. A plataforma completa para sua jornada fitness.">
-    <meta name="keywords" content="personal trainer, treino online, inteligencia artificial, fitness, academia, dieta">
-    <meta name="author" content="Momentum Fit">
-    
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="Momentum Fit - Tecnologia e Expertise Humana">
-    <meta property="og:description" content="Transforme seu corpo com planos personalizados e acompanhamento inteligente.">
-    <meta property="og:image" content="/images/momentum-fit-logo-completo.png">
     
     <link rel="stylesheet" href="/css/styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
-<body>
+<body class="<%= (typeof path !== 'undefined' && (path.includes('/login') || path.includes('/register'))) ? 'auth-page' : '' %>">
 
 <header class="main-header">
     <div class="header-container">
@@ -29,8 +22,7 @@
 
         <nav class="desktop-nav">
             <a href="/" class="nav-link <%= typeof path !== 'undefined' && path === '/' ? 'active' : '' %>">Início</a>
-            <a href="/#how-it-works" class="nav-link">Como Funciona</a>
-            <a href="/#trainers" class="nav-link">Trainers</a>
+            <a href="/about" class="nav-link <%= typeof path !== 'undefined' && path === '/about' ? 'active' : '' %>">Sobre</a>
             <a href="/plans" class="nav-link <%= typeof path !== 'undefined' && path === '/plans' ? 'active' : '' %>">Planos</a>
             <a href="/articles" class="nav-link <%= typeof path !== 'undefined' && path === '/articles' ? 'active' : '' %>">Blog</a>
         </nav>
@@ -64,8 +56,7 @@
         <div class="mobile-links">
             <a href="/" onclick="toggleMobileMenu()">Início</a>
             <a href="/plans" onclick="toggleMobileMenu()">Planos</a>
-            <a href="/articles" onclick="toggleMobileMenu()">Blog</a>
-            <a href="/contact" onclick="toggleMobileMenu()">Contato</a>
+            <a href="/about" onclick="toggleMobileMenu()">Sobre</a> <a href="/articles" onclick="toggleMobileMenu()">Blog</a>
             
             <% if (typeof user !== 'undefined' && user) { %>
                 <hr style="border-color: #333; margin: 20px 0;">

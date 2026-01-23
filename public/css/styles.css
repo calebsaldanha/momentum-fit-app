@@ -321,3 +321,24 @@ img { max-width: 100%; height: auto; display: block; }
     .auth-visual { display: none; } /* Esconde visual no mobile para focar na conversão */
     .auth-form-container { max-width: 100%; padding: 40px 20px; border-left: none; }
 }
+
+/* Ajuste para páginas de Auth com Header Fixo */
+body.auth-page {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+body.auth-page .auth-wrapper {
+    margin-top: var(--header-height); /* Empurra para baixo do header */
+    min-height: calc(100vh - var(--header-height)); /* Ocupa o resto da tela */
+    height: auto; /* Permite crescer se necessário */
+}
+
+/* No mobile, o header é menor */
+@media (max-width: 992px) {
+    body.auth-page .auth-wrapper {
+        margin-top: 60px;
+        min-height: calc(100vh - 60px);
+    }
+}

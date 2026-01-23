@@ -1,31 +1,37 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Criar Conta | Momentum Fit</title>
-    <link rel="stylesheet" href="/css/styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-</head>
-<body>
+<%- include('../partials/header.ejs', { title: 'Criar Conta' }) %>
 
-<div class="auth-wrapper">
-    <div class="auth-visual" style="background-image: url('/images/features-bg.png');">
+<% 
+    // Lógica para detectar se é cadastro de Personal Trainer
+    let isTrainer = false;
+    let isFreePlan = false;
+    
+    if (typeof query !== 'undefined') {
+        if (query.role === 'trainer') isTrainer = true;
+        if (query.plan === 'free') isFreePlan = true;
+    }
+%>
+
+<main class="auth-wrapper">
+    <div class="auth-visual" style="background-image: url('<%= isTrainer ? '/images/hero-bg.png' : '/images/features-bg.png' %>');">
         <div class="auth-quote">
-            <h2>Seu corpo, sua máquina.</h2>
-            <p>Junte-se a milhares de usuários que estão transformando dados em performance física.</p>
+            <% if (isTrainer) { %>
+                <h2>Potencialize sua carreira.</h2>
+                <p>Ferramentas de gestão de alunos, biblioteca de exercícios e IA ao seu favor. Aumente sua receita.</p>
+            <% } else { %>
+                <h2>Seu corpo, sua máquina.</h2>
+                <p>Junte-se a milhares de usuários que estão transformando dados em performance física.</p>
+            <% } %>
         </div>
     </div>
 
     <div class="auth-form-container">
         <div class="auth-header">
-            <a href="/" style="display: flex; align-items: center; gap: 10px; margin-bottom: 30px; text-decoration: none;">
-                <img src="/images/momentum-fit-icon.png" alt="Logo" style="height: 32px;">
-                <span style="font-weight: 800; color: white; font-size: 1.2rem;">Momentum</span>
-            </a>
-            <h1>Crie sua conta</h1>
-            <p>Comece sua jornada de transformação hoje.</p>
+            <h1 style="color: white; margin-bottom: 10px;">
+                <%= isTrainer ? 'Cadastro de Personal' : 'Crie sua conta' %>
+            </h1>
+            <p>
+                <%= isTrainer ? 'Junte-se ao time de especialistas.' : 'Comece sua jornada de transformação hoje.' %>
+            </p>
         </div>
 
         <% if (messages.error && messages.error.length > 0) { %>
@@ -37,7 +43,7 @@
         <form action="/auth/register" method="POST">
             <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
             
-            <input type="hidden" name="role" value="client">
+            <input type="hidden" name="role" value="<%= isTrainer ? 'trainer' : 'client' %>">
 
             <div class="form-group">
                 <label class="form-label">Nome Completo</label>
@@ -66,16 +72,26 @@
                 </span>
             </div>
 
-            <button type="submit" class="btn btn-primary" style="width: 100%;">Criar Conta Grátis</button>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">
+                <%= isTrainer ? 'Cadastrar como Treinador' : 'Criar Conta Grátis' %>
+            </button>
         </form>
 
         <div class="auth-footer">
             Já tem conta? <a href="/auth/login">Fazer Login</a>
             <br><br>
-            <a href="/auth/register?role=trainer" style="font-size: 0.8rem; color: #444; text-decoration: underline;">Cadastro de Personal Trainer</a>
+            
+            <% if (!isTrainer) { %>
+                <a href="/auth/register?role=trainer" style="font-size: 0.8rem; color: #444; text-decoration: underline;">
+                    Sou Personal Trainer
+                </a>
+            <% } else { %>
+                <a href="/auth/register" style="font-size: 0.8rem; color: #444; text-decoration: underline;">
+                    Quero treinar (Sou Aluno)
+                </a>
+            <% } %>
         </div>
     </div>
-</div>
+</main>
 
-</body>
-</html>
+<%- include('../partials/footer.ejs') %>

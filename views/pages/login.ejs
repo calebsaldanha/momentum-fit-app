@@ -1,16 +1,6 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Entrar | Momentum Fit</title>
-    <link rel="stylesheet" href="/css/styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-</head>
-<body>
+<%- include('../partials/header.ejs', { title: 'Entrar' }) %>
 
-<div class="auth-wrapper">
+<main class="auth-wrapper">
     <div class="auth-visual">
         <div class="auth-quote">
             <h2>Foco total no seu resultado.</h2>
@@ -20,12 +10,8 @@
 
     <div class="auth-form-container">
         <div class="auth-header">
-            <a href="/" style="display: flex; align-items: center; gap: 10px; margin-bottom: 30px; text-decoration: none;">
-                <img src="/images/momentum-fit-icon.png" alt="Logo" style="height: 32px;">
-                <span style="font-weight: 800; color: white; font-size: 1.2rem;">Momentum</span>
-            </a>
-            <h1>Bem-vindo de volta</h1>
-            <p>Insira suas credenciais para acessar o dashboard.</p>
+            <h1 style="color: white; margin-bottom: 10px;">Bem-vindo de volta</h1>
+            <p>Insira suas credenciais para acessar a plataforma.</p>
         </div>
 
         <% if (messages.error && messages.error.length > 0) { %>
@@ -33,6 +19,7 @@
                 <i class="fas fa-exclamation-circle"></i> <%= messages.error %>
             </div>
         <% } %>
+        
         <% if (messages.success && messages.success.length > 0) { %>
             <div style="background: rgba(190, 242, 2, 0.1); color: var(--primary-color); padding: 12px; border-radius: 6px; margin-bottom: 20px; font-size: 0.9rem; border: 1px solid rgba(190, 242, 2, 0.2);">
                 <i class="fas fa-check"></i> <%= messages.success %>
@@ -50,19 +37,18 @@
             <div class="form-group">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <label class="form-label" style="margin-bottom: 0;">Senha</label>
-                    <a href="/auth/forgot-password" style="font-size: 0.8rem; color: var(--text-muted); hover: color: white;">Esqueceu?</a>
+                    <a href="/auth/forgot-password" style="font-size: 0.8rem; color: var(--text-muted);">Esqueceu?</a>
                 </div>
                 <input type="password" name="password" class="form-control" placeholder="••••••••" required style="margin-top: 8px;">
             </div>
 
-            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">Entrar na Plataforma</button>
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">Entrar</button>
         </form>
 
         <div class="auth-footer">
             Não tem uma conta? <a href="/auth/register">Começar agora</a>
         </div>
     </div>
-</div>
+</main>
 
-</body>
-</html>
+<%- include('../partials/footer.ejs') %>
