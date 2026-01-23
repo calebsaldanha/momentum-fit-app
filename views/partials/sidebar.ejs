@@ -1,87 +1,54 @@
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
-<aside class="sidebar" id="mainSidebar">
+<aside class="sidebar" id="appSidebar">
     <div class="sidebar-brand">
-        <a href="/" style="display: flex; align-items: center; gap: 10px; color: white; text-decoration: none;">
-            <img src="/images/momentum-fit-icon.png" alt="Momentum" style="height: 32px;">
-            <span>Momentum</span>
-        </a>
-        <button onclick="toggleSidebar()" style="background:none; border:none; color: #666; font-size: 1.2rem; margin-left: auto; display: none;" class="mobile-close-btn">
-            <i class="fas fa-times"></i>
-        </button>
+        <i class="fas fa-bolt" style="color: var(--primary-color); margin-right: 10px;"></i>
+        Momentum Fit
     </div>
 
     <nav class="sidebar-nav">
-        <% const role = user.role; %>
-        <% const currentPath = typeof path !== 'undefined' ? path : ''; %>
-
-        <% if (role === 'client') { %>
-            <div class="nav-label">Treinamento</div>
-            <a href="/client/dashboard" class="side-link <%= currentPath.includes('/dashboard') ? 'active' : '' %>">
-                <i class="fas fa-th-large"></i> <span>Visão Geral</span>
+        <% const r = user.role; %>
+        
+        <% if (r === 'client') { %>
+            <div style="padding: 0 12px; margin-bottom: 10px; font-size: 0.75rem; color: #555; text-transform: uppercase; font-weight: bold;">Treino</div>
+            <a href="/client/dashboard" class="side-link <%= path.includes('dashboard') ? 'active' : '' %>">
+                <i class="fas fa-home"></i> Visão Geral
             </a>
-            <a href="/client/workouts" class="side-link <%= currentPath.includes('/workouts') ? 'active' : '' %>">
-                <i class="fas fa-dumbbell"></i> <span>Meus Treinos</span>
+            <a href="/client/workouts" class="side-link <%= path.includes('workouts') ? 'active' : '' %>">
+                <i class="fas fa-dumbbell"></i> Meus Treinos
             </a>
-            <a href="/client/evolution" class="side-link <%= currentPath.includes('/evolution') ? 'active' : '' %>">
-                <i class="fas fa-chart-line"></i> <span>Evolução</span>
+            
+            <div style="padding: 0 12px; margin-top: 20px; margin-bottom: 10px; font-size: 0.75rem; color: #555; text-transform: uppercase; font-weight: bold;">Dados</div>
+            <a href="/client/evolution" class="side-link <%= path.includes('evolution') ? 'active' : '' %>">
+                <i class="fas fa-chart-line"></i> Evolução
             </a>
-
-            <div class="nav-label">Inteligência</div>
-            <a href="/client/ai-coach" class="side-link <%= currentPath.includes('/ai-coach') ? 'active' : '' %>">
-                <i class="fas fa-robot"></i> <span>IA Coach</span>
-            </a>
-            <a href="/client/diet" class="side-link <%= currentPath.includes('/diet') ? 'active' : '' %>">
-                <i class="fas fa-apple-alt"></i> <span>Plano Alimentar</span>
+            <a href="/client/ai-coach" class="side-link <%= path.includes('ai-coach') ? 'active' : '' %>">
+                <i class="fas fa-robot"></i> IA Coach
             </a>
         <% } %>
 
-        <% if (role === 'trainer') { %>
-            <div class="nav-label">Gestão</div>
-            <a href="/trainer/dashboard" class="side-link <%= currentPath.includes('/dashboard') ? 'active' : '' %>">
-                <i class="fas fa-columns"></i> <span>Dashboard</span>
+        <% if (r === 'trainer') { %>
+            <a href="/trainer/dashboard" class="side-link <%= path.includes('dashboard') ? 'active' : '' %>">
+                <i class="fas fa-columns"></i> Painel
             </a>
-            <a href="/trainer/clients" class="side-link <%= currentPath.includes('/clients') ? 'active' : '' %>">
-                <i class="fas fa-users"></i> <span>Alunos</span>
-            </a>
-            <a href="/trainer/workouts" class="side-link <%= currentPath.includes('/workouts') ? 'active' : '' %>">
-                <i class="fas fa-list-alt"></i> <span>Biblioteca</span>
+            <a href="/trainer/clients" class="side-link <%= path.includes('clients') ? 'active' : '' %>">
+                <i class="fas fa-users"></i> Alunos
             </a>
         <% } %>
 
-        <div class="nav-label">Conta</div>
-        <a href="/client/settings" class="side-link <%= currentPath.includes('/settings') ? 'active' : '' %>">
-            <i class="fas fa-cog"></i> <span>Configurações</span>
-        </a>
-    </nav>
-
-    <div class="sidebar-footer">
-        <div class="user-mini">
-            <div class="user-avatar-placeholder">
-                <%= user.name.charAt(0).toUpperCase() %>
-            </div>
-            <div class="user-details" style="overflow: hidden;">
-                <h4 style="white-space: nowrap; text-overflow: ellipsis; overflow: hidden;"><%= user.name.split(' ')[0] %></h4>
-                <a href="/auth/logout" style="color: #ff4d4d; font-size: 0.8rem;">Sair</a>
-            </div>
+        <div style="margin-top: auto; padding-top: 20px; border-top: 1px solid #222;">
+            <a href="/auth/logout" class="side-link" style="color: #ff4d4d;">
+                <i class="fas fa-sign-out-alt"></i> Sair
+            </a>
         </div>
-    </div>
+    </nav>
 </aside>
-
-<style>
-    @media (max-width: 992px) {
-        .mobile-close-btn { display: block !important; }
-    }
-</style>
 
 <script>
     function toggleSidebar() {
-        const sb = document.getElementById('mainSidebar');
+        const sb = document.getElementById('appSidebar');
         const ov = document.getElementById('sidebarOverlay');
         sb.classList.toggle('active');
         ov.classList.toggle('active');
-        
-        // Bloqueia scroll do body quando menu aberto
-        document.body.style.overflow = sb.classList.contains('active') ? 'hidden' : '';
     }
 </script>

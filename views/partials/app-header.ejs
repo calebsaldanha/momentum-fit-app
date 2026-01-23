@@ -1,21 +1,14 @@
 <header class="app-header">
     <div style="display: flex; align-items: center;">
-        <i class="fas fa-bars mobile-menu-btn" onclick="toggleSidebar()"></i>
-        <h2 class="page-title"><%= title %></h2>
+        <button class="mobile-toggle-btn" onclick="toggleSidebar()">
+            <i class="fas fa-bars"></i>
+        </button>
+        <h2 style="color: white; font-size: 1.1rem; margin-left: 10px;"><%= typeof title !== 'undefined' ? title : 'Dashboard' %></h2>
     </div>
 
-    <div class="header-tools">
-        <div style="position: relative;">
-            <button class="icon-btn">
-                <i class="far fa-bell"></i>
-                <% if (typeof notifications !== 'undefined' && notifications.length > 0) { %>
-                    <span class="badge-dot"></span>
-                <% } %>
-            </button>
+    <div style="display: flex; gap: 15px;">
+        <div style="width: 35px; height: 35px; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+            <%= user.name.charAt(0).toUpperCase() %>
         </div>
-        
-        <a href="/chat" class="icon-btn">
-            <i class="far fa-comment-dots"></i>
-        </a>
     </div>
 </header>
