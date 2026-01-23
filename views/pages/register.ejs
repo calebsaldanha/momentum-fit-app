@@ -1,118 +1,81 @@
-<%- include('../partials/header') %>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar Conta | Momentum Fit</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
 
-<main class="auth-wrapper">
-    <div class="auth-card">
-        <div style="text-align: center; margin-bottom: 30px;">
-            <img src="/images/momentum-fit-icon.png" alt="Logo" style="width: 60px; margin-bottom: 10px;">
-            <h2 style="color: white; font-weight: 700;">Crie sua conta</h2>
-            <p class="text-muted">Junte-se ao time e transforme sua rotina.</p>
+<div class="auth-wrapper">
+    <div class="auth-visual" style="background-image: url('/images/features-bg.png');">
+        <div class="auth-quote">
+            <h2>Seu corpo, sua máquina.</h2>
+            <p>Junte-se a milhares de usuários que estão transformando dados em performance física.</p>
+        </div>
+    </div>
+
+    <div class="auth-form-container">
+        <div class="auth-header">
+            <a href="/" style="display: flex; align-items: center; gap: 10px; margin-bottom: 30px; text-decoration: none;">
+                <img src="/images/momentum-fit-icon.png" alt="Logo" style="height: 32px;">
+                <span style="font-weight: 800; color: white; font-size: 1.2rem;">Momentum</span>
+            </a>
+            <h1>Crie sua conta</h1>
+            <p>Comece sua jornada de transformação hoje.</p>
         </div>
 
-        <% if (messages.error) { %>
-            <div class="alert alert-danger" style="margin-bottom: 20px;">
-                <i class="fas fa-exclamation-triangle"></i> <%= messages.error %>
+        <% if (messages.error && messages.error.length > 0) { %>
+            <div style="background: rgba(255, 77, 77, 0.1); color: #ff6b6b; padding: 12px; border-radius: 6px; margin-bottom: 20px; font-size: 0.9rem; border: 1px solid rgba(255,77,77,0.2);">
+                <i class="fas fa-exclamation-circle"></i> <%= messages.error %>
             </div>
         <% } %>
 
-        <form action="/auth/register" method="POST" id="registerForm">
-            <input type="hidden" name="plan" value="<%= typeof plan !== 'undefined' ? plan : '' %>">
+        <form action="/auth/register" method="POST">
             <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+            
+            <input type="hidden" name="role" value="client">
 
-            <div class="form-group" style="margin-bottom: 20px;">
-                <label style="color: #ccc; font-size: 0.9rem; margin-bottom: 5px; display: block;">Nome Completo</label>
-                <div style="position: relative;">
-                    <i class="fas fa-user" style="position: absolute; left: 15px; top: 14px; color: #666;"></i>
-                    <input type="text" name="name" required class="form-control" placeholder="Ex: Caleb Saldanha" 
-                        style="width: 100%; padding: 12px 12px 12px 45px; background: #222; border: 1px solid #444; color: white; border-radius: 6px;">
-                </div>
+            <div class="form-group">
+                <label class="form-label">Nome Completo</label>
+                <input type="text" name="name" class="form-control" placeholder="Ex: João Silva" required>
             </div>
 
-            <div class="form-group" style="margin-bottom: 20px;">
-                <label style="color: #ccc; font-size: 0.9rem; margin-bottom: 5px; display: block;">Email</label>
-                <div style="position: relative;">
-                    <i class="fas fa-envelope" style="position: absolute; left: 15px; top: 14px; color: #666;"></i>
-                    <input type="email" name="email" required class="form-control" placeholder="seu@email.com" 
-                        style="width: 100%; padding: 12px 12px 12px 45px; background: #222; border: 1px solid #444; color: white; border-radius: 6px;">
-                </div>
+            <div class="form-group">
+                <label class="form-label">Email</label>
+                <input type="email" name="email" class="form-control" placeholder="seu@email.com" required>
             </div>
 
-            <div class="form-group" style="margin-bottom: 20px;">
-                <label style="color: #ccc; font-size: 0.9rem; margin-bottom: 5px; display: block;">Tipo de Conta</label>
-                <div style="position: relative;">
-                    <i class="fas fa-users" style="position: absolute; left: 15px; top: 14px; color: #666;"></i>
-                    <select name="role" class="form-control" 
-                        style="width: 100%; padding: 12px 12px 12px 45px; background: #222; border: 1px solid #444; color: white; border-radius: 6px; appearance: none;">
-                        <option value="client">Aluno (Quero treinar)</option>
-                        <option value="trainer">Personal Trainer (Quero dar aulas)</option>
-                    </select>
-                    <i class="fas fa-chevron-down" style="position: absolute; right: 15px; top: 14px; color: #666; pointer-events: none;"></i>
-                </div>
+            <div class="form-group">
+                <label class="form-label">Senha</label>
+                <input type="password" name="password" class="form-control" placeholder="Mínimo 6 caracteres" required minlength="6">
             </div>
 
-            <div class="form-group" style="margin-bottom: 20px;">
-                <label style="color: #ccc; font-size: 0.9rem; margin-bottom: 5px; display: block;">Senha</label>
-                <div style="position: relative;">
-                    <i class="fas fa-lock" style="position: absolute; left: 15px; top: 14px; color: #666;"></i>
-                    <input type="password" name="password" id="password" required class="form-control" placeholder="Mínimo 6 caracteres" 
-                        style="width: 100%; padding: 12px 12px 12px 45px; background: #222; border: 1px solid #444; color: white; border-radius: 6px;">
-                </div>
-                <small id="passwordHelp" style="color: #ff6b6b; display: none; margin-top: 5px; font-size: 0.8rem;">A senha deve ter pelo menos 6 caracteres.</small>
+            <div class="form-group">
+                <label class="form-label">Confirmar Senha</label>
+                <input type="password" name="confirmPassword" class="form-control" placeholder="Repita a senha" required>
             </div>
 
-            <div class="form-group" style="margin-bottom: 25px;">
-                <label style="color: #ccc; font-size: 0.9rem; margin-bottom: 5px; display: block;">Confirmar Senha</label>
-                <div style="position: relative;">
-                    <i class="fas fa-lock" style="position: absolute; left: 15px; top: 14px; color: #666;"></i>
-                    <input type="password" name="confirm_password" id="confirm_password" required class="form-control" placeholder="Repita a senha" 
-                        style="width: 100%; padding: 12px 12px 12px 45px; background: #222; border: 1px solid #444; color: white; border-radius: 6px;">
-                </div>
-                <small id="confirmHelp" style="color: #ff6b6b; display: none; margin-top: 5px; font-size: 0.8rem;">As senhas não coincidem.</small>
+            <div class="form-group" style="display: flex; gap: 10px; align-items: flex-start;">
+                <input type="checkbox" required style="margin-top: 4px; accent-color: var(--primary-color);">
+                <span style="font-size: 0.85rem; color: #888;">
+                    Li e concordo com os <a href="/terms" target="_blank">Termos de Uso</a> e <a href="/privacy" target="_blank">Política de Privacidade</a>.
+                </span>
             </div>
 
-            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 14px; font-weight: bold; font-size: 1.1rem; text-transform: uppercase;">
-                Cadastrar <i class="fas fa-arrow-right"></i>
-            </button>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Criar Conta Grátis</button>
         </form>
 
-        <div style="text-align: center; margin-top: 30px;">
-            <p style="color: #888;">Já tem conta?</p>
-            <a href="/auth/login" class="btn btn-outline" style="width: 100%; margin-top: 10px; border: 1px solid #444; color: white; padding: 10px; border-radius: 6px; display: inline-block;">Fazer Login</a>
+        <div class="auth-footer">
+            Já tem conta? <a href="/auth/login">Fazer Login</a>
+            <br><br>
+            <a href="/auth/register?role=trainer" style="font-size: 0.8rem; color: #444; text-decoration: underline;">Cadastro de Personal Trainer</a>
         </div>
     </div>
-</main>
+</div>
 
-<script>
-    const form = document.getElementById('registerForm');
-    const pass = document.getElementById('password');
-    const confirm = document.getElementById('confirm_password');
-    const passHelp = document.getElementById('passwordHelp');
-    const confirmHelp = document.getElementById('confirmHelp');
-
-    form.addEventListener('submit', function(e) {
-        let valid = true;
-        
-        // Validação Tamanho
-        if (pass.value.length < 6) {
-            passHelp.style.display = 'block';
-            pass.style.borderColor = '#ff6b6b';
-            valid = false;
-        } else {
-            passHelp.style.display = 'none';
-            pass.style.borderColor = '#444';
-        }
-
-        // Validação Igualdade
-        if (pass.value !== confirm.value) {
-            confirmHelp.style.display = 'block';
-            confirm.style.borderColor = '#ff6b6b';
-            valid = false;
-        } else {
-            confirmHelp.style.display = 'none';
-            confirm.style.borderColor = '#444';
-        }
-
-        if (!valid) e.preventDefault();
-    });
-</script>
-
-<%- include('../partials/footer') %>
+</body>
+</html>

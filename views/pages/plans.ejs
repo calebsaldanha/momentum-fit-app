@@ -1,74 +1,103 @@
-<%- include('../partials/header.ejs') %>
+<%- include('../partials/header.ejs', { title: 'Planos e Preços', path: '/plans' }) %>
 
 <main class="public-content">
-
-    <section class="page-header" style="background: linear-gradient(to bottom, #050505, #111); padding: 100px 0 60px; text-align: center; border-bottom: 1px solid #222;">
+    
+    <section class="page-hero-mini">
         <div class="container">
-            <span class="badge-neon">Planos e Preços</span>
-            <h1 style="font-size: 3rem; margin: 15px 0 10px; color: white;">Escolha sua Evolução</h1>
-            <p style="color: #a0a0a0; max-width: 600px; margin: 0 auto;">
-                Todos os planos incluem acesso total à plataforma e aplicativo.
-            </p>
+            <span class="badge-neon" style="margin-bottom: 20px;">Investimento Transparente</span>
+            <h1 style="font-size: 3rem; color: white; margin-bottom: 10px; font-weight: 800;">Planos para cada nível</h1>
+            <p style="color: #888; max-width: 600px; margin: 0 auto;">Escolha a flexibilidade que você precisa. Sem contratos de fidelidade obscuros.</p>
         </div>
     </section>
 
     <section class="section-padding">
         <div class="container">
-            <div class="features-grid" style="align-items: center; justify-content: center;">
+            <div class="features-grid" style="align-items: flex-start;">
                 
-                <div class="feature-card" style="border: 1px solid #333;">
-                    <h3 style="font-size: 1.5rem; margin-bottom: 10px;">Mensal</h3>
+                <div class="feature-card plan-featured" style="border-color: var(--primary-color); position: relative;">
+                    <div style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: var(--primary-color); color: black; font-size: 0.75rem; font-weight: 800; padding: 4px 12px; border-radius: 20px;">MAIS POPULAR</div>
+                    <h3 style="font-size: 1.5rem; margin-bottom: 10px;">Gratuito</h3>
+                    <div style="font-size: 2.5rem; font-weight: 800; color: white; margin-bottom: 20px;">
+                        R$ 0<span style="font-size: 1rem; color: #666; font-weight: 400;">/mês</span>
+                    </div>
+                    <p style="color: #888; font-size: 0.9rem; margin-bottom: 20px;">Para quem quer começar a se organizar agora.</p>
+                    <ul style="margin-bottom: 30px; color: #ccc; padding-left: 0; list-style: none;">
+                        <li style="margin-bottom: 12px; display: flex; gap: 10px;"><i class="fas fa-check" style="color: var(--primary-color);"></i> Acesso ao App Mobile</li>
+                        <li style="margin-bottom: 12px; display: flex; gap: 10px;"><i class="fas fa-check" style="color: var(--primary-color);"></i> Biblioteca de Exercícios</li>
+                        <li style="margin-bottom: 12px; display: flex; gap: 10px;"><i class="fas fa-check" style="color: var(--primary-color);"></i> Registro de Peso</li>
+                    </ul>
+                    <a href="/auth/register?plan=free" class="btn btn-primary" style="width: 100%;">Começar Agora</a>
+                </div>
+
+                <div class="feature-card plan-disabled" style="opacity: 0.6; filter: grayscale(1);">
+                    <div class="tooltip-badge" style="position: absolute; top: 15px; right: 15px; background: #333; color: white; padding: 5px 10px; font-size: 0.7rem; border-radius: 4px;">EM BREVE</div>
+                    <h3 style="font-size: 1.5rem; margin-bottom: 10px;">Momentum Pro</h3>
                     <div style="font-size: 2.5rem; font-weight: 800; color: white; margin-bottom: 20px;">
                         R$ 89,90<span style="font-size: 1rem; color: #666; font-weight: 400;">/mês</span>
                     </div>
-                    <ul style="margin-bottom: 30px; color: #ccc; padding-left: 20px; text-align: left;">
-                        <li style="margin-bottom: 10px;">• Treino Personalizado</li>
-                        <li style="margin-bottom: 10px;">• Chat com Treinador</li>
-                        <li style="margin-bottom: 10px;">• Acesso ao App</li>
+                    <p style="color: #888; font-size: 0.9rem; margin-bottom: 20px;">Acelere resultados com ajuda profissional.</p>
+                    <ul style="margin-bottom: 30px; color: #666; padding-left: 0; list-style: none;">
+                        <li style="margin-bottom: 12px; display: flex; gap: 10px;"><i class="fas fa-check"></i> Treinador Dedicado</li>
+                        <li style="margin-bottom: 12px; display: flex; gap: 10px;"><i class="fas fa-check"></i> Dieta Personalizada</li>
+                        <li style="margin-bottom: 12px; display: flex; gap: 10px;"><i class="fas fa-check"></i> Análise de Vídeo via IA</li>
                     </ul>
-                    <a href="/auth/register?plan=monthly" class="btn btn-outline" style="width: 100%;">Assinar Mensal</a>
+                    <button class="btn btn-outline" style="width: 100%; cursor: not-allowed;">Lista de Espera</button>
                 </div>
 
-                <div class="feature-card plan-featured" style="border-color: var(--primary-color); transform: scale(1.05); background: #151515;">
-                    <div style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: var(--primary-color); color: #000; padding: 5px 15px; border-radius: 20px; font-weight: 700; font-size: 0.8rem;">MAIS POPULAR</div>
-                    <h3 style="font-size: 1.5rem; margin-bottom: 10px; color: var(--primary-color);">Trimestral</h3>
-                    <div style="font-size: 2.5rem; font-weight: 800; color: white; margin-bottom: 20px;">
-                        R$ 79,90<span style="font-size: 1rem; color: #666; font-weight: 400;">/mês</span>
-                    </div>
-                    <ul style="margin-bottom: 30px; color: #fff; padding-left: 20px; text-align: left;">
-                        <li style="margin-bottom: 10px;">• <strong>Tudo do Mensal</strong></li>
-                        <li style="margin-bottom: 10px;">• Avaliação por IA</li>
-                        <li style="margin-bottom: 10px;">• Suporte Prioritário</li>
-                    </ul>
-                    <a href="/auth/register?plan=quarterly" class="btn btn-primary" style="width: 100%;">Assinar Agora</a>
-                </div>
-
-                 <div class="feature-card" style="border: 1px solid #333;">
-                    <h3 style="font-size: 1.5rem; margin-bottom: 10px;">Anual</h3>
+                <div class="feature-card plan-disabled" style="opacity: 0.6; filter: grayscale(1);">
+                    <div class="tooltip-badge" style="position: absolute; top: 15px; right: 15px; background: #333; color: white; padding: 5px 10px; font-size: 0.7rem; border-radius: 4px;">EM BREVE</div>
+                    <h3 style="font-size: 1.5rem; margin-bottom: 10px;">VIP Anual</h3>
                     <div style="font-size: 2.5rem; font-weight: 800; color: white; margin-bottom: 20px;">
                         R$ 69,90<span style="font-size: 1rem; color: #666; font-weight: 400;">/mês</span>
                     </div>
-                    <ul style="margin-bottom: 30px; color: #ccc; padding-left: 20px; text-align: left;">
-                        <li style="margin-bottom: 10px;">• Economia Máxima</li>
-                        <li style="margin-bottom: 10px;">• Nutrição (Beta)</li>
-                        <li style="margin-bottom: 10px;">• Acesso Vitalício</li>
+                    <p style="color: #888; font-size: 0.9rem; margin-bottom: 20px;">Compromisso de longo prazo com desconto.</p>
+                    <ul style="margin-bottom: 30px; color: #666; padding-left: 0; list-style: none;">
+                        <li style="margin-bottom: 12px; display: flex; gap: 10px;"><i class="fas fa-check"></i> Economia de 20%</li>
+                        <li style="margin-bottom: 12px; display: flex; gap: 10px;"><i class="fas fa-check"></i> Consultoria por Vídeo</li>
+                        <li style="margin-bottom: 12px; display: flex; gap: 10px;"><i class="fas fa-check"></i> Kit de Boas-vindas</li>
                     </ul>
-                    <a href="/auth/register?plan=annual" class="btn btn-outline" style="width: 100%;">Assinar Anual</a>
+                    <button class="btn btn-outline" style="width: 100%; cursor: not-allowed;">Lista de Espera</button>
                 </div>
             </div>
 
-            <div style="max-width: 800px; margin: 80px auto 0;">
-                <h2 style="text-align: center; margin-bottom: 40px; color: white;">Dúvidas Frequentes</h2>
-                
-                <div style="background: #111; padding: 20px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #333;">
-                    <h4 style="color: white; margin-bottom: 10px;">Como funciona o pagamento?</h4>
-                    <p style="color: #999; font-size: 0.95rem;">Aceitamos cartão de crédito e PIX. A cobrança é recorrente de acordo com o plano escolhido.</p>
-                </div>
-                
-                <div style="background: #111; padding: 20px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #333;">
-                    <h4 style="color: white; margin-bottom: 10px;">Posso trocar de personal?</h4>
-                    <p style="color: #999; font-size: 0.95rem;">Sim! Se você não se adaptar à metodologia do seu treinador, pode solicitar a troca diretamente pelo suporte.</p>
-                </div>
+            <div style="margin-top: 80px; overflow-x: auto;">
+                <h3 style="text-align: center; color: white; margin-bottom: 40px; font-size: 1.8rem;">Comparativo de Recursos</h3>
+                <table style="width: 100%; border-collapse: collapse; min-width: 600px;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid #333;">
+                            <th style="text-align: left; padding: 20px; color: #fff;">Recurso</th>
+                            <th style="padding: 20px; color: var(--primary-color);">Gratuito</th>
+                            <th style="padding: 20px; color: #888;">Pro</th>
+                            <th style="padding: 20px; color: #888;">VIP</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom: 1px solid #1a1a1a;">
+                            <td style="padding: 15px 20px; color: #ccc;">Acesso Web & Mobile</td>
+                            <td style="text-align: center; color: white;"><i class="fas fa-check"></i></td>
+                            <td style="text-align: center; color: #666;"><i class="fas fa-check"></i></td>
+                            <td style="text-align: center; color: #666;"><i class="fas fa-check"></i></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #1a1a1a;">
+                            <td style="padding: 15px 20px; color: #ccc;">Log de Treinos</td>
+                            <td style="text-align: center; color: white;">Ilimitado</td>
+                            <td style="text-align: center; color: #666;">Ilimitado</td>
+                            <td style="text-align: center; color: #666;">Ilimitado</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #1a1a1a;">
+                            <td style="padding: 15px 20px; color: #ccc;">Personal Trainer Humano</td>
+                            <td style="text-align: center; color: #333;"><i class="fas fa-minus"></i></td>
+                            <td style="text-align: center; color: #666;"><i class="fas fa-check"></i></td>
+                            <td style="text-align: center; color: #666;"><i class="fas fa-check"></i> Prioritário</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #1a1a1a;">
+                            <td style="padding: 15px 20px; color: #ccc;">Análise de Vídeo IA</td>
+                            <td style="text-align: center; color: #333;"><i class="fas fa-minus"></i></td>
+                            <td style="text-align: center; color: #666;"><i class="fas fa-check"></i></td>
+                            <td style="text-align: center; color: #666;"><i class="fas fa-check"></i></td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </section>

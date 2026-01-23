@@ -1,40 +1,21 @@
 const express = require('express');
 const router = express.Router();
 
-// Rota Home
-router.get('/', (req, res) => {
-    // Passar dados necessários se houver
-    res.render('pages/index', {
-        user: req.session.user
+// Middleware auxiliar para renderizar views públicas com dados de sessão
+const renderPublic = (res, req, view, title) => {
+    res.render(view, {
+        title: title,
+        user: req.session.user || null,
+        path: req.path
     });
-});
+};
 
-// Rota Planos
-router.get('/plans', (req, res) => {
-    res.render('pages/plans', {
-        user: req.session.user
-    });
-});
-
-// Rota Sobre (Verificando se o arquivo existe, se não, usar index)
-router.get('/about', (req, res) => {
-    res.render('pages/about', {
-        user: req.session.user
-    });
-});
-
-// Rota Contato
-router.get('/contact', (req, res) => {
-    res.render('pages/contact', {
-        user: req.session.user
-    });
-});
-
-// Rota Termos (Placeholder)
-router.get('/terms', (req, res) => {
-    res.render('pages/terms', {
-        user: req.session.user
-    });
-});
+router.get('/', (req, res) => renderPublic(res, req, 'pages/index', 'Início'));
+router.get('/plans', (req, res) => renderPublic(res, req, 'pages/plans', 'Planos e Preços'));
+router.get('/about', (req, res) => renderPublic(res, req, 'pages/about', 'Sobre Nós'));
+router.get('/contact', (req, res) => renderPublic(res, req, 'pages/contact', 'Contato'));
+router.get('/terms', (req, res) => renderPublic(res, req, 'pages/terms', 'Termos de Uso'));
+router.get('/privacy', (req, res) => renderPublic(res, req, 'pages/privacy', 'Política de Privacidade'));
+router.get('/cookies', (req, res) => renderPublic(res, req, 'pages/cookies', 'Política de Cookies'));
 
 module.exports = router;

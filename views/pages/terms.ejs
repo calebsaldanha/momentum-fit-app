@@ -1,7 +1,25 @@
-<%- include('../partials/header.ejs') %>
-<div class="header-spacer"></div>
-<div class="container" style="padding: 60px 20px;">
-    <h1>Termos de Uso e Privacidade</h1>
-    <p>Texto legal...</p>
-</div>
+<%- include('../partials/header.ejs', { title: 'Termos de Uso', path: '/terms' }) %>
+<main class="public-content">
+    <section class="page-hero-mini">
+        <div class="container">
+            <h1 style="font-size: 2.5rem; color: white;">Termos de Uso</h1>
+            <p style="color: #888;">Última atualização: Janeiro 2026</p>
+        </div>
+    </section>
+    <section class="container legal-content">
+        <p>Bem-vindo ao Momentum Fit. Ao usar nossa plataforma, você concorda com os seguintes termos:</p>
+        
+        <h3>1. Isenção de Responsabilidade Médica</h3>
+        <p>O Momentum Fit não é uma instituição médica. Nossos treinos e sugestões de IA são baseados em diretrizes gerais de fitness. Você deve consultar um médico antes de iniciar qualquer programa de exercícios.</p>
+        
+        <h3>2. Contas de Usuário</h3>
+        <p>Você é responsável por manter a segurança de sua senha. Qualquer atividade realizada na sua conta é de sua responsabilidade.</p>
+        
+        <h3>3. Planos e Pagamentos</h3>
+        <p>Atualmente operamos em modelo Freemium. Funcionalidades futuras pagas serão claramente identificadas antes de qualquer cobrança.</p>
+        
+        <h3>4. Uso Aceitável</h3>
+        <p>É proibido usar a plataforma para distribuir conteúdo ilegal, spam ou tentar engenharia reversa de nossa IA.</p>
+    </section>
+</main>
 <%- include('../partials/footer.ejs') %>
