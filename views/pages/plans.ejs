@@ -1,78 +1,78 @@
 <%- include('../partials/header.ejs') %>
 
 <main class="public-content">
-    <section id="plans" class="section-padding">
+
+    <section class="page-header" style="background: linear-gradient(to bottom, #050505, #111); padding: 100px 0 60px; text-align: center; border-bottom: 1px solid #222;">
         <div class="container">
-            <div class="section-header center">
-                <h2 class="section-title">Nossos <span class="text-neon">Planos</span></h2>
-                <p class="section-desc" style="color: #a0a0a0;">Escolha a opção ideal para o seu momento.</p>
+            <span class="badge-neon">Planos e Preços</span>
+            <h1 style="font-size: 3rem; margin: 15px 0 10px; color: white;">Escolha sua Evolução</h1>
+            <p style="color: #a0a0a0; max-width: 600px; margin: 0 auto;">
+                Todos os planos incluem acesso total à plataforma e aplicativo.
+            </p>
+        </div>
+    </section>
+
+    <section class="section-padding">
+        <div class="container">
+            <div class="features-grid" style="align-items: center; justify-content: center;">
+                
+                <div class="feature-card" style="border: 1px solid #333;">
+                    <h3 style="font-size: 1.5rem; margin-bottom: 10px;">Mensal</h3>
+                    <div style="font-size: 2.5rem; font-weight: 800; color: white; margin-bottom: 20px;">
+                        R$ 89,90<span style="font-size: 1rem; color: #666; font-weight: 400;">/mês</span>
+                    </div>
+                    <ul style="margin-bottom: 30px; color: #ccc; padding-left: 20px; text-align: left;">
+                        <li style="margin-bottom: 10px;">• Treino Personalizado</li>
+                        <li style="margin-bottom: 10px;">• Chat com Treinador</li>
+                        <li style="margin-bottom: 10px;">• Acesso ao App</li>
+                    </ul>
+                    <a href="/auth/register?plan=monthly" class="btn btn-outline" style="width: 100%;">Assinar Mensal</a>
+                </div>
+
+                <div class="feature-card plan-featured" style="border-color: var(--primary-color); transform: scale(1.05); background: #151515;">
+                    <div style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: var(--primary-color); color: #000; padding: 5px 15px; border-radius: 20px; font-weight: 700; font-size: 0.8rem;">MAIS POPULAR</div>
+                    <h3 style="font-size: 1.5rem; margin-bottom: 10px; color: var(--primary-color);">Trimestral</h3>
+                    <div style="font-size: 2.5rem; font-weight: 800; color: white; margin-bottom: 20px;">
+                        R$ 79,90<span style="font-size: 1rem; color: #666; font-weight: 400;">/mês</span>
+                    </div>
+                    <ul style="margin-bottom: 30px; color: #fff; padding-left: 20px; text-align: left;">
+                        <li style="margin-bottom: 10px;">• <strong>Tudo do Mensal</strong></li>
+                        <li style="margin-bottom: 10px;">• Avaliação por IA</li>
+                        <li style="margin-bottom: 10px;">• Suporte Prioritário</li>
+                    </ul>
+                    <a href="/auth/register?plan=quarterly" class="btn btn-primary" style="width: 100%;">Assinar Agora</a>
+                </div>
+
+                 <div class="feature-card" style="border: 1px solid #333;">
+                    <h3 style="font-size: 1.5rem; margin-bottom: 10px;">Anual</h3>
+                    <div style="font-size: 2.5rem; font-weight: 800; color: white; margin-bottom: 20px;">
+                        R$ 69,90<span style="font-size: 1rem; color: #666; font-weight: 400;">/mês</span>
+                    </div>
+                    <ul style="margin-bottom: 30px; color: #ccc; padding-left: 20px; text-align: left;">
+                        <li style="margin-bottom: 10px;">• Economia Máxima</li>
+                        <li style="margin-bottom: 10px;">• Nutrição (Beta)</li>
+                        <li style="margin-bottom: 10px;">• Acesso Vitalício</li>
+                    </ul>
+                    <a href="/auth/register?plan=annual" class="btn btn-outline" style="width: 100%;">Assinar Anual</a>
+                </div>
             </div>
 
-            <div class="features-grid" style="align-items: center;">
+            <div style="max-width: 800px; margin: 80px auto 0;">
+                <h2 style="text-align: center; margin-bottom: 40px; color: white;">Dúvidas Frequentes</h2>
                 
-                <div class="card-box" style="border: 1px solid #333; opacity: 0.8;">
-                    <h3 style="font-size: 1.5rem; color: white;">Gratuito</h3>
-                    <div style="font-size: 2.5rem; font-weight: 800; color: white; margin: 15px 0;">
-                         R$ 0 <span style="font-size: 1rem; font-weight: 400; color: #888;">/mês</span>
-                    </div>
-                    <p class="text-muted" style="margin-bottom: 20px;">Para começar a se movimentar.</p>
-                    
-                     <ul style="list-style: none; margin-bottom: 30px; text-align: left; padding: 0;">
-                        <li style="margin-bottom: 10px; color: #ccc;"><i class="fas fa-check text-neon"></i> Acesso à plataforma</li>
-                        <li style="margin-bottom: 10px; color: #ccc;"><i class="fas fa-check text-neon"></i> 1 Ficha de Treino</li>
-                        <li style="margin-bottom: 10px; color: #555;"><i class="fas fa-times"></i> Sem suporte de Personal</li>
-                    </ul>
-
-                    <% if (!isAuthenticated) { %>
-                        <a href="/auth/register?plan=free" class="btn btn-outline" style="width: 100%;">Criar Conta</a>
-                    <% } else { %>
-                        <button class="btn btn-outline" disabled style="width: 100%;">Plano Atual</button>
-                    <% } %>
+                <div style="background: #111; padding: 20px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #333;">
+                    <h4 style="color: white; margin-bottom: 10px;">Como funciona o pagamento?</h4>
+                    <p style="color: #999; font-size: 0.95rem;">Aceitamos cartão de crédito e PIX. A cobrança é recorrente de acordo com o plano escolhido.</p>
                 </div>
-
-                <div class="card-box plan-featured">
-                    <div style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--primary-color); color: black; padding: 4px 15px; border-radius: 20px; font-weight: bold; font-size: 0.8rem;">
-                        RECOMENDADO
-                    </div>
-                    
-                    <h3 style="font-size: 1.8rem; color: var(--primary-color);">Momentum Básico</h3>
-                    <div style="font-size: 3rem; font-weight: 800; color: white; margin: 15px 0;">
-                        R$ 10,00 <span style="font-size: 1rem; font-weight: 400; color: #888;">/mês</span>
-                    </div>
-                    <p class="text-muted" style="margin-bottom: 20px;">Evolução constante com custo acessível.</p>
-                    
-                    <ul style="list-style: none; margin-bottom: 30px; text-align: left; padding: 0;">
-                        <li style="margin-bottom: 12px; color: white;"><i class="fas fa-check text-neon"></i> <strong>Treinos Ilimitados</strong></li>
-                        <li style="margin-bottom: 12px; color: white;"><i class="fas fa-check text-neon"></i> <strong>Suporte via Chat</strong></li>
-                        <li style="margin-bottom: 12px; color: white;"><i class="fas fa-check text-neon"></i> Histórico de Evolução</li>
-                        <li style="margin-bottom: 12px; color: white;"><i class="fas fa-check text-neon"></i> Acesso ao IA Coach</li>
-                    </ul>
-
-                    <% if (!isAuthenticated) { %>
-                        <a href="/auth/register?plan=basic" class="btn btn-primary btn-lg" style="width: 100%; box-shadow: 0 0 15px rgba(190, 242, 2, 0.4);">Assinar Agora</a>
-                    <% } else { %>
-                         <a href="/client/profile" class="btn btn-primary btn-lg" style="width: 100%;">Fazer Upgrade</a>
-                    <% } %>
+                
+                <div style="background: #111; padding: 20px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #333;">
+                    <h4 style="color: white; margin-bottom: 10px;">Posso trocar de personal?</h4>
+                    <p style="color: #999; font-size: 0.95rem;">Sim! Se você não se adaptar à metodologia do seu treinador, pode solicitar a troca diretamente pelo suporte.</p>
                 </div>
-
-                <div class="card-box" style="border: 1px solid #333; opacity: 0.6;">
-                    <h3 style="font-size: 1.5rem; color: white;">Momentum Pro</h3>
-                    <div style="font-size: 2.5rem; font-weight: 800; color: white; margin: 15px 0;">
-                        R$ 89,90 <span style="font-size: 1rem; font-weight: 400; color: #888;">/mês</span>
-                    </div>
-                    <p class="text-muted" style="margin-bottom: 20px;">Acompanhamento VIP completo.</p>
-                    
-                    <ul style="list-style: none; margin-bottom: 30px; text-align: left; padding: 0;">
-                        <li style="margin-bottom: 10px; color: #ccc;"><i class="fas fa-check text-neon"></i> Tudo do Básico</li>
-                        <li style="margin-bottom: 10px; color: #ccc;"><i class="fas fa-check text-neon"></i> Nutricionista Dedicado</li>
-                        <li style="margin-bottom: 10px; color: #ccc;"><i class="fas fa-check text-neon"></i> Videoconferência Mensal</li>
-                    </ul>
-
-                    <button class="btn btn-outline" disabled style="width: 100%; cursor: not-allowed; border-style: dashed;">Em Breve</button>
-                </div>
-
             </div>
         </div>
     </section>
+
 </main>
+
 <%- include('../partials/footer.ejs') %>

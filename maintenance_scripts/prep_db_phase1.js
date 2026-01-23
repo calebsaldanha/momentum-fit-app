@@ -5,14 +5,14 @@ async function prepareDatabase() {
     try {
         console.log('���️ Verificando schema do banco de dados...');
         
-        // Adiciona colunas na tabela de treinos (Workouts)
+        // Colunas para Treinos (evita erro no Dashboard)
         await db.query(`
             ALTER TABLE workouts 
             ADD COLUMN IF NOT EXISTS muscle_group VARCHAR(100),
             ADD COLUMN IF NOT EXISTS difficulty VARCHAR(50);
         `);
 
-        // Adiciona colunas na tabela de clientes (Anamnese detalhada)
+        // Colunas para Anamnese IA (evita erro no Perfil)
         await db.query(`
             ALTER TABLE clients 
             ADD COLUMN IF NOT EXISTS sleep_hours VARCHAR(50),
@@ -23,7 +23,7 @@ async function prepareDatabase() {
             ADD COLUMN IF NOT EXISTS motivation_source TEXT;
         `);
 
-        console.log('✅ Banco de dados preparado para novas funcionalidades.');
+        console.log('✅ Banco de dados preparado.');
         process.exit(0);
     } catch (err) {
         console.error('❌ Erro na preparação do banco:', err);

@@ -20,7 +20,7 @@
         <nav class="desktop-nav">
             <a href="/" class="nav-link">Início</a>
             <a href="/plans" class="nav-link">Planos</a>
-            <a href="/#about" class="nav-link">Sobre</a>
+            <a href="/about" class="nav-link">Sobre</a>
             <a href="/contact" class="nav-link">Contato</a>
         </nav>
 
@@ -52,27 +52,15 @@
             <button class="close-btn" onclick="toggleMobileMenu()">&times;</button>
         </div>
         <div class="mobile-links">
-            <% if (typeof user !== 'undefined' && user) { %>
-                <% 
-                    let dashLink = '/client/dashboard';
-                    if (user.role === 'trainer') dashLink = '/trainer/dashboard';
-                    if (user.role === 'admin') dashLink = '/admin/dashboard';
-                %>
-                <a href="<%= dashLink %>" style="color: var(--primary-color);">
-                    <i class="fas fa-columns"></i> Acessar Painel
-                </a>
-                <a href="/auth/logout">Sair</a>
-                <hr style="border-color: #333; margin: 15px 0;">
-            <% } %>
-            
             <a href="/">Início</a>
             <a href="/plans">Planos</a>
             <a href="/contact">Contato</a>
-            
-            <% if (!user) { %>
-                <hr style="border-color: #333; margin: 15px 0;">
+            <% if (typeof user !== 'undefined' && user) { %>
+                <a href="/client/dashboard">Meu Painel</a>
+                <a href="/auth/logout">Sair</a>
+            <% } else { %>
                 <a href="/auth/login">Login</a>
-                <a href="/auth/register" style="color: var(--primary-color);">Criar Conta</a>
+                <a href="/auth/register">Criar Conta</a>
             <% } %>
         </div>
     </div>
