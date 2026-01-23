@@ -12,18 +12,15 @@
                     <span class="text-gradient">A Sua Jornada Começa Agora.</span>
                 </h1>
                 <p class="hero-subtitle">
-                    Conecte-se com personal trainers qualificados para planos de treino personalizados e acompanhamento contínuo. Alcance os seus objetivos com o Momentum Fit.
+                    Conecte-se com personal trainers de elite para planos personalizados, dieta e acompanhamento contínuo via IA.
+                    Alcance sua melhor versão com o Momentum Fit.
                 </p>
                 <div class="hero-buttons">
-                    <% if (!isAuthenticated) { %>
-                        <a href="/auth/register" class="btn btn-primary btn-lg">Comece Sua Transformação <i class="fas fa-arrow-right"></i></a>
-                        <a href="#about" class="btn btn-outline btn-lg">Saiba Mais</a>
-                    <% } else if (user.role === 'client') { %>
+                    <% if (typeof user !== 'undefined' && user) { %>
                         <a href="/client/dashboard" class="btn btn-primary btn-lg">Meu Dashboard</a>
-                    <% } else if (user.role === 'trainer') { %>
-                        <a href="/trainer/dashboard" class="btn btn-primary btn-lg">Painel do Treinador</a>
                     <% } else { %>
-                        <a href="/admin/dashboard" class="btn btn-primary btn-lg">Dashboard Admin</a>
+                        <a href="/auth/register" class="btn btn-primary btn-lg">Começar Agora <i class="fas fa-arrow-right"></i></a>
+                        <a href="#plans" class="btn btn-outline btn-lg">Ver Planos</a>
                     <% } %>
                 </div>
             </div>
@@ -33,56 +30,81 @@
     <section id="about" class="section-padding bg-subtle">
         <div class="container">
             <div class="section-header center">
-                <h2 class="section-title">O Caminho para Seus Melhores Resultados</h2>
-                <p style="color: #a0a0a0; font-size: 1.1rem;">Um processo simples e estruturado para o seu sucesso.</p>
+                <h2 class="section-title">Metodologia Comprovada</h2>
+                <p style="color: #a0a0a0; font-size: 1.1rem;">Unimos expertise humana com inteligência de dados.</p>
             </div>
 
             <div class="features-grid">
                 <div class="feature-card">
                     <div class="icon-box"><i class="fas fa-bullseye"></i></div>
-                    <h3>Defina Seu Alvo</h3>
-                    <p style="color: #888;">Comece com um questionário rápido para entendermos seus objetivos exatos: emagrecimento, hipertrofia ou performance.</p>
+                    <h3>Diagnóstico Preciso</h3>
+                    <p style="color: #888;">Nossa IA analisa seu perfil, histórico e objetivos para conectar você ao treinador ideal.</p>
                 </div>
                 <div class="feature-card">
-                    <div class="icon-box"><i class="fas fa-clipboard-list"></i></div>
-                    <h3>Plano Personalizado</h3>
-                    <p style="color: #888;">Receba um plano de treino 100% adaptado por um de nossos especialistas, focado na sua rotina e limitações.</p>
+                    <div class="icon-box"><i class="fas fa-mobile-alt"></i></div>
+                    <h3>Treino na Palma da Mão</h3>
+                    <p style="color: #888;">Acesse seus treinos, vídeos explicativos e registre cargas diretamente pelo app.</p>
                 </div>
                 <div class="feature-card">
-                    <div class="icon-box"><i class="fas fa-route"></i></div>
-                    <h3>Acompanhamento</h3>
-                    <p style="color: #888;">Execute seus treinos, registre seu progresso (check-ins) e tire dúvidas em tempo real pelo chat privado.</p>
+                    <div class="icon-box"><i class="fas fa-comments"></i></div>
+                    <h3>Suporte Real</h3>
+                    <p style="color: #888;">Converse com seu treinador via chat integrado para ajustes rápidos e motivação diária.</p>
                 </div>
                 <div class="feature-card">
                     <div class="icon-box"><i class="fas fa-chart-line"></i></div>
-                    <h3>Evolução</h3>
-                    <p style="color: #888;">Seu treinador ajusta o plano com base nos seus dados e feedback, garantindo que o seu progresso nunca pare.</p>
+                    <h3>Evolução Constante</h3>
+                    <p style="color: #888;">Gráficos detalhados do seu progresso de peso, medidas e consistência nos treinos.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <section id="features" class="section-padding">
+    <section id="plans" class="section-padding">
         <div class="container">
             <div class="section-header center">
-                <h2 class="section-title">A Tecnologia por Trás do Momentum</h2>
+                <h2 class="section-title">Escolha Seu Plano</h2>
+                <p style="color: #a0a0a0;">Investimento simples para resultados complexos.</p>
             </div>
             
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="icon-box"><i class="fas fa-dumbbell"></i></div>
-                    <h3>Treinos Focados</h3>
-                    <p style="color: #888;">Planos de treino otimizados para maximizar seus resultados, com foco em técnica e consistência.</p>
+            <div class="features-grid" style="align-items: center;">
+                <div class="feature-card" style="border: 1px solid #333;">
+                    <h3 style="font-size: 1.5rem; margin-bottom: 10px;">Mensal</h3>
+                    <div style="font-size: 2.5rem; font-weight: 800; color: white; margin-bottom: 20px;">
+                        R$ 89,90<span style="font-size: 1rem; color: #666; font-weight: 400;">/mês</span>
+                    </div>
+                    <ul style="margin-bottom: 30px; color: #ccc; padding-left: 20px;">
+                        <li style="margin-bottom: 10px;">• Treino personalizado</li>
+                        <li style="margin-bottom: 10px;">• Chat com Treinador</li>
+                        <li style="margin-bottom: 10px;">• Acesso ao App</li>
+                    </ul>
+                    <a href="/auth/register?plan=monthly" class="btn btn-outline" style="width: 100%;">Assinar Mensal</a>
                 </div>
-                <div class="feature-card">
-                    <div class="icon-box"><i class="fas fa-comments"></i></div>
-                    <h3>Comunicação Direta</h3>
-                    <p style="color: #888;">Use nosso chat embutido para ter acesso rápido ao seu personal, sem intermediários.</p>
+
+                <div class="feature-card plan-featured" style="border-color: var(--primary-color);">
+                    <div style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: var(--primary-color); color: #000; padding: 5px 15px; border-radius: 20px; font-weight: 700; font-size: 0.8rem;">MAIS POPULAR</div>
+                    <h3 style="font-size: 1.5rem; margin-bottom: 10px; color: var(--primary-color);">Trimestral</h3>
+                    <div style="font-size: 2.5rem; font-weight: 800; color: white; margin-bottom: 20px;">
+                        R$ 79,90<span style="font-size: 1rem; color: #666; font-weight: 400;">/mês</span>
+                    </div>
+                    <ul style="margin-bottom: 30px; color: #fff; padding-left: 20px;">
+                        <li style="margin-bottom: 10px;">• <strong>Tudo do Mensal</strong></li>
+                        <li style="margin-bottom: 10px;">• Avaliação por IA Grátis</li>
+                        <li style="margin-bottom: 10px;">• Prioridade no Suporte</li>
+                    </ul>
+                    <a href="/auth/register?plan=quarterly" class="btn btn-primary" style="width: 100%;">Assinar Agora</a>
                 </div>
-                <div class="feature-card">
-                    <div class="icon-box"><i class="fas fa-chart-bar"></i></div>
-                    <h3>Métricas e Check-ins</h3>
-                    <p style="color: #888;">Acompanhe seu desempenho e feedback de treino para ver seu progresso de forma clara e motivadora.</p>
+
+                 <div class="feature-card" style="border: 1px solid #333;">
+                    <h3 style="font-size: 1.5rem; margin-bottom: 10px;">Anual</h3>
+                    <div style="font-size: 2.5rem; font-weight: 800; color: white; margin-bottom: 20px;">
+                        R$ 69,90<span style="font-size: 1rem; color: #666; font-weight: 400;">/mês</span>
+                    </div>
+                    <ul style="margin-bottom: 30px; color: #ccc; padding-left: 20px;">
+                        <li style="margin-bottom: 10px;">• Economia de 25%</li>
+                        <li style="margin-bottom: 10px;">• Consultoria Nutricional (Beta)</li>
+                        <li style="margin-bottom: 10px;">• Acesso Vitalício ao Histórico</li>
+                    </ul>
+                    <a href="/auth/register?plan=annual" class="btn btn-outline" style="width: 100%;">Assinar Anual</a>
                 </div>
             </div>
         </div>

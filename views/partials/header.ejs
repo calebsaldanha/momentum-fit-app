@@ -4,62 +4,83 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Momentum Fit</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/css/styles.css">
-    <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
 <header class="main-header">
     <div class="header-container">
         <a href="/" class="brand-logo">
-            <img src="/images/momentum-fit-icon.png" alt="Logo" class="logo-icon">
-            <span>Momentum Fit</span>
+            <img src="/images/momentum-fit-icon.png" alt="Icon" class="logo-icon">
+            <span>Momentum</span>
         </a>
 
         <nav class="desktop-nav">
-            <a href="/" class="nav-link">Home</a>
-            <a href="/about" class="nav-link">Sobre</a>
+            <a href="/" class="nav-link">Início</a>
             <a href="/plans" class="nav-link">Planos</a>
+            <a href="/#about" class="nav-link">Sobre</a>
             <a href="/contact" class="nav-link">Contato</a>
         </nav>
 
         <div class="desktop-actions">
-            <% if (locals.user) { %>
-                <span class="user-greeting">Olá, <strong><%= user.name.split(' ')[0] %></strong></span>
+            <% if (typeof user !== 'undefined' && user) { %>
+                <% 
+                    let dashboardLink = '/client/dashboard';
+                    if (user.role === 'trainer') dashboardLink = '/trainer/dashboard';
+                    if (user.role === 'admin' || user.role === 'superadmin') dashboardLink = '/admin/dashboard';
+                %>
+                <a href="<%= dashboardLink %>" class="btn btn-primary btn-sm">
+                    <i class="fas fa-columns"></i> Painel
+                </a>
                 <a href="/auth/logout" class="btn btn-outline btn-sm">Sair</a>
             <% } else { %>
-                <a href="/auth/login" class="btn btn-outline btn-sm">Entrar</a>
-                <a href="/auth/register" class="btn btn-primary btn-sm">Cadastrar</a>
+                <a href="/auth/login" class="nav-link">Login</a>
+                <a href="/auth/register" class="btn btn-primary btn-sm">Criar Conta</a>
             <% } %>
         </div>
 
-        <button class="hamburger-btn mobile-only" id="mobileMenuBtn">
+        <button class="hamburger-btn" onclick="toggleMobileMenu()">
             <i class="fas fa-bars"></i>
         </button>
     </div>
+
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-header">
+            <span class="brand-logo">Momentum</span>
+            <button class="close-btn" onclick="toggleMobileMenu()">&times;</button>
+        </div>
+        <div class="mobile-links">
+            <% if (typeof user !== 'undefined' && user) { %>
+                <% 
+                    let dashLink = '/client/dashboard';
+                    if (user.role === 'trainer') dashLink = '/trainer/dashboard';
+                    if (user.role === 'admin') dashLink = '/admin/dashboard';
+                %>
+                <a href="<%= dashLink %>" style="color: var(--primary-color);">
+                    <i class="fas fa-columns"></i> Acessar Painel
+                </a>
+                <a href="/auth/logout">Sair</a>
+                <hr style="border-color: #333; margin: 15px 0;">
+            <% } %>
+            
+            <a href="/">Início</a>
+            <a href="/plans">Planos</a>
+            <a href="/contact">Contato</a>
+            
+            <% if (!user) { %>
+                <hr style="border-color: #333; margin: 15px 0;">
+                <a href="/auth/login">Login</a>
+                <a href="/auth/register" style="color: var(--primary-color);">Criar Conta</a>
+            <% } %>
+        </div>
+    </div>
 </header>
 
-<div class="mobile-menu" id="mobileMenu">
-    <div class="mobile-menu-header">
-        <span class="brand-logo">Momentum Fit</span>
-        <button class="close-btn" id="closeMenuBtn"><i class="fas fa-times"></i></button>
-    </div>
-    <div class="mobile-links">
-        <a href="/">Home</a>
-        <a href="/about">Sobre</a>
-        <a href="/plans">Planos</a>
-        <a href="/contact">Contato</a>
-        <% if (locals.user) { %>
-            <hr style="border-color: #333; margin: 10px 0;">
-            <a href="/client/dashboard" style="color: var(--primary-color);">Meu Dashboard</a>
-            <a href="/auth/logout">Sair</a>
-        <% } else { %>
-            <hr style="border-color: #333; margin: 10px 0;">
-            <a href="/auth/login">Entrar</a>
-            <a href="/auth/register" style="color: var(--primary-color);">Criar Conta</a>
-        <% } %>
-    </div>
-</div>
+<script>
+    function toggleMobileMenu() {
+        const menu = document.getElementById('mobileMenu');
+        menu.classList.toggle('active');
+    }
+</script>
