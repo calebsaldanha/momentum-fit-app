@@ -556,3 +556,108 @@ body.auth-page .auth-wrapper {
     .mobile-menu-btn { display: block; margin-right: 15px; }
     .dashboard-wrapper { padding: 20px; }
 }
+
+/* =========================================
+   8. MOBILE RESPONSIVE FIXES (SISTEMA)
+   ========================================= */
+
+/* Ajustes Globais para Mobile */
+@media (max-width: 992px) {
+    
+    /* Sidebar: Off-canvas (Escondida por padrão) */
+    .sidebar {
+        transform: translateX(-100%);
+        width: 280px; /* Um pouco mais larga para toque fácil */
+        box-shadow: none;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .sidebar.active {
+        transform: translateX(0);
+        box-shadow: 10px 0 50px rgba(0,0,0,0.5);
+    }
+
+    /* Conteúdo Principal: Ocupa 100% sempre no mobile */
+    .app-content {
+        margin-left: 0 !important;
+        width: 100% !important;
+        min-width: 0; /* Evita overflow de flex items */
+    }
+
+    /* Header Interno */
+    .app-header {
+        padding: 0 15px;
+        height: 70px;
+        position: sticky;
+        top: 0;
+        width: 100%;
+    }
+
+    .page-title {
+        font-size: 1.1rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 200px;
+    }
+
+    /* Botão Hambúrguer Visível */
+    .mobile-menu-btn {
+        display: block !important;
+        margin-right: 15px;
+        font-size: 1.4rem;
+        padding: 10px; /* Área de toque maior */
+        color: white;
+    }
+
+    /* Dashboard Grid: Coluna Única */
+    .dashboard-grid, .stats-row, .dashboard-main-grid {
+        grid-template-columns: 1fr !important;
+        gap: 20px;
+    }
+
+    .dashboard-wrapper {
+        padding: 20px 15px;
+    }
+
+    /* Cards */
+    .content-card {
+        padding: 20px;
+    }
+    
+    .stat-card {
+        padding: 15px;
+    }
+    
+    .stat-data h3 { font-size: 1.5rem; }
+
+    /* Tabelas Responsivas (Horizontal Scroll) */
+    .table-responsive {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+/* Scrollbar Bonita para Webkit */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: #0a0a0a; }
+::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #555; }
+
+/* Overlay escuro quando menu abre no mobile */
+.sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(4px);
+    z-index: 95;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s;
+}
+.sidebar-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}

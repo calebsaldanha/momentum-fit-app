@@ -2,71 +2,54 @@ const express = require('express');
 const router = express.Router();
 const db = require('../database/db');
 
-// Middleware para garantir que é cliente
+// Middleware de segurança
 const isClient = (req, res, next) => {
-    if (req.session.user && req.session.user.role === 'client') {
-        return next();
-    }
-    // Se for trainer tentando acessar, redireciona para trainer dashboard
-    if (req.session.user && req.session.user.role === 'trainer') {
-        return res.redirect('/trainer/dashboard');
-    }
+    if (req.session.user && req.session.user.role === 'client') return next();
+    if (req.session.user && req.session.user.role === 'trainer') return res.redirect('/trainer/dashboard');
     res.redirect('/auth/login');
 };
 
 router.use(isClient);
 
-// Dashboard
-router.get('/dashboard', (req, res) => {
-    // MOCK DATA - Substituir por queries reais do banco futuramente
-    const stats = {
-        workoutsCompleted: 12,
-        streak: 4,
-        currentWeight: 71.5
-    };
-
-    const nextWorkout = {
-        id: 1,
-        title: 'Hipertrofia A - Peito e Tríceps',
-        category: 'Força',
-        description: 'Foco na fase excêntrica do movimento. Carga moderada a alta.',
-        duration: 50,
-        exerciseCount: 7,
-        intensity: 'Alta'
-    };
-
-    res.render('pages/client-dashboard', {
+// Rota Auxiliar para renderizar views com dados padrão
+const renderApp = (res, req, view, title, extraData = {}) => {
+    res.render(view, {
         user: req.session.user,
-        path: req.path,
-        stats: stats,
-        nextWorkout: nextWorkout, // Passe null se não houver treino
-        title: 'Dashboard'
+        path: req.originalUrl, // Usa originalUrl para garantir match correto no sidebar
+        title: title,
+        notifications: [], // Placeholder
+        ...extraData
     });
+};
+
+router.get('/dashboard', (req, res) => {
+    const stats = { workoutsCompleted: 12, streak: 4, currentWeight: 71.5 };
+    const nextWorkout = { 
+        id: 1, title: 'Hipertrofia A', category: 'Força', 
+        duration: 50, exerciseCount: 7, intensity: 'Alta' 
+    };
+    renderApp(res, req, 'pages/client-dashboard', 'Visão Geral', { stats, nextWorkout });
 });
 
-// Placeholders para outras rotas do menu
 router.get('/workouts', (req, res) => {
-    res.render('pages/error', { message: 'Página de Treinos em construção (Fase 4)' });
+    renderApp(res, req, 'pages/client-workouts', 'Meus Treinos');
 });
 
 router.get('/evolution', (req, res) => {
-    res.render('pages/error', { message: 'Página de Evolução em construção' });
+    renderApp(res, req, 'pages/client-evolution', 'Minha Evolução');
 });
 
 router.get('/ai-coach', (req, res) => {
-    res.render('pages/error', { message: 'IA Coach em construção' });
+    renderApp(res, req, 'pages/client-ai-coach', 'IA Coach');
 });
 
 router.get('/diet', (req, res) => {
-    res.render('pages/error', { message: 'Nutrição em construção' });
+    // Usando placeholder visual por enquanto
+    renderApp(res, req, 'pages/error', 'Nutrição', { message: 'Módulo de Nutrição será liberado na próxima atualização.' });
 });
 
 router.get('/settings', (req, res) => {
-    res.render('pages/client-settings', { // Assegure-se que este arquivo existe ou use placeholder
-        user: req.session.user,
-        path: req.path,
-        title: 'Configurações'
-    });
+    renderApp(res, req, 'pages/client-settings', 'Configurações');
 });
 
 module.exports = router;

@@ -1,36 +1,42 @@
-<%- include('../partials/header.ejs') %>
-<div class="dashboard-container">
-    <%- include('../partials/sidebar.ejs', { path: '/client/workouts' }) %>
-    <main class="dashboard-main">
-        <div class="mobile-dash-header">
-            <button id="sidebarOpenBtn" class="btn btn-outline btn-sm"><i class="fas fa-bars"></i> Menu</button>
-            <span>Treinos</span>
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Momentum Fit</title><link rel="stylesheet" href="/css/styles.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"></head><body>
+<div class="app-layout"><%- include("../partials/sidebar.ejs") %><main class="app-content"><%- include("../partials/app-header.ejs") %><div class="dashboard-wrapper">
+    
+    <div class="content-card">
+        <div class="card-header-flex">
+            <h3 class="card-title">Meus Treinos Ativos</h3>
+            <button class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Solicitar Novo</button>
         </div>
-
-        <div class="page-header">
-            <h1>Meus <span class="text-neon">Treinos</span></h1>
-            <p>Sua ficha atualizada.</p>
+        
+        <div class="table-responsive">
+            <table style="width: 100%; border-collapse: collapse; color: #ccc;">
+                <thead>
+                    <tr style="border-bottom: 1px solid #333; text-align: left;">
+                        <th style="padding: 15px;">Nome</th>
+                        <th style="padding: 15px;">Foco</th>
+                        <th style="padding: 15px;">Duração</th>
+                        <th style="padding: 15px;">Ação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom: 1px solid #222;">
+                        <td style="padding: 15px; color: white; font-weight: 600;">Hipertrofia A</td>
+                        <td style="padding: 15px;">Peito & Tríceps</td>
+                        <td style="padding: 15px;">50 min</td>
+                        <td style="padding: 15px;">
+                            <a href="#" class="btn btn-outline btn-sm">Iniciar</a>
+                        </td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #222;">
+                        <td style="padding: 15px; color: white; font-weight: 600;">Hipertrofia B</td>
+                        <td style="padding: 15px;">Costas & Bíceps</td>
+                        <td style="padding: 15px;">55 min</td>
+                        <td style="padding: 15px;">
+                            <a href="#" class="btn btn-outline btn-sm">Iniciar</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
+    </div>
 
-        <% if (workouts && workouts.length > 0) { %>
-            <div style="display: grid; gap: 20px;">
-                <% workouts.forEach(workout => { %>
-                    <div class="card-box">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <div>
-                                <h3 style="color: white; margin-bottom: 5px;"><%= workout.title %></h3>
-                                <span class="badge-neon" style="font-size: 0.8rem;"><%= workout.day_of_week %></span>
-                            </div>
-                            <a href="/workouts/<%= workout.id %>" class="btn btn-primary btn-sm">Ver Detalhes</a>
-                        </div>
-                    </div>
-                <% }) %>
-            </div>
-        <% } else { %>
-            <div class="card-box" style="text-align: center;">
-                <p class="text-muted">Nenhum treino atribuído ainda.</p>
-            </div>
-        <% } %>
-    </main>
-</div>
-<%- include('../partials/footer.ejs') %>
+</div></main></div></body></html>
