@@ -1,4 +1,4 @@
-<%- include('../partials/header.ejs') %>
+<%- include('../partials/header.ejs', { title: 'Início', path: '/' }) %>
 
 <main class="public-content">
     
@@ -6,7 +6,7 @@
         <div class="hero-overlay"></div>
         <div class="container hero-container">
             <div class="hero-content">
-                <span class="badge-neon">Momentum Fit</span>
+                <span class="badge-neon">Momentum Fit 2.0</span>
                 <h1 class="hero-title">
                     Impulsione o Seu Progresso.<br>
                     <span class="text-gradient">A Sua Jornada Começa Agora.</span>
@@ -16,13 +16,7 @@
                 </p>
                 <div class="hero-buttons">
                     <% if (typeof user !== 'undefined' && user) { %>
-                        <% if (user.role === 'client') { %>
-                            <a href="/client/dashboard" class="btn btn-primary btn-lg">Meu Dashboard</a>
-                        <% } else if (user.role === 'trainer') { %>
-                            <a href="/trainer/dashboard" class="btn btn-primary btn-lg">Painel do Treinador</a>
-                        <% } else { %>
-                            <a href="/admin/dashboard" class="btn btn-primary btn-lg">Admin</a>
-                        <% } %>
+                        <a href="/client/dashboard" class="btn btn-primary btn-lg">Meu Dashboard</a>
                     <% } else { %>
                         <a href="/auth/register" class="btn btn-primary btn-lg">Começar Agora <i class="fas fa-arrow-right"></i></a>
                         <a href="#plans" class="btn btn-outline btn-lg">Ver Planos</a>
@@ -32,79 +26,176 @@
         </div>
     </section>
 
-    <section id="about" class="section-padding bg-subtle">
+    <section id="how-it-works" class="section-padding bg-subtle">
         <div class="container">
             <div class="section-header center">
-                <h2 class="section-title">Por que o Momentum?</h2>
-                <p style="color: #a0a0a0;">Tecnologia e expertise humana unidas.</p>
+                <h2 class="section-title">Como Funciona</h2>
+                <p style="color: #a0a0a0;">Sua evolução em 3 passos simples.</p>
             </div>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="icon-box"><i class="fas fa-robot"></i></div>
-                    <h3>IA Coach</h3>
-                    <p style="color: #888;">Análise de dados para ajustes de treino em tempo real.</p>
+            <div class="steps-grid">
+                <div class="step-item">
+                    <span class="step-number">01</span>
+                    <div class="step-content">
+                        <h3>Escolha seu Plano</h3>
+                        <p style="color: #888;">Comece gratuitamente ou escolha um plano pro para acesso a treinadores reais.</p>
+                    </div>
                 </div>
-                <div class="feature-card">
-                    <div class="icon-box"><i class="fas fa-mobile-alt"></i></div>
-                    <h3>App Intuitivo</h3>
-                    <p style="color: #888;">Treinos, vídeos e histórico na palma da mão.</p>
+                <div class="step-item">
+                    <span class="step-number">02</span>
+                    <div class="step-content">
+                        <h3>Defina Metas</h3>
+                        <p style="color: #888;">Nossa IA analisa seu perfil e cria a base. Seu treinador refina a estratégia.</p>
+                    </div>
                 </div>
-                <div class="feature-card">
-                    <div class="icon-box"><i class="fas fa-user-friends"></i></div>
-                    <h3>Personal Real</h3>
-                    <p style="color: #888;">Chat direto com seu treinador para correções e suporte.</p>
+                <div class="step-item">
+                    <span class="step-number">03</span>
+                    <div class="step-content">
+                        <h3>Treine & Evolua</h3>
+                        <p style="color: #888;">App na mão. Treine, faça check-in e receba feedback em tempo real.</p>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <section id="plans" class="section-padding">
+    <section id="about" class="section-padding">
+        <div class="container">
+            <div class="section-header center">
+                <h2 class="section-title">Por que o Momentum?</h2>
+                <p style="color: #a0a0a0;">Tecnologia e expertise humana unidas.</p>
+            </div>
+        
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="icon-box"><i class="fas fa-robot"></i></div>
+                    <h3>IA Coach</h3>
+                    <p style="color: #888;">Análise de dados para ajustes de treino e insights sobre sua performance.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon-box"><i class="fas fa-mobile-alt"></i></div>
+                    <h3>App Intuitivo</h3>
+                    <p style="color: #888;">Vídeos de execução, histórico de cargas e cronômetro integrado.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon-box"><i class="fas fa-user-friends"></i></div>
+                    <h3>Personal Real</h3>
+                    <p style="color: #888;">Chat direto com treinadores verificados para correções de técnica e motivação.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="trainers" class="section-padding bg-subtle">
+        <div class="container">
+            <div class="section-header center">
+                <h2 class="section-title">Treinadores em Destaque</h2>
+                <p style="color: #a0a0a0;">Profissionais verificados prontos para te guiar.</p>
+            </div>
+            <div class="features-grid">
+                <% const mockTrainers = [
+                    { name: 'Ricardo Silva', spec: 'Hipertrofia', img: '/images/trainer1.jpg' },
+                    { name: 'Ana Costa', spec: 'Emagrecimento', img: '/images/trainer2.jpg' },
+                    { name: 'Carlos Mendes', spec: 'Funcional', img: '/images/trainer3.jpg' }
+                ]; %>
+                <% mockTrainers.forEach(trainer => { %>
+                <div class="trainer-card">
+                    <div class="trainer-img" style="display:flex; align-items:center; justify-content:center; color:#333;">
+                        <i class="fas fa-user-ninja fa-3x"></i>
+                    </div>
+                    <div class="trainer-info">
+                        <h3><%= trainer.name %></h3>
+                        <div class="trainer-tags">
+                            <span class="tag"><%= trainer.spec %></span>
+                            <span class="tag">Online</span>
+                        </div>
+                    </div>
+                </div>
+                <% }) %>
+            </div>
+        </div>
+    </section>
+
+    <section class="section-padding">
+        <div class="container">
+            <div class="section-header center">
+                <h2 class="section-title">Histórias de Sucesso</h2>
+            </div>
+            <div class="testimonials-scroller">
+                <div class="testimonial-card">
+                    <div class="user-info">
+                        <h4>Lucas M.</h4>
+                        <span>Plano Pro</span>
+                    </div>
+                    <p style="color: #ccc; margin-top: 10px; font-size: 0.9rem;">"A combinação da IA analisando meus dados com o toque humano do treinador mudou meu jogo."</p>
+                </div>
+                <div class="testimonial-card">
+                    <div class="user-info">
+                        <h4>Fernanda P.</h4>
+                        <span>Plano Free</span>
+                    </div>
+                    <p style="color: #ccc; margin-top: 10px; font-size: 0.9rem;">"Comecei no gratuito para testar e a interface é incrível. Super fácil de usar."</p>
+                </div>
+                <div class="testimonial-card">
+                    <div class="user-info">
+                        <h4>João B.</h4>
+                        <span>Plano Basic</span>
+                    </div>
+                    <p style="color: #ccc; margin-top: 10px; font-size: 0.9rem;">"Consegui perder 5kg em 2 meses seguindo o plano à risca. Recomendo!"</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="plans" class="section-padding bg-subtle">
         <div class="container">
             <div class="section-header center">
                 <h2 class="section-title">Invista em Você</h2>
-                <p style="color: #a0a0a0;">Planos flexíveis, cancele quando quiser.</p>
+                <p style="color: #a0a0a0;">Comece hoje, evolua sempre.</p>
             </div>
             
-            <div class="features-grid" style="align-items: center;">
-                <div class="feature-card" style="border: 1px solid #333;">
-                    <h3 style="font-size: 1.5rem; margin-bottom: 10px;">Mensal</h3>
+            <div class="features-grid" style="align-items: flex-start;">
+                
+                <div class="feature-card plan-featured" style="border-color: var(--primary-color);">
+                    <h3 style="font-size: 1.5rem; margin-bottom: 10px;">Gratuito</h3>
                     <div style="font-size: 2.5rem; font-weight: 800; color: white; margin-bottom: 20px;">
-                        R$ 89,90<span style="font-size: 1rem; color: #666; font-weight: 400;">/mês</span>
+                        R$ 0<span style="font-size: 1rem; color: #666; font-weight: 400;">/mês</span>
                     </div>
                     <ul style="margin-bottom: 30px; color: #ccc; padding-left: 20px; text-align: left;">
-                        <li style="margin-bottom: 10px;">• Treino Personalizado</li>
-                        <li style="margin-bottom: 10px;">• Chat com Treinador</li>
-                        <li style="margin-bottom: 10px;">• App Mobile</li>
+                        <li style="margin-bottom: 10px;">• Acesso ao App</li>
+                        <li style="margin-bottom: 10px;">• Biblioteca Básica</li>
+                        <li style="margin-bottom: 10px;">• Tracking de Peso</li>
                     </ul>
-                    <a href="/auth/register?plan=monthly" class="btn btn-outline" style="width: 100%;">Assinar Mensal</a>
+                    <a href="/auth/register?plan=free" class="btn btn-primary" style="width: 100%;">Criar Conta Grátis</a>
                 </div>
 
-                <div class="feature-card plan-featured" style="border-color: var(--primary-color); transform: scale(1.05); background: #151515;">
-                    <div style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: var(--primary-color); color: #000; padding: 5px 15px; border-radius: 20px; font-weight: 700; font-size: 0.8rem;">MAIS POPULAR</div>
-                    <h3 style="font-size: 1.5rem; margin-bottom: 10px; color: var(--primary-color);">Trimestral</h3>
+                <div class="feature-card plan-disabled">
+                    <div class="tooltip-badge">EM BREVE</div>
+                    <h3 style="font-size: 1.5rem; margin-bottom: 10px;">Momentum Pro</h3>
                     <div style="font-size: 2.5rem; font-weight: 800; color: white; margin-bottom: 20px;">
-                        R$ 79,90<span style="font-size: 1rem; color: #666; font-weight: 400;">/mês</span>
+                        R$ 89,90
                     </div>
-                    <ul style="margin-bottom: 30px; color: #fff; padding-left: 20px; text-align: left;">
-                        <li style="margin-bottom: 10px;">• <strong>Tudo do Mensal</strong></li>
-                        <li style="margin-bottom: 10px;">• Avaliação por IA</li>
-                        <li style="margin-bottom: 10px;">• Suporte Prioritário</li>
+                    <ul style="margin-bottom: 30px; color: #666; padding-left: 20px; text-align: left;">
+                        <li style="margin-bottom: 10px;">• Treinador Dedicado</li>
+                        <li style="margin-bottom: 10px;">• Dieta Personalizada</li>
+                        <li style="margin-bottom: 10px;">• Análise de Vídeo IA</li>
                     </ul>
-                    <a href="/auth/register?plan=quarterly" class="btn btn-primary" style="width: 100%;">Assinar Agora</a>
+                    <button class="btn btn-outline" style="width: 100%; cursor: not-allowed;">Aguarde Lançamento</button>
                 </div>
 
-                 <div class="feature-card" style="border: 1px solid #333;">
-                    <h3 style="font-size: 1.5rem; margin-bottom: 10px;">Anual</h3>
+                <div class="feature-card plan-disabled">
+                    <div class="tooltip-badge">EM BREVE</div>
+                    <h3 style="font-size: 1.5rem; margin-bottom: 10px;">VIP Anual</h3>
                     <div style="font-size: 2.5rem; font-weight: 800; color: white; margin-bottom: 20px;">
-                        R$ 69,90<span style="font-size: 1rem; color: #666; font-weight: 400;">/mês</span>
+                        R$ 69,90
                     </div>
-                    <ul style="margin-bottom: 30px; color: #ccc; padding-left: 20px; text-align: left;">
+                    <ul style="margin-bottom: 30px; color: #666; padding-left: 20px; text-align: left;">
                         <li style="margin-bottom: 10px;">• Economia Máxima</li>
-                        <li style="margin-bottom: 10px;">• Nutrição (Beta)</li>
-                        <li style="margin-bottom: 10px;">• Acesso Vitalício</li>
+                        <li style="margin-bottom: 10px;">• Consultoria ao Vivo</li>
+                        <li style="margin-bottom: 10px;">• Kit de Boas-vindas</li>
                     </ul>
-                    <a href="/auth/register?plan=annual" class="btn btn-outline" style="width: 100%;">Assinar Anual</a>
+                    <button class="btn btn-outline" style="width: 100%; cursor: not-allowed;">Aguarde Lançamento</button>
                 </div>
+
             </div>
         </div>
     </section>

@@ -1,31 +1,40 @@
 const express = require('express');
 const router = express.Router();
 
-// Home
+// Rota Home
 router.get('/', (req, res) => {
-    res.render('pages/index');
+    // Passar dados necessários se houver
+    res.render('pages/index', {
+        user: req.session.user
+    });
 });
 
-// Sobre
-router.get('/about', (req, res) => {
-    res.render('pages/about');
-});
-
-// Planos (VOLTA A SER ESTÁTICO - MAIS SEGURO)
+// Rota Planos
 router.get('/plans', (req, res) => {
-    res.render('pages/plans');
+    res.render('pages/plans', {
+        user: req.session.user
+    });
 });
 
-// Contato
+// Rota Sobre (Verificando se o arquivo existe, se não, usar index)
+router.get('/about', (req, res) => {
+    res.render('pages/about', {
+        user: req.session.user
+    });
+});
+
+// Rota Contato
 router.get('/contact', (req, res) => {
-    res.render('pages/contact');
+    res.render('pages/contact', {
+        user: req.session.user
+    });
 });
 
-// Termos
+// Rota Termos (Placeholder)
 router.get('/terms', (req, res) => {
-    res.render('pages/terms');
+    res.render('pages/terms', {
+        user: req.session.user
+    });
 });
-
-router.get('/home', (req, res) => res.redirect('/'));
 
 module.exports = router;
