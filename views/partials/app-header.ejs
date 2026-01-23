@@ -1,20 +1,39 @@
 <header class="top-header">
     <div style="display: flex; align-items: center;">
-        <button class="mobile-menu-toggle" onclick="toggleAppSidebar()">
+        <button class="mobile-toggle" onclick="toggleSidebar()">
             <i class="fas fa-bars"></i>
         </button>
-        <h2 class="page-title"><%= typeof title !== 'undefined' ? title : 'Momentum' %></h2>
+        <h2 class="page-title"><%= typeof title !== 'undefined' ? title : 'Momentum Fit' %></h2>
     </div>
 
-    <div class="header-right">
-        <a href="/notifications" class="btn-icon">
+    <div class="header-tools">
+        <button class="tool-btn">
             <i class="far fa-bell"></i>
             <% if (typeof notifications !== 'undefined' && notifications.length > 0) { %>
-                <span class="notif-dot"></span>
+                <span class="badge-dot"></span>
             <% } %>
-        </a>
-        <a href="/client/settings" class="user-avatar" style="width: 32px; height: 32px; font-size: 0.9rem;">
-            <%= user.name.charAt(0).toUpperCase() %>
-        </a>
+        </button>
     </div>
 </header>
+
+<script>
+    // Script Inline de Toggle para garantir funcionamento imediato
+    function toggleSidebar() {
+        const sidebar = document.getElementById('appSidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const body = document.body;
+
+        sidebar.classList.toggle('active');
+        
+        if (overlay) {
+            overlay.classList.toggle('active');
+        }
+
+        // Bloqueia scroll no mobile quando menu aberto
+        if (window.innerWidth <= 992 && sidebar.classList.contains('active')) {
+            body.style.overflow = 'hidden';
+        } else {
+            body.style.overflow = '';
+        }
+    }
+</script>

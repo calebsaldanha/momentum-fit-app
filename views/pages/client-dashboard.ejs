@@ -3,103 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard | Momentum</title>
+    <title>Dashboard | Momentum Fit</title>
     <link rel="stylesheet" href="/css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
 <div class="app-container">
     <%- include('../partials/sidebar.ejs') %>
 
-    <main class="app-main">
+    <main class="main-content">
         <%- include('../partials/app-header.ejs', { title: 'Visão Geral' }) %>
 
-        <div class="content-wrapper">
+        <div class="content-body">
             
-            <div style="margin-bottom: 30px;">
-                <h1 style="font-size: 1.8rem; color: white; margin-bottom: 5px;">Olá, <%= user.name.split(' ')[0] %>! ���</h1>
-                <p style="color: #888;">Vamos manter o ritmo hoje?</p>
+            <div style="margin-bottom: 30px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 20px;">
+                <div>
+                    <h1 style="font-size: 2rem; color: white; margin-bottom: 5px;">Olá, <%= user.name.split(' ')[0] %>! ���</h1>
+                    <p style="color: #888;">Hoje é um ótimo dia para quebrar recordes.</p>
+                </div>
+                <a href="/client/workouts" class="btn btn-primary">
+                    <i class="fas fa-play"></i> Iniciar Treino
+                </a>
             </div>
 
-            <div class="grid-kpi">
+            <div class="kpi-grid">
                 <div class="card kpi-card">
                     <div class="kpi-icon"><i class="fas fa-dumbbell"></i></div>
-                    <div>
-                        <div class="kpi-value"><%= stats.workoutsCompleted || 0 %></div>
-                        <div class="kpi-label">Treinos Mês</div>
+                    <div class="kpi-data">
+                        <h3><%= stats.workoutsCompleted || 0 %></h3>
+                        <span>Treinos (Mês)</span>
                     </div>
                 </div>
                 <div class="card kpi-card">
-                    <div class="kpi-icon" style="color: #ff9f43;"><i class="fas fa-fire"></i></div>
-                    <div>
-                        <div class="kpi-value"><%= stats.streak || 0 %></div>
-                        <div class="kpi-label">Dias Seguidos</div>
+                    <div class="kpi-icon" style="color: #ff9f43; border-color: rgba(255,159,67,0.3); background: rgba(255,159,67,0.05);"><i class="fas fa-fire"></i></div>
+                    <div class="kpi-data">
+                        <h3><%= stats.streak || 0 %></h3>
+                        <span>Dias Seguidos</span>
                     </div>
                 </div>
                 <div class="card kpi-card">
-                    <div class="kpi-icon" style="color: #00cec9;"><i class="fas fa-weight"></i></div>
-                    <div>
-                        <div class="kpi-value"><%= stats.currentWeight || '--' %>kg</div>
-                        <div class="kpi-label">Peso Atual</div>
+                    <div class="kpi-icon" style="color: #00cec9; border-color: rgba(0,206,201,0.3); background: rgba(0,206,201,0.05);"><i class="fas fa-weight"></i></div>
+                    <div class="kpi-data">
+                        <h3><%= stats.currentWeight || '--' %>kg</h3>
+                        <span>Peso Atual</span>
                     </div>
                 </div>
             </div>
 
-            <div class="grid-dashboard">
+            <div class="dash-layout">
                 
                 <div style="display: flex; flex-direction: column; gap: 30px;">
                     
-                    <div class="card workout-today">
-                        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                            <span class="badge badge-neon">Próxima Sessão</span>
-                            <a href="/client/workouts" style="color:#aaa; font-size:0.9rem;">Ver todos</a>
+                    <div class="card card-highlight">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                            <span class="badge badge-success">Sugerido para Hoje</span>
+                            <small style="color: #666;">Hipertrofia</small>
                         </div>
                         
                         <% if (nextWorkout) { %>
-                            <h2><%= nextWorkout.title %></h2>
-                            <p style="color: #ccc;"><%= nextWorkout.description || 'Foco total na execução.' %></p>
+                            <h2 style="font-size: 1.6rem; color: white; margin-bottom: 10px;"><%= nextWorkout.title %></h2>
+                            <p style="color: #ccc; margin-bottom: 20px; font-size: 0.95rem;"><%= nextWorkout.description || 'Foco em execução controlada e carga progressiva.' %></p>
                             
-                            <div class="workout-meta">
-                                <span><i class="far fa-clock"></i> <%= nextWorkout.duration || 60 %> min</span>
-                                <span><i class="fas fa-layer-group"></i> <%= nextWorkout.exerciseCount || 0 %> exercícios</span>
-                                <span style="color: #ff6b6b;"><i class="fas fa-bolt"></i> <%= nextWorkout.intensity || 'Alta' %></span>
+                            <div style="display: flex; gap: 20px; color: #888; font-size: 0.9rem; margin-bottom: 25px;">
+                                <span><i class="far fa-clock" style="color: var(--primary);"></i> <%= nextWorkout.duration || 45 %> min</span>
+                                <span><i class="fas fa-list-ul" style="color: var(--primary);"></i> <%= nextWorkout.exerciseCount || 0 %> exercícios</span>
+                                <span><i class="fas fa-bolt" style="color: var(--primary);"></i> Intenso</span>
                             </div>
 
-                            <a href="/workouts/start/<%= nextWorkout.id %>" class="btn btn-primary" style="width: 100%;">
-                                <i class="fas fa-play"></i> Iniciar Treino
-                            </a>
+                            <div style="display: flex; gap: 15px;">
+                                <a href="/workouts/start/<%= nextWorkout.id %>" class="btn btn-primary" style="flex: 1;">Começar Agora</a>
+                                <a href="/workouts/details/<%= nextWorkout.id %>" class="btn btn-outline">Detalhes</a>
+                            </div>
                         <% } else { %>
-                            <div style="padding: 20px 0; text-align: center;">
-                                <h3 style="color: white;">Descanso merecido! ���</h3>
-                                <p style="color: #888;">Nenhum treino agendado para hoje.</p>
-                                <a href="/client/workouts" class="btn btn-outline btn-sm" style="margin-top: 15px;">Explorar Treinos</a>
+                            <div style="text-align: center; padding: 20px;">
+                                <p style="color: #888;">Tudo pronto! Você não tem treinos pendentes.</p>
+                                <a href="/client/workouts" class="btn btn-outline btn-sm" style="margin-top: 10px;">Ver Biblioteca</a>
                             </div>
                         <% } %>
                     </div>
 
                     <div class="card">
-                        <h3 style="color: white; margin-bottom: 20px; font-size: 1.1rem;">Últimas Atividades</h3>
-                        <div class="table-responsive">
-                            <table style="width: 100%; border-collapse: collapse; color: #ccc; font-size: 0.9rem;">
+                        <h3 style="color: white; font-size: 1.1rem; margin-bottom: 20px;">Atividades Recentes</h3>
+                        <div style="overflow-x: auto;">
+                            <table style="width: 100%; border-collapse: collapse; min-width: 400px;">
                                 <thead>
-                                    <tr style="border-bottom: 1px solid #222; text-align: left;">
-                                        <th style="padding: 10px;">Treino</th>
-                                        <th style="padding: 10px;">Data</th>
-                                        <th style="padding: 10px;">Duração</th>
+                                    <tr style="text-align: left; color: #666; font-size: 0.85rem; border-bottom: 1px solid #222;">
+                                        <th style="padding-bottom: 10px;">Treino</th>
+                                        <th style="padding-bottom: 10px;">Data</th>
+                                        <th style="padding-bottom: 10px;">Duração</th>
+                                        <th style="padding-bottom: 10px; text-align: right;">Status</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td style="padding: 12px 10px;">Superiores A</td>
-                                        <td style="padding: 12px 10px;">Ontem</td>
-                                        <td style="padding: 12px 10px;">55 min</td>
+                                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.02);">
+                                        <td style="padding: 15px 0; color: white;">Treino A (Peito)</td>
+                                        <td style="padding: 15px 0; color: #888;">Ontem</td>
+                                        <td style="padding: 15px 0; color: #888;">55 min</td>
+                                        <td style="padding: 15px 0; text-align: right;"><span style="color: var(--primary); font-size: 0.8rem;"><i class="fas fa-check"></i> Feito</span></td>
                                     </tr>
                                     <tr>
-                                        <td style="padding: 12px 10px;">Pernas B</td>
-                                        <td style="padding: 12px 10px;">17/01</td>
-                                        <td style="padding: 12px 10px;">62 min</td>
+                                        <td style="padding: 15px 0; color: white;">Cardio Leve</td>
+                                        <td style="padding: 15px 0; color: #888;">18/01</td>
+                                        <td style="padding: 15px 0; color: #888;">30 min</td>
+                                        <td style="padding: 15px 0; text-align: right;"><span style="color: var(--primary); font-size: 0.8rem;"><i class="fas fa-check"></i> Feito</span></td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -109,37 +117,35 @@
 
                 <div style="display: flex; flex-direction: column; gap: 30px;">
                     
-                    <div class="card ia-insight">
-                        <h3 style="color: var(--primary); font-size: 1.1rem; margin-bottom: 15px;">
-                            <i class="fas fa-robot"></i> Coach IA
-                        </h3>
-                        <p style="color: #ddd; font-style: italic; font-size: 0.9rem; line-height: 1.5;">
-                            "Notei que sua carga no Supino estagnou. Que tal tentarmos uma técnica de Drop-set hoje?"
+                    <div class="card" style="background: linear-gradient(180deg, rgba(190, 242, 2, 0.05) 0%, #111 100%); border-color: rgba(190, 242, 2, 0.2);">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                            <i class="fas fa-robot" style="color: var(--primary);"></i>
+                            <h3 style="color: white; font-size: 1rem;">Insight IA</h3>
+                        </div>
+                        <p style="color: #ccc; font-style: italic; font-size: 0.9rem; line-height: 1.5; margin-bottom: 20px;">
+                            "Sua consistência aumentou 20% esta semana! Continue assim para bater sua meta de peso até o fim do mês."
                         </p>
-                        <a href="/client/ai-coach" class="btn btn-outline btn-sm" style="width: 100%; margin-top: 15px; border-color: var(--primary); color: var(--primary);">
-                            Conversar
-                        </a>
+                        <a href="/client/ai-coach" class="btn btn-outline btn-sm" style="width: 100%;">Conversar com Coach</a>
                     </div>
 
                     <div class="card">
-                        <h3 style="color: white; font-size: 1.1rem; margin-bottom: 15px;">Acesso Rápido</h3>
+                        <h3 style="color: white; font-size: 1rem; margin-bottom: 15px;">Acesso Rápido</h3>
                         <div style="display: flex; flex-direction: column; gap: 10px;">
-                            <a href="/client/evolution" class="btn btn-outline" style="justify-content: flex-start; border-color: #333; color: #ccc;">
+                            <a href="/client/evolution" class="btn btn-outline" style="justify-content: flex-start; text-align: left; border-color: #333; color: #aaa;">
                                 <i class="fas fa-weight-scale" style="width: 25px;"></i> Registrar Peso
                             </a>
-                            <a href="#" class="btn btn-outline" style="justify-content: flex-start; border-color: #333; color: #ccc;">
+                            <a href="#" class="btn btn-outline" style="justify-content: flex-start; text-align: left; border-color: #333; color: #aaa;">
                                 <i class="fas fa-camera" style="width: 25px;"></i> Foto de Progresso
                             </a>
                         </div>
                     </div>
 
                 </div>
-
             </div>
+
         </div>
     </main>
 </div>
 
-<script src="/js/layout.js"></script>
 </body>
 </html>

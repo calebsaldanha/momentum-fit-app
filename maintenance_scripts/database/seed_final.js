@@ -992,7 +992,7 @@ async function seed() {
             console.log(`✅ ${name}`);
             count++;
         }
-        console.log(`\n�� Sucesso! ${count} exercícios processados.`);
+        console.log(`\n Sucesso! ${count} exercícios processados.`);
     } catch (err) {
         console.error("❌ Erro fatal:", err);
     } finally {
