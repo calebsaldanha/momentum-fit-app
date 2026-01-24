@@ -1,34 +1,55 @@
-/* =========================================
-   DASHBOARD LOGIC ONLY
-   ========================================= */
+/**
+ * Momentum Fit - Main Scripts
+ * Handles Layout, Sidebar, and UI Interactions
+ */
 
-// Função para alternar a Sidebar (Menu Lateral do Painel)
-function toggleSidebar() {
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('dashboardOverlay');
-    
-    if (sidebar) sidebar.classList.toggle('active');
-    if (overlay) overlay.classList.toggle('active');
-}
+(function() {
+    // --- SIDEBAR LOGIC ---
+    window.toggleSidebar = function() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('dashboardOverlay');
+        const body = document.body;
 
-// Fechar Sidebar ao clicar fora (Overlay)
-document.addEventListener('click', function(e) {
-    const overlay = document.getElementById('dashboardOverlay');
-    const sidebar = document.getElementById('sidebar');
-    
-    if (e.target === overlay) {
-        if (sidebar) sidebar.classList.remove('active');
-        if (overlay) overlay.classList.remove('active');
-    }
-});
+        if (sidebar && overlay) {
+            const isActive = sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+            
+            // Travar scroll no mobile para evitar rolar o fundo
+            if (window.innerWidth < 992) {
+                body.style.overflow = isActive ? 'hidden' : '';
+            }
+        } else {
+            console.error('Sidebar elements not found in DOM');
+        }
+    };
 
-// Fechar alertas automaticamente após 5 segundos
-document.addEventListener('DOMContentLoaded', () => {
-    const alerts = document.querySelectorAll('.alert');
-    alerts.forEach(alert => {
-        setTimeout(() => {
-            alert.style.opacity = '0';
-            setTimeout(() => alert.remove(), 500);
-        }, 5000);
+    // Fechar ao clicar no overlay
+    document.addEventListener('click', function(e) {
+        if (e.target.id === 'dashboardOverlay') {
+            window.toggleSidebar();
+        }
     });
-});
+
+    // --- ALERTS AUTO-CLOSE ---
+    document.addEventListener('DOMContentLoaded', () => {
+        const alerts = document.querySelectorAll('.alert');
+        if (alerts.length > 0) {
+            setTimeout(() => {
+                alerts.forEach(alert => {
+                    alert.style.transition = 'opacity 0.5s ease';
+                    alert.style.opacity = '0';
+                    setTimeout(() => alert.remove(), 500);
+                });
+            }, 5000); // 5 segundos
+        }
+    });
+
+    // --- MOBILE MENU PUBLICO ---
+    window.togglePublicMenu = function() {
+        const menu = document.getElementById('publicMenu');
+        if (menu) {
+            const isActive = menu.classList.toggle('active');
+            document.body.style.overflow = isActive ? 'hidden' : '';
+        }
+    };
+})();

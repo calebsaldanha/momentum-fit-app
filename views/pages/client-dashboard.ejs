@@ -12,7 +12,10 @@
 <body>
 
 <div class="dashboard-layout">
+    
     <%- include('../partials/sidebar.ejs') %>
+    
+    <div id="dashboardOverlay" class="dashboard-overlay"></div>
 
     <main class="app-main">
         <%- include('../partials/app-header.ejs') %>
@@ -38,34 +41,18 @@
                         <p style="margin:0; color:#888; font-size:0.85rem;">Peso (kg)</p>
                     </div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-icon"><i class="fas fa-fire"></i></div>
-                    <div>
-                        <h3 style="margin:0; color:white; font-size: 1.5rem;"><%= stats.streak || 0 %></h3>
-                        <p style="margin:0; color:#888; font-size:0.85rem;">Sequência</p>
-                    </div>
-                </div>
             </div>
-
+            
             <div class="grid-2-col">
                 <div class="feature-card">
                     <h3 style="font-size: 1.2rem; display: flex; align-items: center; gap: 10px;">
-                        <i class="fas fa-calendar-day" style="color: var(--primary);"></i> Próximo Treino
+                        <i class="fas fa-play-circle" style="color: var(--primary);"></i> Treino Rápido
                     </h3>
-                    <p style="margin-bottom: 20px;">Treino de Superiores (Força)</p>
-                    <a href="/client/workouts" class="btn btn-primary btn-sm" style="text-align: center;">Começar Agora</a>
-                </div>
-                
-                <div class="feature-card">
-                    <h3 style="font-size: 1.2rem;">Histórico Recente</h3>
-                    <ul style="list-style: none; padding: 0; margin: 0;">
-                        <li style="padding: 12px 0; border-bottom: 1px solid #222; display: flex; justify-content: space-between; color: #ccc; font-size: 0.9rem;">
-                            <span>Nenhum treino registrado</span>
-                            <span style="color: #666;">-</span>
-                        </li>
-                    </ul>
+                    <p style="margin-bottom: 20px;">Sem tempo? Gere um treino de 20min com IA.</p>
+                    <a href="/client/ai-coach" class="btn btn-outline btn-sm text-center">Gerar Agora</a>
                 </div>
             </div>
+
         </div>
     </main>
 </div>

@@ -1,16 +1,17 @@
 <aside class="sidebar" id="sidebar">
     
-    <div class="sidebar-header">
-        <a href="/" class="sidebar-brand">
-            <img src="/images/momentum-fit-icon.png" alt="Momentum" class="logo-rounded" style="width: 35px; height: 35px; border: 2px solid #bef202;">
-            <span>Momentum</span>
+    <div class="sidebar-header" style="display: flex; justify-content: space-between; align-items: center;">
+        <a href="/" class="sidebar-brand" style="display: flex; align-items: center; gap: 10px; text-decoration: none;">
+            <img src="/images/momentum-fit-icon.png" alt="Momentum" class="logo-rounded">
+            <span style="font-weight: 800; font-size: 1.2rem; color: white;">Momentum</span>
         </a>
+        
         <button class="sidebar-close-btn" onclick="toggleSidebar()" aria-label="Fechar Menu">
             <i class="fas fa-times"></i>
         </button>
     </div>
 
-    <nav class="sidebar-nav" style="flex: 1; overflow-y: auto;">
+    <nav class="sidebar-nav" style="flex: 1; overflow-y: auto; padding-top: 20px;">
         
         <% if (user.role === 'client') { %>
             <a href="/client/dashboard" class="nav-link <%= path === '/client/dashboard' ? 'active' : '' %>">
@@ -26,38 +27,35 @@
                 <i class="fas fa-robot"></i> <span>Coach IA</span>
             </a>
             <a href="/client/financial" class="nav-link <%= path.includes('/financial') ? 'active' : '' %>">
-                <i class="fas fa-wallet"></i> <span>Assinatura</span>
+                <i class="fas fa-credit-card"></i> <span>Assinatura</span>
             </a>
 
         <% } else if (user.role === 'trainer') { %>
             <a href="/trainer/dashboard" class="nav-link <%= path === '/trainer/dashboard' ? 'active' : '' %>">
-                <i class="fas fa-home"></i> <span>Dashboard</span>
+                <i class="fas fa-home"></i> <span>Visão Geral</span>
             </a>
             <a href="/trainer/clients" class="nav-link <%= path.includes('/clients') ? 'active' : '' %>">
-                <i class="fas fa-users"></i> <span>Alunos</span>
+                <i class="fas fa-users"></i> <span>Meus Alunos</span>
             </a>
             <a href="/trainer/library" class="nav-link <%= path.includes('/library') ? 'active' : '' %>">
                 <i class="fas fa-book-open"></i> <span>Biblioteca</span>
             </a>
-            <a href="/trainer/financial" class="nav-link <%= path.includes('/financial') ? 'active' : '' %>">
-                <i class="fas fa-dollar-sign"></i> <span>Financeiro</span>
+            <a href="/trainer/schedule" class="nav-link <%= path.includes('/schedule') ? 'active' : '' %>">
+                <i class="fas fa-calendar-alt"></i> <span>Agenda</span>
             </a>
 
         <% } else if (user.role === 'admin' || user.role === 'superadmin') { %>
             <a href="/admin/dashboard" class="nav-link <%= path === '/admin/dashboard' ? 'active' : '' %>">
-                <i class="fas fa-tachometer-alt"></i> <span>Painel</span>
+                <i class="fas fa-chart-pie"></i> <span>Painel</span>
             </a>
             <a href="/admin/users" class="nav-link <%= path.includes('/users') ? 'active' : '' %>">
-                <i class="fas fa-users"></i> <span>Usuários</span>
-            </a>
-            <a href="/admin/approvals" class="nav-link <%= path.includes('/approvals') ? 'active' : '' %>">
-                <i class="fas fa-check-double"></i> <span>Aprovações</span>
+                <i class="fas fa-users-cog"></i> <span>Usuários</span>
             </a>
         <% } %>
 
     </nav>
 
-    <div class="sidebar-footer">
+    <div class="sidebar-footer" style="padding-top: 20px; border-top: 1px solid #222;">
         <% 
             let profileLink = '/client/profile';
             if(user.role === 'trainer') profileLink = '/trainer/profile';
@@ -73,20 +71,3 @@
         </a>
     </div>
 </aside>
-
-<div id="dashboardOverlay" class="dashboard-overlay" onclick="toggleSidebar()"></div>
-
-<script>
-    function toggleSidebar() {
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('dashboardOverlay');
-        
-        if (sidebar) sidebar.classList.toggle('active');
-        if (overlay) overlay.classList.toggle('active');
-        
-        // Travar scroll do body no mobile quando menu aberto
-        if (window.innerWidth < 992) {
-            document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
-        }
-    }
-</script>
