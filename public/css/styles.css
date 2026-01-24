@@ -803,3 +803,157 @@ body {
         width: 100%;
     }
 }
+
+/* =========================================
+   16. ARCHITECTURAL FIX: PUBLIC LAYOUT ENGINE
+   ========================================= */
+
+/* --- Container Padrão (Responsivo) --- */
+.container {
+    width: 100%;
+    padding-right: 20px;
+    padding-left: 20px;
+    margin-right: auto;
+    margin-left: auto;
+}
+@media (min-width: 768px) { .container { max-width: 720px; } }
+@media (min-width: 992px) { .container { max-width: 960px; } }
+@media (min-width: 1200px) { .container { max-width: 1140px; } }
+
+/* --- Grid System Unificado (Mobile First) --- */
+/* Por padrão (mobile), tudo é coluna única */
+.features-grid, .steps-grid, .plans-grid, .footer-grid {
+    display: grid;
+    grid-template-columns: 1fr; 
+    gap: 30px;
+    width: 100%;
+    margin-top: 40px;
+}
+
+/* Tablet (2 colunas onde faz sentido) */
+@media (min-width: 768px) {
+    .steps-grid, .footer-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Desktop (3 ou 4 colunas - AQUI ESTAVA O ERRO DE FORMATAÇÃO) */
+@media (min-width: 1024px) {
+    .features-grid, .plans-grid {
+        grid-template-columns: repeat(3, 1fr); /* Força 3 cards lado a lado */
+        align-items: stretch; /* Garante mesma altura */
+    }
+    .steps-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    .footer-grid {
+        grid-template-columns: 1.5fr 1fr 1fr 1.5fr; /* Logo e News maiores */
+    }
+}
+
+/* --- Card Styles (Home & Planos) --- */
+.feature-card {
+    background: #0f0f0f;
+    border: 1px solid #222;
+    border-radius: 12px;
+    padding: 30px;
+    display: flex;
+    flex-direction: column; /* Importante para o botão ir pro final */
+    height: 100%; /* Ocupa altura total da grid */
+    transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--primary);
+}
+
+.feature-card p, .plan-desc {
+    color: #999;
+    line-height: 1.6;
+    margin-bottom: 20px;
+    flex-grow: 1; /* Empurra o conteúdo inferior para baixo */
+}
+
+/* Icon Box dentro dos cards */
+.icon-box {
+    width: 50px; height: 50px;
+    background: rgba(190, 242, 2, 0.1);
+    color: var(--primary);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+}
+
+/* --- Planos Específicos --- */
+.plan-header { text-align: center; border-bottom: 1px solid #222; padding-bottom: 20px; margin-bottom: 20px; }
+.plan-title { font-size: 1.4rem; color: white; font-weight: 700; margin-bottom: 5px; }
+.plan-price { font-size: 2.5rem; font-weight: 800; color: white; }
+.plan-price span { font-size: 1rem; color: #666; font-weight: 400; }
+.plan-features li { margin-bottom: 12px; color: #ccc; display: flex; align-items: center; gap: 10px; }
+.plan-features li i { color: var(--primary); }
+.plan-features li.muted { opacity: 0.5; }
+.plan-featured { border: 1px solid var(--primary); background: #111; transform: scale(1.05); z-index: 2; }
+@media (max-width: 1024px) { .plan-featured { transform: none; } }
+
+/* --- Footer Fix (Mobile & Desktop) --- */
+.main-footer {
+    background: #000;
+    border-top: 1px solid #1a1a1a;
+    padding: 60px 0 20px;
+    margin-top: auto;
+}
+
+.footer-col h4 {
+    color: white;
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.footer-col ul li { margin-bottom: 10px; }
+.footer-col ul li a { color: #888; transition: 0.2s; text-decoration: none; }
+.footer-col ul li a:hover { color: var(--primary); padding-left: 5px; }
+
+/* Correção Newsletter quebra de linha */
+.newsletter-form { display: flex; width: 100%; }
+.newsletter-input { 
+    flex: 1; min-width: 0; 
+    padding: 12px; background: #111; border: 1px solid #333; color: white; 
+    border-radius: 6px 0 0 6px;
+}
+.newsletter-btn {
+    padding: 0 15px; background: var(--primary); border: none; 
+    border-radius: 0 6px 6px 0; cursor: pointer; color: black;
+}
+
+/* Footer Mobile Específico */
+@media (max-width: 767px) {
+    .main-footer { padding: 40px 0; text-align: center; }
+    .footer-grid { gap: 40px; margin-top: 20px; }
+    
+    .footer-col { 
+        display: flex; flex-direction: column; align-items: center; 
+    }
+    
+    .newsletter-form { max-width: 300px; margin: 0 auto; }
+    
+    .brand-logo { justify-content: center; }
+}
+
+/* --- Hero Fix --- */
+.hero {
+    position: relative;
+    padding-top: 100px; /* Espaço para o header */
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+}
+.hero-content { max-width: 600px; position: relative; z-index: 2; }
+
+@media (max-width: 991px) {
+    .hero { min-height: auto; padding: 120px 0 60px; text-align: center; }
+    .hero-content { margin: 0 auto; }
+    .hero-buttons { justify-content: center; }
+}
