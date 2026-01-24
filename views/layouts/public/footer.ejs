@@ -1,57 +1,56 @@
-<footer class="main-footer">
+<footer class="main-footer" style="background: #000; border-top: 1px solid #222; padding: 60px 0 20px;">
     <div class="container">
-        <div class="footer-grid">
+        <div class="footer-grid" style="display: grid; gap: 40px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+            <div class="footer-col">
+                <a href="/" class="brand-logo" style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px; color: white; text-decoration: none; font-size: 1.5rem; font-weight: bold;">
+                    <img src="/images/momentum-fit-icon.png" alt="Logo" class="logo-rounded" style="width: 40px; height: 40px; border: 2px solid var(--primary); border-radius: 50%;">
+                    <span>Momentum</span>
+                </a>
+                <p style="color: #666; font-size: 0.9rem; line-height: 1.6;">
+                    Transformando potencial em performance através de tecnologia, dados e metodologia validada.
+                </p>
+            </div>
             
             <div class="footer-col">
-                <a href="/" class="brand-logo" style="margin-bottom: 20px; display: inline-flex; align-items: center; text-decoration: none;">
-                    <img src="/images/momentum-fit-icon.png" alt="Logo" class="logo-rounded" style="height: 40px; width: 40px;">
-                    <span style="font-size: 1.4rem; color: white; margin-left: 10px; font-weight: 800;">Momentum</span>
-                </a>
-                <p style="color: #888; font-size: 0.9rem; line-height: 1.6;">
-                    A plataforma definitiva que une inteligência artificial e treinadores de elite para maximizar seus resultados.
-                </p>
-                <div class="social-links" style="display: flex; gap: 15px; margin-top: 20px;">
-                    <a href="#" aria-label="Instagram" style="color: #fff;"><i class="fab fa-instagram fa-lg"></i></a>
-                    <a href="#" aria-label="Twitter" style="color: #fff;"><i class="fab fa-twitter fa-lg"></i></a>
-                    <a href="#" aria-label="YouTube" style="color: #fff;"><i class="fab fa-youtube fa-lg"></i></a>
-                </div>
-            </div>
-
-            <div class="footer-col">
-                <h4>Empresa</h4>
+                <h4 style="color: white; margin-bottom: 20px;">Plataforma</h4>
                 <ul style="list-style: none; padding: 0;">
-                    <li><a href="/about">Sobre Nós</a></li>
-                    <li><a href="/plans">Planos</a></li>
-                    <li><a href="/contact">Contato</a></li>
+                    <li style="margin-bottom: 10px;"><a href="/plans" style="color: #888;">Planos</a></li>
+                    <li style="margin-bottom: 10px;"><a href="/features" style="color: #888;">Funcionalidades</a></li>
+                    <li style="margin-bottom: 10px;"><a href="/trainers" style="color: #888;">Personais</a></li>
+                    <li style="margin-bottom: 10px;"><a href="/app" style="color: #888;">App Mobile</a></li>
                 </ul>
             </div>
-
+            
             <div class="footer-col">
-                <h4>Legal</h4>
+                <h4 style="color: white; margin-bottom: 20px;">Empresa</h4>
                 <ul style="list-style: none; padding: 0;">
-                    <li><a href="/terms">Termos de Uso</a></li>
-                    <li><a href="/privacy">Privacidade</a></li>
-                    <li><a href="/cookies">Cookies</a></li>
+                    <li style="margin-bottom: 10px;"><a href="/about" style="color: #888;">Sobre Nós</a></li>
+                    <li style="margin-bottom: 10px;"><a href="/blog" style="color: #888;">Blog</a></li>
+                    <li style="margin-bottom: 10px;"><a href="/contact" style="color: #888;">Contato</a></li>
+                    <li style="margin-bottom: 10px;"><a href="/privacy" style="color: #888;">Privacidade</a></li>
                 </ul>
             </div>
-
+            
             <div class="footer-col">
-                <h4>Fique por dentro</h4>
-                <p style="color: #888; font-size: 0.9rem; margin-bottom: 15px;">Receba dicas de treino e novidades.</p>
-                <form class="newsletter-form" onsubmit="event.preventDefault(); alert('Inscrito com sucesso!');">
-                    <input type="email" class="newsletter-input" placeholder="Seu email" required>
-                    <button type="submit" class="newsletter-btn"><i class="fas fa-paper-plane"></i></button>
+                <h4 style="color: white; margin-bottom: 20px;">Novidades</h4>
+                <p style="color: #666; font-size: 0.9rem; margin-bottom: 15px;">Receba dicas de treino e atualizações.</p>
+                <form class="newsletter-form" onsubmit="event.preventDefault(); alert('Inscrito com sucesso!');" style="display: flex; gap: 10px;">
+                    <input type="email" placeholder="E-mail" style="padding: 10px; background: #111; border: 1px solid #333; color: white; border-radius: 5px; flex: 1;">
+                    <button type="submit" class="btn btn-primary" style="padding: 0 15px;"><i class="fas fa-paper-plane"></i></button>
                 </form>
             </div>
         </div>
-
-        <div class="footer-bottom" style="text-align: center; border-top: 1px solid #1a1a1a; padding-top: 20px; margin-top: 50px; color: #666; font-size: 0.85rem;">
+        
+        <div style="border-top: 1px solid #222; margin-top: 50px; padding-top: 30px; text-align: center; color: #444; font-size: 0.85rem; display: flex; flex-direction: column; gap: 10px;">
             <p>&copy; 2026 Momentum Fit. Todos os direitos reservados.</p>
-            <p>Feito com <i class="fas fa-bolt" style="color: var(--primary);"></i> para performance.</p>
+            <div style="display: flex; justify-content: center; gap: 20px; font-size: 1.2rem;">
+                <a href="#" style="color: #444;"><i class="fab fa-instagram"></i></a>
+                <a href="#" style="color: #444;"><i class="fab fa-linkedin"></i></a>
+                <a href="#" style="color: #444;"><i class="fab fa-github"></i></a>
+            </div>
         </div>
     </div>
 </footer>
-
 <script src="/js/main.js"></script>
 </body>
 </html>
