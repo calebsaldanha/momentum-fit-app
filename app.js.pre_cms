@@ -63,14 +63,6 @@ app.use((req, res, next) => {
     res.locals.success_msg = req.flash('success_msg');
     res.locals.error_msg = req.flash('error_msg');
     res.locals.error = req.flash('error');
-    
-    // í·± CMS MOCK (Injetado via Script)
-    res.locals.content = { 
-        hero_title: 'Transforme Seu Potencial em Performance', 
-        hero_subtitle: 'Plataforma para Personal Trainers e Alunos.', 
-        cta_primary: 'ComeÃ§ar Agora', 
-        cta_secondary: 'Ver Planos' 
-    };
     res.locals.user = req.user || null;
     
     // ï¿½ï¿½ FIX: Injeta o caminho da rota atual para uso no header.ejs

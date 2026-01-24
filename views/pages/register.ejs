@@ -1,61 +1,54 @@
-<%- include('../partials/header.ejs', { title: 'Cadastro', path: '/auth/register' }) %>
+<%- include('../layouts/public/head') %>
+<%- include('../layouts/public/header') %>
 
-<main class="public-content">
-    <section class="hero" style="min-height: 100vh; align-items: center; justify-content: center; padding: 100px 20px;">
-        <div class="hero-overlay"></div>
-        
-        <div class="container" style="position: relative; z-index: 2; max-width: 500px; width: 100%;">
-            <div class="feature-card" style="padding: 40px; background: rgba(10, 10, 10, 0.95); border: 1px solid #333;">
+<section class="hero" style="min-height: 100vh; padding-top: 120px;">
+    <div class="hero-overlay"></div>
+    
+    <div class="container hero-container" style="display: flex; justify-content: center;">
+        <div class="feature-card" style="max-width: 450px; width: 100%; border-top: 4px solid var(--primary);">
+            <div class="center" style="margin-bottom: 20px;">
+                <h2 style="color: white; margin-bottom: 10px;">Criar Conta</h2>
+                <p style="color: #888; font-size: 0.9rem;">Comece sua jornada hoje.</p>
+            </div>
+
+            <% if (typeof error_msg !== 'undefined' && error_msg.length > 0) { %>
+                <div class="alert alert-danger"><%= error_msg %></div>
+            <% } %>
+
+            <form action="/auth/register" method="POST">
+                <div style="margin-bottom: 15px;">
+                    <label style="color: #ccc; font-size: 0.9rem; margin-bottom: 5px; display: block;">Nome Completo</label>
+                    <input type="text" name="name" required style="width: 100%; padding: 12px; background: #050505; border: 1px solid #333; color: white; border-radius: 6px;">
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label style="color: #ccc; font-size: 0.9rem; margin-bottom: 5px; display: block;">E-mail</label>
+                    <input type="email" name="email" required style="width: 100%; padding: 12px; background: #050505; border: 1px solid #333; color: white; border-radius: 6px;">
+                </div>
                 
-                <div class="text-center" style="text-align: center; margin-bottom: 30px;">
-                    <h2 style="color: white; font-size: 2rem; font-weight: 700;">Criar Conta</h2>
-                    <p style="color: #888;">Comece sua jornada hoje mesmo</p>
+                <div style="margin-bottom: 15px;">
+                    <label style="color: #ccc; font-size: 0.9rem; margin-bottom: 5px; display: block;">Senha</label>
+                    <input type="password" name="password" required minlength="6" style="width: 100%; padding: 12px; background: #050505; border: 1px solid #333; color: white; border-radius: 6px;">
                 </div>
 
-                <% if (typeof errors !== 'undefined') { %>
-                    <% errors.forEach(function(error) { %>
-                        <div class="alert alert-danger"><%= error.msg %></div>
-                    <% }); %>
-                <% } %>
-
-                <form action="/auth/register" method="POST">
-                    <div class="form-group" style="margin-bottom: 20px;">
-                        <label style="color: #ccc; margin-bottom: 8px; display: block;">Nome Completo</label>
-                        <input type="text" name="name" class="form-control" placeholder="Seu nome" required 
-                               style="width: 100%; padding: 12px; background: #222; border: 1px solid #444; border-radius: 8px; color: white;">
-                    </div>
-
-                    <div class="form-group" style="margin-bottom: 20px;">
-                        <label style="color: #ccc; margin-bottom: 8px; display: block;">Email</label>
-                        <input type="email" name="email" class="form-control" placeholder="seu@email.com" required 
-                               style="width: 100%; padding: 12px; background: #222; border: 1px solid #444; border-radius: 8px; color: white;">
-                    </div>
-
-                    <div class="form-group" style="margin-bottom: 20px;">
-                        <label style="color: #ccc; margin-bottom: 8px; display: block;">Tipo de Conta</label>
-                        <select name="role" class="form-control" required style="width: 100%; padding: 12px; background: #222; border: 1px solid #444; border-radius: 8px; color: white;">
-                            <option value="client">Aluno</option>
-                            <option value="trainer">Personal Trainer</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group" style="margin-bottom: 25px;">
-                        <label style="color: #ccc; margin-bottom: 8px; display: block;">Senha</label>
-                        <input type="password" name="password" class="form-control" placeholder="Mínimo 6 caracteres" required 
-                               style="width: 100%; padding: 12px; background: #222; border: 1px solid #444; border-radius: 8px; color: white;">
-                    </div>
-
-                    <button type="submit" class="btn btn-primary w-100" style="padding: 12px; font-weight: 600; font-size: 1rem;">
-                        Criar Conta Grátis
-                    </button>
-                </form>
-
-                <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #333;">
-                    <p style="color: #888;">Já tem conta? <a href="/auth/login" style="color: var(--primary); text-decoration: none; font-weight: 500;">Entrar</a></p>
+                <div style="margin-bottom: 20px;">
+                    <label style="color: #ccc; font-size: 0.9rem; margin-bottom: 5px; display: block;">Eu sou:</label>
+                    <select name="role" class="w-100" style="padding: 12px; background: #050505; border: 1px solid #333; color: white; border-radius: 6px;">
+                        <option value="client">Aluno</option>
+                        <option value="trainer">Personal Trainer</option>
+                    </select>
                 </div>
+
+                <button type="submit" class="btn btn-primary w-100">Criar Conta</button>
+            </form>
+
+            <div class="center" style="margin-top: 20px; font-size: 0.9rem;">
+                <p style="color: #666;">
+                    Já tem conta? <a href="/auth/login" style="color: white; text-decoration: underline;">Fazer Login</a>
+                </p>
             </div>
         </div>
-    </section>
-</main>
+    </div>
+</section>
 
-<%- include('../partials/footer.ejs') %>
+<%- include('../layouts/public/footer') %>
