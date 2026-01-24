@@ -8,10 +8,8 @@ const flash = require('./middleware/flash');
 const passport = require('passport');
 const pool = require('./database/db'); 
 
-// Ìª°Ô∏è 1. CONFIAN√áA NO PROXY (CR√çTICO PARA VERCEL)
+// Ìª°Ô∏è 1. INFRAESTRUTURA
 app.set('trust proxy', 1);
-
-// Ìª°Ô∏è 2. CONFIGURA√á√ïES B√ÅSICAS
 require('./config/passport')(passport);
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -20,7 +18,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ÔøΩÔøΩÔ∏è 3. SESS√ÉO BLINDADA (SEM RACE CONDITIONS)
+// Ìª°Ô∏è 2. SESS√ÉO ROBUSTA
 const sessionStore = new pgSession({
     pool: pool,
     tableName: 'session',
@@ -28,9 +26,7 @@ const sessionStore = new pgSession({
     pruneSessionInterval: 60 * 15
 });
 
-sessionStore.on('error', (err) => {
-    console.error('ÔøΩÔøΩ CR√çTICO: Erro no Store de Sess√£o:', err.message);
-});
+sessionStore.on('error', (err) => console.error('Ì¥• Session Store Error:', err.message));
 
 const isProduction = process.env.NODE_ENV === 'production';
 
@@ -39,13 +35,13 @@ app.use(session({
     secret: process.env.SESSION_SECRET || 'secret_dev_key_123',
     resave: false,
     saveUninitialized: false,
-    proxy: true, // Obrigat√≥rio para cookies funcionarem atr√°s do proxy da Vercel
+    proxy: true,
     rolling: true,
     cookie: { 
-        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 dias
-        secure: isProduction, // HTTPS em produ√ß√£o
+        maxAge: 30 * 24 * 60 * 60 * 1000, 
+        secure: isProduction, 
         httpOnly: true,
-        sameSite: 'lax' // Melhor equil√≠brio entre seguran√ßa e usabilidade
+        sameSite: 'lax' 
     }
 }));
 
@@ -53,21 +49,11 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
 
-// Ìª°Ô∏è 4. LOGGER DIAGN√ìSTICO (CORRIGIDO)
+// Ìª°Ô∏è 3. DIAGN√ìSTICO DE TR√ÅFEGO
 app.use((req, res, next) => {
     if (!req.path.match(/\.(css|js|png|jpg|ico|svg|woff)$/)) {
-        // Corre√ß√£o aqui: Template strings limpas
-        const proto = req.headers['x-forwarded-proto'] || req.protocol;
-        const isSecure = req.secure || proto === 'https';
-        const user = req.user ? `${req.user.email} [${req.user.role}]` : 'Visitante';
-        
         console.log(`Ì∫¶ [${req.method}] ${req.path}`);
-        console.log(`   Ì±§ Auth: ${req.isAuthenticated()} | User: ${user}`);
-        
-        // Debug de Cookie apenas se falhar
-        if (isProduction && !isSecure) {
-            console.warn("‚ö†Ô∏è ALERTA: Conex√£o insegura detectada em Prod. Cookie secure pode falhar.");
-        }
+        console.log(`   Ì±§ Auth: ${req.isAuthenticated()} | User: ${req.user ? req.user.email : 'Visitante'}`);
     }
     next();
 });
@@ -81,26 +67,39 @@ app.use((req, res, next) => {
     next();
 });
 
-// ROTAS
+// Ìª°Ô∏è 4. ROTAS (ORDEM CR√çTICA - ESPEC√çFICAS PRIMEIRO)
 try {
-    app.use('/', require('./routes/index'));
+    console.log("Ì≥Ç Carregando rotas...");
+    
+    // Rotas de API e Auth t√™m prioridade absoluta
     app.use('/auth', require('./routes/auth'));
+    app.use('/api', require('./routes/api'));
+    
+    // Rotas de Pain√©is
     app.use('/admin', require('./routes/admin'));
     app.use('/trainer', require('./routes/trainer'));
     app.use('/client', require('./routes/client'));
+    
+    // Rotas de Funcionalidades
     app.use('/workouts', require('./routes/workouts'));
     app.use('/notifications', require('./routes/notifications'));
-    app.use('/api', require('./routes/api'));
+    
+    // ‚ö†Ô∏è ROTA GEN√âRICA (INDEX) DEVE SER A √öLTIMA
+    // Se ela vier antes, rouba as requisi√ß√µes das outras.
+    app.use('/', require('./routes/index'));
+    
+    console.log("‚úÖ Rotas carregadas com sucesso.");
 } catch (err) {
-    console.error("‚ùå FALHA AO CARREGAR ROTAS:", err);
+    console.error("‚ùå ERRO FATAL NAS ROTAS:", err);
 }
+
+// Ìª°Ô∏è 5. ROTA DE DEBUG (TESTE DE VIDA)
+app.get('/health', (req, res) => res.send('OK - Server is running'));
 
 // 404 HANDLER
 app.use((req, res) => {
-    if (req.path.match(/\.(css|js|png|jpg|ico|map|json)$/)) {
-        return res.status(404).end();
-    }
-    console.warn(`‚ö†Ô∏è 404 Detectado: ${req.path}`);
+    if (req.path.match(/\.(css|js|png|jpg|ico|map|json)$/)) return res.status(404).end();
+    console.warn(`‚ö†Ô∏è 404 Real: ${req.path}`);
     res.status(404).render('pages/error', { message: 'P√°gina n√£o encontrada' });
 });
 
