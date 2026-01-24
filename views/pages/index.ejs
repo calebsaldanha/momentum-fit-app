@@ -6,19 +6,20 @@
         <div class="hero-overlay"></div>
         <div class="container hero-container">
             <div class="hero-content">
+                <span style="color: var(--primary); font-weight: 600; letter-spacing: 2px; text-transform: uppercase; font-size: 0.9rem; margin-bottom: 10px; display: block;">Evolução Constante</span>
                 <h1 class="hero-title">
-                    Impulsione o Seu Progresso.<br>
-                    <span class="text-gradient">A Sua Jornada Começa Agora.</span>
+                    Treine com <br>
+                    <span class="text-gradient">Inteligência Real</span>
                 </h1>
                 <p class="hero-subtitle">
-                    Conecte-se com personal trainers de elite para planos personalizados, dieta e acompanhamento contínuo via IA.
+                    A única plataforma que adapta seus treinos automaticamente baseada na sua performance diária e feedback.
                 </p>
                 <div class="hero-buttons">
                     <% if (typeof user !== 'undefined' && user) { %>
-                        <a href="/client/dashboard" class="btn btn-primary btn-lg">Meu Dashboard</a>
+                        <a href="/client/dashboard" class="btn btn-primary btn-lg">Acessar App</a>
                     <% } else { %>
-                        <a href="/auth/register" class="btn btn-primary btn-lg">Começar Agora <i class="fas fa-arrow-right"></i></a>
-                        <a href="#plans" class="btn btn-outline btn-lg">Ver Planos</a>
+                        <a href="/auth/register" class="btn btn-primary btn-lg">Começar Grátis</a>
+                        <a href="/plans" class="btn btn-outline btn-lg">Ver Planos</a>
                     <% } %>
                 </div>
             </div>
@@ -29,28 +30,29 @@
         <div class="container">
             <div class="section-header center">
                 <h2 class="section-title">Como Funciona</h2>
-                <p style="color: #a0a0a0;">Sua evolução em 3 passos simples.</p>
+                <p style="color: #a0a0a0; margin-top: 10px;">Metodologia simples, resultados complexos.</p>
             </div>
+            
             <div class="steps-grid">
                 <div class="step-item">
-                    <span class="step-number">01</span>
+                    <div class="step-number">01</div>
                     <div class="step-content">
-                        <h3>Escolha seu Plano</h3>
-                        <p style="color: #888;">Comece gratuitamente ou escolha um plano pro.</p>
+                        <h3>Crie seu Perfil</h3>
+                        <p style="color: #888; font-size: 0.95rem;">Responda algumas perguntas sobre seus objetivos, equipamentos disponíveis e experiência.</p>
                     </div>
                 </div>
                 <div class="step-item">
-                    <span class="step-number">02</span>
+                    <div class="step-number">02</div>
                     <div class="step-content">
-                        <h3>Defina Metas</h3>
-                        <p style="color: #888;">Nossa IA analisa seu perfil e cria a base.</p>
+                        <h3>IA Gera o Plano</h3>
+                        <p style="color: #888; font-size: 0.95rem;">Nossa inteligência artificial constrói uma rotina personalizada instantaneamente.</p>
                     </div>
                 </div>
                 <div class="step-item">
-                    <span class="step-number">03</span>
+                    <div class="step-number">03</div>
                     <div class="step-content">
-                        <h3>Treine & Evolua</h3>
-                        <p style="color: #888;">App na mão. Treine, faça check-in e receba feedback.</p>
+                        <h3>Evolua Diariamente</h3>
+                        <p style="color: #888; font-size: 0.95rem;">Registre seus treinos no app e receba ajustes de carga automáticos semana a semana.</p>
                     </div>
                 </div>
             </div>
@@ -61,75 +63,76 @@
         <div class="container">
             <div class="section-header center">
                 <h2 class="section-title">Por que o Momentum?</h2>
-                <p style="color: #a0a0a0;">Tecnologia e expertise humana unidas.</p>
+                <p style="color: #a0a0a0; margin-top: 10px;">Não é apenas um app, é seu treinador de bolso.</p>
             </div>
+            
             <div class="features-grid">
                 <div class="feature-card">
-                    <div class="icon-box"><i class="fas fa-robot"></i></div>
-                    <h3>IA Coach</h3>
-                    <p style="color: #888;">Análise de dados para ajustes de treino e insights.</p>
+                    <div class="icon-box"><i class="fas fa-brain"></i></div>
+                    <h3>IA Adaptativa</h3>
+                    <p>O sistema aprende com você. Se o treino foi fácil, a carga aumenta. Se foi difícil, ela ajusta o volume.</p>
                 </div>
                 <div class="feature-card">
-                    <div class="icon-box"><i class="fas fa-mobile-alt"></i></div>
-                    <h3>App Intuitivo</h3>
-                    <p style="color: #888;">Vídeos de execução, histórico de cargas e cronômetro.</p>
+                    <div class="icon-box"><i class="fas fa-video"></i></div>
+                    <h3>Biblioteca HD</h3>
+                    <p>Milhares de vídeos demonstrativos em alta qualidade para garantir a execução perfeita.</p>
                 </div>
                 <div class="feature-card">
-                    <div class="icon-box"><i class="fas fa-user-friends"></i></div>
-                    <h3>Personal Real</h3>
-                    <p style="color: #888;">Chat direto com treinadores verificados.</p>
+                    <div class="icon-box"><i class="fas fa-chart-line"></i></div>
+                    <h3>Métricas Claras</h3>
+                    <p>Visualize sua progressão de força, peso corporal e consistência em gráficos intuitivos.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <section id="plans" class="section-padding bg-subtle">
+    <section class="section-padding bg-subtle">
         <div class="container">
             <div class="section-header center">
-                <h2 class="section-title">Invista em Você</h2>
-                <p style="color: #a0a0a0;">Planos flexíveis para cada objetivo.</p>
+                <h2 class="section-title">Comece Hoje</h2>
             </div>
             <div class="plans-grid">
-                <div class="feature-card">
+                 <div class="feature-card">
                     <div class="plan-header">
                         <h3 class="plan-title">Start</h3>
-                        <div class="plan-price">R$ 0<span>/mês</span></div>
-                        <p class="plan-desc">Para quem quer começar.</p>
+                        <div class="plan-price">R$ 0</div>
+                        <p class="plan-desc">Básico essencial.</p>
                     </div>
                     <ul class="plan-features">
-                        <li><i class="fas fa-check"></i> Acesso ao App</li>
-                        <li><i class="fas fa-check"></i> Biblioteca Básica</li>
-                        <li class="muted"><i class="fas fa-times"></i> Coach IA</li>
+                        <li><i class="fas fa-check"></i> Registro de Treinos</li>
+                        <li><i class="fas fa-check"></i> Biblioteca de Vídeos</li>
+                        <li class="muted"><i class="fas fa-times"></i> IA Coach</li>
                     </ul>
-                    <a href="/auth/register?plan=free" class="btn btn-outline w-100">Começar Grátis</a>
+                    <a href="/auth/register?plan=free" class="btn btn-outline w-100">Criar Conta</a>
                 </div>
 
-                <div class="feature-card plan-featured" style="border-color: var(--primary);">
-                    <div class="plan-header">
+                <div class="feature-card plan-featured">
+                    <div style="position: absolute; top: 0; left: 0; width: 100%; background: var(--primary); color: black; text-align: center; font-weight: 700; font-size: 0.8rem; padding: 5px;">MAIS POPULAR</div>
+                    <div class="plan-header" style="margin-top: 15px;">
                         <h3 class="plan-title" style="color: var(--primary);">Pro</h3>
                         <div class="plan-price">R$ 89<span>/mês</span></div>
-                        <p class="plan-desc">A experiência completa.</p>
+                        <p class="plan-desc">IA Ilimitada.</p>
                     </div>
                     <ul class="plan-features">
                         <li><i class="fas fa-check"></i> <strong>Tudo do Start</strong></li>
-                        <li><i class="fas fa-check"></i> Coach IA Ilimitado</li>
-                        <li><i class="fas fa-check"></i> Geração de Treinos</li>
+                        <li><i class="fas fa-check"></i> Geração Automática</li>
+                        <li><i class="fas fa-check"></i> Ajustes de Carga</li>
                     </ul>
-                    <a href="/auth/register?plan=pro" class="btn btn-primary w-100">Assinar Pro</a>
+                    <a href="/auth/register?plan=pro" class="btn btn-primary w-100">Testar Grátis</a>
                 </div>
 
                 <div class="feature-card">
                     <div class="plan-header">
-                        <h3 class="plan-title">VIP</h3>
+                        <h3 class="plan-title">Personal</h3>
                         <div class="plan-price">R$ 249<span>/mês</span></div>
-                        <p class="plan-desc">Acompanhamento humano.</p>
+                        <p class="plan-desc">Humano + IA.</p>
                     </div>
                     <ul class="plan-features">
                         <li><i class="fas fa-check"></i> <strong>Tudo do Pro</strong></li>
-                        <li><i class="fas fa-check"></i> Personal Real</li>
+                        <li><i class="fas fa-check"></i> Personal Dedicado</li>
                         <li><i class="fas fa-check"></i> Chat WhatsApp</li>
                     </ul>
-                    <button class="btn btn-outline w-100" disabled>Esgotado</button>
+                    <button class="btn btn-outline w-100" disabled>Vagas Limitadas</button>
                 </div>
             </div>
         </div>

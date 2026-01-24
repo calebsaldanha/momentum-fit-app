@@ -426,3 +426,190 @@ body {
 .newsletter-form { display: flex; width: 100%; }
 .newsletter-input { flex: 1; min-width: 0; /* Fix flex overflow */ }
 
+
+/* =========================================
+   14. PUBLIC COMPONENTS VISUALS (THE LOOK)
+   ========================================= */
+
+/* --- Componente: Feature Card (Recursos & Planos) --- */
+.feature-card {
+    background: var(--bg-card);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 16px;
+    padding: 30px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(190, 242, 2, 0.3);
+}
+
+.feature-card h3 {
+    color: white;
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 15px;
+}
+
+.feature-card h4 {
+    color: white;
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+}
+
+.feature-card p {
+    color: #999;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 20px;
+    flex: 1; /* Empurra o botão para baixo */
+}
+
+/* Ícones dentro dos cards */
+.icon-box {
+    width: 60px;
+    height: 60px;
+    background: rgba(190, 242, 2, 0.05);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: var(--primary);
+    margin-bottom: 25px;
+    border: 1px solid rgba(190, 242, 2, 0.1);
+}
+
+/* --- Componente: Steps (Como Funciona) --- */
+.step-item {
+    position: relative;
+    padding: 30px 20px;
+    border-left: 2px solid rgba(255,255,255,0.05);
+    background: linear-gradient(90deg, rgba(255,255,255,0.02) 0%, transparent 100%);
+    border-radius: 0 16px 16px 0;
+}
+
+.step-number {
+    font-size: 4rem;
+    font-weight: 900;
+    color: rgba(255, 255, 255, 0.03);
+    position: absolute;
+    top: 0;
+    right: 20px;
+    line-height: 1;
+    z-index: 0;
+    font-family: 'Inter', sans-serif;
+}
+
+.step-content {
+    position: relative;
+    z-index: 1;
+}
+
+.step-content h3 {
+    color: var(--primary);
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+}
+
+/* --- Componente: Planos Específicos --- */
+.plan-header {
+    text-align: center;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+}
+
+.plan-title { font-size: 1.5rem !important; margin-bottom: 5px !important; }
+.plan-price { font-size: 2.5rem; color: white; font-weight: 800; }
+.plan-price span { font-size: 0.9rem; color: #666; font-weight: 400; }
+
+.plan-features {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 30px;
+}
+
+.plan-features li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #ccc;
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+}
+
+.plan-features li i { color: var(--primary); font-size: 0.8rem; }
+.plan-features li.muted { color: #555; text-decoration: line-through; opacity: 0.6; }
+
+.plan-featured {
+    background: linear-gradient(180deg, rgba(20, 20, 20, 1) 0%, rgba(10, 10, 10, 1) 100%);
+    border: 1px solid var(--primary);
+    box-shadow: 0 0 30px rgba(190, 242, 2, 0.05);
+}
+
+/* --- Componente: Footer Visuals --- */
+.footer-logo-area {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.footer-social {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.footer-social a {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #111;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    transition: 0.2s;
+    border: 1px solid #222;
+}
+
+.footer-social a:hover {
+    background: var(--primary);
+    color: black;
+    border-color: var(--primary);
+}
+
+/* --- Mobile Specific Fixes for Footer --- */
+@media (max-width: 768px) {
+    .footer-grid {
+        display: flex !important;
+        flex-direction: column;
+        gap: 40px !important;
+        text-align: center;
+    }
+
+    .footer-logo-area { align-items: center; }
+    .footer-social { justify-content: center; }
+    
+    .footer-col h4 {
+        color: var(--primary); /* Destaque no título mobile */
+        border-bottom: 1px solid #222;
+        padding-bottom: 10px;
+        display: inline-block;
+    }
+    
+    /* Grid de steps em 1 coluna */
+    .step-item {
+        border-left: none;
+        border-top: 2px solid rgba(255,255,255,0.05);
+        border-radius: 0 0 16px 16px;
+        background: linear-gradient(180deg, rgba(255,255,255,0.02) 0%, transparent 100%);
+    }
+}
