@@ -6,10 +6,14 @@ const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
 const flash = require('connect-flash');
 const passport = require('passport');
-const pool = require('./database/db'); // Importa o pool para a sessão
+const pool = require('./database/db'); 
 
-// --- CONFIGURAÇÕES --- //
-require('./config/passport')(passport); // Configura estratégia
+// --- CONFIGURAÇÃO CRÍTICA PARA VERCEL/PROXY ---
+// Necessário para cookies funcionarem atrás de load balancers (Vercel, Heroku, AWS)
+app.set('trust proxy', 1);
+
+// Configuração do Passport
+require('./config/passport')(passport);
 
 // View Engine
 app.set('view engine', 'ejs');
@@ -22,19 +26,22 @@ app.use(express.json());
 // Arquivos Estáticos
 app.use(express.static(path.join(__dirname, 'public')));
 
-// --- SESSÃO E AUTH --- //
-// IMPORTANTE: Deve vir ANTES das rotas
+// --- SESSÃO E AUTH ---
 app.use(session({
     store: new pgSession({
         pool: pool,
-        tableName: 'session' // Garanta que esta tabela exista ou use 'create_tables_fix.js'
+        tableName: 'session', // A tabela que vamos criar agora
+        createTableIfMissing: true // Tenta criar automaticamente, mas vamos forçar no script
     }),
     secret: process.env.SESSION_SECRET || 'secret_dev_key_123',
     resave: false,
     saveUninitialized: false,
+    proxy: true, // Importante para SSL
     cookie: { 
         maxAge: 30 * 24 * 60 * 60 * 1000, // 30 dias
-        secure: process.env.NODE_ENV === 'production' 
+        secure: process.env.NODE_ENV === 'production', // true em produção (HTTPS)
+        httpOnly: true,
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax' // Ajuste para cross-site cookies se necessário
     }
 }));
 
@@ -45,16 +52,16 @@ app.use(passport.session());
 // Flash Messages
 app.use(flash());
 
-// Variáveis Globais (Middleware)
+// Variáveis Globais
 app.use((req, res, next) => {
     res.locals.success_msg = req.flash('success_msg');
     res.locals.error_msg = req.flash('error_msg');
-    res.locals.error = req.flash('error'); // Passport usa essa chave para erros
-    res.locals.user = req.user || null; // Disponibiliza user em todas as views
+    res.locals.error = req.flash('error');
+    res.locals.user = req.user || null;
     next();
 });
 
-// --- ROTAS --- //
+// --- ROTAS ---
 app.use('/', require('./routes/index'));
 app.use('/auth', require('./routes/auth'));
 app.use('/admin', require('./routes/admin'));
