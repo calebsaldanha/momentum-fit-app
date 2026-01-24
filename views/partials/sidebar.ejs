@@ -20,7 +20,7 @@
             </a>
         <% } else { %>
             <a href="/trainer/dashboard" class="nav-link <%= path === '/trainer/dashboard' ? 'active' : '' %>">
-                <i class="fas fa-home"></i> <span>Dashboard</span>
+                <i class="fas fa-home"></i> <span>Visão Geral</span>
             </a>
             <a href="/trainer/clients" class="nav-link <%= path.includes('/clients') ? 'active' : '' %>">
                 <i class="fas fa-users"></i> <span>Alunos</span>
@@ -31,10 +31,13 @@
         <% } %>
         
         <div style="margin-top: auto; border-top: 1px solid #222; padding-top: 10px;">
+            <a href="/client/profile" class="nav-link <%= path.includes('/profile') ? 'active' : '' %>">
+                <i class="fas fa-user-cog"></i> <span>Perfil</span>
+            </a>
             <a href="/auth/logout" class="nav-link" style="color: #ff6b6b;">
                 <i class="fas fa-sign-out-alt"></i> <span>Sair</span>
             </a>
         </div>
     </nav>
 </aside>
-<div class="dashboard-overlay" onclick="toggleSidebar()"></div>
+<div id="dashboardOverlay" class="dashboard-overlay"></div>

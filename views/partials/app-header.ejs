@@ -3,32 +3,23 @@
         <button class="mobile-toggle" onclick="toggleSidebar()">
             <i class="fas fa-bars"></i>
         </button>
-        <div class="header-title">
-            <h2><%= typeof title !== 'undefined' ? title : 'Dashboard' %></h2>
-        </div>
+        <h2 style="font-size: 1.2rem; font-weight: 700; color: white; margin: 0;">
+            <%= typeof title !== 'undefined' ? title : 'Momentum Fit' %>
+        </h2>
     </div>
 
-    <div class="header-actions">
-        <a href="#" style="color: #ccc; position: relative;">
+    <div style="display: flex; align-items: center; gap: 15px;">
+        <a href="/notifications" style="position: relative; color: #ccc;">
             <i class="fas fa-bell"></i>
-            <span style="position: absolute; top: -5px; right: -5px; width: 8px; height: 8px; background: var(--primary); border-radius: 50%;"></span>
-        </a>
+            </a>
         
-        <div class="user-profile">
-            <span style="font-size: 0.9rem; display: none; margin-right: 10px; @media(min-width: 768px){ display: inline; }">
+        <div class="user-profile" style="display: flex; align-items: center; gap: 10px;">
+            <span style="display: none; @media(min-width: 768px){ display: inline; } color: #ccc; font-size: 0.9rem;">
                 <%= user.name.split(' ')[0] %>
             </span>
-            <div class="user-avatar">
-                <i class="fas fa-user"></i>
+            <div style="width: 35px; height: 35px; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white;">
+                <%= user.name.charAt(0) %>
             </div>
         </div>
     </div>
 </header>
-
-<script>
-    function toggleSidebar() {
-        document.getElementById('sidebar').classList.toggle('active');
-        const overlay = document.querySelector('.dashboard-overlay');
-        if(overlay) overlay.classList.toggle('active');
-    }
-</script>

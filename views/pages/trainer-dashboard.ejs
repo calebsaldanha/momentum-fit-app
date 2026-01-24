@@ -1,26 +1,43 @@
-<%- include('../partials/header.ejs') %>
-<div class="dashboard-container">
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Painel do Treinador | Momentum Fit</title>
+    <link rel="icon" href="/images/momentum-fit-icon.png" type="image/png">
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="dashboard-layout">
     <%- include('../partials/sidebar.ejs', { path: '/trainer/dashboard' }) %>
-    <main class="dashboard-main">
-        <div class="mobile-dash-header">
-            <button id="sidebarOpenBtn" class="btn btn-outline btn-sm"><i class="fas fa-bars"></i> Menu</button>
-            <span>Painel</span>
-        </div>
 
-        <div class="page-header">
-            <h1>Painel do <span class="text-neon">Treinador</span></h1>
-        </div>
+    <main class="app-main">
+        <%- include('../partials/app-header.ejs', { title: 'Área do Treinador' }) %>
 
-        <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
-            <div class="card-box">
-                <h3>Total Alunos</h3>
-                <p style="font-size: 2rem; font-weight: bold;"><%= typeof stats !== 'undefined' ? stats.totalClients : 0 %></p>
-            </div>
-            <div class="card-box">
-                <h3>Alunos Ativos</h3>
-                <p style="font-size: 2rem; font-weight: bold; color: var(--primary-color);"><%= typeof stats !== 'undefined' ? stats.activeClients : 0 %></p>
+        <div class="dashboard-content">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-users"></i></div>
+                    <div>
+                        <h3 style="color:white; margin:0;">0</h3>
+                        <p style="color:#888; margin:0;">Alunos Ativos</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-clipboard-list"></i></div>
+                    <div>
+                        <h3 style="color:white; margin:0;">0</h3>
+                        <p style="color:#888; margin:0;">Treinos Pendentes</p>
+                    </div>
+                </div>
             </div>
         </div>
     </main>
 </div>
-<%- include('../partials/footer.ejs') %>
+
+<script src="/js/main.js"></script>
+</body>
+</html>
