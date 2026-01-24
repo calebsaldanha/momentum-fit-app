@@ -1,40 +1,46 @@
+// ✅ MIDDLEWARE DE AUTENTICAÇÃO CENTRALIZADO
 module.exports = {
+    // Garante que o usuário está logado
     ensureAuthenticated: function(req, res, next) {
         if (req.isAuthenticated()) {
             return next();
         }
-        
-        // Evita loop se já estiver tentando ir para login
+        // Evita loop de redirecionamento se já estiver no login
         if (req.path === '/auth/login' || req.path === '/login') {
             return next();
         }
-
-        req.flash('error_msg', 'Por favor, faça login para acessar este recurso');
+        req.flash('error_msg', 'Faça login para continuar');
         res.redirect('/auth/login');
     },
 
-    ensureRole: function(role) {
+    // Garante que o usuário tem o cargo correto
+    ensureRole: function(requiredRole) {
         return function(req, res, next) {
+            // Primeiro checa se está logado
             if (!req.isAuthenticated()) {
+                req.flash('error_msg', 'Sessão expirada');
                 return res.redirect('/auth/login');
             }
 
-            // Permite superadmin acessar tudo, ou valida role específica
-            if (req.user.role === 'superadmin' || req.user.role === role) {
+            // Superadmin acessa tudo
+            if (req.user.role === 'superadmin') {
                 return next();
             }
 
-            // Se o usuário está logado mas na role errada, NÃO redirecione para login (causa loop).
-            // Redirecione para o dashboard DELE ou mostre erro 403.
-            req.flash('error_msg', 'Acesso não autorizado para seu perfil.');
+            // Checa o cargo específico
+            if (req.user.role === requiredRole) {
+                return next();
+            }
+
+            // Acesso negado: Redireciona para o dashboard correto do usuário
+            console.warn(`⛔ Acesso negado: Usuário ${req.user.email} (${req.user.role}) tentou acessar área de ${requiredRole}`);
+            req.flash('error_msg', 'Acesso não autorizado.');
             
-            // Redirecionamento inteligente baseado na role real do usuário
-            const userRole = req.user.role;
-            if (userRole === 'client') return res.redirect('/client/dashboard');
-            if (userRole === 'trainer') return res.redirect('/trainer/dashboard');
-            if (userRole === 'admin') return res.redirect('/admin/dashboard');
+            if (req.user.role === 'admin') return res.redirect('/admin/dashboard');
+            if (req.user.role === 'trainer') return res.redirect('/trainer/dashboard');
+            if (req.user.role === 'client') return res.redirect('/client/dashboard');
             
-            res.redirect('/');
+            return res.redirect('/');
         }
     }
 };
