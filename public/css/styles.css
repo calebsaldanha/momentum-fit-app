@@ -957,3 +957,124 @@ body {
     .hero-content { margin: 0 auto; }
     .hero-buttons { justify-content: center; }
 }
+
+/* =========================================
+   17. DESKTOP GRID REPAIR (ABSOLUTE FIX)
+   ========================================= */
+
+/* Força o container a centralizar e ter largura correta */
+.container {
+    width: 100%;
+    padding-right: 15px;
+    padding-left: 15px;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+@media (min-width: 1200px) {
+    .container { max-width: 1140px; }
+}
+
+/* Regras para Desktop (Telas acima de 1024px) */
+@media (min-width: 1024px) {
+    
+    /* 1. Grid de Recursos e Planos (3 Colunas) */
+    .features-grid, 
+    .plans-grid, 
+    .steps-grid,
+    .trainers-grid {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 30px !important;
+        width: 100% !important;
+        margin-top: 40px;
+    }
+
+    /* 2. Grid do Footer (4 Colunas) */
+    .footer-grid {
+        display: grid !important;
+        grid-template-columns: 1.5fr 1fr 1fr 1.5fr !important;
+        gap: 40px !important;
+        text-align: left !important;
+    }
+
+    /* 3. Cards com altura igual */
+    .feature-card, .plan-card, .step-item {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    /* Botão sempre no rodapé do card */
+    .feature-card .btn, .plan-card .btn {
+        margin-top: auto;
+    }
+    
+    /* Hero alinhado à esquerda no desktop */
+    .hero {
+        text-align: left;
+        align-items: center;
+    }
+    .hero-content {
+        margin: 0;
+        max-width: 600px;
+    }
+    .hero-buttons {
+        justify-content: flex-start;
+    }
+}
+
+/* Regras para Mobile (Telas abaixo de 1024px) */
+@media (max-width: 1023px) {
+    /* Transforma grids em lista vertical */
+    .features-grid, 
+    .plans-grid, 
+    .steps-grid, 
+    .footer-grid {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 30px !important;
+    }
+    
+    /* Centraliza tudo */
+    .hero, .section-header, .footer-grid {
+        text-align: center !important;
+    }
+    
+    .hero-buttons, .footer-social, .newsletter-form {
+        justify-content: center !important;
+    }
+    
+    .brand-logo {
+        justify-content: center;
+    }
+}
+
+/* Polimento Visual dos Cards (Funciona em ambos) */
+.feature-card {
+    background: #0a0a0a;
+    border: 1px solid #222;
+    border-radius: 16px;
+    padding: 30px;
+    transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.feature-card:hover {
+    border-color: var(--primary);
+    transform: translateY(-5px);
+}
+
+.plan-featured {
+    border-color: var(--primary);
+    box-shadow: 0 0 20px rgba(190, 242, 2, 0.1);
+    position: relative;
+    background: #0f0f0f;
+}
+
+/* Correção de Texto */
+.section-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: white;
+    margin-bottom: 10px;
+}

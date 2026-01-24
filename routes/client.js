@@ -1,122 +1,75 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../database/db');
-const { ensureAuthenticated, isClient } = require('../middleware/auth');
+// Importação desestruturada segura
+const authMiddleware = require('../middleware/auth');
+const ensureAuthenticated = authMiddleware.ensureAuthenticated;
+const isClient = authMiddleware.isClient;
 
-// Middleware global para rotas de cliente
+// Middleware global para rotas de cliente (Sidebars e User)
 router.use(ensureAuthenticated, isClient, (req, res, next) => {
-    // Garante que o user tenha profile
-    if (!req.user.profile) {
-        req.user.profile = {}; 
-    }
-    res.locals.path = req.path; // Disponibiliza path para sidebar
+    // Garante perfil vazio se não existir para evitar crash nas views
+    if (!req.user.profile) req.user.profile = {};
+    res.locals.path = req.path;
     next();
 });
 
-// 1. DASHBOARD
-router.get('/dashboard', async (req, res) => {
-    try {
-        // Buscar estatísticas reais ou usar defaults
-        // Exemplo: Contar treinos completados este mês
-        const stats = {
-            workoutsDone: 0,
-            currentWeight: req.user.profile.weight || '--',
-            streak: 0,
-            nextWorkout: 'Descanso'
-        };
-        
-        // Tenta buscar dados reais se as tabelas existirem
-        try {
-             // Lógica futura de DB aqui
-        } catch (dbError) {
-            console.warn('Erro ao buscar stats:', dbError.message);
-        }
+// --- ROTAS ---
 
-        res.render('pages/client-dashboard', {
-            title: 'Visão Geral',
-            user: req.user,
-            stats: stats
-        });
-    } catch (err) {
-        console.error(err);
-        res.render('pages/error', { message: 'Erro ao carregar dashboard.' });
-    }
+// 1. Dashboard
+router.get('/dashboard', (req, res) => {
+    // Dados mockados para evitar tela branca se DB falhar
+    const stats = {
+        treinos: 0,
+        peso: req.user.profile.weight || '--',
+        streak: 0
+    };
+    res.render('pages/client-dashboard', {
+        title: 'Visão Geral',
+        user: req.user,
+        stats: stats
+    });
 });
 
-// 2. MEUS TREINOS
-router.get('/workouts', async (req, res) => {
-    try {
-        // Mock de treinos por enquanto
-        const workouts = []; 
-        res.render('pages/client-workouts', {
-            title: 'Meus Treinos',
-            user: req.user,
-            workouts: workouts
-        });
-    } catch (err) {
-        console.error(err);
-        res.render('pages/error', { message: 'Erro ao carregar treinos.' });
-    }
+// 2. Treinos
+router.get('/workouts', (req, res) => {
+    res.render('pages/client-workouts', {
+        title: 'Meus Treinos',
+        user: req.user,
+        workouts: []
+    });
 });
 
-// 3. EVOLUÇÃO (Gráficos)
-router.get('/evolution', async (req, res) => {
-    try {
-        res.render('pages/client-evolution', {
-            title: 'Minha Evolução',
-            user: req.user
-        });
-    } catch (err) {
-        res.render('pages/error', { message: 'Erro ao carregar evolução.' });
-    }
+// 3. Evolução
+router.get('/evolution', (req, res) => {
+    res.render('pages/client-evolution', {
+        title: 'Minha Evolução',
+        user: req.user
+    });
 });
 
-// 4. IA COACH
-router.get('/ai-coach', async (req, res) => {
-    try {
-        res.render('pages/client-ai-coach', {
-            title: 'Coach Inteligente',
-            user: req.user
-        });
-    } catch (err) {
-        res.render('pages/error', { message: 'Erro ao carregar IA Coach.' });
-    }
+// 4. IA Coach
+router.get('/ai-coach', (req, res) => {
+    res.render('pages/client-ai-coach', {
+        title: 'Coach IA',
+        user: req.user
+    });
 });
 
-// 5. FINANCEIRO / PLANOS
-router.get('/financial', async (req, res) => {
-    try {
-        res.render('pages/client-financial', {
-            title: 'Minha Assinatura',
-            user: req.user
-        });
-    } catch (err) {
-        res.render('pages/error', { message: 'Erro ao carregar financeiro.' });
-    }
+// 5. Financeiro
+router.get('/financial', (req, res) => {
+    res.render('pages/client-financial', {
+        title: 'Minha Assinatura',
+        user: req.user
+    });
 });
 
-// 6. PERFIL
-router.get('/profile', async (req, res) => {
-    try {
-        res.render('pages/client-profile', {
-            title: 'Meu Perfil',
-            user: req.user
-        });
-    } catch (err) {
-        res.render('pages/error', { message: 'Erro ao carregar perfil.' });
-    }
-});
-
-// 7. CONFIGURAÇÕES
-router.get('/settings', async (req, res) => {
-    try {
-        res.render('pages/client-settings', {
-            title: 'Configurações',
-            user: req.user
-        });
-    } catch (err) {
-        res.render('pages/error', { message: 'Erro ao carregar configurações.' });
-    }
+// 6. Perfil
+router.get('/profile', (req, res) => {
+    res.render('pages/client-profile', {
+        title: 'Meu Perfil',
+        user: req.user
+    });
 });
 
 module.exports = router;
