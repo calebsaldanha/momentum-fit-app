@@ -1,54 +1,50 @@
-<%- include('../partials/header.ejs', { title: 'Entrar' }) %>
+<%- include('../partials/header.ejs', { title: 'Login', path: '/auth/login' }) %>
 
-<main class="auth-wrapper">
-    <div class="auth-visual">
-        <div class="auth-quote">
-            <h2>Foco total no seu resultado.</h2>
-            <p>Acesse sua área exclusiva e acompanhe sua evolução diária com a precisão da IA e o suporte do seu treinador.</p>
-        </div>
-    </div>
-
-    <div class="auth-form-container">
-        <div class="auth-header">
-            <h1 style="color: white; margin-bottom: 10px;">Bem-vindo de volta</h1>
-            <p>Insira suas credenciais para acessar a plataforma.</p>
-        </div>
-
-        <% if (messages.error && messages.error.length > 0) { %>
-            <div style="background: rgba(255, 77, 77, 0.1); color: #ff6b6b; padding: 12px; border-radius: 6px; margin-bottom: 20px; font-size: 0.9rem; border: 1px solid rgba(255,77,77,0.2);">
-                <i class="fas fa-exclamation-circle"></i> <%= messages.error %>
-            </div>
-        <% } %>
+<main class="public-content">
+    <section class="hero" style="min-height: 100vh; align-items: center; justify-content: center; padding: 100px 20px;">
+        <div class="hero-overlay"></div>
         
-        <% if (messages.success && messages.success.length > 0) { %>
-            <div style="background: rgba(190, 242, 2, 0.1); color: var(--primary-color); padding: 12px; border-radius: 6px; margin-bottom: 20px; font-size: 0.9rem; border: 1px solid rgba(190, 242, 2, 0.2);">
-                <i class="fas fa-check"></i> <%= messages.success %>
-            </div>
-        <% } %>
-
-        <form action="/auth/login" method="POST">
-            <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
-            
-            <div class="form-group">
-                <label class="form-label">Email</label>
-                <input type="email" name="email" class="form-control" placeholder="seu@email.com" required autofocus>
-            </div>
-
-            <div class="form-group">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <label class="form-label" style="margin-bottom: 0;">Senha</label>
-                    <a href="/auth/forgot-password" style="font-size: 0.8rem; color: var(--text-muted);">Esqueceu?</a>
+        <div class="container" style="position: relative; z-index: 2; max-width: 450px; width: 100%;">
+            <div class="feature-card" style="padding: 40px; background: rgba(10, 10, 10, 0.9); border: 1px solid #333;">
+                
+                <div class="text-center" style="text-align: center; margin-bottom: 30px;">
+                    <h2 style="color: white; font-size: 2rem; font-weight: 700;">Bem-vindo</h2>
+                    <p style="color: #888;">Acesse sua conta para treinar</p>
                 </div>
-                <input type="password" name="password" class="form-control" placeholder="••••••••" required style="margin-top: 8px;">
+
+                <% if (typeof error !== 'undefined' && error) { %>
+                    <div class="alert alert-danger" style="background: rgba(255, 0, 0, 0.1); color: #ff6b6b; padding: 10px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #ff6b6b;">
+                        <%= error %>
+                    </div>
+                <% } %>
+
+                <form action="/auth/login" method="POST">
+                    <div class="form-group" style="margin-bottom: 20px;">
+                        <label style="color: #ccc; margin-bottom: 8px; display: block;">Email</label>
+                        <input type="email" name="email" class="form-control" placeholder="seu@email.com" required 
+                               style="width: 100%; padding: 12px; background: #222; border: 1px solid #444; border-radius: 8px; color: white;">
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 25px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <label style="color: #ccc;">Senha</label>
+                            <a href="/auth/forgot-password" style="color: var(--primary); font-size: 0.85rem; text-decoration: none;">Esqueceu?</a>
+                        </div>
+                        <input type="password" name="password" class="form-control" placeholder="••••••••" required 
+                               style="width: 100%; padding: 12px; background: #222; border: 1px solid #444; border-radius: 8px; color: white;">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; font-weight: 600; font-size: 1rem;">
+                        Entrar
+                    </button>
+                </form>
+
+                <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #333;">
+                    <p style="color: #888;">Ainda não tem conta? <a href="/auth/register" style="color: var(--primary); text-decoration: none; font-weight: 500;">Crie agora</a></p>
+                </div>
             </div>
-
-            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">Entrar</button>
-        </form>
-
-        <div class="auth-footer">
-            Não tem uma conta? <a href="/auth/register">Começar agora</a>
         </div>
-    </div>
+    </section>
 </main>
 
 <%- include('../partials/footer.ejs') %>

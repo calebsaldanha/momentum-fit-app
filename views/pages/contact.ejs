@@ -1,39 +1,31 @@
 <%- include('../partials/header.ejs', { title: 'Contato', path: '/contact' }) %>
 
 <main class="public-content">
-    <section class="section-padding" style="margin-top: 60px;">
-        <div class="container">
+    <section class="hero" style="min-height: 100vh; align-items: center; padding-top: 100px;">
+        <div class="hero-overlay"></div>
+        <div class="container" style="position: relative; z-index: 2; width: 100%;">
             <div class="section-header center">
                 <h1 class="section-title">Fale Conosco</h1>
-                <p style="color: #888;">Estamos prontos para ajudar você a alcançar seus objetivos.</p>
+                <p style="color: #ccc;">Estamos prontos para ajudar você a alcançar seus objetivos.</p>
             </div>
 
             <div class="contact-wrapper">
-                <div class="contact-info-box">
+                <div class="contact-info-box" style="display: flex; flex-direction: column; justify-content: center;">
                     <h3 style="color:white; margin-bottom:20px;">Canais de Atendimento</h3>
                     <ul style="list-style:none; padding:0;">
                         <li style="margin-bottom:20px; display:flex; align-items:center; gap:15px; color:#ccc;">
-                            <i class="fas fa-envelope fa-lg" style="color:var(--primary)"></i>
+                            <div class="icon-box" style="margin-bottom: 0; width: 50px; height: 50px;">
+                                <i class="fas fa-envelope" style="color:var(--primary)"></i>
+                            </div>
                             <div>
                                 <strong style="display:block; color:white;">Email</strong>
-                                suporte@momentumfit.com.br
-                            </div>
-                        </li>
-                        <li style="margin-bottom:20px; display:flex; align-items:center; gap:15px; color:#ccc;">
-                            <i class="fas fa-whatsapp fa-lg" style="color:var(--primary)"></i>
-                            <div>
-                                <strong style="display:block; color:white;">WhatsApp</strong>
-                                (11) 99999-9999
-                            </div>
-                        </li>
-                        <li style="margin-bottom:20px; display:flex; align-items:center; gap:15px; color:#ccc;">
-                            <i class="fas fa-map-marker-alt fa-lg" style="color:var(--primary)"></i>
-                            <div>
-                                <strong style="display:block; color:white;">Sede</strong>
-                                São Paulo, SP - Brasil
+                                <a href="mailto:admin@momentumfitness.com.br" style="color: #ccc; text-decoration: none;">admin@momentumfitness.com.br</a>
                             </div>
                         </li>
                     </ul>
+                    <p style="color: #888; margin-top: 20px; font-size: 0.9rem;">
+                        Nosso tempo médio de resposta é de 24 horas úteis.
+                    </p>
                 </div>
 
                 <div class="contact-form-box">
