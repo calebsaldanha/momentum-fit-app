@@ -5,25 +5,17 @@
     <div class="hero-overlay"></div>
     <div class="container hero-container">
         <div class="hero-content">
-            <h1 class="hero-title text-gradient">
-                <%= content ? content.hero_title : 'Treine com Inteligência' %>
-            </h1>
+            <h1 class="hero-title text-gradient">Transforme Seu Potencial em Performance</h1>
             <p class="hero-subtitle">
-                <%= content ? content.hero_subtitle : 'A evolução do seu treino começa aqui.' %>
+                A plataforma definitiva para personal trainers escalarem seus negócios e alunos atingirem resultados reais através de dados.
             </p>
             
             <div class="hero-buttons">
                 <% if (!user) { %>
-                    <a href="/auth/register" class="btn btn-primary"><%= content ? content.cta_primary : 'Começar' %></a>
-                    <a href="/plans" class="btn btn-outline"><%= content ? content.cta_secondary : 'Ver Planos' %></a>
+                    <a href="/auth/register" class="btn btn-primary">Começar Agora</a>
+                    <a href="/plans" class="btn btn-outline">Ver Planos</a>
                 <% } else { %>
-                    <% if (user.role === 'admin') { %>
-                        <a href="/admin/dashboard" class="btn btn-primary">Ir para Admin</a>
-                    <% } else if (user.role === 'trainer') { %>
-                        <a href="/trainer/dashboard" class="btn btn-primary">Painel do Treinador</a>
-                    <% } else { %>
-                        <a href="/client/dashboard" class="btn btn-primary">Meu Treino</a>
-                    <% } %>
+                    <a href="/<%= user.role %>/dashboard" class="btn btn-primary">Ir para Dashboard</a>
                 <% } %>
             </div>
         </div>
@@ -36,18 +28,20 @@
         <div class="features-grid">
             <div class="feature-card">
                 <div class="icon-box"><i class="fas fa-dumbbell"></i></div>
-                <h3>Treinos Inteligentes</h3>
-                <p>Prescrição baseada em dados e feedback real de performance.</p>
+                <h3>Prescrição Inteligente</h3>
+                <p>Crie treinos detalhados com vídeos, cargas e RPE. Acompanhe a execução real vs planejada.</p>
             </div>
-            <div class="feature-card">
-                <div class="icon-box"><i class="fas fa-robot"></i></div>
-                <h3>IA Coach</h3>
-                <p>Assistente virtual que ajusta cargas e tira dúvidas 24/7.</p>
-            </div>
+            
             <div class="feature-card">
                 <div class="icon-box"><i class="fas fa-chart-line"></i></div>
-                <h3>Evolução Visual</h3>
-                <p>Acompanhe seu progresso com gráficos detalhados de carga e volume.</p>
+                <h3>Data-Driven</h3>
+                <p>Dashboards de volume, tonelagem e frequência. Tome decisões baseadas em métricas, não em achismo.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="icon-box"><i class="fas fa-mobile-alt"></i></div>
+                <h3>App do Aluno</h3>
+                <p>Uma experiência fluida para seu aluno registrar cargas, ver vídeos e dar feedback em tempo real.</p>
             </div>
         </div>
     </div>

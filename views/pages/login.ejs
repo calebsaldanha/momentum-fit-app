@@ -1,44 +1,49 @@
 <%- include('../layouts/public/head') %>
 <%- include('../layouts/public/header') %>
 
-<section class="hero" style="min-height: 100vh; align-items: center; justify-content: center;">
+<section class="hero" style="min-height: 100vh; align-items: center; justify-content: center; padding-top: 80px;">
     <div class="hero-overlay"></div>
     
     <div class="container hero-container" style="display: flex; justify-content: center;">
         <div class="feature-card" style="max-width: 400px; width: 100%; border-top: 4px solid var(--primary);">
             <div class="center" style="margin-bottom: 20px;">
-                <img src="/images/momentum-fit-icon.png" alt="Logo" style="width: 50px; height: 50px; margin: 0 auto 15px;">
-                <h2 style="color: white; margin-bottom: 10px;">Login</h2>
-                <p style="color: #888; font-size: 0.9rem;">Entre para continuar sua evolução.</p>
+                <img src="/images/momentum-fit-icon.png" alt="Logo" style="width: 50px; height: 50px; margin: 0 auto 15px; border-radius: 50%;">
+                <h2 style="color: white; margin-bottom: 10px;">Bem-vindo</h2>
+                <p style="color: #888; font-size: 0.9rem;">Faça login para acessar sua conta.</p>
             </div>
 
             <% if (typeof error_msg !== 'undefined' && error_msg.length > 0) { %>
-                <div class="alert alert-danger"><%= error_msg %></div>
+                <div class="alert alert-danger" style="background: rgba(255, 107, 107, 0.1); color: #ff6b6b; padding: 10px; border-radius: 5px; margin-bottom: 15px; font-size: 0.9rem;"><%= error_msg %></div>
             <% } %>
             <% if (typeof success_msg !== 'undefined' && success_msg.length > 0) { %>
-                <div class="alert alert-success"><%= success_msg %></div>
+                <div class="alert alert-success" style="background: rgba(190, 242, 2, 0.1); color: var(--primary); padding: 10px; border-radius: 5px; margin-bottom: 15px; font-size: 0.9rem;"><%= success_msg %></div>
+            <% } %>
+            <% if (typeof error !== 'undefined' && error.length > 0) { %>
+                <div class="alert alert-danger" style="background: rgba(255, 107, 107, 0.1); color: #ff6b6b; padding: 10px; border-radius: 5px; margin-bottom: 15px; font-size: 0.9rem;"><%= error %></div>
             <% } %>
 
             <form action="/auth/login" method="POST">
                 <div style="margin-bottom: 15px;">
                     <label style="color: #ccc; font-size: 0.9rem; margin-bottom: 5px; display: block;">E-mail</label>
-                    <input type="email" name="email" class="form-control" placeholder="seu@email.com" required 
-                           style="width: 100%; padding: 12px; background: #050505; border: 1px solid #333; color: white; border-radius: 6px;">
+                    <input type="email" name="email" required 
+                           style="width: 100%; padding: 12px; background: #050505; border: 1px solid #333; color: white; border-radius: 6px;"
+                           placeholder="seu@email.com">
                 </div>
                 
                 <div style="margin-bottom: 20px;">
                     <label style="color: #ccc; font-size: 0.9rem; margin-bottom: 5px; display: block;">Senha</label>
-                    <input type="password" name="password" class="form-control" placeholder="******" required
-                           style="width: 100%; padding: 12px; background: #050505; border: 1px solid #333; color: white; border-radius: 6px;">
+                    <input type="password" name="password" required
+                           style="width: 100%; padding: 12px; background: #050505; border: 1px solid #333; color: white; border-radius: 6px;"
+                           placeholder="******">
                 </div>
 
                 <button type="submit" class="btn btn-primary w-100">Entrar</button>
             </form>
 
             <div class="center" style="margin-top: 20px; font-size: 0.9rem;">
-                <a href="/auth/forgot-password" style="color: var(--primary);">Esqueci minha senha</a>
-                <p style="color: #666; margin-top: 10px;">
-                    Ainda não tem conta? <a href="/auth/register" style="color: white; text-decoration: underline;">Cadastre-se</a>
+                <a href="/auth/forgot-password" style="color: var(--primary); text-decoration: none;">Esqueci minha senha</a>
+                <p style="color: #666; margin-top: 15px;">
+                    Não tem conta? <a href="/auth/register" style="color: white; text-decoration: underline;">Cadastre-se</a>
                 </p>
             </div>
         </div>
