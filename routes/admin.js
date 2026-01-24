@@ -3,41 +3,55 @@ const router = express.Router();
 const pool = require('../database/db');
 const { ensureAuthenticated, ensureRole } = require('../middleware/auth');
 
-// Middleware Global para rotas de Admin (Segurança Dupla)
+// Middleware Global para rotas de Admin
 router.use(ensureAuthenticated);
 router.use(ensureRole('admin'));
 
-// --- DASHBOARD (A Rota Quebrada) ---
+// --- DASHBOARD CENTRAL ---
 router.get('/dashboard', async (req, res) => {
     try {
-        console.log("��� Carregando estatísticas do Dashboard...");
+        console.log("��� Carregando Dashboard Completo...");
         
-        // Executa queries em paralelo para performance
-        const [usersQ, trainersQ, clientsQ] = await Promise.all([
+        // Consultas em paralelo para performance
+        // 1. Estatísticas Gerais
+        // 2. Usuários Recentes (LIMIT 5)
+        const [usersQ, trainersQ, clientsQ, recentUsersQ] = await Promise.all([
             pool.query('SELECT COUNT(*) FROM users'),
             pool.query("SELECT COUNT(*) FROM users WHERE role = 'trainer'"),
-            pool.query("SELECT COUNT(*) FROM users WHERE role = 'client'")
+            pool.query("SELECT COUNT(*) FROM users WHERE role = 'client'"),
+            pool.query("SELECT id, name, email, role, created_at, status FROM users ORDER BY created_at DESC LIMIT 5")
         ]);
 
-        // Objeto stats esperado pela View
         const stats = {
             totalUsers: parseInt(usersQ.rows[0].count),
             totalTrainers: parseInt(trainersQ.rows[0].count),
             totalClients: parseInt(clientsQ.rows[0].count),
-            // Adicione mais métricas aqui conforme a view pedir
             activePlans: 0, 
             revenue: 0 
         };
 
+        // Formatação básica de data para exibição (opcional, evita erro se EJS não formatar)
+        const recentUsers = recentUsersQ.rows.map(u => ({
+            ...u,
+            formattedDate: new Date(u.created_at).toLocaleDateString('pt-BR')
+        }));
+
         res.render('pages/admin-dashboard', { 
             user: req.user,
             stats: stats,
-            path: req.path // Redundância segura
+            recentUsers: recentUsers, // ✅ O que estava faltando
+            
+            // ���️ Prevenção de Erros Futuros:
+            // Passamos arrays vazios para variáveis que a view PODE vir a pedir
+            activities: [],
+            notifications: [],
+            path: req.path
         });
 
     } catch (err) {
-        console.error("��� Erro no Dashboard Admin:", err);
-        res.render('pages/error', { message: 'Erro ao carregar dados do painel.' });
+        console.error("��� Erro Crítico no Dashboard Admin:", err);
+        // Renderiza página de erro mas mantém o layout funcional se possível
+        res.render('pages/error', { message: 'Falha ao carregar dados do painel administrativo.' });
     }
 });
 
@@ -51,23 +65,22 @@ router.get('/users', async (req, res) => {
             path: req.path
         });
     } catch (err) {
-        console.error(err);
+        console.error("Erro em /users:", err);
         res.redirect('/admin/dashboard');
     }
 });
 
-// --- APROVAÇÕES PENDENTES (TRAINERS) ---
+// --- APROVAÇÕES ---
 router.get('/approvals', async (req, res) => {
     try {
-        // Assume que existe um status 'pending' ou similar
         const result = await pool.query("SELECT * FROM users WHERE role = 'trainer' ORDER BY created_at DESC");
         res.render('pages/admin-approvals', { 
             user: req.user, 
-            trainers: result.rows, // Nome da variável pode variar no EJS, ajustável
+            trainers: result.rows,
             path: req.path
         });
     } catch (err) {
-        console.error(err);
+        console.error("Erro em /approvals:", err);
         res.redirect('/admin/dashboard');
     }
 });
@@ -75,22 +88,20 @@ router.get('/approvals', async (req, res) => {
 // --- PLANOS ---
 router.get('/plans', async (req, res) => {
     try {
-        // Verifica se a tabela plans existe, senão manda array vazio para não quebrar
         let plans = [];
         try {
             const result = await pool.query('SELECT * FROM plans');
             plans = result.rows;
-        } catch (e) {
-            console.warn("⚠️ Tabela 'plans' não encontrada ou vazia.");
+        } catch (e) { 
+            console.warn("Tabela plans não encontrada, enviando vazio.");
         }
-
         res.render('pages/admin-plans', { 
             user: req.user, 
             plans: plans,
             path: req.path
         });
     } catch (err) {
-        console.error(err);
+        console.error("Erro em /plans:", err);
         res.redirect('/admin/dashboard');
     }
 });
