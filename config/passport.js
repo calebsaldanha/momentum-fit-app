@@ -6,38 +6,47 @@ module.exports = function(passport) {
     passport.use(
         new LocalStrategy({ usernameField: 'email' }, async (email, password, done) => {
             try {
-                // 1. Verificar se o usuário existe
-                const result = await db.query('SELECT * FROM users WHERE email = $1', [email]);
+                // 1. Normalizar input
+                const emailLower = email.toLowerCase().trim();
+                
+                // 2. Buscar usuário
+                const result = await db.query('SELECT * FROM users WHERE email = $1', [emailLower]);
                 
                 if (result.rows.length === 0) {
-                    return done(null, false, { message: 'Este email não está cadastrado.' });
+                    return done(null, false, { message: 'Email não cadastrado.' });
                 }
 
                 const user = result.rows[0];
 
-                // 2. Verificar senha
+                // 3. BLINDAGEM CONTRA CRASH (Correção do erro Illegal arguments)
+                if (!user.password) {
+                    console.error(`[CRITICAL] Usuário ${user.id} (${user.email}) não possui hash de senha.`);
+                    return done(null, false, { message: 'Erro na conta: Senha não definida. Contate o suporte.' });
+                }
+
+                // 4. Verificar senha
                 const isMatch = await bcrypt.compare(password, user.password);
+                
                 if (isMatch) {
                     return done(null, user);
                 } else {
                     return done(null, false, { message: 'Senha incorreta.' });
                 }
             } catch (err) {
-                console.error('Erro na autenticação:', err);
+                console.error('Erro crítico no Passport:', err);
                 return done(err);
             }
         })
     );
 
-    // Serializar usuário para a sessão (apenas o ID)
+    // Serializar
     passport.serializeUser((user, done) => {
         done(null, user.id);
     });
 
-    // Desserializar: recuperar usuário completo pelo ID
+    // Desserializar
     passport.deserializeUser(async (id, done) => {
         try {
-            // Buscando perfil junto para ter dados completos na sessão
             const query = `
                 SELECT u.id, u.name, u.email, u.role, p.weight, p.height 
                 FROM users u 
@@ -46,22 +55,23 @@ module.exports = function(passport) {
             `;
             const result = await db.query(query, [id]);
             
-            // Se achou, monta o objeto user
             if (result.rows.length > 0) {
                 const row = result.rows[0];
+                // Reconstrói objeto user seguro
                 const user = {
                     id: row.id,
                     name: row.name,
                     email: row.email,
                     role: row.role,
-                    profile: { // Garante que profile existe mesmo se vazio
+                    profile: {
                         weight: row.weight,
                         height: row.height
                     }
                 };
                 done(null, user);
             } else {
-                done(new Error('User not found'), null);
+                // Usuário na sessão não existe mais no banco
+                done(null, false);
             }
         } catch (err) {
             done(err, null);
