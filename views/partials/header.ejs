@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title><%= typeof title !== 'undefined' ? title + ' | Momentum Fit' : 'Momentum Fit' %></title>
-    
     <link rel="icon" href="/images/momentum-fit-icon.png" type="image/png">
-    
     <link rel="stylesheet" href="/css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -29,29 +27,37 @@
                 <a href="/auth/register" class="btn btn-primary btn-sm" style="color: black;">Começar</a>
             </nav>
 
-            <button class="hamburger-btn" onclick="togglePublicMenu()">
+            <button class="hamburger-btn" onclick="togglePublicMenu()" aria-label="Menu">
                 <i class="fas fa-bars"></i>
             </button>
         </div>
 
         <div class="mobile-menu" id="publicMenu">
-            <div style="display:flex; justify-content:space-between; align-items: center; margin-bottom: 40px;">
-                <span class="brand-logo" style="font-size: 1.2rem;">
-                    <img src="/images/momentum-fit-icon.png" alt="Logo" class="logo-rounded" style="height: 30px; margin-right: 10px;">
-                    Momentum
-                </span>
-                <button onclick="togglePublicMenu()" style="background:none; border:none; color:white; font-size:1.5rem;">&times;</button>
-            </div>
-            <a href="/" class="side-link">Início</a>
-            <a href="/plans" class="side-link">Planos e Preços</a>
-            <a href="/about" class="side-link">Sobre Nós</a>
-            <a href="/auth/login" class="side-link">Entrar</a>
-            <a href="/auth/register" class="btn btn-primary" style="margin-top: 20px; text-align: center; color: black;">Começar Agora</a>
+            <button onclick="togglePublicMenu()" style="position: absolute; top: 20px; right: 20px; background: none; border: none; color: white; font-size: 2rem; cursor: pointer;">
+                <i class="fas fa-times"></i>
+            </button>
+
+            <a href="/" class="side-link" onclick="togglePublicMenu()">Início</a>
+            <a href="/plans" class="side-link" onclick="togglePublicMenu()">Planos</a>
+            <a href="/about" class="side-link" onclick="togglePublicMenu()">Sobre</a>
+            <a href="/auth/login" class="side-link" onclick="togglePublicMenu()">Entrar</a>
+            <a href="/auth/register" class="btn btn-primary btn-lg" style="margin-top: 20px; width: 80%; text-align: center; color: black;">Começar Agora</a>
         </div>
     </header>
+    
     <script>
         function togglePublicMenu() {
-            document.getElementById('publicMenu').classList.toggle('active');
+            const menu = document.getElementById('publicMenu');
+            const btn = document.querySelector('.hamburger-btn i');
+            
+            menu.classList.toggle('active');
+            
+            // Trava o scroll do body quando menu está aberto
+            if (menu.classList.contains('active')) {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = '';
+            }
         }
     </script>
 <% } %>
