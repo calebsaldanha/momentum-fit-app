@@ -1,0 +1,40 @@
+<header class="main-header">
+    <div class="header-container">
+        <a href="/" class="brand-logo">
+            <img src="/images/momentum-fit-icon.png" alt="Momentum Logo" class="logo-rounded">
+            <span>Momentum</span>
+        </a>
+        
+        <nav class="desktop-nav">
+            <a href="/">Início</a>
+            <a href="/plans">Planos</a>
+            <a href="/about">Sobre</a>
+            <a href="/auth/login">Entrar</a>
+            <a href="/auth/register" class="btn btn-primary btn-sm" style="color: black;">Começar</a>
+        </nav>
+
+        <button class="hamburger-btn" onclick="togglePublicMenu()" aria-label="Menu">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
+
+    <div class="mobile-menu" id="publicMenu">
+        <button onclick="togglePublicMenu()" style="position: absolute; top: 20px; right: 20px; background: none; border: none; color: white; font-size: 2rem; cursor: pointer;">
+            <i class="fas fa-times"></i>
+        </button>
+
+        <a href="/" class="side-link" onclick="togglePublicMenu()">Início</a>
+        <a href="/plans" class="side-link" onclick="togglePublicMenu()">Planos</a>
+        <a href="/about" class="side-link" onclick="togglePublicMenu()">Sobre</a>
+        <a href="/auth/login" class="side-link" onclick="togglePublicMenu()">Entrar</a>
+        <a href="/auth/register" class="btn btn-primary btn-lg w-100" style="color: black; margin-top: 20px;">Começar Agora</a>
+    </div>
+</header>
+
+<script>
+    function togglePublicMenu() {
+        const menu = document.getElementById('publicMenu');
+        menu.classList.toggle('active');
+        document.body.style.overflow = menu.classList.contains('active') ? 'hidden' : '';
+    }
+</script>

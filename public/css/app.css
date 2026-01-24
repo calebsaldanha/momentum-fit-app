@@ -1,0 +1,50 @@
+/* Ì¥ê APP - √Årea Logada 
+   Focado em utilidade, densidade de informa√ß√£o e UI est√°vel.
+*/
+@import url('./modules/base.css');
+
+/* Layout Shell */
+.dashboard-layout { display: flex; min-height: 100vh; }
+.app-main { flex: 1; margin-left: 260px; display: flex; flex-direction: column; width: calc(100% - 260px); }
+.dashboard-content { padding: 30px; flex: 1; }
+
+/* Sidebar */
+.sidebar {
+    width: 260px; background: #050505; border-right: 1px solid #1f1f1f;
+    position: fixed; top: 0; bottom: 0; left: 0; z-index: 1050;
+    display: flex; flex-direction: column; padding: 24px; transition: transform 0.3s;
+}
+.sidebar-header { padding-bottom: 30px; margin-bottom: 10px; border-bottom: 1px solid #1a1a1a; display: flex; align-items: center; justify-content: space-between; }
+.nav-link {
+    display: flex; align-items: center; gap: 14px; padding: 14px 16px;
+    border-radius: 10px; color: #999; font-weight: 500; font-size: 0.95rem;
+    margin-bottom: 5px; border-left: 3px solid transparent;
+}
+.nav-link:hover { background: rgba(255,255,255,0.03); color: white; }
+.nav-link.active { background: rgba(190, 242, 2, 0.08); color: var(--primary); border-left-color: var(--primary); }
+.sidebar-footer { margin-top: auto; padding-top: 20px; border-top: 1px solid #1a1a1a; }
+
+/* Header do App */
+.app-header {
+    height: 70px; background: rgba(5,5,5,0.95); border-bottom: 1px solid #222;
+    display: flex; align-items: center; justify-content: space-between; padding: 0 30px;
+    position: sticky; top: 0; z-index: 900;
+}
+
+/* Componentes de UI */
+.stat-card { background: #111; border: 1px solid #222; padding: 25px; border-radius: 12px; display: flex; align-items: center; gap: 15px; }
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+
+/* Alertas */
+.alert { padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9rem; }
+.alert-danger { background: rgba(255, 107, 107, 0.1); border: 1px solid rgba(255, 107, 107, 0.3); color: #ff6b6b; }
+.alert-success { background: rgba(190, 242, 2, 0.1); border: 1px solid rgba(190, 242, 2, 0.3); color: var(--primary); }
+
+/* Mobile Dashboard */
+@media (max-width: 991px) {
+    .sidebar { transform: translateX(-100%); width: 280px; z-index: 9999; }
+    .sidebar.active { transform: translateX(0); box-shadow: 10px 0 50px rgba(0,0,0,0.8); }
+    .app-main { margin-left: 0; width: 100%; }
+    .app-header { padding: 0 20px; }
+    .mobile-toggle { display: block; }
+}

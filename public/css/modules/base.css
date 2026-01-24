@@ -1,0 +1,53 @@
+/* Ìø¢ BASE - Vari√°veis e Reset 
+   N√£o cont√©m classes de layout, apenas fundamentos.
+*/
+:root {
+    --primary: #bef202;
+    --primary-hover: #a3d900;
+    --bg-dark: #050505;
+    --bg-card: #111111;
+    --text-main: #ffffff;
+    --text-muted: #888888;
+    --border: 1px solid #222;
+    --font-main: 'Inter', sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: var(--font-main);
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+a { text-decoration: none; color: inherit; transition: 0.2s; }
+ul { list-style: none; }
+img, svg, video { max-width: 100%; height: auto; display: block; }
+
+/* Utilit√°rios Globais */
+.container {
+    width: 100%; padding: 0 20px; margin: 0 auto;
+}
+@media (min-width: 768px) { .container { max-width: 720px; } }
+@media (min-width: 992px) { .container { max-width: 960px; } }
+@media (min-width: 1200px) { .container { max-width: 1140px; } }
+
+.text-gradient {
+    background: linear-gradient(90deg, #fff 0%, var(--primary) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.center { text-align: center; margin-left: auto; margin-right: auto; }
+.w-100 { width: 100%; }
+
+.btn { 
+    display: inline-block; padding: 12px 24px; border-radius: 8px; 
+    font-weight: 600; cursor: pointer; text-align: center; border: 1px solid transparent; 
+}
+.btn-primary { background: var(--primary); color: #000; }
+.btn-primary:hover { background: var(--primary-hover); }
+.btn-outline { border-color: rgba(255,255,255,0.2); color: white; background: transparent; }
+.btn-outline:hover { border-color: var(--primary); color: var(--primary); }
