@@ -1,7 +1,7 @@
 <header class="main-header">
     <div class="header-container">
         <a href="/" class="brand-logo">
-            <img src="/images/momentum-fit-icon.png" alt="Momentum Logo" class="logo-rounded">
+            <img src="/images/momentum-fit-icon.png" alt="Momentum Logo" class="logo-rounded" style="height: 35px; width: 35px;">
             <span>Momentum</span>
         </a>
         
@@ -35,6 +35,10 @@
     function togglePublicMenu() {
         const menu = document.getElementById('publicMenu');
         menu.classList.toggle('active');
-        document.body.style.overflow = menu.classList.contains('active') ? 'hidden' : '';
+        if (menu.classList.contains('active')) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
     }
 </script>
