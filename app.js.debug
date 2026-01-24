@@ -8,30 +8,40 @@ const flash = require('./middleware/flash');
 const passport = require('passport');
 const pool = require('./database/db'); 
 
-// Ìª°Ô∏è 1. CONFIAN√áA NO PROXY (Obrigat√≥rio para Cookies na Vercel)
-// 'true' confia em todos os hops (necess√°rio em alguns setups serverless)
-// Sem isso, req.secure √© false, e o cookie secure: true NUNCA √© enviado.
-app.set('trust proxy', true);
+// --- Ìª°Ô∏è 1. TIMEOUT GLOBAL (FAIL FAST) ---
+// Se o banco travar, matamos a requisi√ß√£o em 10s com erro explicito.
+app.use((req, res, next) => {
+    res.setTimeout(10000, () => {
+        console.error(`‚åõ TIMEOUT na rota: ${req.path}`);
+        res.status(504).send('‚è±Ô∏è Erro: O servidor demorou muito para responder (Prov√°vel timeout de Banco de Dados).');
+    });
+    next();
+});
 
-// Ìª°Ô∏è 2. VIEWS E MIDDLEWARES
+// --- CONFIGURA√á√ÉO DE PROXY ---
+app.set('trust proxy', 1);
+
+// --- PASSPORT & VIEWS ---
 require('./config/passport')(passport);
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
+// --- MIDDLEWARES BASE ---
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Ìª°Ô∏è 3. SESS√ÉO ROBUSTA
+// --- Ìª°Ô∏è 2. SESS√ÉO COM TRATAMENTO DE ERRO ---
 const sessionStore = new pgSession({
     pool: pool,
     tableName: 'session',
-    createTableIfMissing: true, // Tenta criar se o script manual falhou
-    pruneSessionInterval: 60 * 15
+    createTableIfMissing: true,
+    pruneSessionInterval: 60 * 15 
 });
 
+// Importante: Logar erro do store para n√£o falhar silenciosamente
 sessionStore.on('error', (err) => {
-    console.error('Ì¥• FALHA NO STORAGE DE SESS√ÉO:', err.message);
+    console.error('Ì¥• ERRO NO SESSION STORE:', err.message);
 });
 
 const isProduction = process.env.NODE_ENV === 'production';
@@ -39,17 +49,14 @@ const isProduction = process.env.NODE_ENV === 'production';
 app.use(session({
     store: sessionStore,
     secret: process.env.SESSION_SECRET || 'secret_dev_key_123',
-    resave: false,
-    saveUninitialized: false,
-    proxy: true, // For√ßa o cookie a respeitar o proxy
+    resave: false,             
+    saveUninitialized: false,  
+    proxy: true,
     rolling: true,
     cookie: { 
         maxAge: 30 * 24 * 60 * 60 * 1000, 
-        // Em produ√ß√£o, exige HTTPS. Se sua Vercel n√£o tiver HTTPS configurado, isso quebra.
-        // Se estiver "dando problema", mude secure para false TEMPORARIAMENTE para testar.
         secure: isProduction, 
         httpOnly: true,
-        // Lax √© o equil√≠brio perfeito. None exige secure: true obrigat√≥rio.
         sameSite: 'lax' 
     }
 }));
@@ -58,26 +65,19 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
 
-// Ìª°Ô∏è 4. LOGGER DIAGN√ìSTICO (O "Dedo Duro")
+// --- Ìª°Ô∏è 3. TRAFFIC INSPECTOR (POSICIONADO CORRETAMENTE) ---
+// Agora logamos DEPOIS que a sess√£o e o passport rodaram.
+// Se n√£o aparecer no log, sabemos que travou na linha da session acima.
 app.use((req, res, next) => {
     if (!req.path.match(/\.(css|js|png|jpg|ico|svg|woff)$/)) {
-        const proto = req.headers['x-forwarded-proto'] || req.protocol;
-        const isSecure = req.secure || proto === 'https';
-        const user = req.user ? \`\${req.user.email} [\${req.user.role}]\` : 'Visitante';
-        
-        console.log(\`Ì∫¶ [\${req.method}] \${req.path}\`);
-        console.log(\`   Ì±§ Auth: \${req.isAuthenticated()} | User: \${user}\`);
-        console.log(\`   Ì¥ê Secure: \${isSecure} (Proxy: \${proto}) | SessionID: \${req.sessionID}\`);
-        
-        // Alerta se o cookie secure estiver ligado mas a conex√£o for insegura
-        if (isProduction && !isSecure) {
-            console.warn("‚ö†Ô∏è  ALERTA CR√çTICO: Conex√£o insegura em Prod. Cookie n√£o ser√° salvo!");
-        }
+        const user = req.user ? `${req.user.email} (${req.user.role})` : 'Visitante';
+        const authStatus = req.isAuthenticated() ? '‚úÖ Autenticado' : '‚ùå N√£o-Auth';
+        console.log(`Ì∫¶ [${req.method}] ${req.path} | ${authStatus} | ${user}`);
     }
     next();
 });
 
-// VARIAVEIS GLOBAIS
+// --- VARI√ÅVEIS GLOBAIS ---
 app.use((req, res, next) => {
     res.locals.success_msg = req.flash('success_msg');
     res.locals.error_msg = req.flash('error_msg');
@@ -86,7 +86,7 @@ app.use((req, res, next) => {
     next();
 });
 
-// ROTAS
+// --- ROTAS ---
 try {
     app.use('/', require('./routes/index'));
     app.use('/auth', require('./routes/auth'));
@@ -97,12 +97,15 @@ try {
     app.use('/notifications', require('./routes/notifications'));
     app.use('/api', require('./routes/api'));
 } catch (err) {
-    console.error("‚ùå Erro ao carregar rotas:", err);
+    console.error("‚ùå Erro fatal ao carregar rotas:", err);
 }
 
-// 404
+// --- 404 & ERROR HANDLER ---
 app.use((req, res) => {
-    if (req.path.match(/\.(css|js|png|jpg|ico|map|json)$/)) return res.status(404).end();
+    if (req.path.match(/\.(css|js|png|jpg|ico|map|json)$/)) {
+        return res.status(404).end();
+    }
+    console.warn(`‚ö†Ô∏è 404: ${req.path}`);
     res.status(404).render('pages/error', { message: 'P√°gina n√£o encontrada' });
 });
 
@@ -111,6 +114,7 @@ module.exports = app;
 if (require.main === module) {
     const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => {
-        console.log(\`‚úÖ Servidor rodando na porta \${PORT}\`);
+        console.log(`‚úÖ Servidor rodando na porta ${PORT}`);
+        console.log(`Ìª°Ô∏è  Modo: ${process.env.NODE_ENV || 'development'}`);
     });
 }
