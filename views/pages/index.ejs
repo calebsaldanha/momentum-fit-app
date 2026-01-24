@@ -6,179 +6,196 @@
         <div class="hero-overlay"></div>
         <div class="container hero-container">
             <div class="hero-content">
-                <h1 class="hero-title text-gradient">Transforme Seu Potencial em Performance</h1>
-                <p class="hero-subtitle">
-                    A plataforma definitiva onde Personal Trainers escalam seus negócios e alunos superam seus limites com inteligência de dados.
+                <div style="margin-bottom: 20px;">
+                    <span style="background: rgba(190, 242, 2, 0.2); color: var(--primary); padding: 8px 16px; border-radius: 30px; font-size: 0.85rem; font-weight: 600; border: 1px solid var(--primary);">
+                        ��� A Nova Era do Treinamento
+                    </span>
+                </div>
+                <h1 class="hero-title text-gradient" style="font-size: 3.8rem; line-height: 1.1; margin-bottom: 25px;">
+                    Transforme Potencial <br>em Performance.
+                </h1>
+                <p class="hero-subtitle" style="font-size: 1.2rem; color: #ccc; max-width: 600px; margin-bottom: 40px;">
+                    A plataforma definitiva onde Personal Trainers escalam seus negócios e alunos superam limites com inteligência de dados e IA.
                 </p>
                 
-                <div class="hero-buttons">
+                <div class="hero-buttons" style="display: flex; gap: 15px;">
                     <% if (!user) { %>
-                        <a href="/auth/register" class="btn btn-primary">Começar Agora</a>
-                        <a href="#plans" class="btn btn-outline">Ver Planos</a>
+                        <a href="/auth/register" class="btn btn-primary btn-lg">Criar Conta Grátis</a>
+                        <a href="#plans" class="btn btn-outline btn-lg">Ver Planos</a>
                     <% } else { %>
-                        <a href="/<%= user.role %>/dashboard" class="btn btn-primary">Ir para Dashboard</a>
+                        <a href="/<%= user.role %>/dashboard" class="btn btn-primary btn-lg">Acessar Painel</a>
                     <% } %>
                 </div>
             </div>
         </div>
     </section>
 
-    <section class="section-padding bg-subtle" id="features">
+    <section class="section-padding" style="background: #0a0a0a;">
         <div class="container">
-            <div class="center" style="margin-bottom: 50px;">
-                <h2 class="section-title">Por que escolher a Momentum?</h2>
-                <p class="text-muted">Tecnologia de ponta para resultados reais.</p>
+            <div class="center" style="margin-bottom: 60px;">
+                <h2 class="section-title">Treino não é achismo. <span class="text-gradient">É Ciência.</span></h2>
+                <p class="text-muted">Ferramentas profissionais para quem leva o resultado a sério.</p>
             </div>
             
             <div class="features-grid">
                 <div class="feature-card">
-                    <div class="icon-box"><i class="fas fa-dumbbell"></i></div>
-                    <h3>Prescrição Inteligente</h3>
-                    <p>Treinos detalhados com vídeos, controle de carga, RPE e descanso. Tudo na palma da mão.</p>
+                    <div class="icon-box"><i class="fas fa-brain"></i></div>
+                    <h3>Inteligência Artificial</h3>
+                    <p style="color: #888; line-height: 1.6;">Nosso <strong>IA Coach</strong> analisa seu histórico 24/7, sugerindo cargas ideais e ajustes de volume baseados na sua recuperação real.</p>
                 </div>
                 
                 <div class="feature-card">
-                    <div class="icon-box"><i class="fas fa-chart-line"></i></div>
-                    <h3>Data-Driven</h3>
-                    <p>Visualise sua evolução com gráficos de volume, tonalagem e frequência. Dados, não achismos.</p>
+                    <div class="icon-box"><i class="fas fa-chart-pie"></i></div>
+                    <h3>Métricas Avançadas</h3>
+                    <p style="color: #888; line-height: 1.6;">Esqueça o caderninho. Acompanhe Tonelagem, Carga de Trabalho e Frequência em gráficos detalhados.</p>
                 </div>
                 
                 <div class="feature-card">
-                    <div class="icon-box"><i class="fas fa-robot"></i></div>
-                    <h3>IA Coach</h3>
-                    <p>Assistente virtual que analisa seus treinos e sugere ajustes de carga em tempo real.</p>
+                    <div class="icon-box"><i class="fas fa-mobile-alt"></i></div>
+                    <h3>App do Aluno</h3>
+                    <p style="color: #888; line-height: 1.6;">Experiência fluida com vídeos de execução, cronômetro de descanso e feedback RPE em tempo real.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <section class="section-padding" style="background: #000;">
+    <section class="section-padding" style="background: #000; border-top: 1px solid #111; border-bottom: 1px solid #111;">
         <div class="container">
-            <div class="header-flex" style="display:flex; justify-content:space-between; align-items:end; margin-bottom:40px;">
+            <div style="display: flex; justify-content: space-between; align-items: end; margin-bottom: 40px;">
                 <div>
-                    <h2 class="section-title">Treine com os Melhores</h2>
-                    <p class="text-muted">Profissionais verificados e avaliados.</p>
+                    <h2 class="section-title">Trainers em Destaque</h2>
+                    <p class="text-muted">Profissionais validados pela metodologia Momentum.</p>
                 </div>
-                <a href="/auth/register" class="link-arrow" style="color: var(--primary);">Ver todos <i class="fas fa-arrow-right"></i></a>
+                <a href="/auth/register" style="color: var(--primary); font-weight: 600;">Ser um Trainer <i class="fas fa-arrow-right"></i></a>
             </div>
 
-            <div class="features-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
-                <div class="feature-card" style="padding: 0; overflow: hidden;">
-                    <div style="height: 200px; background: #222; display: flex; align-items: center; justify-content: center;">
-                        <i class="fas fa-user-ninja" style="font-size: 4rem; color: #444;"></i>
+            <div class="features-grid" style="gap: 20px;">
+                <div class="feature-card" style="padding: 0; overflow: hidden; border: none; background: #111;">
+                    <div style="height: 250px; background: #222; display: flex; align-items: center; justify-content: center; position: relative;">
+                        <i class="fas fa-user-astronaut" style="font-size: 5rem; color: #333;"></i>
+                        <div style="position: absolute; bottom: 10px; left: 10px; background: var(--primary); color: black; padding: 4px 10px; border-radius: 4px; font-weight: bold; font-size: 0.8rem;">PRO</div>
                     </div>
                     <div style="padding: 20px;">
-                        <h4 style="color: white; margin-bottom: 5px;">Carlos Silva</h4>
-                        <p style="color: var(--primary); font-size: 0.85rem; margin-bottom: 15px;">Especialista em Hipertrofia</p>
-                        <p class="text-muted" style="font-size: 0.9rem;">"Foco total na execução perfeita e progressão de carga."</p>
+                        <h4 style="color: white; margin-bottom: 5px;">Carlos "Iron" Silva</h4>
+                        <p style="color: #666; font-size: 0.9rem;">Especialista em Hipertrofia</p>
                     </div>
                 </div>
 
-                <div class="feature-card" style="padding: 0; overflow: hidden;">
-                    <div style="height: 200px; background: #222; display: flex; align-items: center; justify-content: center;">
-                        <i class="fas fa-user-astronaut" style="font-size: 4rem; color: #444;"></i>
+                <div class="feature-card" style="padding: 0; overflow: hidden; border: none; background: #111;">
+                    <div style="height: 250px; background: #222; display: flex; align-items: center; justify-content: center; position: relative;">
+                        <i class="fas fa-running" style="font-size: 5rem; color: #333;"></i>
+                        <div style="position: absolute; bottom: 10px; left: 10px; background: var(--primary); color: black; padding: 4px 10px; border-radius: 4px; font-weight: bold; font-size: 0.8rem;">PRO</div>
                     </div>
                     <div style="padding: 20px;">
                         <h4 style="color: white; margin-bottom: 5px;">Ana Costa</h4>
-                        <p style="color: var(--primary); font-size: 0.85rem; margin-bottom: 15px;">Performance & Mobilidade</p>
-                        <p class="text-muted" style="font-size: 0.9rem;">"Construa um corpo forte e funcional para a vida toda."</p>
+                        <p style="color: #666; font-size: 0.9rem;">Mobilidade & Performance</p>
                     </div>
                 </div>
 
-                <div class="feature-card" style="padding: 0; overflow: hidden;">
-                    <div style="height: 200px; background: #222; display: flex; align-items: center; justify-content: center;">
-                        <i class="fas fa-running" style="font-size: 4rem; color: #444;"></i>
+                <div class="feature-card" style="padding: 0; overflow: hidden; border: none; background: #111;">
+                    <div style="height: 250px; background: #222; display: flex; align-items: center; justify-content: center; position: relative;">
+                        <i class="fas fa-dumbbell" style="font-size: 5rem; color: #333;"></i>
                     </div>
                     <div style="padding: 20px;">
                         <h4 style="color: white; margin-bottom: 5px;">Pedro Santos</h4>
-                        <p style="color: var(--primary); font-size: 0.85rem; margin-bottom: 15px;">Powerlifting</p>
-                        <p class="text-muted" style="font-size: 0.9rem;">"Força bruta com técnica refinada. Vamos levantar peso."</p>
+                        <p style="color: #666; font-size: 0.9rem;">Powerlifting Coach</p>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <section class="section-padding bg-subtle" id="plans">
+    <section class="section-padding" id="plans" style="background: linear-gradient(180deg, #0a0a0a 0%, #000 100%);">
         <div class="container">
-            <div class="center" style="margin-bottom: 50px;">
-                <h2 class="section-title">Escolha seu Plano</h2>
-                <p class="text-muted">Comece gratuitamente e evolua conforme seu ritmo.</p>
+            <div class="center" style="margin-bottom: 60px;">
+                <h2 class="section-title">Planos para sua Evolução</h2>
+                <p class="text-muted">Comece hoje. Sem cartão de crédito.</p>
             </div>
 
             <div class="features-grid">
-                <div class="feature-card" style="border-color: var(--primary); transform: scale(1.05);">
-                    <div style="text-align: center; margin-bottom: 20px;">
-                        <span style="background: rgba(190, 242, 2, 0.1); color: var(--primary); padding: 5px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: bold;">POPULAR</span>
-                        <h3 style="font-size: 2rem; margin: 15px 0 5px;">Gratuito</h3>
-                        <p class="text-muted">Para começar agora</p>
+                
+                <div class="feature-card" style="border: 2px solid var(--primary); position: relative; transform: scale(1.02); z-index: 2;">
+                    <div style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: var(--primary); color: black; padding: 5px 15px; border-radius: 20px; font-weight: 700; font-size: 0.8rem;">
+                        EDIÇÃO FUNDADORES
                     </div>
-                    <ul style="margin-bottom: 30px; flex: 1;">
-                        <li style="margin-bottom: 10px; display: flex; gap: 10px;"><i class="fas fa-check" style="color: var(--primary);"></i> Acesso a 1 Aluno/Personal</li>
-                        <li style="margin-bottom: 10px; display: flex; gap: 10px;"><i class="fas fa-check" style="color: var(--primary);"></i> Biblioteca de Exercícios</li>
-                        <li style="margin-bottom: 10px; display: flex; gap: 10px;"><i class="fas fa-check" style="color: var(--primary);"></i> Histórico Básico</li>
+                    <div style="text-align: center; padding: 20px 0; border-bottom: 1px solid #333;">
+                        <h3 style="font-size: 1.5rem; margin-bottom: 10px;">Gratuito</h3>
+                        <div style="font-size: 2.5rem; font-weight: 800; color: white;">R$ 0<small style="font-size: 1rem; color: #666; font-weight: 400;">/mês</small></div>
+                        <p style="color: #888; font-size: 0.9rem; margin-top: 10px;">Acesso total por tempo limitado.</p>
+                    </div>
+                    <ul style="margin: 30px 0; list-style: none; padding: 0;">
+                        <li style="margin-bottom: 15px; color: #ccc; display: flex; gap: 10px;"><i class="fas fa-check" style="color: var(--primary);"></i> App do Aluno Completo</li>
+                        <li style="margin-bottom: 15px; color: #ccc; display: flex; gap: 10px;"><i class="fas fa-check" style="color: var(--primary);"></i> Gestão de Treinos</li>
+                        <li style="margin-bottom: 15px; color: #ccc; display: flex; gap: 10px;"><i class="fas fa-check" style="color: var(--primary);"></i> Biblioteca de Exercícios</li>
+                        <li style="margin-bottom: 15px; color: #ccc; display: flex; gap: 10px;"><i class="fas fa-check" style="color: var(--primary);"></i> Suporte Básico</li>
                     </ul>
-                    <a href="/auth/register" class="btn btn-primary w-100" style="color: black;">Criar Conta Grátis</a>
+                    <a href="/auth/register" class="btn btn-primary w-100" style="color: black; font-weight: 800;">Garantir Vaga</a>
                 </div>
 
-                <div class="feature-card" style="opacity: 0.6; position: relative;">
-                    <div style="position: absolute; top: 15px; right: 15px; background: #333; padding: 5px 10px; border-radius: 5px; font-size: 0.8rem;">EM BREVE</div>
-                    <div style="text-align: center; margin-bottom: 20px;">
-                        <h3 style="font-size: 2rem; margin: 15px 0 5px;">Pro Trainer</h3>
-                        <p class="text-muted">Para profissionais</p>
+                <div class="feature-card" style="opacity: 0.7; border: 1px solid #333;">
+                    <div style="text-align: center; padding: 20px 0; border-bottom: 1px solid #333;">
+                        <h3 style="font-size: 1.5rem; margin-bottom: 10px; color: #888;">Básico</h3>
+                        <div style="font-size: 2.5rem; font-weight: 800; color: #888;">R$ 10<small style="font-size: 1rem; color: #666; font-weight: 400;">/mês</small></div>
+                        <p style="color: #666; font-size: 0.9rem; margin-top: 10px; font-style: italic;">(Em Breve)</p>
                     </div>
-                    <ul style="margin-bottom: 30px;">
-                        <li style="margin-bottom: 10px; display: flex; gap: 10px;"><i class="fas fa-check"></i> Alunos Ilimitados</li>
-                        <li style="margin-bottom: 10px; display: flex; gap: 10px;"><i class="fas fa-check"></i> IA Assistente de Treino</li>
-                        <li style="margin-bottom: 10px; display: flex; gap: 10px;"><i class="fas fa-check"></i> Página de Vendas</li>
+                    <ul style="margin: 30px 0; list-style: none; padding: 0;">
+                        <li style="margin-bottom: 15px; color: #666; display: flex; gap: 10px;"><i class="fas fa-check"></i> Tudo do Gratuito</li>
+                        <li style="margin-bottom: 15px; color: #666; display: flex; gap: 10px;"><i class="fas fa-check"></i> Sem anúncios</li>
+                        <li style="margin-bottom: 15px; color: #666; display: flex; gap: 10px;"><i class="fas fa-check"></i> Histórico ilimitado</li>
                     </ul>
-                    <button class="btn btn-outline w-100" disabled>Aguarde</button>
+                    <button class="btn btn-outline w-100" disabled style="cursor: not-allowed; border-color: #333; color: #666;">Aguarde</button>
                 </div>
 
-                <div class="feature-card" style="opacity: 0.6; position: relative;">
-                    <div style="position: absolute; top: 15px; right: 15px; background: #333; padding: 5px 10px; border-radius: 5px; font-size: 0.8rem;">EM BREVE</div>
-                    <div style="text-align: center; margin-bottom: 20px;">
-                        <h3 style="font-size: 2rem; margin: 15px 0 5px;">Studio</h3>
-                        <p class="text-muted">Para gestão completa</p>
+                <div class="feature-card" style="opacity: 0.7; border: 1px solid #333;">
+                    <div style="text-align: center; padding: 20px 0; border-bottom: 1px solid #333;">
+                        <h3 style="font-size: 1.5rem; margin-bottom: 10px; color: #888;">Pro</h3>
+                        <div style="font-size: 2.5rem; font-weight: 800; color: #888;">R$ 89,90<small style="font-size: 1rem; color: #666; font-weight: 400;">/mês</small></div>
+                        <p style="color: #666; font-size: 0.9rem; margin-top: 10px; font-style: italic;">(Em Breve)</p>
                     </div>
-                    <ul style="margin-bottom: 30px;">
-                        <li style="margin-bottom: 10px; display: flex; gap: 10px;"><i class="fas fa-check"></i> Múltiplos Personais</li>
-                        <li style="margin-bottom: 10px; display: flex; gap: 10px;"><i class="fas fa-check"></i> Financeiro Completo</li>
-                        <li style="margin-bottom: 10px; display: flex; gap: 10px;"><i class="fas fa-check"></i> White Label</li>
+                    <ul style="margin: 30px 0; list-style: none; padding: 0;">
+                        <li style="margin-bottom: 15px; color: #666; display: flex; gap: 10px;"><i class="fas fa-check"></i> Para Personal Trainers</li>
+                        <li style="margin-bottom: 15px; color: #666; display: flex; gap: 10px;"><i class="fas fa-check"></i> Alunos Ilimitados</li>
+                        <li style="margin-bottom: 15px; color: #666; display: flex; gap: 10px;"><i class="fas fa-check"></i> IA Generativa de Treino</li>
+                        <li style="margin-bottom: 15px; color: #666; display: flex; gap: 10px;"><i class="fas fa-check"></i> Página de Vendas</li>
                     </ul>
-                    <button class="btn btn-outline w-100" disabled>Aguarde</button>
+                    <button class="btn btn-outline w-100" disabled style="cursor: not-allowed; border-color: #333; color: #666;">Aguarde</button>
                 </div>
+
             </div>
         </div>
     </section>
 
     <section class="section-padding">
         <div class="container">
-            <h2 class="section-title center" style="margin-bottom: 40px;">O que dizem nossos usuários</h2>
-            <div class="features-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
-                <div class="feature-card">
-                    <div style="margin-bottom: 15px; color: var(--primary);">
+            <h2 class="section-title center" style="margin-bottom: 50px;">O que dizem os usuários</h2>
+            <div class="features-grid" style="grid-template-columns: repeat(2, 1fr);">
+                <div class="feature-card" style="background: #111;">
+                    <div style="margin-bottom: 20px; color: var(--primary);">
                         <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
                     </div>
-                    <p style="font-style: italic; margin-bottom: 20px;">"A melhor plataforma que já usei. A IA realmente ajuda a ajustar as cargas quando estou cansado. Recomendo demais!"</p>
+                    <p style="font-style: italic; color: #ccc; margin-bottom: 20px; font-size: 1.1rem;">
+                        "Finalmente uma plataforma que foca no que importa: dados. A IA me ajudou a sair de um platô de 3 meses no supino."
+                    </p>
                     <div style="display: flex; align-items: center; gap: 15px;">
-                        <div style="width: 40px; height: 40px; background: #333; border-radius: 50%;"></div>
+                        <div style="width: 50px; height: 50px; background: #333; border-radius: 50%;"></div>
                         <div>
-                            <h5 style="margin: 0; color: white;">Lucas M.</h5>
-                            <small class="text-muted">Aluno desde 2024</small>
+                            <h5 style="margin: 0; color: white;">Ricardo M.</h5>
+                            <small class="text-muted">Aluno Momentum</small>
                         </div>
                     </div>
                 </div>
 
-                <div class="feature-card">
-                    <div style="margin-bottom: 15px; color: var(--primary);">
+                <div class="feature-card" style="background: #111;">
+                    <div style="margin-bottom: 20px; color: var(--primary);">
                         <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
                     </div>
-                    <p style="font-style: italic; margin-bottom: 20px;">"Consegui dobrar meu número de alunos online organizando tudo pelo Momentum. A criação de treino é muito rápida."</p>
+                    <p style="font-style: italic; color: #ccc; margin-bottom: 20px; font-size: 1.1rem;">
+                        "Organizou minha consultoria online. Consigo gerenciar 30 alunos em metade do tempo que levava antes."
+                    </p>
                     <div style="display: flex; align-items: center; gap: 15px;">
-                        <div style="width: 40px; height: 40px; background: #333; border-radius: 50%;"></div>
+                        <div style="width: 50px; height: 50px; background: #333; border-radius: 50%;"></div>
                         <div>
-                            <h5 style="margin: 0; color: white;">Mariana S.</h5>
+                            <h5 style="margin: 0; color: white;">Juliana S.</h5>
                             <small class="text-muted">Personal Trainer</small>
                         </div>
                     </div>
@@ -187,13 +204,13 @@
         </div>
     </section>
 
-    <section style="padding: 80px 0; background: linear-gradient(180deg, #050505 0%, #111 100%); text-align: center;">
+    <section style="padding: 100px 0; text-align: center; border-top: 1px solid #222;">
         <div class="container">
-            <h2 class="hero-title" style="font-size: 2.5rem; margin-bottom: 20px;">Comece sua evolução hoje</h2>
-            <p class="text-muted" style="max-width: 600px; margin: 0 auto 30px;">
-                Junte-se a milhares de personais e alunos que levam o treino a sério.
+            <h2 style="font-size: 3rem; margin-bottom: 20px; color: white;">Pronto para evoluir?</h2>
+            <p style="color: #888; margin-bottom: 40px; font-size: 1.2rem;">
+                Junte-se à comunidade que mais cresce no Brasil.
             </p>
-            <a href="/auth/register" class="btn btn-primary btn-lg" style="color: black;">Criar Conta Gratuitamente</a>
+            <a href="/auth/register" class="btn btn-primary btn-lg" style="padding: 15px 40px; font-size: 1.1rem; color: black;">Começar Gratuitamente</a>
         </div>
     </section>
 </main>
