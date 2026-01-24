@@ -1,135 +1,65 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard | Momentum Fit</title>
     <link rel="stylesheet" href="/css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
-<div class="app-wrapper">
-    <%- include('../partials/sidebar.ejs') %>
+<div class="dashboard-layout">
+    <%- include('../partials/sidebar.ejs', { path: '/client/dashboard' }) %>
 
-    <main class="main-content">
+    <main class="app-main">
         <%- include('../partials/app-header.ejs', { title: 'Visão Geral' }) %>
 
-        <div class="dashboard-container">
-            
-            <div style="margin-bottom: 35px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 20px;">
-                <div>
-                    <h1 style="font-size: 2rem; color: white; margin-bottom: 5px;">Olá, <%= user.name.split(' ')[0] %>! ��</h1>
-                    <p style="color: #888; font-size: 1rem;">O foco define o resultado. Vamos treinar?</p>
-                </div>
-                <a href="/client/workouts" class="btn btn-primary">
-                    <i class="fas fa-play"></i> Iniciar Treino
-                </a>
+        <div class="dashboard-content">
+            <div style="margin-bottom: 30px;">
+                <h1 style="color: white; font-size: 1.8rem;">Olá, <span style="color: var(--primary);"><%= user.name.split(' ')[0] %></span>!</h1>
+                <p style="color: #888;">Aqui está o resumo da sua performance.</p>
             </div>
 
-            <div class="grid-stats">
-                <div class="stat-box">
-                    <div class="stat-icon"><i class="fas fa-check"></i></div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-fire"></i></div>
                     <div class="stat-info">
-                        <h3><%= stats.workoutsCompleted || 0 %></h3>
-                        <span>Treinos Feitos</span>
+                        <h3>12</h3>
+                        <p>Treinos no Mês</p>
                     </div>
                 </div>
-                <div class="stat-box">
-                    <div class="stat-icon" style="color: #ffaa00; background: rgba(255, 170, 0, 0.1);"><i class="fas fa-fire"></i></div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-weight"></i></div>
                     <div class="stat-info">
-                        <h3><%= stats.streak || 0 %></h3>
-                        <span>Dias Seguidos</span>
+                        <h3>71kg</h3>
+                        <p>Peso Atual</p>
                     </div>
                 </div>
-                <div class="stat-box">
-                    <div class="stat-icon" style="color: #00ccff; background: rgba(0, 204, 255, 0.1);"><i class="fas fa-weight-scale"></i></div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-trophy"></i></div>
                     <div class="stat-info">
-                        <h3><%= stats.currentWeight || '--' %>kg</h3>
-                        <span>Peso Atual</span>
+                        <h3>Lv. 5</h3>
+                        <p>Nível</p>
                     </div>
                 </div>
             </div>
 
-            <div class="grid-main">
+            <div class="grid-2-col" style="gap: 20px;">
+                <div class="feature-card" style="min-height: 200px;">
+                    <h3>Próximo Treino</h3>
+                    <p style="color: #888;">Treino A - Superiores e Core</p>
+                    <a href="/client/workouts" class="btn btn-primary btn-sm" style="margin-top: 15px;">Começar</a>
+                </div>
                 
-                <div style="display: flex; flex-direction: column; gap: 30px;">
-                    
-                    <div class="card card-featured">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
-                            <span class="badge badge-neon">HOJE</span>
-                            <small style="color: #888;">Hipertrofia</small>
-                        </div>
-                        
-                        <% if (nextWorkout) { %>
-                            <h2 style="font-size: 1.8rem; margin-bottom: 10px; color: white;"><%= nextWorkout.title %></h2>
-                            <p style="color: #ccc; margin-bottom: 25px;"><%= nextWorkout.description || 'Foco na técnica e controle de carga.' %></p>
-                            
-                            <div style="display: flex; gap: 25px; margin-bottom: 25px; color: #999; font-size: 0.9rem;">
-                                <span><i class="far fa-clock" style="color: var(--primary);"></i> <%= nextWorkout.duration %> min</span>
-                                <span><i class="fas fa-dumbbell" style="color: var(--primary);"></i> <%= nextWorkout.exerciseCount %> exercícios</span>
-                            </div>
-
-                            <div style="display: flex; gap: 15px;">
-                                <a href="/workouts/start/<%= nextWorkout.id %>" class="btn btn-primary" style="padding: 10px 30px;">Começar</a>
-                                <a href="/workouts/details/<%= nextWorkout.id %>" class="btn btn-outline">Detalhes</a>
-                            </div>
-                        <% } else { %>
-                            <p style="color: #888;">Nenhum treino agendado.</p>
-                            <a href="/client/workouts" class="btn btn-outline btn-sm">Ver Biblioteca</a>
-                        <% } %>
-                    </div>
-
-                    <div class="content-box">
-                        <div class="box-header">
-                            <h3 class="box-title">Histórico Recente</h3>
-                            <a href="/client/evolution" style="font-size: 0.8rem; color: var(--primary);">Ver tudo</a>
-                        </div>
-                        <div class="item-list">
-                            <div class="list-row">
-                                <div class="row-info">
-                                    <h4>Treino de Peito A</h4>
-                                    <div class="row-meta"><span>Ontem</span> • <span>55 min</span></div>
-                                </div>
-                                <span class="badge badge-dark">Concluído</span>
-                            </div>
-                            <div class="list-row">
-                                <div class="row-info">
-                                    <h4>Cardio HIIT</h4>
-                                    <div class="row-meta"><span>18/01</span> • <span>25 min</span></div>
-                                </div>
-                                <span class="badge badge-dark">Concluído</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div style="display: flex; flex-direction: column; gap: 30px;">
-                    
-                    <div class="card" style="background: linear-gradient(180deg, rgba(190, 242, 2, 0.03) 0%, #111 100%); border-color: rgba(190, 242, 2, 0.15);">
-                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
-                            <i class="fas fa-robot" style="color: var(--primary);"></i>
-                            <h3 style="color: white; font-size: 1rem; font-weight: 700;">Momentum AI</h3>
-                        </div>
-                        <p style="color: #ccc; font-size: 0.9rem; font-style: italic; line-height: 1.5; margin-bottom: 20px;">
-                            "Sua carga no Supino aumentou 10% nas últimas 3 semanas. Sugiro aumentar o descanso em 30s hoje."
-                        </p>
-                        <a href="/client/ai-coach" class="btn btn-outline btn-sm" style="width: 100%;">Conversar</a>
-                    </div>
-
-                    <div class="content-box">
-                        <h3 class="box-title" style="margin-bottom: 15px;">Acesso Rápido</h3>
-                        <div style="display: flex; flex-direction: column; gap: 10px;">
-                            <a href="#" class="btn btn-outline" style="justify-content: flex-start; text-align: left; border-color: #333; color: #aaa;">
-                                <i class="fas fa-weight-scale" style="width: 25px;"></i> Atualizar Peso
-                            </a>
-                            <a href="#" class="btn btn-outline" style="justify-content: flex-start; text-align: left; border-color: #333; color: #aaa;">
-                                <i class="fas fa-camera" style="width: 25px;"></i> Foto do Shape
-                            </a>
-                        </div>
-                    </div>
-
+                <div class="feature-card" style="min-height: 200px;">
+                    <h3>Histórico Recente</h3>
+                    <ul style="list-style: none; padding: 0; margin-top: 10px;">
+                        <li style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); color: #ccc; display: flex; justify-content: space-between;">
+                            <span>Treino B</span>
+                            <span style="color: var(--primary);">Concluído</span>
+                        </li>
+                    </ul>
                 </div>
             </div>
 
