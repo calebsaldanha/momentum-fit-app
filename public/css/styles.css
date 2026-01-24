@@ -285,3 +285,144 @@ body {
         background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, transparent 100%);
     }
 }
+
+/* =========================================
+   13. FINAL PUBLIC LAYOUT SYSTEM (MOBILE FIRST)
+   ========================================= */
+
+/* --- Container & Resets --- */
+.container {
+    width: 100%;
+    padding-right: 20px;
+    padding-left: 20px;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+@media (min-width: 768px) { .container { max-width: 720px; } }
+@media (min-width: 992px) { .container { max-width: 960px; } }
+@media (min-width: 1200px) { .container { max-width: 1140px; } }
+
+/* --- Grid System Universal --- */
+/* Mobile First: Tudo é 1 coluna por padrão */
+.features-grid, 
+.steps-grid, 
+.plans-grid,
+.trainers-grid,
+.testimonials-scroller,
+.footer-grid,
+.grid-3-col {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 30px !important;
+    width: 100% !important;
+}
+
+/* Tablet: 2 Colunas (Onde fizer sentido) */
+@media (min-width: 768px) {
+    .footer-grid, .steps-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+/* Desktop: 3 ou 4 Colunas */
+@media (min-width: 992px) {
+    .features-grid, 
+    .plans-grid,
+    .trainers-grid,
+    .testimonials-scroller,
+    .grid-3-col {
+        grid-template-columns: repeat(3, 1fr) !important;
+    }
+    
+    .footer-grid {
+        grid-template-columns: repeat(4, 1fr) !important;
+    }
+    
+    .steps-grid {
+        grid-template-columns: repeat(3, 1fr) !important;
+    }
+}
+
+/* --- Public Header Fix --- */
+.main-header {
+    width: 100%;
+    z-index: 1050;
+    transition: all 0.3s ease;
+}
+
+/* Mobile Header */
+@media (max-width: 991px) {
+    .main-header {
+        position: fixed !important;
+        top: 0; left: 0;
+        background: rgba(5, 5, 5, 0.95) !important;
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        padding: 15px 0;
+    }
+    
+    /* Espaçamento para o conteúdo não subir */
+    .public-content, .hero {
+        padding-top: 80px !important;
+    }
+    
+    /* Ajuste do Hero no Mobile */
+    .hero {
+        min-height: auto !important;
+        padding-bottom: 60px;
+        align-items: flex-start !important; /* Conteúdo no topo */
+    }
+    
+    .hero-content {
+        padding-top: 40px;
+        text-align: center;
+    }
+    
+    .hero-title {
+        font-size: 2.2rem !important;
+    }
+    
+    .hero-buttons {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .hero-buttons .btn {
+        width: 100%;
+    }
+}
+
+/* Desktop Header */
+@media (min-width: 992px) {
+    .main-header {
+        position: absolute !important;
+        background: transparent !important;
+        border-bottom: none;
+        padding: 25px 0;
+    }
+    
+    .public-content {
+        padding-top: 0 !important;
+    }
+}
+
+/* --- Footer Fix --- */
+.main-footer {
+    background: #000;
+    border-top: 1px solid #222;
+    padding: 60px 0 20px;
+    margin-top: auto;
+}
+
+.footer-col { margin-bottom: 20px; }
+.footer-col h4 { color: white; font-size: 1.1rem; margin-bottom: 20px; font-weight: 600; }
+.footer-col ul { list-style: none; padding: 0; }
+.footer-col ul li { margin-bottom: 12px; }
+.footer-col ul li a { color: #888; text-decoration: none; transition: 0.2s; }
+.footer-col ul li a:hover { color: var(--primary); padding-left: 5px; }
+
+/* Newsletter Fix */
+.newsletter-form { display: flex; width: 100%; }
+.newsletter-input { flex: 1; min-width: 0; /* Fix flex overflow */ }
+
