@@ -4,35 +4,27 @@ const app = express();
 const path = require('path');
 const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
-// FIX: Usar middleware local seguro em vez do pacote depreciado
+// Middleware seguro local (criado no passo anterior)
 const flash = require('./middleware/flash'); 
 const passport = require('passport');
 const pool = require('./database/db'); 
 
-console.log('�� Iniciando Momentum Fit App...');
+console.log('��� Inicializando Configuração da Aplicação...');
 
-// --- VERIFICAÇÃO DE AMBIENTE ---
-if (!process.env.SESSION_SECRET) {
-    console.warn('⚠️  AVISO: SESSION_SECRET não definido. Usando segredo inseguro de dev.');
-}
-
-// --- CONFIGURAÇÃO DE PROXY (Vercel/Heroku) ---
+// --- 1. CONFIGURAÇÃO DE PROXY (OBRIGATÓRIO PARA VERCEL) ---
 app.set('trust proxy', 1);
 
-// --- PASSPORT ---
+// --- 2. PASSPORT & VIEWS ---
 require('./config/passport')(passport);
-
-// --- VIEW ENGINE ---
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// --- MIDDLEWARES BASE ---
+// --- 3. MIDDLEWARES BASE ---
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// --- SESSÃO E AUTH ---
-// Tratamento de erro na store da sessão para não crashar o app se o DB cair
+// --- 4. SESSÃO ROBUSTA (BLINDADA CONTRA QUEDA DO DB) ---
 const sessionStore = new pgSession({
     pool: pool,
     tableName: 'session',
@@ -40,9 +32,9 @@ const sessionStore = new pgSession({
     pruneSessionInterval: 60 * 15 // 15 min
 });
 
+// Evita crash se o banco cair na Vercel
 sessionStore.on('error', function(error) {
-    console.error('��� Erro crítico na Session Store (Banco de Dados):', error.message);
-    // Não crasha o app, mas loga o erro
+    console.error('��� Erro na Session Store (Ignorado para manter app vivo):', error.message);
 });
 
 app.use(session({
@@ -50,10 +42,10 @@ app.use(session({
     secret: process.env.SESSION_SECRET || 'secret_dev_key_123',
     resave: false,
     saveUninitialized: false,
-    proxy: true,
+    proxy: true, // Vital para HTTPS na Vercel
     cookie: { 
-        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 dias
-        secure: process.env.NODE_ENV === 'production',
+        maxAge: 30 * 24 * 60 * 60 * 1000, 
+        secure: process.env.NODE_ENV === 'production', // true na Vercel
         httpOnly: true,
         sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
     }
@@ -61,11 +53,9 @@ app.use(session({
 
 app.use(passport.initialize());
 app.use(passport.session());
-
-// --- FLASH MESSAGES ---
 app.use(flash());
 
-// --- VARIÁVEIS GLOBAIS (Locals) ---
+// --- 5. VARIÁVEIS GLOBAIS ---
 app.use((req, res, next) => {
     res.locals.success_msg = req.flash('success_msg');
     res.locals.error_msg = req.flash('error_msg');
@@ -74,7 +64,7 @@ app.use((req, res, next) => {
     next();
 });
 
-// --- ROTAS ---
+// --- 6. ROTAS ---
 try {
     app.use('/', require('./routes/index'));
     app.use('/auth', require('./routes/auth'));
@@ -86,30 +76,33 @@ try {
     app.use('/api', require('./routes/api'));
 } catch (err) {
     console.error("❌ Erro fatal ao carregar rotas:", err);
-    process.exit(1); 
 }
 
-// --- ROTA 404 ---
+// Rota 404
 app.use((req, res) => {
     res.status(404).render('pages/error', { message: 'Página não encontrada' });
 });
 
-// --- INICIALIZAÇÃO SEGURA DO SERVIDOR ---
-const PORT = process.env.PORT || 3000;
+// --- 7. EXPORTAÇÃO CRÍTICA PARA VERCEL ---
+// Isso permite que o api/index.js receba a app sem tentar abrir porta
+module.exports = app;
 
-// Testa conexão com DB antes de abrir a porta
-pool.query('SELECT NOW()', (err, res) => {
-    if (err) {
-        console.error('❌ FATAL: Não foi possível conectar ao Banco de Dados.');
-        console.error('��� Verifique seu arquivo .env e se o PostgreSQL está rodando.');
-        console.error('Detalhe do erro:', err.message);
-        // Em dev, continuamos para permitir debug, em prod deveríamos sair.
-    } else {
-        console.log('✅ Banco de Dados Conectado com Sucesso.');
-    }
-
-    app.listen(PORT, () => {
-        console.log(`✅ Servidor rodando na porta ${PORT}`);
-        console.log(`��� Acesso local: http://localhost:${PORT}`);
+// --- 8. INICIALIZAÇÃO CONDICIONAL (APENAS LOCAL) ---
+// O if abaixo garante que o app.listen SÓ roda se você chamar 'node app.js'
+// Na Vercel, isso é IGNORADO (correto), pois a Vercel já injeta o servidor.
+if (require.main === module) {
+    const PORT = process.env.PORT || 3000;
+    
+    // Verificação de DB apenas no boot local para feedback visual
+    pool.query('SELECT NOW()', (err, res) => {
+        if (err) {
+            console.error('❌ ERRO DB (Local):', err.message);
+        } else {
+            console.log('✅ DB Conectado (Local).');
+        }
+        
+        app.listen(PORT, () => {
+            console.log(`✅ Servidor Local rodando na porta ${PORT}`);
+        });
     });
-});
+}
