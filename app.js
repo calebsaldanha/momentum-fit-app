@@ -8,12 +8,10 @@ const flash = require('./middleware/flash');
 const passport = require('passport');
 const pool = require('./database/db'); 
 
-// í»¡ï¸ 1. CONFIANÃ‡A NO PROXY (ObrigatÃ³rio para Cookies na Vercel)
-// 'true' confia em todos os hops (necessÃ¡rio em alguns setups serverless)
-// Sem isso, req.secure Ã© false, e o cookie secure: true NUNCA Ã© enviado.
-app.set('trust proxy', true);
+// í»¡ï¸ 1. CONFIANÃ‡A NO PROXY (CRÃTICO PARA VERCEL)
+app.set('trust proxy', 1);
 
-// í»¡ï¸ 2. VIEWS E MIDDLEWARES
+// í»¡ï¸ 2. CONFIGURAÃ‡Ã•ES BÃSICAS
 require('./config/passport')(passport);
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -22,16 +20,16 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// í»¡ï¸ 3. SESSÃƒO ROBUSTA
+// ï¿½ï¿½ï¸ 3. SESSÃƒO BLINDADA (SEM RACE CONDITIONS)
 const sessionStore = new pgSession({
     pool: pool,
     tableName: 'session',
-    createTableIfMissing: true, // Tenta criar se o script manual falhou
+    createTableIfMissing: true,
     pruneSessionInterval: 60 * 15
 });
 
 sessionStore.on('error', (err) => {
-    console.error('í´¥ FALHA NO STORAGE DE SESSÃƒO:', err.message);
+    console.error('ï¿½ï¿½ CRÃTICO: Erro no Store de SessÃ£o:', err.message);
 });
 
 const isProduction = process.env.NODE_ENV === 'production';
@@ -41,16 +39,13 @@ app.use(session({
     secret: process.env.SESSION_SECRET || 'secret_dev_key_123',
     resave: false,
     saveUninitialized: false,
-    proxy: true, // ForÃ§a o cookie a respeitar o proxy
+    proxy: true, // ObrigatÃ³rio para cookies funcionarem atrÃ¡s do proxy da Vercel
     rolling: true,
     cookie: { 
-        maxAge: 30 * 24 * 60 * 60 * 1000, 
-        // Em produÃ§Ã£o, exige HTTPS. Se sua Vercel nÃ£o tiver HTTPS configurado, isso quebra.
-        // Se estiver "dando problema", mude secure para false TEMPORARIAMENTE para testar.
-        secure: isProduction, 
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 dias
+        secure: isProduction, // HTTPS em produÃ§Ã£o
         httpOnly: true,
-        // Lax Ã© o equilÃ­brio perfeito. None exige secure: true obrigatÃ³rio.
-        sameSite: 'lax' 
+        sameSite: 'lax' // Melhor equilÃ­brio entre seguranÃ§a e usabilidade
     }
 }));
 
@@ -58,26 +53,26 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
 
-// í»¡ï¸ 4. LOGGER DIAGNÃ“STICO (O "Dedo Duro")
+// í»¡ï¸ 4. LOGGER DIAGNÃ“STICO (CORRIGIDO)
 app.use((req, res, next) => {
     if (!req.path.match(/\.(css|js|png|jpg|ico|svg|woff)$/)) {
+        // CorreÃ§Ã£o aqui: Template strings limpas
         const proto = req.headers['x-forwarded-proto'] || req.protocol;
         const isSecure = req.secure || proto === 'https';
-        const user = req.user ? \`\${req.user.email} [\${req.user.role}]\` : 'Visitante';
+        const user = req.user ? `${req.user.email} [${req.user.role}]` : 'Visitante';
         
-        console.log(\`íº¦ [\${req.method}] \${req.path}\`);
-        console.log(\`   í±¤ Auth: \${req.isAuthenticated()} | User: \${user}\`);
-        console.log(\`   í´ Secure: \${isSecure} (Proxy: \${proto}) | SessionID: \${req.sessionID}\`);
+        console.log(`íº¦ [${req.method}] ${req.path}`);
+        console.log(`   í±¤ Auth: ${req.isAuthenticated()} | User: ${user}`);
         
-        // Alerta se o cookie secure estiver ligado mas a conexÃ£o for insegura
+        // Debug de Cookie apenas se falhar
         if (isProduction && !isSecure) {
-            console.warn("âš ï¸  ALERTA CRÃTICO: ConexÃ£o insegura em Prod. Cookie nÃ£o serÃ¡ salvo!");
+            console.warn("âš ï¸ ALERTA: ConexÃ£o insegura detectada em Prod. Cookie secure pode falhar.");
         }
     }
     next();
 });
 
-// VARIAVEIS GLOBAIS
+// VARIÃVEIS GLOBAIS
 app.use((req, res, next) => {
     res.locals.success_msg = req.flash('success_msg');
     res.locals.error_msg = req.flash('error_msg');
@@ -97,12 +92,15 @@ try {
     app.use('/notifications', require('./routes/notifications'));
     app.use('/api', require('./routes/api'));
 } catch (err) {
-    console.error("âŒ Erro ao carregar rotas:", err);
+    console.error("âŒ FALHA AO CARREGAR ROTAS:", err);
 }
 
-// 404
+// 404 HANDLER
 app.use((req, res) => {
-    if (req.path.match(/\.(css|js|png|jpg|ico|map|json)$/)) return res.status(404).end();
+    if (req.path.match(/\.(css|js|png|jpg|ico|map|json)$/)) {
+        return res.status(404).end();
+    }
+    console.warn(`âš ï¸ 404 Detectado: ${req.path}`);
     res.status(404).render('pages/error', { message: 'PÃ¡gina nÃ£o encontrada' });
 });
 
@@ -111,6 +109,6 @@ module.exports = app;
 if (require.main === module) {
     const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => {
-        console.log(\`âœ… Servidor rodando na porta \${PORT}\`);
+        console.log(`âœ… Servidor ONLINE na porta ${PORT}`);
     });
 }
