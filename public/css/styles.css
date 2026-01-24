@@ -419,3 +419,35 @@ img { max-width: 100%; display: block; }
     .hero-title { font-size: 2.5rem; }
     .hero { background-position: center bottom; }
 }
+
+/* =========================================
+   7. PLANS PAGE STYLES (ADICIONADO)
+   ========================================= */
+
+/* Plan Card Styles */
+.plan-header { margin-bottom: 25px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; }
+.plan-title { font-size: 1.4rem; font-weight: 700; color: white; margin-bottom: 10px; }
+.plan-price { font-size: 3rem; font-weight: 800; color: white; line-height: 1; }
+.plan-price span { font-size: 1rem; color: #666; font-weight: 400; margin-left: 5px; }
+.plan-desc { color: #888; margin-top: 15px; font-size: 0.9rem; }
+
+.plan-features { margin-bottom: 30px; text-align: left; }
+.plan-features li { margin-bottom: 12px; color: #ccc; font-size: 0.95rem; display: flex; align-items: center; gap: 10px; }
+.plan-features li i { color: var(--primary); font-size: 0.8rem; }
+.plan-features li.muted { color: #555; text-decoration: line-through; }
+.plan-features li.muted i { color: #444; }
+
+/* Comparison Table */
+.comparison-table-wrapper { overflow-x: auto; margin-top: 20px; }
+.comparison-table { width: 100%; border-collapse: collapse; min-width: 600px; }
+.comparison-table th, .comparison-table td { padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); color: #ccc; }
+.comparison-table th { font-size: 1.1rem; color: white; border-bottom: 2px solid rgba(255,255,255,0.1); }
+.comparison-table .highlight { background: rgba(190, 242, 2, 0.05); border-color: rgba(190, 242, 2, 0.1); color: white; font-weight: 600; }
+.text-success { color: var(--primary); }
+
+/* FAQ */
+.faq-grid { display: flex; flex-direction: column; gap: 20px; }
+.faq-item { background: var(--bg-card); padding: 25px; border-radius: 12px; border: var(--border); }
+.faq-item h4 { color: white; margin-bottom: 10px; font-size: 1.1rem; }
+.faq-item p { color: #888; font-size: 0.95rem; line-height: 1.6; }
+

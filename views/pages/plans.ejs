@@ -2,102 +2,148 @@
 
 <main class="public-content">
     
-    <section class="page-hero-mini">
+    <section class="hero hero-small" style="min-height: 50vh; padding-top: 120px;">
+        <div class="hero-overlay"></div>
+        <div class="container hero-container">
+            <div class="hero-content center" style="margin: 0 auto; text-align: center;">
+                <span class="badge-neon">Invista em Você</span>
+                <h1 class="hero-title" style="font-size: 3rem;">
+                    Escolha o Seu <span class="text-gradient">Ritmo</span>
+                </h1>
+                <p class="hero-subtitle" style="margin: 0 auto;">
+                    Planos flexíveis desenhados para cada estágio da sua jornada fitness.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section-padding bg-subtle">
         <div class="container">
-            <span class="badge-neon" style="margin-bottom: 20px;">Investimento Transparente</span>
-            <h1 style="font-size: 3rem; color: white; margin-bottom: 10px; font-weight: 800;">Planos para cada nível</h1>
-            <p style="color: #888; max-width: 600px; margin: 0 auto;">Escolha a flexibilidade que você precisa. Sem contratos de fidelidade obscuros.</p>
+            <div class="features-grid" style="align-items: flex-start;">
+                
+                <div class="feature-card">
+                    <div class="plan-header">
+                        <h3 class="plan-title">Start</h3>
+                        <div class="plan-price">R$ 0<span>/mês</span></div>
+                        <p class="plan-desc">Para quem quer começar a se movimentar com organização.</p>
+                    </div>
+                    <ul class="plan-features">
+                        <li><i class="fas fa-check"></i> Acesso ao App</li>
+                        <li><i class="fas fa-check"></i> Biblioteca de Exercícios</li>
+                        <li><i class="fas fa-check"></i> Tracking de Peso</li>
+                        <li class="muted"><i class="fas fa-times"></i> Coach IA</li>
+                        <li class="muted"><i class="fas fa-times"></i> Dieta Personalizada</li>
+                    </ul>
+                    <a href="/auth/register?plan=free" class="btn btn-outline" style="width: 100%;">Começar Grátis</a>
+                </div>
+
+                <div class="feature-card plan-featured" style="transform: scale(1.05); border-color: var(--primary);">
+                    <div class="badge-neon" style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%);">Mais Popular</div>
+                    <div class="plan-header">
+                        <h3 class="plan-title" style="color: var(--primary);">Momentum Pro</h3>
+                        <div class="plan-price">R$ 89,90<span>/mês</span></div>
+                        <p class="plan-desc">A experiência completa com inteligência artificial.</p>
+                    </div>
+                    <ul class="plan-features">
+                        <li><i class="fas fa-check"></i> <strong>Tudo do Start</strong></li>
+                        <li><i class="fas fa-check"></i> Coach IA Ilimitado</li>
+                        <li><i class="fas fa-check"></i> Geração de Treinos IA</li>
+                        <li><i class="fas fa-check"></i> Dieta Inteligente</li>
+                        <li><i class="fas fa-check"></i> Análise de Execução (Vídeo)</li>
+                    </ul>
+                    <a href="/auth/register?plan=pro" class="btn btn-primary" style="width: 100%;">Assinar Pro</a>
+                </div>
+
+                <div class="feature-card">
+                    <div class="plan-header">
+                        <h3 class="plan-title">VIP Personal</h3>
+                        <div class="plan-price">R$ 249,90<span>/mês</span></div>
+                        <p class="plan-desc">Acompanhamento humano dedicado para resultados máximos.</p>
+                    </div>
+                    <ul class="plan-features">
+                        <li><i class="fas fa-check"></i> <strong>Tudo do Pro</strong></li>
+                        <li><i class="fas fa-check"></i> Personal Trainer Real</li>
+                        <li><i class="fas fa-check"></i> Chat Direto (WhatsApp)</li>
+                        <li><i class="fas fa-check"></i> Ajustes Semanais</li>
+                        <li><i class="fas fa-check"></i> Videoconferência Mensal</li>
+                    </ul>
+                    <button class="btn btn-outline" style="width: 100%;" disabled>Vagas Esgotadas</button>
+                </div>
+
+            </div>
         </div>
     </section>
 
     <section class="section-padding">
         <div class="container">
-            <div class="features-grid" style="align-items: flex-start;">
-                
-                <div class="feature-card plan-featured" style="border-color: var(--primary-color); position: relative;">
-                    <div style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: var(--primary-color); color: black; font-size: 0.75rem; font-weight: 800; padding: 4px 12px; border-radius: 20px;">MAIS POPULAR</div>
-                    <h3 style="font-size: 1.5rem; margin-bottom: 10px;">Gratuito</h3>
-                    <div style="font-size: 2.5rem; font-weight: 800; color: white; margin-bottom: 20px;">
-                        R$ 0<span style="font-size: 1rem; color: #666; font-weight: 400;">/mês</span>
-                    </div>
-                    <p style="color: #888; font-size: 0.9rem; margin-bottom: 20px;">Para quem quer começar a se organizar agora.</p>
-                    <ul style="margin-bottom: 30px; color: #ccc; padding-left: 0; list-style: none;">
-                        <li style="margin-bottom: 12px; display: flex; gap: 10px;"><i class="fas fa-check" style="color: var(--primary-color);"></i> Acesso ao App Mobile</li>
-                        <li style="margin-bottom: 12px; display: flex; gap: 10px;"><i class="fas fa-check" style="color: var(--primary-color);"></i> Biblioteca de Exercícios</li>
-                        <li style="margin-bottom: 12px; display: flex; gap: 10px;"><i class="fas fa-check" style="color: var(--primary-color);"></i> Registro de Peso</li>
-                    </ul>
-                    <a href="/auth/register?plan=free" class="btn btn-primary" style="width: 100%;">Começar Agora</a>
-                </div>
-
-                <div class="feature-card plan-disabled" style="opacity: 0.6; filter: grayscale(1);">
-                    <div class="tooltip-badge" style="position: absolute; top: 15px; right: 15px; background: #333; color: white; padding: 5px 10px; font-size: 0.7rem; border-radius: 4px;">EM BREVE</div>
-                    <h3 style="font-size: 1.5rem; margin-bottom: 10px;">Momentum Pro</h3>
-                    <div style="font-size: 2.5rem; font-weight: 800; color: white; margin-bottom: 20px;">
-                        R$ 89,90<span style="font-size: 1rem; color: #666; font-weight: 400;">/mês</span>
-                    </div>
-                    <p style="color: #888; font-size: 0.9rem; margin-bottom: 20px;">Acelere resultados com ajuda profissional.</p>
-                    <ul style="margin-bottom: 30px; color: #666; padding-left: 0; list-style: none;">
-                        <li style="margin-bottom: 12px; display: flex; gap: 10px;"><i class="fas fa-check"></i> Treinador Dedicado</li>
-                        <li style="margin-bottom: 12px; display: flex; gap: 10px;"><i class="fas fa-check"></i> Dieta Personalizada</li>
-                        <li style="margin-bottom: 12px; display: flex; gap: 10px;"><i class="fas fa-check"></i> Análise de Vídeo via IA</li>
-                    </ul>
-                    <button class="btn btn-outline" style="width: 100%; cursor: not-allowed;">Lista de Espera</button>
-                </div>
-
-                <div class="feature-card plan-disabled" style="opacity: 0.6; filter: grayscale(1);">
-                    <div class="tooltip-badge" style="position: absolute; top: 15px; right: 15px; background: #333; color: white; padding: 5px 10px; font-size: 0.7rem; border-radius: 4px;">EM BREVE</div>
-                    <h3 style="font-size: 1.5rem; margin-bottom: 10px;">VIP Anual</h3>
-                    <div style="font-size: 2.5rem; font-weight: 800; color: white; margin-bottom: 20px;">
-                        R$ 69,90<span style="font-size: 1rem; color: #666; font-weight: 400;">/mês</span>
-                    </div>
-                    <p style="color: #888; font-size: 0.9rem; margin-bottom: 20px;">Compromisso de longo prazo com desconto.</p>
-                    <ul style="margin-bottom: 30px; color: #666; padding-left: 0; list-style: none;">
-                        <li style="margin-bottom: 12px; display: flex; gap: 10px;"><i class="fas fa-check"></i> Economia de 20%</li>
-                        <li style="margin-bottom: 12px; display: flex; gap: 10px;"><i class="fas fa-check"></i> Consultoria por Vídeo</li>
-                        <li style="margin-bottom: 12px; display: flex; gap: 10px;"><i class="fas fa-check"></i> Kit de Boas-vindas</li>
-                    </ul>
-                    <button class="btn btn-outline" style="width: 100%; cursor: not-allowed;">Lista de Espera</button>
-                </div>
+            <div class="section-header center">
+                <h2 class="section-title">Compare os Recursos</h2>
             </div>
-
-            <div style="margin-top: 80px; overflow-x: auto;">
-                <h3 style="text-align: center; color: white; margin-bottom: 40px; font-size: 1.8rem;">Comparativo de Recursos</h3>
-                <table style="width: 100%; border-collapse: collapse; min-width: 600px;">
+            <div class="comparison-table-wrapper">
+                <table class="comparison-table">
                     <thead>
-                        <tr style="border-bottom: 1px solid #333;">
-                            <th style="text-align: left; padding: 20px; color: #fff;">Recurso</th>
-                            <th style="padding: 20px; color: var(--primary-color);">Gratuito</th>
-                            <th style="padding: 20px; color: #888;">Pro</th>
-                            <th style="padding: 20px; color: #888;">VIP</th>
+                        <tr>
+                            <th style="text-align: left;">Recurso</th>
+                            <th>Start</th>
+                            <th class="highlight">Pro</th>
+                            <th>VIP</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr style="border-bottom: 1px solid #1a1a1a;">
-                            <td style="padding: 15px 20px; color: #ccc;">Acesso Web & Mobile</td>
-                            <td style="text-align: center; color: white;"><i class="fas fa-check"></i></td>
-                            <td style="text-align: center; color: #666;"><i class="fas fa-check"></i></td>
-                            <td style="text-align: center; color: #666;"><i class="fas fa-check"></i></td>
+                        <tr>
+                            <td>App Mobile</td>
+                            <td><i class="fas fa-check text-success"></i></td>
+                            <td class="highlight"><i class="fas fa-check text-success"></i></td>
+                            <td><i class="fas fa-check text-success"></i></td>
                         </tr>
-                        <tr style="border-bottom: 1px solid #1a1a1a;">
-                            <td style="padding: 15px 20px; color: #ccc;">Log de Treinos</td>
-                            <td style="text-align: center; color: white;">Ilimitado</td>
-                            <td style="text-align: center; color: #666;">Ilimitado</td>
-                            <td style="text-align: center; color: #666;">Ilimitado</td>
+                        <tr>
+                            <td>Treinos Personalizados</td>
+                            <td>Básico</td>
+                            <td class="highlight">IA Avançada</td>
+                            <td>Humano + IA</td>
                         </tr>
-                        <tr style="border-bottom: 1px solid #1a1a1a;">
-                            <td style="padding: 15px 20px; color: #ccc;">Personal Trainer Humano</td>
-                            <td style="text-align: center; color: #333;"><i class="fas fa-minus"></i></td>
-                            <td style="text-align: center; color: #666;"><i class="fas fa-check"></i></td>
-                            <td style="text-align: center; color: #666;"><i class="fas fa-check"></i> Prioritário</td>
+                        <tr>
+                            <td>Planejamento Alimentar</td>
+                            <td>-</td>
+                            <td class="highlight"><i class="fas fa-check text-success"></i></td>
+                            <td><i class="fas fa-check text-success"></i></td>
                         </tr>
-                        <tr style="border-bottom: 1px solid #1a1a1a;">
-                            <td style="padding: 15px 20px; color: #ccc;">Análise de Vídeo IA</td>
-                            <td style="text-align: center; color: #333;"><i class="fas fa-minus"></i></td>
-                            <td style="text-align: center; color: #666;"><i class="fas fa-check"></i></td>
-                            <td style="text-align: center; color: #666;"><i class="fas fa-check"></i></td>
+                        <tr>
+                            <td>Correção de Movimento</td>
+                            <td>-</td>
+                            <td class="highlight">Via IA (Câmera)</td>
+                            <td>Via Personal</td>
+                        </tr>
+                        <tr>
+                            <td>Suporte</td>
+                            <td>Email</td>
+                            <td class="highlight">Prioritário</td>
+                            <td>WhatsApp 24/7</td>
                         </tr>
                     </tbody>
                 </table>
+            </div>
+        </div>
+    </section>
+
+    <section class="section-padding bg-subtle">
+        <div class="container">
+            <div class="section-header center">
+                <h2 class="section-title">Dúvidas Frequentes</h2>
+            </div>
+            <div class="faq-grid" style="max-width: 800px; margin: 0 auto;">
+                <div class="faq-item">
+                    <h4>Posso cancelar a qualquer momento?</h4>
+                    <p>Sim, todos os planos mensais podem ser cancelados a qualquer momento sem multa.</p>
+                </div>
+                <div class="faq-item">
+                    <h4>Como funciona o Coach IA?</h4>
+                    <p>Nossa IA analisa seu histórico de treinos, cargas e feedback diário para ajustar automaticamente suas séries e repetições para a próxima sessão.</p>
+                </div>
+                <div class="faq-item">
+                    <h4>Preciso de equipamentos de academia?</h4>
+                    <p>Não necessariamente. Ao configurar seu perfil, você informa quais equipamentos tem (ou se treina em casa apenas com o corpo) e o treino é gerado de acordo.</p>
+                </div>
             </div>
         </div>
     </section>
