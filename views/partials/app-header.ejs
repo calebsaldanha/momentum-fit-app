@@ -1,6 +1,6 @@
 <header class="app-header">
     <div style="display: flex; align-items: center; gap: 15px;">
-        <button class="mobile-toggle" onclick="toggleSidebar()">
+        <button class="mobile-toggle" onclick="toggleSidebar()" style="color: white; background: none; border: none; font-size: 1.4rem; cursor: pointer;">
             <i class="fas fa-bars"></i>
         </button>
         <h2 style="font-size: 1.2rem; font-weight: 700; color: white; margin: 0;">
@@ -8,17 +8,20 @@
         </h2>
     </div>
 
-    <div style="display: flex; align-items: center; gap: 15px;">
-        <a href="/notifications" style="position: relative; color: #ccc;">
+    <div class="header-actions" style="display: flex; align-items: center; gap: 20px;">
+        <a href="/notifications" style="position: relative; color: #ccc; text-decoration: none;">
             <i class="fas fa-bell"></i>
-            </a>
+            <% if (typeof notifications !== 'undefined' && notifications.length > 0) { %>
+                <span style="position: absolute; top: -2px; right: -2px; width: 8px; height: 8px; background: var(--primary); border-radius: 50%;"></span>
+            <% } %>
+        </a>
         
-        <div class="user-profile" style="display: flex; align-items: center; gap: 10px;">
-            <span style="display: none; @media(min-width: 768px){ display: inline; } color: #ccc; font-size: 0.9rem;">
+        <div class="user-profile" style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+            <span style="display: none; color: #ccc; font-size: 0.9rem; font-weight: 500; @media(min-width: 768px){ display: inline; }">
                 <%= user.name.split(' ')[0] %>
             </span>
-            <div style="width: 35px; height: 35px; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white;">
-                <%= user.name.charAt(0) %>
+            <div style="width: 35px; height: 35px; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; border: 1px solid #444;">
+                <%= user.name.charAt(0).toUpperCase() %>
             </div>
         </div>
     </div>

@@ -333,3 +333,66 @@ ul { list-style: none; }
     border-color: rgba(190, 242, 2, 0.2);
     color: #bef202;
 }
+
+/* =========================================
+   20. GLOBAL IMAGE SAFETY & LAYOUT FIXES
+   ========================================= */
+
+/* REGRA DE OURO: Imagens nunca estouram o pai */
+img, svg, video {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Fix do Logo Gigante (Especificidade alta) */
+.sidebar-header .logo-rounded,
+.brand-logo .logo-rounded {
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px; /* Impede esmagamento */
+}
+
+/* Ajuste fino para o logo no texto do footer */
+.footer-logo-area .logo-rounded {
+    width: 45px !important;
+    height: 45px !important;
+}
+
+/* Fix do Dashboard Layout para Mobile */
+@media (max-width: 991px) {
+    .dashboard-layout {
+        flex-direction: column;
+    }
+    
+    .sidebar {
+        width: 280px; /* Largura fixa da gaveta */
+        transform: translateX(-100%);
+    }
+    
+    .sidebar.active {
+        transform: translateX(0);
+        box-shadow: 5px 0 15px rgba(0,0,0,0.5);
+    }
+    
+    .app-main {
+        margin-left: 0 !important;
+        width: 100% !important;
+    }
+    
+    .app-header {
+        padding: 0 15px;
+    }
+}
+
+/* Garantia de Scroll no Dashboard */
+.app-main {
+    height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* Espaçamento interno dos cards para evitar colagem */
+.stat-card, .feature-card {
+    padding: 25px;
+}

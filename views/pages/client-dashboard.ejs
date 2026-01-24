@@ -10,54 +10,66 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
+
 <div class="dashboard-layout">
     <%- include('../partials/sidebar.ejs') %>
+
     <main class="app-main">
         <%- include('../partials/app-header.ejs') %>
+
         <div class="dashboard-content">
             <div style="margin-bottom: 30px;">
-                <h1 style="color: white; font-size: 1.8rem;">Olá, <span style="color: var(--primary);"><%= user.name.split(' ')[0] %></span>!</h1>
-                <p style="color: #888;">Vamos fazer o dia de hoje valer a pena.</p>
+                <h1 style="color: white; font-size: 1.8rem; margin-bottom: 5px;">Olá, <span style="color: var(--primary);"><%= user.name.split(' ')[0] %></span>!</h1>
+                <p style="color: #888; font-size: 0.95rem;">Resumo da sua jornada hoje.</p>
             </div>
 
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-icon"><i class="fas fa-dumbbell"></i></div>
                     <div>
-                        <h3 style="margin:0; color:white;"><%= stats.workoutsDone || 0 %></h3>
-                        <p style="margin:0; color:#888; font-size:0.85rem;">Treinos Mês</p>
+                        <h3 style="margin:0; color:white; font-size: 1.5rem;"><%= stats.workoutsDone || 0 %></h3>
+                        <p style="margin:0; color:#888; font-size:0.85rem;">Treinos</p>
                     </div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon"><i class="fas fa-weight"></i></div>
                     <div>
-                        <h3 style="margin:0; color:white;"><%= stats.currentWeight %></h3>
-                        <p style="margin:0; color:#888; font-size:0.85rem;">Peso Atual</p>
+                        <h3 style="margin:0; color:white; font-size: 1.5rem;"><%= stats.currentWeight || '--' %></h3>
+                        <p style="margin:0; color:#888; font-size:0.85rem;">Peso (kg)</p>
                     </div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon"><i class="fas fa-fire"></i></div>
                     <div>
-                        <h3 style="margin:0; color:white;"><%= stats.streak || 0 %></h3>
-                        <p style="margin:0; color:#888; font-size:0.85rem;">Dias Seguidos</p>
+                        <h3 style="margin:0; color:white; font-size: 1.5rem;"><%= stats.streak || 0 %></h3>
+                        <p style="margin:0; color:#888; font-size:0.85rem;">Sequência</p>
                     </div>
                 </div>
             </div>
 
             <div class="grid-2-col">
                 <div class="feature-card">
-                    <h3>Próximo Treino</h3>
-                    <p><%= stats.nextWorkout %></p>
-                    <a href="/client/workouts" class="btn btn-primary btn-sm">Iniciar</a>
+                    <h3 style="font-size: 1.2rem; display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-calendar-day" style="color: var(--primary);"></i> Próximo Treino
+                    </h3>
+                    <p style="margin-bottom: 20px;">Treino de Superiores (Força)</p>
+                    <a href="/client/workouts" class="btn btn-primary btn-sm" style="text-align: center;">Começar Agora</a>
                 </div>
+                
                 <div class="feature-card">
-                    <h3>Progresso Recente</h3>
-                    <p style="color:#888;">Nenhum dado registrado esta semana.</p>
+                    <h3 style="font-size: 1.2rem;">Histórico Recente</h3>
+                    <ul style="list-style: none; padding: 0; margin: 0;">
+                        <li style="padding: 12px 0; border-bottom: 1px solid #222; display: flex; justify-content: space-between; color: #ccc; font-size: 0.9rem;">
+                            <span>Nenhum treino registrado</span>
+                            <span style="color: #666;">-</span>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>
     </main>
 </div>
+
 <script src="/js/main.js"></script>
 </body>
 </html>
