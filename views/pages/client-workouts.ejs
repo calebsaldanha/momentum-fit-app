@@ -1,42 +1,36 @@
-<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Momentum Fit</title><link rel="stylesheet" href="/css/styles.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"></head><body>
-<div class="app-layout"><%- include("../partials/sidebar.ejs") %><main class="app-content"><%- include("../partials/app-header.ejs") %><div class="dashboard-wrapper">
-    
-    <div class="content-card">
-        <div class="card-header-flex">
-            <h3 class="card-title">Meus Treinos Ativos</h3>
-            <button class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Solicitar Novo</button>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title><%= title %> | Momentum Fit</title>
+    <link rel="icon" href="/images/momentum-fit-icon.png">
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="dashboard-layout">
+    <%- include('../partials/sidebar.ejs') %>
+    <main class="app-main">
+        <%- include('../partials/app-header.ejs') %>
+        <div class="dashboard-content">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h1 style="color:white; font-size:1.5rem;">Meus Treinos</h1>
+                <button class="btn btn-primary btn-sm" onclick="alert('Funcionalidade em breve!')">
+                    <i class="fas fa-plus"></i> Novo
+                </button>
+            </div>
+            
+            <div class="feature-card" style="text-align:center; padding:50px;">
+                <i class="fas fa-clipboard-list" style="font-size:3rem; color:#333; margin-bottom:20px;"></i>
+                <h3 style="color:white;">Nenhum treino ativo</h3>
+                <p style="max-width:400px; margin:0 auto 20px auto;">Você ainda não possui uma rotina de treinos ativa. Solicite ao seu treinador ou use a IA.</p>
+                <a href="/client/ai-coach" class="btn btn-outline btn-sm">Pedir para IA</a>
+            </div>
         </div>
-        
-        <div class="table-responsive">
-            <table style="width: 100%; border-collapse: collapse; color: #ccc;">
-                <thead>
-                    <tr style="border-bottom: 1px solid #333; text-align: left;">
-                        <th style="padding: 15px;">Nome</th>
-                        <th style="padding: 15px;">Foco</th>
-                        <th style="padding: 15px;">Duração</th>
-                        <th style="padding: 15px;">Ação</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr style="border-bottom: 1px solid #222;">
-                        <td style="padding: 15px; color: white; font-weight: 600;">Hipertrofia A</td>
-                        <td style="padding: 15px;">Peito & Tríceps</td>
-                        <td style="padding: 15px;">50 min</td>
-                        <td style="padding: 15px;">
-                            <a href="#" class="btn btn-outline btn-sm">Iniciar</a>
-                        </td>
-                    </tr>
-                    <tr style="border-bottom: 1px solid #222;">
-                        <td style="padding: 15px; color: white; font-weight: 600;">Hipertrofia B</td>
-                        <td style="padding: 15px;">Costas & Bíceps</td>
-                        <td style="padding: 15px;">55 min</td>
-                        <td style="padding: 15px;">
-                            <a href="#" class="btn btn-outline btn-sm">Iniciar</a>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-</div></main></div></body></html>
+    </main>
+</div>
+<script src="/js/main.js"></script>
+</body>
+</html>

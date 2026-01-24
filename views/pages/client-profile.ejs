@@ -1,61 +1,37 @@
-<%- include('../partials/header.ejs') %>
-
-<div class="dashboard-container">
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title><%= title %> | Momentum Fit</title>
+    <link rel="icon" href="/images/momentum-fit-icon.png">
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="dashboard-layout">
     <%- include('../partials/sidebar.ejs') %>
-
-    <main class="dashboard-main">
-        <div class="page-header">
-            <h1 style="font-size: 1.8rem;">Minha Anamnese</h1>
-            <p style="color: var(--text-muted);">Mantenha seus dados sempre atualizados.</p>
+    <main class="app-main">
+        <%- include('../partials/app-header.ejs') %>
+        <div class="dashboard-content">
+            <h1 style="color:white; font-size:1.5rem; margin-bottom:20px;">Meu Perfil</h1>
+            <div class="feature-card">
+                <form onsubmit="event.preventDefault(); alert('Salvo!');">
+                    <div style="margin-bottom:15px;">
+                        <label style="color:#888; display:block; margin-bottom:5px;">Nome</label>
+                        <input type="text" class="form-control" value="<%= user.name %>" style="width:100%; padding:10px; background:#222; border:1px solid #333; color:white; border-radius:6px;">
+                    </div>
+                    <div style="margin-bottom:15px;">
+                        <label style="color:#888; display:block; margin-bottom:5px;">Email</label>
+                        <input type="email" class="form-control" value="<%= user.email %>" disabled style="width:100%; padding:10px; background:#111; border:1px solid #222; color:#666; border-radius:6px;">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                </form>
+            </div>
         </div>
-
-        <% const safeMeas = (clientData && clientData.body_measurements) ? clientData.body_measurements : {}; %>
-
-        <form action="/client/profile/update" method="POST" style="max-width: 900px;">
-            
-            <div class="card-box">
-                <h3 style="color: white; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px;">Dados Físicos</h3>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-                    <div>
-                        <label>Peso (kg)</label>
-                        <input type="number" step="0.1" name="current_weight" value="<%= clientData.current_weight || '' %>" required class="form-control" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;">
-                    </div>
-                    <div>
-                        <label>Altura (m)</label>
-                        <input type="number" step="0.01" name="height" value="<%= clientData.height || '' %>" required class="form-control" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;">
-                    </div>
-                </div>
-            </div>
-
-            <div class="card-box">
-                <h3 style="color: white; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px;">Estilo de Vida (Novo)</h3>
-                
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                    <div class="form-group">
-                        <label>Horas de Sono</label>
-                        <select name="sleep_hours" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;">
-                            <option value="Menos de 5h" <%= clientData.sleep_hours === 'Menos de 5h' ? 'selected' : '' %>>- 5h (Ruim)</option>
-                            <option value="5-6h" <%= clientData.sleep_hours === '5-6h' ? 'selected' : '' %>>5-6h (Médio)</option>
-                            <option value="7-8h" <%= clientData.sleep_hours === '7-8h' ? 'selected' : '' %>>7-8h (Bom)</option>
-                            <option value="Mais de 8h" <%= clientData.sleep_hours === 'Mais de 8h' ? 'selected' : '' %>>+ 8h</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Nível de Estresse</label>
-                        <select name="stress_level" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;">
-                            <option value="Baixo" <%= clientData.stress_level === 'Baixo' ? 'selected' : '' %>>Baixo</option>
-                            <option value="Moderado" <%= clientData.stress_level === 'Moderado' ? 'selected' : '' %>>Moderado</option>
-                            <option value="Alto" <%= clientData.stress_level === 'Alto' ? 'selected' : '' %>>Alto</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <div style="text-align: right; margin-top: 20px;">
-                <button type="submit" class="btn btn-primary btn-lg">Salvar Anamnese</button>
-            </div>
-        </form>
     </main>
 </div>
-
-<%- include('../partials/footer.ejs') %>
+<script src="/js/main.js"></script>
+</body>
+</html>

@@ -1,95 +1,33 @@
-<%- include('../partials/header') %>
-<div class="dashboard-container">
-    <%- include('../partials/sidebar', { path: '/client/financial' }) %>
-    
-    <main class="dashboard-main">
-        <div class="page-header">
-            <h1>Minha Assinatura</h1>
-            <p style="color: #a0a0a0;">Gerencie seu plano e visualize histórico.</p>
-        </div>
-
-        <% if (messages.success) { %>
-            <div class="alert alert-success"><i class="fas fa-check-circle"></i> <%= messages.success %></div>
-        <% } %>
-        
-        <div class="financial-grid" style="display: grid; grid-template-columns: 1fr; gap: 30px;">
-            
-            <div class="card-box" style="border-left: 4px solid var(--primary-color);">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px;">
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title><%= title %> | Momentum Fit</title>
+    <link rel="icon" href="/images/momentum-fit-icon.png">
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="dashboard-layout">
+    <%- include('../partials/sidebar.ejs') %>
+    <main class="app-main">
+        <%- include('../partials/app-header.ejs') %>
+        <div class="dashboard-content">
+            <h1 style="color:white; font-size:1.5rem; margin-bottom:20px;">Assinatura</h1>
+            <div class="feature-card">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
                     <div>
-                        <h3 style="color: white; margin-bottom: 5px;">Plano Atual</h3>
-                        <% if (subscription) { %>
-                            <h2 style="font-size: 1.8rem; color: var(--primary-color); margin-bottom: 5px;"><%= subscription.plan_name %></h2>
-                            <p style="color: #888;">
-                                R$ <%= subscription.price %>/mês • Vencimento dia <%= subscription.payment_due_day %>
-                            </p>
-                            <div style="margin-top: 15px;">
-                                <span class="badge-status" 
-                                      style="padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; text-transform: uppercase;
-                                      background: <%= subscription.status === 'active' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)' %>;
-                                      color: <%= subscription.status === 'active' ? '#10b981' : '#ef4444' %>;">
-                                    <%= subscription.status === 'active' ? '● Ativo' : '● Pendente/Inativo' %>
-                                </span>
-                            </div>
-                        <% } else { %>
-                            <p style="color: #ccc;">Nenhuma assinatura ativa.</p>
-                        <% } %>
+                        <h3 style="color:var(--primary);">Plano Free</h3>
+                        <p style="margin-bottom:0;">Válido até: Ilimitado</p>
                     </div>
-                    
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <% if (subscription && subscription.status === 'pending_payment') { %>
-                            <a href="/client/checkout/<%= subscription.plan_id %>" class="btn btn-primary btn-sm">
-                                <i class="fas fa-qrcode"></i> Pagar
-                            </a>
-                        <% } %>
-                        <a href="/client/plans" class="btn btn-outline btn-sm">Mudar Plano</a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card-box">
-                <h3 style="color: white; margin-bottom: 20px; border-bottom: 1px solid var(--border-light); padding-bottom: 15px;">
-                    Histórico
-                </h3>
-                
-                <div class="table-responsive">
-                    <table style="width: 100%; min-width: 600px;">
-                        <thead>
-                            <tr style="background: #1a1a1a;">
-                                <th>Data</th>
-                                <th>Valor</th>
-                                <th>Status</th>
-                                <th>Ação</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% if (payments && payments.length > 0) { %>
-                                <% payments.forEach(pay => { %>
-                                    <tr style="border-bottom: 1px solid #222;">
-                                        <td><%= new Date(pay.created_at).toLocaleDateString() %></td>
-                                        <td>R$ <%= pay.amount %></td>
-                                        <td>
-                                            <span style="color: <%= pay.status === 'paid' ? '#10b981' : '#f59e0b' %>">
-                                                <%= pay.status === 'paid' ? 'Pago' : 'Pendente' %>
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <% if (pay.status === 'pending') { %>
-                                                <a href="/client/checkout/<%= subscription ? subscription.plan_id : 1 %>" style="color: var(--primary-color);">
-                                                    <i class="fas fa-external-link-alt"></i>
-                                                </a>
-                                            <% } else { %> - <% } %>
-                                        </td>
-                                    </tr>
-                                <% }) %>
-                            <% } else { %>
-                                <tr><td colspan="4" style="text-align:center; padding: 20px;">Sem registros.</td></tr>
-                            <% } %>
-                        </tbody>
-                    </table>
+                    <button class="btn btn-outline">Fazer Upgrade</button>
                 </div>
             </div>
         </div>
     </main>
 </div>
-<%- include('../partials/footer') %>
+<script src="/js/main.js"></script>
+</body>
+</html>

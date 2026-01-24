@@ -1,57 +1,122 @@
 const express = require('express');
 const router = express.Router();
+const db = require('../database/db');
+const { ensureAuthenticated, isClient } = require('../middleware/auth');
 
-const isClient = (req, res, next) => {
-    if (req.session.user && req.session.user.role === 'client') return next();
-    if (req.session.user && req.session.user.role === 'trainer') return res.redirect('/trainer/dashboard');
-    res.redirect('/auth/login');
-};
-
-router.use(isClient);
-
-router.get('/dashboard', (req, res) => {
-    // DADOS MOCKADOS PARA TESTE VISUAL
-    const stats = {
-        workoutsCompleted: 8,
-        streak: 3,
-        currentWeight: 71.2
-    };
-
-    const nextWorkout = {
-        id: 101,
-        title: 'Full Body Power',
-        description: 'Treino de corpo inteiro com foco em compostos.',
-        duration: 50,
-        exerciseCount: 6,
-        intensity: 'Alta'
-    };
-
-    res.render('pages/client-dashboard', {
-        user: req.session.user,
-        path: req.originalUrl,
-        title: 'Visão Geral',
-        stats: stats,
-        nextWorkout: nextWorkout,
-        notifications: []
-    });
+// Middleware global para rotas de cliente
+router.use(ensureAuthenticated, isClient, (req, res, next) => {
+    // Garante que o user tenha profile
+    if (!req.user.profile) {
+        req.user.profile = {}; 
+    }
+    res.locals.path = req.path; // Disponibiliza path para sidebar
+    next();
 });
 
-// Outras rotas...
-const renderPlaceholder = (res, req, title) => {
-    res.render('pages/error', { message: title + ' - Em Breve' });
-};
+// 1. DASHBOARD
+router.get('/dashboard', async (req, res) => {
+    try {
+        // Buscar estatísticas reais ou usar defaults
+        // Exemplo: Contar treinos completados este mês
+        const stats = {
+            workoutsDone: 0,
+            currentWeight: req.user.profile.weight || '--',
+            streak: 0,
+            nextWorkout: 'Descanso'
+        };
+        
+        // Tenta buscar dados reais se as tabelas existirem
+        try {
+             // Lógica futura de DB aqui
+        } catch (dbError) {
+            console.warn('Erro ao buscar stats:', dbError.message);
+        }
 
-router.get('/workouts', (req, res) => renderPlaceholder(res, req, 'Treinos'));
-router.get('/evolution', (req, res) => renderPlaceholder(res, req, 'Evolução'));
-router.get('/ai-coach', (req, res) => renderPlaceholder(res, req, 'IA Coach'));
-router.get('/diet', (req, res) => renderPlaceholder(res, req, 'Dieta'));
-router.get('/settings', (req, res) => {
-    res.render('pages/client-settings', {
-        user: req.session.user,
-        path: req.originalUrl,
-        title: 'Configurações',
-        notifications: []
-    });
+        res.render('pages/client-dashboard', {
+            title: 'Visão Geral',
+            user: req.user,
+            stats: stats
+        });
+    } catch (err) {
+        console.error(err);
+        res.render('pages/error', { message: 'Erro ao carregar dashboard.' });
+    }
+});
+
+// 2. MEUS TREINOS
+router.get('/workouts', async (req, res) => {
+    try {
+        // Mock de treinos por enquanto
+        const workouts = []; 
+        res.render('pages/client-workouts', {
+            title: 'Meus Treinos',
+            user: req.user,
+            workouts: workouts
+        });
+    } catch (err) {
+        console.error(err);
+        res.render('pages/error', { message: 'Erro ao carregar treinos.' });
+    }
+});
+
+// 3. EVOLUÇÃO (Gráficos)
+router.get('/evolution', async (req, res) => {
+    try {
+        res.render('pages/client-evolution', {
+            title: 'Minha Evolução',
+            user: req.user
+        });
+    } catch (err) {
+        res.render('pages/error', { message: 'Erro ao carregar evolução.' });
+    }
+});
+
+// 4. IA COACH
+router.get('/ai-coach', async (req, res) => {
+    try {
+        res.render('pages/client-ai-coach', {
+            title: 'Coach Inteligente',
+            user: req.user
+        });
+    } catch (err) {
+        res.render('pages/error', { message: 'Erro ao carregar IA Coach.' });
+    }
+});
+
+// 5. FINANCEIRO / PLANOS
+router.get('/financial', async (req, res) => {
+    try {
+        res.render('pages/client-financial', {
+            title: 'Minha Assinatura',
+            user: req.user
+        });
+    } catch (err) {
+        res.render('pages/error', { message: 'Erro ao carregar financeiro.' });
+    }
+});
+
+// 6. PERFIL
+router.get('/profile', async (req, res) => {
+    try {
+        res.render('pages/client-profile', {
+            title: 'Meu Perfil',
+            user: req.user
+        });
+    } catch (err) {
+        res.render('pages/error', { message: 'Erro ao carregar perfil.' });
+    }
+});
+
+// 7. CONFIGURAÇÕES
+router.get('/settings', async (req, res) => {
+    try {
+        res.render('pages/client-settings', {
+            title: 'Configurações',
+            user: req.user
+        });
+    } catch (err) {
+        res.render('pages/error', { message: 'Erro ao carregar configurações.' });
+    }
 });
 
 module.exports = router;

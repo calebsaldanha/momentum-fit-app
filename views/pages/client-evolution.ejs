@@ -1,27 +1,38 @@
-<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Momentum Fit</title><link rel="stylesheet" href="/css/styles.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"></head><body>
-<div class="app-layout"><%- include("../partials/sidebar.ejs") %><main class="app-content"><%- include("../partials/app-header.ejs") %><div class="dashboard-wrapper">
-    
-    <div class="stats-row">
-        <div class="stat-card">
-            <div class="stat-data">
-                <h3>71.5 kg</h3>
-                <p>Peso Atual</p>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title><%= title %> | Momentum Fit</title>
+    <link rel="icon" href="/images/momentum-fit-icon.png">
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="dashboard-layout">
+    <%- include('../partials/sidebar.ejs') %>
+    <main class="app-main">
+        <%- include('../partials/app-header.ejs') %>
+        <div class="dashboard-content">
+            <h1 style="color:white; font-size:1.5rem; margin-bottom:20px;">Minha Evolução</h1>
+            <div class="grid-2-col">
+                <div class="feature-card">
+                    <h3>Peso Corporal</h3>
+                    <div style="height:200px; background:#050505; border-radius:8px; display:flex; align-items:center; justify-content:center; color:#333;">
+                        Gráfico em desenvolvimento
+                    </div>
+                </div>
+                <div class="feature-card">
+                    <h3>Cargas Máximas</h3>
+                    <div style="height:200px; background:#050505; border-radius:8px; display:flex; align-items:center; justify-content:center; color:#333;">
+                        Gráfico em desenvolvimento
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="stat-card">
-            <div class="stat-data">
-                <h3>-2.1 kg</h3>
-                <p>Últimos 30 dias</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="content-card">
-        <div style="text-align: center; padding: 40px; color: #666;">
-            <i class="fas fa-chart-area fa-3x" style="margin-bottom: 20px; opacity: 0.5;"></i>
-            <h3>Gráficos em Desenvolvimento</h3>
-            <p>Em breve você verá aqui seu progresso de carga e peso corporal detalhado.</p>
-        </div>
-    </div>
-
-</div></main></div></body></html>
+    </main>
+</div>
+<script src="/js/main.js"></script>
+</body>
+</html>

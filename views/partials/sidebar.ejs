@@ -18,9 +18,12 @@
             <a href="/client/ai-coach" class="nav-link <%= path.includes('/ai-coach') ? 'active' : '' %>">
                 <i class="fas fa-robot"></i> <span>Coach IA</span>
             </a>
-        <% } else { %>
+            <a href="/client/financial" class="nav-link <%= path.includes('/financial') ? 'active' : '' %>">
+                <i class="fas fa-wallet"></i> <span>Assinatura</span>
+            </a>
+        <% } else if (user.role === 'trainer') { %>
             <a href="/trainer/dashboard" class="nav-link <%= path === '/trainer/dashboard' ? 'active' : '' %>">
-                <i class="fas fa-home"></i> <span>Visão Geral</span>
+                <i class="fas fa-home"></i> <span>Dashboard</span>
             </a>
             <a href="/trainer/clients" class="nav-link <%= path.includes('/clients') ? 'active' : '' %>">
                 <i class="fas fa-users"></i> <span>Alunos</span>
@@ -28,11 +31,15 @@
             <a href="/trainer/library" class="nav-link <%= path.includes('/library') ? 'active' : '' %>">
                 <i class="fas fa-book"></i> <span>Biblioteca</span>
             </a>
+            <a href="/trainer/financial" class="nav-link <%= path.includes('/financial') ? 'active' : '' %>">
+                <i class="fas fa-coins"></i> <span>Financeiro</span>
+            </a>
         <% } %>
         
         <div style="margin-top: auto; border-top: 1px solid #222; padding-top: 10px;">
-            <a href="/client/profile" class="nav-link <%= path.includes('/profile') ? 'active' : '' %>">
-                <i class="fas fa-user-cog"></i> <span>Perfil</span>
+            <% const profileLink = user.role === 'client' ? '/client/profile' : '/trainer/profile'; %>
+            <a href="<%= profileLink %>" class="nav-link <%= path.includes('/profile') ? 'active' : '' %>">
+                <i class="fas fa-user-circle"></i> <span>Perfil</span>
             </a>
             <a href="/auth/logout" class="nav-link" style="color: #ff6b6b;">
                 <i class="fas fa-sign-out-alt"></i> <span>Sair</span>
@@ -40,4 +47,4 @@
         </div>
     </nav>
 </aside>
-<div id="dashboardOverlay" class="dashboard-overlay"></div>
+<div id="dashboardOverlay" class="dashboard-overlay" onclick="toggleSidebar()"></div>

@@ -3,58 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dashboard | Momentum Fit</title>
-    <link rel="icon" href="/images/momentum-fit-icon.png" type="image/png">
+    <title><%= title %> | Momentum Fit</title>
+    <link rel="icon" href="/images/momentum-fit-icon.png">
     <link rel="stylesheet" href="/css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
-
 <div class="dashboard-layout">
-    <%- include('../partials/sidebar.ejs', { path: '/client/dashboard' }) %>
-
+    <%- include('../partials/sidebar.ejs') %>
     <main class="app-main">
-        <%- include('../partials/app-header.ejs', { title: 'Visão Geral' }) %>
-
+        <%- include('../partials/app-header.ejs') %>
         <div class="dashboard-content">
-            <div style="margin-bottom: 25px;">
-                <h1 style="font-size: 1.5rem; color: white;">Olá, <span style="color: var(--primary);"><%= user.name.split(' ')[0] %></span>!</h1>
-                <p style="color: #888; font-size: 0.9rem;">Vamos treinar hoje?</p>
+            <div style="margin-bottom: 30px;">
+                <h1 style="color: white; font-size: 1.8rem;">Olá, <span style="color: var(--primary);"><%= user.name.split(' ')[0] %></span>!</h1>
+                <p style="color: #888;">Vamos fazer o dia de hoje valer a pena.</p>
             </div>
 
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-icon"><i class="fas fa-fire"></i></div>
+                    <div class="stat-icon"><i class="fas fa-dumbbell"></i></div>
                     <div>
-                        <h3 style="font-size: 1.5rem; color: white; margin-bottom: 0;">0</h3>
-                        <p style="color: #888; font-size: 0.8rem; margin: 0;">Treinos Realizados</p>
+                        <h3 style="margin:0; color:white;"><%= stats.workoutsDone || 0 %></h3>
+                        <p style="margin:0; color:#888; font-size:0.85rem;">Treinos Mês</p>
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon"><i class="fas fa-weight-hanging"></i></div>
+                    <div class="stat-icon"><i class="fas fa-weight"></i></div>
                     <div>
-                        <h3 style="font-size: 1.5rem; color: white; margin-bottom: 0;"><%= user.profile && user.profile.weight ? user.profile.weight : '--' %>kg</h3>
-                        <p style="color: #888; font-size: 0.8rem; margin: 0;">Peso Atual</p>
+                        <h3 style="margin:0; color:white;"><%= stats.currentWeight %></h3>
+                        <p style="margin:0; color:#888; font-size:0.85rem;">Peso Atual</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-fire"></i></div>
+                    <div>
+                        <h3 style="margin:0; color:white;"><%= stats.streak || 0 %></h3>
+                        <p style="margin:0; color:#888; font-size:0.85rem;">Dias Seguidos</p>
                     </div>
                 </div>
             </div>
 
             <div class="grid-2-col">
                 <div class="feature-card">
-                    <h3 style="color: white; margin-bottom: 15px;">Próximo Treino</h3>
-                    <p style="color: #888;">Nenhum treino agendado.</p>
-                    <a href="/client/workouts" class="btn btn-primary btn-sm" style="margin-top: 15px; display: inline-block;">Ver Treinos</a>
+                    <h3>Próximo Treino</h3>
+                    <p><%= stats.nextWorkout %></p>
+                    <a href="/client/workouts" class="btn btn-primary btn-sm">Iniciar</a>
                 </div>
                 <div class="feature-card">
-                    <h3 style="color: white; margin-bottom: 15px;">Histórico</h3>
-                    <p style="color: #888;">Sem atividades recentes.</p>
+                    <h3>Progresso Recente</h3>
+                    <p style="color:#888;">Nenhum dado registrado esta semana.</p>
                 </div>
             </div>
         </div>
     </main>
 </div>
-
 <script src="/js/main.js"></script>
 </body>
 </html>

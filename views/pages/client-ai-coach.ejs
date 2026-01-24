@@ -1,24 +1,32 @@
-<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Momentum Fit</title><link rel="stylesheet" href="/css/styles.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"></head><body>
-<div class="app-layout"><%- include("../partials/sidebar.ejs") %><main class="app-content"><%- include("../partials/app-header.ejs") %><div class="dashboard-wrapper">
-    
-    <div class="content-card" style="height: calc(100vh - 140px); display: flex; flex-direction: column;">
-        <div class="card-header-flex">
-            <h3 class="card-title"><i class="fas fa-robot" style="color: var(--primary-color);"></i> Momentum AI</h3>
-        </div>
-        
-        <div style="flex: 1; background: #0a0a0a; border-radius: 12px; padding: 20px; overflow-y: auto; margin-bottom: 20px; border: 1px solid #222;">
-            <div style="display: flex; gap: 15px; margin-bottom: 20px;">
-                <div style="width: 35px; height: 35px; background: var(--primary-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: black; flex-shrink: 0;">AI</div>
-                <div style="background: #1a1a1a; padding: 15px; border-radius: 0 12px 12px 12px; max-width: 80%;">
-                    <p style="color: #ddd; font-size: 0.95rem;">Olá, Caleb! Analisei seu último treino de pernas. Sua carga no Agachamento subiu 5%, excelente! Como você está se sentindo hoje?</p>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title><%= title %> | Momentum Fit</title>
+    <link rel="icon" href="/images/momentum-fit-icon.png">
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="dashboard-layout">
+    <%- include('../partials/sidebar.ejs') %>
+    <main class="app-main">
+        <%- include('../partials/app-header.ejs') %>
+        <div class="dashboard-content">
+            <div class="feature-card" style="max-width:600px; margin:0 auto; text-align:center;">
+                <div class="icon-box" style="margin:0 auto 20px auto;"><i class="fas fa-robot"></i></div>
+                <h2>Momentum IA</h2>
+                <p>Estou analisando seus dados para sugerir o melhor treino para hoje.</p>
+                <div style="margin-top:20px;">
+                    <button class="btn btn-primary">Gerar Novo Treino</button>
+                    <button class="btn btn-outline" style="margin-left:10px;">Ajustar Dieta</button>
                 </div>
             </div>
         </div>
-
-        <form style="display: flex; gap: 10px;">
-            <input type="text" placeholder="Digite sua dúvida ou feedback..." style="flex: 1; background: #111; border: 1px solid #333; padding: 12px; border-radius: 8px; color: white;">
-            <button type="button" class="btn btn-primary"><i class="fas fa-paper-plane"></i></button>
-        </form>
-    </div>
-
-</div></main></div></body></html>
+    </main>
+</div>
+<script src="/js/main.js"></script>
+</body>
+</html>
