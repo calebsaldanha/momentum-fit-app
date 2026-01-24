@@ -1,8 +1,11 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dashboard | Momentum Fit</title>
+    <link rel="icon" href="/images/momentum-fit-icon.png" type="image/png">
+    
     <link rel="stylesheet" href="/css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -18,7 +21,7 @@
         <div class="dashboard-content">
             <div style="margin-bottom: 30px;">
                 <h1 style="color: white; font-size: 1.8rem;">Olá, <span style="color: var(--primary);"><%= user.name.split(' ')[0] %></span>!</h1>
-                <p style="color: #888;">Aqui está o resumo da sua performance.</p>
+                <p style="color: #888;">Resumo da sua jornada fitness.</p>
             </div>
 
             <div class="stats-grid">
@@ -26,21 +29,21 @@
                     <div class="stat-icon"><i class="fas fa-fire"></i></div>
                     <div class="stat-info">
                         <h3>12</h3>
-                        <p>Treinos no Mês</p>
+                        <p>Treinos</p>
                     </div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon"><i class="fas fa-weight"></i></div>
                     <div class="stat-info">
-                        <h3>71kg</h3>
+                        <h3><%= user.profile && user.profile.weight ? user.profile.weight + 'kg' : '--' %></h3>
                         <p>Peso Atual</p>
                     </div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon"><i class="fas fa-trophy"></i></div>
                     <div class="stat-info">
-                        <h3>Lv. 5</h3>
-                        <p>Nível</p>
+                        <h3>Start</h3>
+                        <p>Plano</p>
                     </div>
                 </div>
             </div>
@@ -48,24 +51,44 @@
             <div class="grid-2-col" style="gap: 20px;">
                 <div class="feature-card" style="min-height: 200px;">
                     <h3>Próximo Treino</h3>
-                    <p style="color: #888;">Treino A - Superiores e Core</p>
-                    <a href="/client/workouts" class="btn btn-primary btn-sm" style="margin-top: 15px;">Começar</a>
+                    <p style="color: #888;">Seu plano personalizado está pronto.</p>
+                    <a href="/client/workouts" class="btn btn-primary btn-sm" style="margin-top: 15px; width: 100%; text-align: center; color: black;">Ver Treinos</a>
                 </div>
                 
                 <div class="feature-card" style="min-height: 200px;">
-                    <h3>Histórico Recente</h3>
-                    <ul style="list-style: none; padding: 0; margin-top: 10px;">
-                        <li style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); color: #ccc; display: flex; justify-content: space-between;">
-                            <span>Treino B</span>
-                            <span style="color: var(--primary);">Concluído</span>
-                        </li>
-                    </ul>
+                    <h3>Histórico</h3>
+                    <div style="margin-top: 10px; color: #888; font-size: 0.9rem;">
+                        Nenhuma atividade recente registrada.
+                    </div>
                 </div>
             </div>
 
         </div>
     </main>
 </div>
+
+<script>
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.querySelector('.dashboard-overlay');
+        
+        sidebar.classList.toggle('active');
+        if (overlay) overlay.classList.toggle('active');
+    }
+    
+    // Fechar ao clicar no overlay
+    document.addEventListener('click', function(e) {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.querySelector('.dashboard-overlay');
+        const toggleBtn = document.querySelector('.mobile-toggle');
+        
+        // Se clicou no overlay
+        if (e.target.classList.contains('dashboard-overlay')) {
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+        }
+    });
+</script>
 
 </body>
 </html>

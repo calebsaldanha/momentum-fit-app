@@ -719,3 +719,87 @@ html, body {
     }
     .dashboard-overlay.active { display: block; }
 }
+
+/* =========================================
+   11. DASHBOARD MOBILE FIX (FINAL)
+   ========================================= */
+
+/* Classe para arredondar ícones globalmente */
+.logo-rounded {
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--primary); /* Opcional: borda neon */
+}
+
+/* Reset específico para área logada */
+.dashboard-layout {
+    display: flex;
+    width: 100%;
+    min-height: 100vh;
+    overflow-x: hidden; /* Evita rolagem lateral */
+}
+
+.app-main {
+    flex: 1;
+    min-width: 0; /* Impede flex items de estourarem a largura */
+    display: flex;
+    flex-direction: column;
+    transition: margin-left 0.3s ease;
+}
+
+/* Comportamento Desktop Padrão */
+@media (min-width: 992px) {
+    .sidebar {
+        transform: translateX(0) !important;
+        width: 260px;
+    }
+    .app-main {
+        margin-left: 260px !important;
+        width: calc(100% - 260px) !important;
+    }
+    .mobile-toggle { display: none !important; }
+    .dashboard-overlay { display: none !important; }
+}
+
+/* Comportamento Mobile (Telas menores que 992px) */
+@media (max-width: 991px) {
+    .sidebar {
+        transform: translateX(-100%);
+        width: 260px;
+        box-shadow: 2px 0 10px rgba(0,0,0,0.5);
+    }
+    
+    .sidebar.active {
+        transform: translateX(0);
+    }
+
+    .app-main {
+        margin-left: 0 !important;
+        width: 100% !important;
+    }
+
+    .dashboard-overlay {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.7);
+        z-index: 998; /* Logo abaixo da sidebar (z-1000) */
+        display: none;
+        backdrop-filter: blur(3px);
+    }
+    
+    .dashboard-overlay.active {
+        display: block;
+    }
+    
+    .mobile-toggle {
+        display: block;
+        background: none;
+        border: none;
+        color: white;
+        font-size: 1.5rem;
+        cursor: pointer;
+    }
+    
+    .header-title h2 { font-size: 1.2rem; }
+    .dashboard-content { padding: 20px 15px; }
+}
