@@ -8,16 +8,17 @@ const flash = require('./middleware/flash');
 const passport = require('passport');
 const pool = require('./database/db'); 
 
-// --- TRAFFIC INSPECTOR (DEBUG) ---
+// --- Ìª°Ô∏è 1. TIMEOUT GLOBAL (FAIL FAST) ---
+// Se o banco travar, matamos a requisi√ß√£o em 10s com erro explicito.
 app.use((req, res, next) => {
-    if (!req.path.match(/\.(css|js|png|jpg|ico|svg|woff)$/)) {
-        // Log para identificar loops de redirect
-        console.log(`Ì∫¶ [${req.method}] ${req.path} | Auth: ${req.isAuthenticated ? req.isAuthenticated() : 'N/A'}`);
-    }
+    res.setTimeout(10000, () => {
+        console.error(`‚åõ TIMEOUT na rota: ${req.path}`);
+        res.status(504).send('‚è±Ô∏è Erro: O servidor demorou muito para responder (Prov√°vel timeout de Banco de Dados).');
+    });
     next();
 });
 
-// --- CONFIGURA√á√ÉO DE PROXY (CR√çTICO PARA VERCEL/HEROKU) ---
+// --- CONFIGURA√á√ÉO DE PROXY ---
 app.set('trust proxy', 1);
 
 // --- PASSPORT & VIEWS ---
@@ -30,17 +31,17 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// --- SESS√ÉO E AUTH (CORRE√á√ÉO DE PERFORMANCE) ---
+// --- Ìª°Ô∏è 2. SESS√ÉO COM TRATAMENTO DE ERRO ---
 const sessionStore = new pgSession({
     pool: pool,
     tableName: 'session',
     createTableIfMissing: true,
-    pruneSessionInterval: 60 * 15 // Limpa sess√µes expiradas a cada 15min
+    pruneSessionInterval: 60 * 15 
 });
 
-// Monitoramento de Erro do Store (Evita loading infinito se DB cair)
-sessionStore.on('error', function(error) {
-    console.error('Ì¥• ERRO CR√çTICO NA SESS√ÉO (DB):', error.message);
+// Importante: Logar erro do store para n√£o falhar silenciosamente
+sessionStore.on('error', (err) => {
+    console.error('Ì¥• ERRO NO SESSION STORE:', err.message);
 });
 
 const isProduction = process.env.NODE_ENV === 'production';
@@ -50,14 +51,13 @@ app.use(session({
     secret: process.env.SESSION_SECRET || 'secret_dev_key_123',
     resave: false,             
     saveUninitialized: false,  
-    proxy: true,               // Importante para SSL atr√°s de proxy
-    rolling: true,             // Renova o cookie a cada requisi√ß√£o (mant√©m logado)
+    proxy: true,
+    rolling: true,
     cookie: { 
-        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 dias
-        secure: isProduction, // HTTPS apenas em produ√ß√£o
+        maxAge: 30 * 24 * 60 * 60 * 1000, 
+        secure: isProduction, 
         httpOnly: true,
-        // 'lax' √© mais seguro contra loops de redirect que 'none'
-        sameSite: isProduction ? 'lax' : 'lax' 
+        sameSite: 'lax' 
     }
 }));
 
@@ -65,9 +65,20 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
 
+// --- Ìª°Ô∏è 3. TRAFFIC INSPECTOR (POSICIONADO CORRETAMENTE) ---
+// Agora logamos DEPOIS que a sess√£o e o passport rodaram.
+// Se n√£o aparecer no log, sabemos que travou na linha da session acima.
+app.use((req, res, next) => {
+    if (!req.path.match(/\.(css|js|png|jpg|ico|svg|woff)$/)) {
+        const user = req.user ? `${req.user.email} (${req.user.role})` : 'Visitante';
+        const authStatus = req.isAuthenticated() ? '‚úÖ Autenticado' : '‚ùå N√£o-Auth';
+        console.log(`Ì∫¶ [${req.method}] ${req.path} | ${authStatus} | ${user}`);
+    }
+    next();
+});
+
 // --- VARI√ÅVEIS GLOBAIS ---
 app.use((req, res, next) => {
-    if (req.path.match(/\.(css|js|png|jpg|ico)$/)) return next();
     res.locals.success_msg = req.flash('success_msg');
     res.locals.error_msg = req.flash('error_msg');
     res.locals.error = req.flash('error');
@@ -89,11 +100,12 @@ try {
     console.error("‚ùå Erro fatal ao carregar rotas:", err);
 }
 
-// --- ROTA 404 INTELIGENTE ---
+// --- 404 & ERROR HANDLER ---
 app.use((req, res) => {
     if (req.path.match(/\.(css|js|png|jpg|ico|map|json)$/)) {
-        return res.status(404).send('Asset not found');
+        return res.status(404).end();
     }
+    console.warn(`‚ö†Ô∏è 404: ${req.path}`);
     res.status(404).render('pages/error', { message: 'P√°gina n√£o encontrada' });
 });
 
@@ -103,5 +115,6 @@ if (require.main === module) {
     const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => {
         console.log(`‚úÖ Servidor rodando na porta ${PORT}`);
+        console.log(`Ìª°Ô∏è  Modo: ${process.env.NODE_ENV || 'development'}`);
     });
 }
