@@ -5,16 +5,28 @@
         <div class="hero-overlay"></div>
         
         <div class="container" style="position: relative; z-index: 2; max-width: 450px; width: 100%;">
-            <div class="feature-card" style="padding: 40px; background: rgba(10, 10, 10, 0.9); border: 1px solid #333;">
+            <div class="feature-card" style="padding: 40px; background: rgba(10, 10, 10, 0.95); border: 1px solid #333;">
                 
                 <div class="text-center" style="text-align: center; margin-bottom: 30px;">
                     <h2 style="color: white; font-size: 2rem; font-weight: 700;">Bem-vindo</h2>
                     <p style="color: #888;">Acesse sua conta para treinar</p>
                 </div>
 
-                <% if (typeof error !== 'undefined' && error) { %>
-                    <div class="alert alert-danger" style="background: rgba(255, 0, 0, 0.1); color: #ff6b6b; padding: 10px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #ff6b6b;">
+                <% if (error && error.length > 0) { %>
+                    <div class="alert alert-danger" role="alert">
                         <%= error %>
+                    </div>
+                <% } %>
+                
+                <% if (error_msg && error_msg.length > 0) { %>
+                    <div class="alert alert-danger" role="alert">
+                        <%= error_msg %>
+                    </div>
+                <% } %>
+
+                <% if (success_msg && success_msg.length > 0) { %>
+                    <div class="alert alert-success" role="alert">
+                        <%= success_msg %>
                     </div>
                 <% } %>
 
@@ -34,7 +46,7 @@
                                style="width: 100%; padding: 12px; background: #222; border: 1px solid #444; border-radius: 8px; color: white;">
                     </div>
 
-                    <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; font-weight: 600; font-size: 1rem;">
+                    <button type="submit" class="btn btn-primary w-100" style="padding: 12px; font-weight: 600; font-size: 1rem;">
                         Entrar
                     </button>
                 </form>
