@@ -58,48 +58,43 @@ app.use((req, res, next) => {
     next();
 });
 
-// VARI√ÅVEIS GLOBAIS
+// Ìª°Ô∏è 4. VARI√ÅVEIS GLOBAIS (CORRE√á√ÉO AQUI)
 app.use((req, res, next) => {
     res.locals.success_msg = req.flash('success_msg');
     res.locals.error_msg = req.flash('error_msg');
     res.locals.error = req.flash('error');
     res.locals.user = req.user || null;
+    
+    // ÔøΩÔøΩ FIX: Injeta o caminho da rota atual para uso no header.ejs
+    res.locals.path = req.path;
+    
     next();
 });
 
-// Ìª°Ô∏è 4. ROTAS (ORDEM CR√çTICA - ESPEC√çFICAS PRIMEIRO)
+// Ìª°Ô∏è 5. ROTAS
 try {
-    console.log("Ì≥Ç Carregando rotas...");
-    
-    // Rotas de API e Auth t√™m prioridade absoluta
     app.use('/auth', require('./routes/auth'));
     app.use('/api', require('./routes/api'));
-    
-    // Rotas de Pain√©is
     app.use('/admin', require('./routes/admin'));
     app.use('/trainer', require('./routes/trainer'));
     app.use('/client', require('./routes/client'));
-    
-    // Rotas de Funcionalidades
     app.use('/workouts', require('./routes/workouts'));
     app.use('/notifications', require('./routes/notifications'));
     
-    // ‚ö†Ô∏è ROTA GEN√âRICA (INDEX) DEVE SER A √öLTIMA
-    // Se ela vier antes, rouba as requisi√ß√µes das outras.
+    // Index por √∫ltimo para n√£o sombrear rotas
     app.use('/', require('./routes/index'));
-    
-    console.log("‚úÖ Rotas carregadas com sucesso.");
 } catch (err) {
     console.error("‚ùå ERRO FATAL NAS ROTAS:", err);
 }
 
-// Ìª°Ô∏è 5. ROTA DE DEBUG (TESTE DE VIDA)
-app.get('/health', (req, res) => res.send('OK - Server is running'));
+// Health Check
+app.get('/health', (req, res) => res.send('OK'));
 
-// 404 HANDLER
+// 404 Handler
 app.use((req, res) => {
     if (req.path.match(/\.(css|js|png|jpg|ico|map|json)$/)) return res.status(404).end();
-    console.warn(`‚ö†Ô∏è 404 Real: ${req.path}`);
+    console.warn(`‚ö†Ô∏è 404: ${req.path}`);
+    res.locals.path = req.path; // Garante path no 404 tamb√©m
     res.status(404).render('pages/error', { message: 'P√°gina n√£o encontrada' });
 });
 
