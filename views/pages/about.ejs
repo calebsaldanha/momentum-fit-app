@@ -1,22 +1,38 @@
 <%- include('../partials/header.ejs', { title: 'Sobre Nós', path: '/about' }) %>
+
 <main class="public-content">
-    <section class="page-hero-mini">
-        <div class="container">
-            <h1 style="font-size: 3rem; color: white;">Nossa Missão</h1>
+    <section class="hero hero-small" style="min-height: 60vh;">
+        <div class="hero-overlay"></div>
+        <div class="container hero-container">
+            <div class="hero-content center">
+                <span class="badge-neon">Nossa Missão</span>
+                <h1 class="hero-title">Revolucionando o <span class="text-gradient">Fitness</span></h1>
+                <p class="hero-subtitle">Unimos tecnologia de ponta e expertise humana para democratizar o acesso a treinos de alta performance.</p>
+            </div>
         </div>
     </section>
-    <section class="container legal-content">
-        <p>No <strong>Momentum Fit</strong>, acreditamos que a alta performance não deve ser um privilégio de poucos.</p>
-        <p>Nascemos em 2025 com um objetivo claro: democratizar o acesso ao treinamento físico de qualidade através da tecnologia. Unimos a precisão fria dos dados e da Inteligência Artificial com o calor e a empatia de Personal Trainers reais.</p>
-        
-        <h3>Nossos Valores</h3>
-        <ul>
-            <li><strong>Ciência em primeiro lugar:</strong> Não seguimos modismos. Tudo o que prescrevemos tem base fisiológica.</li>
-            <li><strong>Transparência:</strong> Seus dados são seus. Não vendemos informações para terceiros.</li>
-            <li><strong>Evolução Constante:</strong> Assim como nos treinos, nossa plataforma nunca para de melhorar (Kaizen).</li>
-        </ul>
-        
-        <p>Seja bem-vindo à evolução do fitness.</p>
+
+    <section class="section-padding">
+        <div class="container">
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="icon-box"><i class="fas fa-bullseye"></i></div>
+                    <h3>Foco no Resultado</h3>
+                    <p style="color:#888">Não acreditamos em soluções mágicas. Acreditamos em dados, consistência e progressão mensurável.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon-box"><i class="fas fa-brain"></i></div>
+                    <h3>Inteligência Real</h3>
+                    <p style="color:#888">Nossa IA não apenas gera treinos, ela aprende com você a cada repetição para otimizar sua rotina.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon-box"><i class="fas fa-users"></i></div>
+                    <h3>Comunidade</h3>
+                    <p style="color:#888">Conectamos alunos a treinadores de elite, criando um ecossistema de motivação e suporte.</p>
+                </div>
+            </div>
+        </div>
     </section>
 </main>
+
 <%- include('../partials/footer.ejs') %>
