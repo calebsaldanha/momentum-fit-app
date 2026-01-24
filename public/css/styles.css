@@ -451,3 +451,37 @@ img { max-width: 100%; display: block; }
 .faq-item h4 { color: white; margin-bottom: 10px; font-size: 1.1rem; }
 .faq-item p { color: #888; font-size: 0.95rem; line-height: 1.6; }
 
+
+/* =========================================
+   8. FIXES & ADJUSTMENTS (MOBILE/DESKTOP)
+   ========================================= */
+
+/* Impede zoom indesejado e scroll horizontal no mobile */
+html, body {
+    overflow-x: hidden;
+    width: 100%;
+    position: relative;
+    touch-action: manipulation; /* Melhora resposta ao toque */
+}
+
+/* Ajuste específico para a Grid de Planos no Desktop */
+@media (min-width: 992px) {
+    .features-grid {
+        grid-template-columns: repeat(3, 1fr) !important; /* Força 3 colunas */
+        align-items: stretch;
+    }
+}
+
+/* Garante que imagens de logo não distorçam */
+.brand-logo img {
+    display: block;
+    object-fit: contain;
+}
+
+/* Footer adjustments */
+.main-footer .brand-logo {
+    color: white;
+    text-decoration: none;
+    font-weight: 800;
+    gap: 10px;
+}

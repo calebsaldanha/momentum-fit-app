@@ -2,8 +2,8 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Momentum Fit</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title><%= typeof title !== 'undefined' ? title + ' | Momentum Fit' : 'Momentum Fit' %></title>
     <link rel="stylesheet" href="/css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -14,7 +14,8 @@
     <header class="main-header">
         <div class="header-container">
             <a href="/" class="brand-logo">
-                <i class="fas fa-bolt" style="color: var(--primary-color);"></i> Momentum
+                <img src="/images/momentum-fit-icon.png" alt="Momentum Logo" style="height: 35px; width: auto;">
+                <span>Momentum</span>
             </a>
             
             <nav class="desktop-nav">
@@ -31,13 +32,18 @@
         </div>
 
         <div class="mobile-menu" id="publicMenu">
-            <div style="display:flex; justify-content:space-between; margin-bottom: 40px;">
-                <span class="brand-logo">Momentum</span>
+            <div style="display:flex; justify-content:space-between; align-items: center; margin-bottom: 40px;">
+                <span class="brand-logo" style="font-size: 1.2rem;">
+                    <img src="/images/momentum-fit-icon.png" alt="Logo" style="height: 30px; margin-right: 10px;">
+                    Momentum
+                </span>
                 <button onclick="togglePublicMenu()" style="background:none; border:none; color:white; font-size:1.5rem;">&times;</button>
             </div>
             <a href="/" class="side-link">Início</a>
-            <a href="/plans" class="side-link">Planos</a>
+            <a href="/plans" class="side-link">Planos e Preços</a>
+            <a href="/about" class="side-link">Sobre Nós</a>
             <a href="/auth/login" class="side-link">Entrar</a>
+            <a href="/auth/register" class="btn btn-primary" style="margin-top: 20px; text-align: center; color: black;">Começar Agora</a>
         </div>
     </header>
     <script>

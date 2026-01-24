@@ -131,14 +131,14 @@
                 <div class="testimonial-card">
                     <div class="user-info">
                         <h4>Fernanda P.</h4>
-                        <span>Plano Free</span>
+                        <span>Plano Start</span>
                     </div>
                     <p style="color: #ccc; margin-top: 10px; font-size: 0.9rem;">"Comecei no gratuito para testar e a interface é incrível. Super fácil de usar."</p>
                 </div>
                 <div class="testimonial-card">
                     <div class="user-info">
                         <h4>João B.</h4>
-                        <span>Plano Basic</span>
+                        <span>Plano Pro</span>
                     </div>
                     <p style="color: #ccc; margin-top: 10px; font-size: 0.9rem;">"Consegui perder 5kg em 2 meses seguindo o plano à risca. Recomendo!"</p>
                 </div>
@@ -153,47 +153,52 @@
                 <p style="color: #a0a0a0;">Comece hoje, evolua sempre.</p>
             </div>
             
-            <div class="features-grid" style="align-items: flex-start;">
+            <div class="features-grid">
                 
-                <div class="feature-card plan-featured" style="border-color: var(--primary-color);">
-                    <h3 style="font-size: 1.5rem; margin-bottom: 10px;">Gratuito</h3>
-                    <div style="font-size: 2.5rem; font-weight: 800; color: white; margin-bottom: 20px;">
-                        R$ 0<span style="font-size: 1rem; color: #666; font-weight: 400;">/mês</span>
+                <div class="feature-card">
+                    <div class="plan-header">
+                        <h3 class="plan-title">Start</h3>
+                        <div class="plan-price">R$ 0<span>/mês</span></div>
+                        <p class="plan-desc">Para quem quer começar a se movimentar com organização.</p>
                     </div>
-                    <ul style="margin-bottom: 30px; color: #ccc; padding-left: 20px; text-align: left;">
-                        <li style="margin-bottom: 10px;">• Acesso ao App</li>
-                        <li style="margin-bottom: 10px;">• Biblioteca Básica</li>
-                        <li style="margin-bottom: 10px;">• Tracking de Peso</li>
+                    <ul class="plan-features">
+                        <li><i class="fas fa-check"></i> Acesso ao App</li>
+                        <li><i class="fas fa-check"></i> Biblioteca Básica</li>
+                        <li><i class="fas fa-check"></i> Tracking de Peso</li>
+                        <li class="muted"><i class="fas fa-times"></i> Coach IA</li>
                     </ul>
-                    <a href="/auth/register?plan=free" class="btn btn-primary" style="width: 100%;">Criar Conta Grátis</a>
+                    <a href="/auth/register?plan=free" class="btn btn-outline" style="width: 100%;">Começar Grátis</a>
                 </div>
 
-                <div class="feature-card plan-disabled">
-                    <div class="tooltip-badge">EM BREVE</div>
-                    <h3 style="font-size: 1.5rem; margin-bottom: 10px;">Momentum Pro</h3>
-                    <div style="font-size: 2.5rem; font-weight: 800; color: white; margin-bottom: 20px;">
-                        R$ 89,90
+                <div class="feature-card plan-featured" style="border-color: var(--primary);">
+                    <div class="badge-neon" style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%);">Mais Popular</div>
+                    <div class="plan-header">
+                        <h3 class="plan-title" style="color: var(--primary);">Momentum Pro</h3>
+                        <div class="plan-price">R$ 89,90<span>/mês</span></div>
+                        <p class="plan-desc">A experiência completa com inteligência artificial.</p>
                     </div>
-                    <ul style="margin-bottom: 30px; color: #666; padding-left: 20px; text-align: left;">
-                        <li style="margin-bottom: 10px;">• Treinador Dedicado</li>
-                        <li style="margin-bottom: 10px;">• Dieta Personalizada</li>
-                        <li style="margin-bottom: 10px;">• Análise de Vídeo IA</li>
+                    <ul class="plan-features">
+                        <li><i class="fas fa-check"></i> <strong>Tudo do Start</strong></li>
+                        <li><i class="fas fa-check"></i> Coach IA Ilimitado</li>
+                        <li><i class="fas fa-check"></i> Geração de Treinos</li>
+                        <li><i class="fas fa-check"></i> Dieta Inteligente</li>
                     </ul>
-                    <button class="btn btn-outline" style="width: 100%; cursor: not-allowed;">Aguarde Lançamento</button>
+                    <a href="/auth/register?plan=pro" class="btn btn-primary" style="width: 100%;">Assinar Pro</a>
                 </div>
 
-                <div class="feature-card plan-disabled">
-                    <div class="tooltip-badge">EM BREVE</div>
-                    <h3 style="font-size: 1.5rem; margin-bottom: 10px;">VIP Anual</h3>
-                    <div style="font-size: 2.5rem; font-weight: 800; color: white; margin-bottom: 20px;">
-                        R$ 69,90
+                <div class="feature-card">
+                    <div class="plan-header">
+                        <h3 class="plan-title">VIP Personal</h3>
+                        <div class="plan-price">R$ 249,90<span>/mês</span></div>
+                        <p class="plan-desc">Acompanhamento humano dedicado para resultados máximos.</p>
                     </div>
-                    <ul style="margin-bottom: 30px; color: #666; padding-left: 20px; text-align: left;">
-                        <li style="margin-bottom: 10px;">• Economia Máxima</li>
-                        <li style="margin-bottom: 10px;">• Consultoria ao Vivo</li>
-                        <li style="margin-bottom: 10px;">• Kit de Boas-vindas</li>
+                    <ul class="plan-features">
+                        <li><i class="fas fa-check"></i> <strong>Tudo do Pro</strong></li>
+                        <li><i class="fas fa-check"></i> Personal Trainer Real</li>
+                        <li><i class="fas fa-check"></i> Chat Direto (WhatsApp)</li>
+                        <li><i class="fas fa-check"></i> Ajustes Semanais</li>
                     </ul>
-                    <button class="btn btn-outline" style="width: 100%; cursor: not-allowed;">Aguarde Lançamento</button>
+                    <button class="btn btn-outline" style="width: 100%; cursor: not-allowed;" disabled>Vagas Esgotadas</button>
                 </div>
 
             </div>
