@@ -1,13 +1,17 @@
-<%- include('../partials/header.ejs', { title: 'Planos', path: '/plans' }) %>
+<%- include('../partials/header.ejs', { title: 'Planos e Preços', path: '/plans' }) %>
 
 <main class="public-content">
     
-    <section class="hero hero-small" style="min-height: 50vh; align-items: center; display: flex;">
+    <section class="hero hero-small" style="min-height: 50vh; display: flex; align-items: center;">
         <div class="hero-overlay"></div>
-        <div class="container hero-container" style="text-align: center;">
-            <div class="hero-content center" style="margin: 0 auto;">
-                <h1 class="hero-title">Planos & Preços</h1>
-                <p class="hero-subtitle">Escolha o ritmo ideal para a sua evolução.</p>
+        <div class="container hero-container">
+            <div class="hero-content center" style="margin: 0 auto; text-align: center;">
+                <h1 class="hero-title" style="font-size: 3rem;">
+                    Escolha o Seu <span class="text-gradient">Ritmo</span>
+                </h1>
+                <p class="hero-subtitle" style="margin: 0 auto;">
+                    Planos flexíveis desenhados para cada estágio da sua jornada fitness.
+                </p>
             </div>
         </div>
     </section>
@@ -19,63 +23,70 @@
                     <div class="plan-header">
                         <h3 class="plan-title">Start</h3>
                         <div class="plan-price">R$ 0<span>/mês</span></div>
-                        <p class="plan-desc">Para quem quer começar.</p>
+                        <p class="plan-desc">Para iniciantes.</p>
                     </div>
                     <ul class="plan-features">
                         <li><i class="fas fa-check"></i> Acesso ao App</li>
+                        <li><i class="fas fa-check"></i> Biblioteca de Exercícios</li>
                         <li><i class="fas fa-check"></i> Tracking de Peso</li>
                         <li class="muted"><i class="fas fa-times"></i> Coach IA</li>
+                        <li class="muted"><i class="fas fa-times"></i> Dieta Personalizada</li>
                     </ul>
                     <a href="/auth/register?plan=free" class="btn btn-outline w-100">Começar Grátis</a>
                 </div>
 
-                <div class="feature-card plan-featured" style="border-color: var(--primary);">
+                <div class="feature-card plan-featured">
                     <div class="plan-header">
-                        <h3 class="plan-title" style="color: var(--primary);">Pro</h3>
-                        <div class="plan-price">R$ 89<span>/mês</span></div>
-                        <p class="plan-desc">Inteligência Artificial.</p>
+                        <h3 class="plan-title" style="color: var(--primary);">Momentum Pro</h3>
+                        <div class="plan-price">R$ 89,90<span>/mês</span></div>
+                        <p class="plan-desc">Para quem quer evoluir rápido.</p>
                     </div>
                     <ul class="plan-features">
                         <li><i class="fas fa-check"></i> <strong>Tudo do Start</strong></li>
                         <li><i class="fas fa-check"></i> Coach IA Ilimitado</li>
-                        <li><i class="fas fa-check"></i> Treinos Personalizados</li>
+                        <li><i class="fas fa-check"></i> Geração de Treinos IA</li>
+                        <li><i class="fas fa-check"></i> Dieta Inteligente</li>
+                        <li><i class="fas fa-check"></i> Análise de Execução</li>
                     </ul>
                     <a href="/auth/register?plan=pro" class="btn btn-primary w-100">Assinar Pro</a>
                 </div>
 
                 <div class="feature-card">
                     <div class="plan-header">
-                        <h3 class="plan-title">VIP</h3>
-                        <div class="plan-price">R$ 249<span>/mês</span></div>
-                        <p class="plan-desc">Personal Trainer Dedicado.</p>
+                        <h3 class="plan-title">VIP Personal</h3>
+                        <div class="plan-price">R$ 249,90<span>/mês</span></div>
+                        <p class="plan-desc">Máxima personalização.</p>
                     </div>
                     <ul class="plan-features">
                         <li><i class="fas fa-check"></i> <strong>Tudo do Pro</strong></li>
-                        <li><i class="fas fa-check"></i> Acompanhamento Humano</li>
+                        <li><i class="fas fa-check"></i> Personal Trainer Real</li>
+                        <li><i class="fas fa-check"></i> Chat Direto (WhatsApp)</li>
                         <li><i class="fas fa-check"></i> Ajustes Semanais</li>
+                        <li><i class="fas fa-check"></i> Videoconferência Mensal</li>
                     </ul>
-                    <button class="btn btn-outline w-100" disabled>Lista de Espera</button>
+                    <button class="btn btn-outline w-100" disabled>Vagas Esgotadas</button>
                 </div>
             </div>
         </div>
     </section>
-    
+
     <section class="section-padding">
         <div class="container">
             <div class="section-header center">
-                <h2 class="section-title">Dúvidas?</h2>
+                <h2 class="section-title">Dúvidas Frequentes</h2>
             </div>
-            <div class="features-grid"> <div class="feature-card">
-                    <h4>Posso cancelar?</h4>
-                    <p style="color: #888;">Sim, a qualquer momento pelo painel.</p>
+            <div class="grid-3-col">
+                <div class="feature-card">
+                    <h4>Posso cancelar a qualquer momento?</h4>
+                    <p>Sim, todos os planos mensais podem ser cancelados a qualquer momento sem multa.</p>
                 </div>
                 <div class="feature-card">
-                    <h4>Como funciona a IA?</h4>
-                    <p style="color: #888;">Ela analisa seu feedback pós-treino e ajusta as cargas.</p>
+                    <h4>Como funciona o Coach IA?</h4>
+                    <p>Nossa IA analisa seu histórico de treinos e ajusta as cargas e séries automaticamente.</p>
                 </div>
                 <div class="feature-card">
-                    <h4>Tem fidelidade?</h4>
-                    <p style="color: #888;">Não, você paga apenas pelo mês que usar.</p>
+                    <h4>Preciso de equipamentos?</h4>
+                    <p>Não. Você informa o que tem disponível (ou se treina em casa) e o treino é adaptado.</p>
                 </div>
             </div>
         </div>

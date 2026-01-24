@@ -1,28 +1,27 @@
 <footer class="main-footer">
     <div class="container">
         <div class="footer-grid">
-            <div class="footer-col footer-logo-area">
-                <a href="/" class="brand-logo" style="margin-bottom: 15px; display: inline-flex; align-items: center; text-decoration: none;">
+            <div class="footer-col">
+                <a href="/" class="brand-logo" style="margin-bottom: 20px; display: inline-flex; align-items: center; text-decoration: none;">
                     <img src="/images/momentum-fit-icon.png" alt="Logo" class="logo-rounded" style="height: 40px; width: 40px; border: 2px solid var(--primary);">
                     <span style="font-size: 1.4rem; color: white; margin-left: 10px;">Momentum</span>
                 </a>
-                <p style="color: #888; font-size: 0.9rem; line-height: 1.6; max-width: 250px; margin: 0 auto 0 0;">
-                    A revolução do seu treino. Tecnologia, dados e expertise humana em uma única plataforma.
+                <p style="color: #888; font-size: 0.9rem; line-height: 1.6;">
+                    Plataforma de alta performance com IA e treinadores reais.
                 </p>
-                <div class="footer-social">
-                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-                    <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
-                    <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                <div class="social-links" style="display: flex; gap: 15px; margin-top: 20px;">
+                    <a href="#" style="color: #fff;"><i class="fab fa-instagram fa-lg"></i></a>
+                    <a href="#" style="color: #fff;"><i class="fab fa-twitter fa-lg"></i></a>
+                    <a href="#" style="color: #fff;"><i class="fab fa-youtube fa-lg"></i></a>
                 </div>
             </div>
 
             <div class="footer-col">
-                <h4>Navegação</h4>
+                <h4>Empresa</h4>
                 <ul>
-                    <li><a href="/">Início</a></li>
-                    <li><a href="/plans">Planos e Preços</a></li>
-                    <li><a href="/about">Nossa História</a></li>
-                    <li><a href="/contact">Fale Conosco</a></li>
+                    <li><a href="/about">Sobre Nós</a></li>
+                    <li><a href="/plans">Planos</a></li>
+                    <li><a href="/contact">Contato</a></li>
                 </ul>
             </div>
 
@@ -30,28 +29,23 @@
                 <h4>Legal</h4>
                 <ul>
                     <li><a href="/terms">Termos de Uso</a></li>
-                    <li><a href="/privacy">Política de Privacidade</a></li>
-                    <li><a href="/cookies">Gestão de Cookies</a></li>
+                    <li><a href="/privacy">Privacidade</a></li>
+                    <li><a href="/cookies">Cookies</a></li>
                 </ul>
             </div>
 
             <div class="footer-col">
                 <h4>Novidades</h4>
-                <p style="color: #888; font-size: 0.85rem; margin-bottom: 15px;">
-                    Receba dicas exclusivas de treino e nutrição.
-                </p>
-                <form class="newsletter-form" style="display: flex; gap: 5px;">
-                    <input type="email" placeholder="Seu melhor e-mail" required 
-                           style="flex: 1; padding: 10px; background: #111; border: 1px solid #333; color: white; border-radius: 6px;">
-                    <button type="submit" class="btn btn-primary" style="padding: 0 15px; border-radius: 6px;">
-                        <i class="fas fa-arrow-right"></i>
-                    </button>
+                <p style="color: #888; font-size: 0.9rem; margin-bottom: 15px;">Dicas de treino no seu email.</p>
+                <form class="newsletter-form" onsubmit="event.preventDefault(); alert('Obrigado!');">
+                    <input type="email" class="newsletter-input" placeholder="Seu email" required>
+                    <button type="submit" class="newsletter-btn"><i class="fas fa-paper-plane"></i></button>
                 </form>
             </div>
         </div>
 
-        <div class="footer-bottom">
-            <p>&copy; <%= new Date().getFullYear() %> Momentum Fit. Todos os direitos reservados.</p>
+        <div class="footer-bottom" style="text-align: center; border-top: 1px solid #222; padding-top: 25px; margin-top: 50px;">
+            <p style="color: #666; font-size: 0.85rem;">&copy; 2026 Momentum Fit. Todos os direitos reservados.</p>
         </div>
     </div>
 </footer>
