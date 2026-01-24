@@ -1,7 +1,6 @@
 /**
- * Middleware Flash Messages (Substituto Local Moderno)
- * Substitui a dependência depreciada 'connect-flash'.
- * Mantém 100% de compatibilidade com a API original.
+ * Middleware Flash Messages (Versão Segura para Node 22+)
+ * Substitui 'connect-flash' para evitar erro [DEP0044] (util.isArray).
  */
 module.exports = function flash(options) {
   options = options || {};
@@ -16,8 +15,8 @@ module.exports = function flash(options) {
       var msgs = this.session.flash = this.session.flash || {};
       
       if (type && msg) {
-        // WRITE: Adiciona mensagem ao array do tipo
-        if (Array.isArray(msg)) {
+        // WRITE
+        if (Array.isArray(msg)) { // Fix: Usa Array.isArray nativo
           msg.forEach(function(val){
             (msgs[type] = msgs[type] || []).push(val);
           });
@@ -26,12 +25,12 @@ module.exports = function flash(options) {
         (msgs[type] = msgs[type] || []).push(msg);
         return msgs[type].length;
       } else if (type) {
-        // READ: Retorna e limpa as mensagens do tipo
+        // READ
         var arr = msgs[type];
         delete msgs[type];
         return arr || [];
       } else {
-        // READ ALL: Retorna e limpa todas as mensagens
+        // READ ALL
         this.session.flash = {};
         return msgs;
       }
