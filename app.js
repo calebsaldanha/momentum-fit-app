@@ -4,7 +4,7 @@ const app = express();
 const path = require('path');
 const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
-const flash = require('connect-flash');
+const flash = require('./middleware/flash');
 const passport = require('passport');
 const pool = require('./database/db'); 
 
