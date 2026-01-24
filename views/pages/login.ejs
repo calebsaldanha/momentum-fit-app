@@ -1,30 +1,30 @@
 <%- include('../partials/header.ejs', { title: 'Login', path: '/auth/login' }) %>
 
 <main class="public-content">
-    <section class="hero" style="min-height: 100vh; align-items: center; justify-content: center; padding: 100px 20px;">
+    <section class="hero" style="min-height: 100vh; align-items: center; justify-content: center; padding: 120px 20px 60px;">
         <div class="hero-overlay"></div>
         
-        <div class="container" style="position: relative; z-index: 2; max-width: 450px; width: 100%;">
-            <div class="feature-card" style="padding: 40px; background: rgba(10, 10, 10, 0.95); border: 1px solid #333;">
+        <div class="container" style="position: relative; z-index: 2; max-width: 420px; width: 100%;">
+            <div class="feature-card" style="padding: 40px 30px; background: rgba(5, 5, 5, 0.95); border: 1px solid #222; box-shadow: 0 20px 40px rgba(0,0,0,0.6);">
                 
                 <div class="text-center" style="text-align: center; margin-bottom: 30px;">
-                    <h2 style="color: white; font-size: 2rem; font-weight: 700;">Bem-vindo</h2>
-                    <p style="color: #888;">Acesse sua conta para treinar</p>
+                    <a href="/" style="display: inline-block; margin-bottom: 20px;">
+                        <img src="/images/momentum-fit-icon.png" alt="Logo" style="height: 50px; width: auto;">
+                    </a>
+                    <h2 style="color: white; font-size: 1.8rem; font-weight: 700; margin-bottom: 10px;">Bem-vindo</h2>
+                    <p style="color: #666; font-size: 0.95rem;">Digite suas credenciais para continuar</p>
                 </div>
 
-                <% if (error && error.length > 0) { %>
+                <% let hasError = (typeof error !== 'undefined' && error.length > 0) || (typeof error_msg !== 'undefined' && error_msg.length > 0); %>
+                <% let hasSuccess = (typeof success_msg !== 'undefined' && success_msg.length > 0); %>
+
+                <% if (hasError) { %>
                     <div class="alert alert-danger" role="alert">
-                        <%= error %>
-                    </div>
-                <% } %>
-                
-                <% if (error_msg && error_msg.length > 0) { %>
-                    <div class="alert alert-danger" role="alert">
-                        <%= error_msg %>
+                        <%= (typeof error !== 'undefined' && error.length > 0) ? error : error_msg %>
                     </div>
                 <% } %>
 
-                <% if (success_msg && success_msg.length > 0) { %>
+                <% if (hasSuccess) { %>
                     <div class="alert alert-success" role="alert">
                         <%= success_msg %>
                     </div>
@@ -32,27 +32,29 @@
 
                 <form action="/auth/login" method="POST">
                     <div class="form-group" style="margin-bottom: 20px;">
-                        <label style="color: #ccc; margin-bottom: 8px; display: block;">Email</label>
-                        <input type="email" name="email" class="form-control" placeholder="seu@email.com" required 
-                               style="width: 100%; padding: 12px; background: #222; border: 1px solid #444; border-radius: 8px; color: white;">
+                        <label style="color: #ccc; margin-bottom: 8px; display: block; font-size: 0.9rem;">Email</label>
+                        <input type="email" name="email" class="form-control" placeholder="exemplo@email.com" required 
+                               style="width: 100%; padding: 12px 15px; background: #1a1a1a; border: 1px solid #333; border-radius: 8px; color: white; outline: none; transition: 0.3s;">
                     </div>
 
                     <div class="form-group" style="margin-bottom: 25px;">
                         <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                            <label style="color: #ccc;">Senha</label>
+                            <label style="color: #ccc; font-size: 0.9rem;">Senha</label>
                             <a href="/auth/forgot-password" style="color: var(--primary); font-size: 0.85rem; text-decoration: none;">Esqueceu?</a>
                         </div>
                         <input type="password" name="password" class="form-control" placeholder="••••••••" required 
-                               style="width: 100%; padding: 12px; background: #222; border: 1px solid #444; border-radius: 8px; color: white;">
+                               style="width: 100%; padding: 12px 15px; background: #1a1a1a; border: 1px solid #333; border-radius: 8px; color: white; outline: none; transition: 0.3s;">
                     </div>
 
-                    <button type="submit" class="btn btn-primary w-100" style="padding: 12px; font-weight: 600; font-size: 1rem;">
-                        Entrar
+                    <button type="submit" class="btn btn-primary w-100" style="padding: 14px; font-weight: 700; font-size: 1rem; width: 100%; border-radius: 8px;">
+                        Entrar na Plataforma
                     </button>
                 </form>
 
-                <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #333;">
-                    <p style="color: #888;">Ainda não tem conta? <a href="/auth/register" style="color: var(--primary); text-decoration: none; font-weight: 500;">Crie agora</a></p>
+                <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #222;">
+                    <p style="color: #888; font-size: 0.9rem;">
+                        Novo por aqui? <a href="/auth/register" style="color: var(--primary); text-decoration: none; font-weight: 600;">Criar conta gratuita</a>
+                    </p>
                 </div>
             </div>
         </div>

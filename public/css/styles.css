@@ -279,3 +279,57 @@ ul { list-style: none; }
     border: 1px solid rgba(190, 242, 2, 0.3);
     color: var(--primary);
 }
+
+/* =========================================
+   19. EMERGENCY UI FIXES
+   ========================================= */
+
+/* Fix: Header colado nas bordas */
+.header-container {
+    padding-left: 5% !important;
+    padding-right: 5% !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+@media (min-width: 1200px) {
+    .header-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding-left: 20px !important;
+        padding-right: 20px !important;
+    }
+}
+
+/* Fix: Elemento vermelho vazio (Alertas Fantasmas) */
+.alert {
+    display: none; /* Oculta por padrão */
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+}
+
+/* Só exibe se tiver conteúdo de texto ou elementos filhos */
+.alert:not(:empty) {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Cores específicas */
+.alert-danger {
+    background-color: rgba(220, 38, 38, 0.1);
+    border-color: rgba(220, 38, 38, 0.2);
+    color: #f87171;
+}
+
+.alert-success {
+    background-color: rgba(190, 242, 2, 0.1);
+    border-color: rgba(190, 242, 2, 0.2);
+    color: #bef202;
+}
