@@ -396,3 +396,107 @@ img, svg, video {
 .stat-card, .feature-card {
     padding: 25px;
 }
+
+/* =========================================
+   21. SIDEBAR POLISH & UX IMPROVEMENTS
+   ========================================= */
+
+/* Sidebar Container */
+.sidebar {
+    background-color: #050505; /* Fundo mais profundo */
+    border-right: 1px solid #1f1f1f;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    z-index: 1050; /* Acima do header */
+}
+
+/* Header da Sidebar */
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Para acomodar o botão fechar no mobile */
+    padding-bottom: 30px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #1a1a1a;
+}
+
+.sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 800;
+    font-size: 1.2rem;
+    color: white;
+    text-decoration: none;
+}
+
+/* Botão Fechar Sidebar (Só aparece no mobile) */
+.sidebar-close-btn {
+    display: none;
+    background: none;
+    border: none;
+    color: #666;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: 0.2s;
+    padding: 5px;
+}
+.sidebar-close-btn:hover { color: white; }
+
+/* Links de Navegação */
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    border-radius: 10px;
+    color: #999;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    margin-bottom: 5px;
+    text-decoration: none;
+    border-left: 3px solid transparent; /* Indicador invisível */
+}
+
+.nav-link:hover {
+    background: rgba(255,255,255,0.03);
+    color: white;
+}
+
+/* Estado Ativo (Destaque Neon) */
+.nav-link.active {
+    background: rgba(190, 242, 2, 0.08);
+    color: var(--primary);
+    border-left-color: var(--primary); /* Indicador visível */
+}
+
+.nav-link i {
+    width: 20px;
+    text-align: center;
+    font-size: 1.1rem;
+}
+
+/* Área de Footer da Sidebar (Perfil/Sair) */
+.sidebar-footer {
+    margin-top: auto;
+    padding-top: 20px;
+    border-top: 1px solid #1a1a1a;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+/* Mobile Overrides */
+@media (max-width: 991px) {
+    .sidebar-close-btn {
+        display: block; /* Mostra o X no mobile */
+    }
+    
+    .sidebar {
+        width: 280px;
+        box-shadow: 10px 0 30px rgba(0,0,0,0.5);
+    }
+}
