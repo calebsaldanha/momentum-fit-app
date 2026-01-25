@@ -1,6 +1,6 @@
-/* í¾¨ PUBLIC CSS - ARQUITETURA RESPONSIVA
+/* í¾¨ PUBLIC CSS - ARQUITETURA RESPONSIVA (V2)
    Autor: Senior Architect
-   Contexto: Landing Pages, Sobre, Planos
+   Contexto: Landing Pages, Sobre, Planos, Home
 */
 @import url('./modules/base.css');
 
@@ -8,13 +8,20 @@
     --header-height: 80px;
     --hero-padding-desktop: 180px 0 100px;
     --hero-padding-mobile: 120px 0 60px;
+    --card-bg: #111;
+    --card-border: #222;
 }
 
 /* --- UTILS --- */
 .text-justify { text-align: justify; }
 .w-100 { width: 100%; }
+.mb-10 { margin-bottom: 10px; }
 .mb-20 { margin-bottom: 20px; }
 .mb-40 { margin-bottom: 40px; }
+.mb-80 { margin-bottom: 80px; }
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.mx-auto { margin-left: auto; margin-right: auto; }
 
 /* --- HEADER & NAV --- */
 .main-header {
@@ -44,28 +51,77 @@
     padding: var(--hero-padding-desktop);
     min-height: 60vh;
     display: flex; flex-direction: column; justify-content: center;
+    position: relative;
 }
 
-.hero-title { font-size: 3.5rem; font-weight: 800; margin-bottom: 20px; line-height: 1.1; letter-spacing: -1px; color: white; }
-.hero-subtitle { color: #888; font-size: 1.2rem; max-width: 700px; margin: 0 auto; line-height: 1.6; }
+/* Home Specific Hero */
+.hero-home {
+    background: url('../images/hero-bg.png') center/cover no-repeat;
+    min-height: 90vh;
+}
+.hero-overlay {
+    position: absolute; inset: 0; 
+    background: linear-gradient(90deg, #050505 0%, rgba(5,5,5,0.9) 30%, rgba(5,5,5,0.4) 100%);
+    z-index: 1;
+}
+.hero-container { position: relative; z-index: 2; width: 100%; }
+.hero-content { max-width: 700px; } /* Alinhado a esquerda na home desktop */
+
+.hero-title { font-size: 3.8rem; font-weight: 800; margin-bottom: 20px; line-height: 1.1; letter-spacing: -2px; color: white; }
+.hero-subtitle { color: #bbb; font-size: 1.25rem; margin-bottom: 40px; line-height: 1.6; }
+.hero-buttons { display: flex; gap: 15px; flex-wrap: wrap; }
+
+/* Badge da Hero */
+.hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(190, 242, 2, 0.1); border: 1px solid rgba(190, 242, 2, 0.2);
+    color: var(--primary); padding: 8px 16px; border-radius: 50px;
+    font-size: 0.85rem; font-weight: 700; margin-bottom: 25px;
+    text-transform: uppercase; letter-spacing: 1px;
+}
 
 /* --- SECTIONS & GRIDS --- */
 .section-padding { padding: 100px 0; }
 .bg-darker { background: #0a0a0a; }
 
-.grid-2, .grid-3 { display: grid; gap: 40px; }
+.grid-2, .grid-3 { display: grid; gap: 30px; }
 .grid-2 { grid-template-columns: repeat(2, 1fr); align-items: center; }
-.grid-3 { grid-template-columns: repeat(3, 1fr); }
+.grid-3 { grid-template-columns: repeat(3, 1fr); align-items: stretch; }
 
-/* --- CARDS (Planos & Features) --- */
+/* --- CARDS (Features & Trainers) --- */
 .feature-card {
-    background: #111; border: 1px solid #222; border-radius: 16px; padding: 40px;
+    background: var(--card-bg); border: 1px solid var(--card-border); 
+    border-radius: 16px; padding: 40px 30px;
     display: flex; flex-direction: column; height: 100%; transition: transform 0.3s;
 }
 .feature-card:hover { transform: translateY(-5px); border-color: var(--primary); }
 
-/* Planos EspecÃ­ficos */
-.plan-card { position: relative; overflow: hidden; }
+.icon-box {
+    width: 60px; height: 60px; background: rgba(190, 242, 2, 0.1); color: var(--primary);
+    border-radius: 12px; display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; margin-bottom: 25px;
+}
+.feature-card h3 { color: white; font-size: 1.5rem; margin-bottom: 15px; }
+.feature-card p { color: #999; line-height: 1.6; }
+
+/* Trainer Card */
+.trainer-card {
+    padding: 0; overflow: hidden; background: #151515;
+    border: 1px solid var(--card-border); border-radius: 16px;
+    transition: 0.3s;
+}
+.trainer-card:hover { border-color: var(--primary); transform: translateY(-5px); }
+.trainer-img {
+    height: 280px; background: #222; display: flex; align-items: center; justify-content: center;
+    font-size: 5rem; color: #333; position: relative;
+}
+.trainer-img img { width: 100%; height: 100%; object-fit: cover; }
+.trainer-info { padding: 25px; }
+.trainer-name { color: white; font-size: 1.3rem; margin-bottom: 5px; font-weight: 700; }
+.trainer-spec { color: var(--primary); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* Planos */
+.plan-card { position: relative; padding: 40px 30px; }
 .plan-featured { border-color: var(--primary); background: linear-gradient(180deg, #151515 0%, #050505 100%); transform: scale(1.05); z-index: 2; }
 .plan-header { text-align: center; border-bottom: 1px solid #222; padding-bottom: 20px; margin-bottom: 20px; }
 .plan-price { font-size: 3rem; font-weight: 800; color: white; margin: 10px 0; }
@@ -94,20 +150,32 @@
         position: fixed; top: 0; right: 0; width: 100%; height: 100vh;
         background: #000; z-index: 2000; padding: 100px 30px;
         transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow-y: auto;
     }
     .mobile-menu.active { transform: translateX(0); }
     .side-link { font-size: 1.4rem; font-weight: 700; border-bottom: 1px solid #222; padding: 15px 0; color: white; display: block; }
 
     /* Layout Ajustes */
-    .hero-page { padding: var(--hero-padding-mobile); min-height: auto; }
-    .hero-title { font-size: 2.2rem; }
+    .hero-page, .hero-home { padding: var(--hero-padding-mobile); min-height: auto; text-align: center; background-position: center top; }
+    .hero-overlay { background: linear-gradient(180deg, rgba(5,5,5,0.7) 0%, #050505 100%); }
+    
+    .hero-content { margin: 0 auto; }
+    .hero-title { font-size: 2.5rem; letter-spacing: -1px; }
+    .hero-subtitle { font-size: 1.1rem; }
+    .hero-buttons { justify-content: center; flex-direction: column; }
+    .hero-buttons .btn { width: 100%; }
     
     .grid-2, .grid-3 { grid-template-columns: 1fr; gap: 30px; }
     
-    .feature-card { padding: 30px 20px; }
+    .feature-card { padding: 30px 20px; text-align: center; }
+    .icon-box { margin-left: auto; margin-right: auto; }
+    
+    .trainer-card { max-width: 400px; margin: 0 auto; width: 100%; }
     
     /* Planos no Mobile */
     .plan-featured { transform: scale(1); border: 2px solid var(--primary); margin: 20px 0; }
     
     .comparison-table th, .comparison-table td { padding: 10px; font-size: 0.85rem; }
+    
+    .section-padding { padding: 60px 0; }
 }

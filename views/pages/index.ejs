@@ -1,46 +1,46 @@
-<%- include('../layouts/public/head') %>
+<%- include('../layouts/public/head', { title: 'Início' }) %>
 <%- include('../layouts/public/header') %>
 
 <main class="home-main">
     
-    <section class="hero">
+    <section class="hero-page hero-home">
         <div class="hero-overlay"></div>
         <div class="container hero-container">
             <div class="hero-content">
-                <div style="margin-bottom: 30px;">
-                    <span style="background: rgba(190, 242, 2, 0.15); color: var(--primary); padding: 10px 20px; border-radius: 50px; font-size: 0.9rem; font-weight: 700; border: 1px solid rgba(190, 242, 2, 0.3); letter-spacing: 0.5px;">
-                        <i class="fas fa-rocket" style="margin-right: 8px;"></i> A Nova Era do Treinamento
-                    </span>
+                <div class="hero-badge">
+                    <i class="fas fa-rocket"></i> A Nova Era do Treinamento
                 </div>
                 
-                <h1 class="hero-title text-gradient">
-                    Transforme Potencial <br>em Performance
+                <h1 class="hero-title">
+                    Transforme Potencial <br><span class="text-gradient">em Performance</span>
                 </h1>
                 
                 <p class="hero-subtitle">
                     A plataforma definitiva onde Personal Trainers escalam seus negócios e alunos superam limites com inteligência de dados e IA.
                 </p>
                 
-                <div class="hero-buttons" style="display: flex; gap: 20px; flex-wrap: wrap;">
+                <div class="hero-buttons">
                     <% if (!user) { %>
-                        <a href="/auth/register" class="btn btn-primary btn-lg" style="padding: 18px 40px; font-size: 1.1rem;">Começar Agora</a>
-                        <a href="#plans" class="btn btn-outline btn-lg" style="padding: 18px 40px; font-size: 1.1rem;">Ver Planos</a>
+                        <a href="/auth/register" class="btn btn-primary btn-lg" style="color: black;">Começar Agora</a>
+                        <a href="#plans" class="btn btn-outline btn-lg">Ver Planos</a>
                     <% } else { %>
-                        <a href="/<%= user.role %>/dashboard" class="btn btn-primary btn-lg">Acessar Painel</a>
+                        <a href="/<%= user.role %>/dashboard" class="btn btn-primary btn-lg" style="color: black;">
+                            <i class="fas fa-columns"></i> Acessar Painel
+                        </a>
                     <% } %>
                 </div>
             </div>
         </div>
     </section>
 
-    <section class="section-padding" style="background: #0a0a0a;">
+    <section class="section-padding bg-darker">
         <div class="container">
-            <div class="center mb-80">
-                <h2 class="section-title">Treino não é achismo <br><span class="text-gradient">É Ciência</span></h2>
+            <div class="center mb-80" style="max-width: 800px;">
+                <h2 class="hero-title" style="font-size: 2.8rem;">Treino não é achismo <br><span class="text-gradient">É Ciência</span></h2>
                 <p class="text-muted" style="font-size: 1.2rem;">Ferramentas profissionais para resultados reais.</p>
             </div>
             
-            <div class="features-grid">
+            <div class="grid-3">
                 <div class="feature-card">
                     <div class="icon-box"><i class="fas fa-brain"></i></div>
                     <h3>Inteligência Artificial</h3>
@@ -62,109 +62,107 @@
         </div>
     </section>
 
-    <section class="section-padding bg-black" id="plans">
+    <section class="section-padding" id="plans">
         <div class="container">
-            <div class="center mb-80">
-                <h2 class="section-title">Escolha seu Plano</h2>
+            <div class="center mb-80" style="max-width: 800px;">
+                <h2 class="hero-title" style="font-size: 2.8rem;">Escolha seu Plano</h2>
                 <p class="text-muted" style="font-size: 1.2rem;">Evolua conforme seu ritmo. Cancele quando quiser.</p>
             </div>
 
-            <div class="plans-grid">
+            <div class="grid-3" style="align-items: center;">
                 
                 <div class="feature-card plan-card">
                     <div class="plan-header">
-                        <h3 class="plan-name">Start</h3>
-                        <div class="plan-price">R$ 0<small>/mês</small></div>
-                        <p style="color: #888; margin-top: 15px;">Para quem quer começar a se movimentar com organização.</p>
+                        <h3 style="color: white; font-size: 1.5rem;">Start</h3>
+                        <div class="plan-price">R$ 0<span>/mês</span></div>
+                        <p style="color: #888; font-size: 0.9rem;">Para começar com organização.</p>
                     </div>
-                    <div class="plan-body">
-                        <ul style="list-style: none; padding: 0; margin-bottom: 30px;">
-                            <li style="margin-bottom: 15px; color: #ccc; display: flex; gap: 10px;"><i class="fas fa-check" style="color: var(--primary);"></i> Acesso ao App</li>
-                            <li style="margin-bottom: 15px; color: #ccc; display: flex; gap: 10px;"><i class="fas fa-check" style="color: var(--primary);"></i> Biblioteca de Exercícios</li>
-                            <li style="margin-bottom: 15px; color: #ccc; display: flex; gap: 10px;"><i class="fas fa-check" style="color: var(--primary);"></i> Tracking de Peso</li>
-                            <li style="margin-bottom: 15px; color: #666; display: flex; gap: 10px;"><i class="fas fa-check"></i> Coach IA (Básico)</li>
-                        </ul>
-                        <a href="/auth/register?plan=start" class="btn btn-outline w-100">Começar Grátis</a>
-                    </div>
+                    <ul class="plan-features" style="flex: 1; margin: 20px 0;">
+                        <li><i class="fas fa-check" style="color: var(--primary);"></i> Acesso ao App</li>
+                        <li><i class="fas fa-check" style="color: var(--primary);"></i> Biblioteca de Exercícios</li>
+                        <li><i class="fas fa-check" style="color: var(--primary);"></i> Tracking de Peso</li>
+                        <li class="muted"><i class="fas fa-times"></i> Coach IA</li>
+                        <li class="muted"><i class="fas fa-times"></i> Dieta Personalizada</li>
+                    </ul>
+                    <a href="/auth/register?plan=free" class="btn btn-outline w-100">Começar Grátis</a>
                 </div>
 
-                <div class="feature-card plan-card" style="border: 2px solid var(--primary); transform: scale(1.05); z-index: 2;">
-                    <div style="background: var(--primary); color: black; text-align: center; padding: 8px; font-weight: 800; font-size: 0.85rem;">MAIS POPULAR</div>
+                <div class="feature-card plan-card plan-featured">
+                    <div style="background: var(--primary); color: black; text-align: center; font-weight: 800; padding: 5px; font-size: 0.8rem; margin: -40px -30px 20px; border-radius: 0 0 8px 8px;">MAIS POPULAR</div>
                     <div class="plan-header">
-                        <h3 class="plan-name" style="color: var(--primary);">Momentum Pro</h3>
-                        <div class="plan-price">R$ 89,90<small>/mês</small></div>
-                        <p style="color: #888; margin-top: 15px;">A experiência completa com inteligência artificial.</p>
+                        <h3 style="color: var(--primary); font-size: 1.5rem;">Momentum Pro</h3>
+                        <div class="plan-price">R$ 89,90<span>/mês</span></div>
+                        <p style="color: #ccc; font-size: 0.9rem;">A experiência completa com IA.</p>
                     </div>
-                    <div class="plan-body">
-                        <ul style="list-style: none; padding: 0; margin-bottom: 30px;">
-                            <li style="margin-bottom: 15px; color: white; font-weight: 600; display: flex; gap: 10px;"><i class="fas fa-check-double" style="color: var(--primary);"></i> Tudo do Start</li>
-                            <li style="margin-bottom: 15px; color: #ccc; display: flex; gap: 10px;"><i class="fas fa-check" style="color: var(--primary);"></i> Coach IA Ilimitado</li>
-                            <li style="margin-bottom: 15px; color: #ccc; display: flex; gap: 10px;"><i class="fas fa-check" style="color: var(--primary);"></i> Geração de Treinos IA</li>
-                            <li style="margin-bottom: 15px; color: #ccc; display: flex; gap: 10px;"><i class="fas fa-check" style="color: var(--primary);"></i> Análise de Execução</li>
-                        </ul>
-                        <a href="/auth/register?plan=pro" class="btn btn-primary w-100 text-black">Assinar Pro</a>
-                    </div>
+                    <ul class="plan-features" style="flex: 1; margin: 20px 0;">
+                        <li><i class="fas fa-check-double" style="color: var(--primary);"></i> <strong>Tudo do Start</strong></li>
+                        <li><i class="fas fa-check" style="color: var(--primary);"></i> Coach IA Ilimitado</li>
+                        <li><i class="fas fa-check" style="color: var(--primary);"></i> Geração de Treinos IA</li>
+                        <li><i class="fas fa-check" style="color: var(--primary);"></i> Dieta Inteligente</li>
+                        <li><i class="fas fa-check" style="color: var(--primary);"></i> Análise de Vídeo</li>
+                    </ul>
+                    <a href="/auth/register?plan=pro" class="btn btn-primary w-100" style="color: black;">Assinar Pro</a>
                 </div>
 
-                <div class="feature-card plan-card" style="opacity: 0.8;">
+                <div class="feature-card plan-card">
                     <div class="plan-header">
-                        <h3 class="plan-name">VIP Personal</h3>
-                        <div class="plan-price">R$ 249,90<small>/mês</small></div>
-                        <p style="color: #888; margin-top: 15px;">Acompanhamento humano dedicado para resultados máximos.</p>
+                        <h3 style="color: white; font-size: 1.5rem;">VIP Personal</h3>
+                        <div class="plan-price">R$ 249,90<span>/mês</span></div>
+                        <p style="color: #888; font-size: 0.9rem;">Acompanhamento humano dedicado.</p>
                     </div>
-                    <div class="plan-body">
-                        <ul style="list-style: none; padding: 0; margin-bottom: 30px;">
-                            <li style="margin-bottom: 15px; color: white; font-weight: 600; display: flex; gap: 10px;"><i class="fas fa-check-double" style="color: var(--primary);"></i> Tudo do Pro</li>
-                            <li style="margin-bottom: 15px; color: #ccc; display: flex; gap: 10px;"><i class="fas fa-check" style="color: var(--primary);"></i> Personal Trainer Real</li>
-                            <li style="margin-bottom: 15px; color: #ccc; display: flex; gap: 10px;"><i class="fas fa-check" style="color: var(--primary);"></i> Chat Direto (WhatsApp)</li>
-                            <li style="margin-bottom: 15px; color: #ccc; display: flex; gap: 10px;"><i class="fas fa-check" style="color: var(--primary);"></i> Videoconferência Mensal</li>
-                        </ul>
-                        <button class="btn btn-outline w-100" disabled style="opacity: 0.5; cursor: not-allowed;">Vagas Esgotadas</button>
-                    </div>
+                    <ul class="plan-features" style="flex: 1; margin: 20px 0;">
+                        <li><i class="fas fa-check-double" style="color: var(--primary);"></i> <strong>Tudo do Pro</strong></li>
+                        <li><i class="fas fa-check" style="color: var(--primary);"></i> Personal Trainer Real</li>
+                        <li><i class="fas fa-check" style="color: var(--primary);"></i> WhatsApp Direto</li>
+                        <li><i class="fas fa-check" style="color: var(--primary);"></i> Ajustes Semanais</li>
+                        <li><i class="fas fa-check" style="color: var(--primary);"></i> Call Mensal</li>
+                    </ul>
+                    <button class="btn btn-outline w-100" disabled style="opacity: 0.5; cursor: not-allowed;">Vagas Esgotadas</button>
                 </div>
-
             </div>
         </div>
     </section>
 
-    <section class="section-padding" style="background: #0a0a0a;">
+    <section class="section-padding bg-darker">
         <div class="container">
             <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 60px; flex-wrap: wrap; gap: 20px;">
                 <div>
-                    <h2 class="section-title" style="margin-bottom: 10px;">Trainers em Destaque</h2>
-                    <p class="text-muted" style="font-size: 1.2rem;">Profissionais validados pela metodologia Momentum.</p>
+                    <h2 class="hero-title" style="font-size: 2.5rem; margin-bottom: 10px;">Trainers em Destaque</h2>
+                    <p class="text-muted" style="font-size: 1.1rem;">Profissionais validados pela metodologia Momentum.</p>
                 </div>
                 <a href="/auth/register" style="color: var(--primary); font-weight: 700; font-size: 1.1rem; display: flex; align-items: center; gap: 10px;">
                     Ser um Trainer <i class="fas fa-arrow-right"></i>
                 </a>
             </div>
 
-            <div class="features-grid">
-                <div class="feature-card" style="padding: 0; overflow: hidden; background: #151515;">
-                    <div style="height: 300px; background: #222; display: flex; align-items: center; justify-content: center; font-size: 5rem; color: #333;">
+            <div class="grid-3">
+                <div class="trainer-card">
+                    <div class="trainer-img">
                         <i class="fas fa-user-astronaut"></i>
                     </div>
-                    <div style="padding: 30px;">
-                        <h4 style="color: white; margin-bottom: 5px; font-size: 1.4rem;">Carlos Silva</h4>
-                        <p style="color: #888;">Especialista em Hipertrofia</p>
+                    <div class="trainer-info">
+                        <h4 class="trainer-name">Carlos Silva</h4>
+                        <span class="trainer-spec">Hipertrofia</span>
                     </div>
                 </div>
-                <div class="feature-card" style="padding: 0; overflow: hidden; background: #151515;">
-                    <div style="height: 300px; background: #222; display: flex; align-items: center; justify-content: center; font-size: 5rem; color: #333;">
+                
+                <div class="trainer-card">
+                    <div class="trainer-img">
                         <i class="fas fa-running"></i>
                     </div>
-                    <div style="padding: 30px;">
-                        <h4 style="color: white; margin-bottom: 5px; font-size: 1.4rem;">Ana Costa</h4>
-                        <p style="color: #888;">Mobilidade & Funcional</p>
+                    <div class="trainer-info">
+                        <h4 class="trainer-name">Ana Costa</h4>
+                        <span class="trainer-spec">Mobilidade & Funcional</span>
                     </div>
                 </div>
-                <div class="feature-card" style="padding: 0; overflow: hidden; background: #151515;">
-                    <div style="height: 300px; background: #222; display: flex; align-items: center; justify-content: center; font-size: 5rem; color: #333;">
+
+                <div class="trainer-card">
+                    <div class="trainer-img">
                         <i class="fas fa-dumbbell"></i>
                     </div>
-                    <div style="padding: 30px;">
-                        <h4 style="color: white; margin-bottom: 5px; font-size: 1.4rem;">Pedro Santos</h4>
-                        <p style="color: #888;">Powerlifting</p>
+                    <div class="trainer-info">
+                        <h4 class="trainer-name">Pedro Santos</h4>
+                        <span class="trainer-spec">Powerlifting</span>
                     </div>
                 </div>
             </div>
@@ -173,11 +171,11 @@
 
     <section style="padding: 150px 0; background: linear-gradient(180deg, #050505 0%, #151515 100%); text-align: center;">
         <div class="container">
-            <h2 style="font-size: 3.5rem; margin-bottom: 30px; color: white; font-weight: 800;">Pronto para evoluir?</h2>
-            <p style="color: #888; margin-bottom: 50px; font-size: 1.4rem; max-width: 700px; margin-left: auto; margin-right: auto;">
+            <h2 class="hero-title" style="margin-bottom: 30px;">Pronto para evoluir?</h2>
+            <p style="color: #888; margin-bottom: 50px; font-size: 1.3rem; max-width: 700px; margin-left: auto; margin-right: auto;">
                 Junte-se à comunidade que mais cresce no Brasil e leve seu treino para o próximo nível.
             </p>
-            <a href="/auth/register" class="btn btn-primary btn-lg" style="padding: 20px 50px; font-size: 1.2rem; color: black; font-weight: 800;">Criar Conta Gratuita</a>
+            <a href="/auth/register" class="btn btn-primary btn-lg" style="color: black; padding: 20px 50px;">Criar Conta Gratuita</a>
         </div>
     </section>
 </main>
