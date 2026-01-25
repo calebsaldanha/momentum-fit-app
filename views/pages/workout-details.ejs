@@ -2,84 +2,117 @@
 <html lang="pt-BR">
 <head>
     <%- include('../layouts/app/head') %>
-    <title>Executar Treino | Momentum Fit</title>
+    <title>Treino em Foco | Momentum</title>
 </head>
 <body>
     <div class="dashboard-wrapper">
         <%- include('../partials/sidebar') %>
+        
         <div class="main-content">
-            <%- include('../partials/app-header', { title: 'Modo Foco' }) %>
+            <%- include('../partials/app-header', { title: 'Modo Execução' }) %>
 
-            <div class="content-pad">
-                <div class="card" style="border-left: 4px solid var(--neon-primary);">
+            <div class="content-scroll-area">
+                
+                <div class="workout-header">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px;">
                         <div>
-                            <span class="badge badge-neutral mb-10">HIPERTROFIA</span>
-                            <h1 style="font-size: 2rem; margin-bottom: 10px;"><%= workout.name %></h1>
-                            <p style="font-size: 1rem; color: #ccc; max-width: 600px;"><%= workout.description %></p>
+                            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                                <span class="badge badge-success">EM ANDAMENTO</span>
+                                <span class="badge badge-neutral"><%= workout.category || 'Geral' %></span>
+                            </div>
+                            <h1 style="font-size: 2.2rem; line-height: 1.1; margin-bottom: 10px;"><%= workout.name %></h1>
+                            <p style="color: #888; max-width: 600px;"><%= workout.description || 'Foco na técnica e controle do movimento.' %></p>
                         </div>
-                        <div style="text-align: right;">
-                            <div style="font-size: 3rem; font-weight: 800; color: var(--text-white); font-variant-numeric: tabular-nums;">00:00</div>
-                            <button class="btn btn-outline btn-sm"><i class="fas fa-stopwatch"></i> Iniciar Timer</button>
+                        
+                        <div style="text-align: right; min-width: 150px;">
+                            <div style="font-size: 0.8rem; color: #666; text-transform: uppercase; font-weight: 700;">Tempo Decorrido</div>
+                            <div style="font-size: 3rem; font-weight: 800; color: white; font-variant-numeric: tabular-nums;" id="timer">00:00</div>
                         </div>
                     </div>
                 </div>
 
-                <div style="display: flex; flex-direction: column; gap: 20px;">
-                    <% workout.exercises.forEach((ex, index) => { %>
-                        <div class="card" style="padding: 0; overflow: hidden;">
-                            <div style="padding: 20px; background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center;">
-                                <div style="display: flex; gap: 15px; align-items: center;">
-                                    <div style="background: var(--bg-input); width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-weight: 800; color: var(--neon-primary);">
-                                        <%= index + 1 %>
-                                    </div>
-                                    <h3 style="font-size: 1.2rem; margin: 0;"><%= ex.name %></h3>
-                                </div>
-                                <button class="btn btn-outline btn-sm"><i class="fas fa-video"></i> Vídeo</button>
-                            </div>
-
-                            <div style="padding: 20px;">
-                                <table style="width: 100%;">
-                                    <thead>
-                                        <tr>
-                                            <th style="width: 10%;">Série</th>
-                                            <th style="width: 25%;">Meta</th>
-                                            <th style="width: 20%;">Carga (kg)</th>
-                                            <th style="width: 20%;">Reps</th>
-                                            <th style="width: 10%;">RPE</th>
-                                            <th style="width: 15%; text-align: right;">Feito</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <% for(let i = 1; i <= ex.sets; i++) { %>
-                                        <tr>
-                                            <td style="color: var(--neon-primary); font-weight: bold;"><%= i %></td>
-                                            <td style="font-size: 0.9rem;"><%= ex.reps %> reps</td>
-                                            <td><input type="number" class="form-control" placeholder="0" style="padding: 8px;"></td>
-                                            <td><input type="number" class="form-control" placeholder="0" style="padding: 8px;"></td>
-                                            <td><input type="number" class="form-control" placeholder="-" style="padding: 8px;"></td>
-                                            <td style="text-align: right;">
-                                                <input type="checkbox" style="width: 20px; height: 20px; accent-color: var(--neon-primary);">
-                                            </td>
-                                        </tr>
+                <form action="/client/workouts/finish" method="POST" id="workoutForm">
+                    <input type="hidden" name="workoutId" value="<%= workout.id %>">
+                    
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        
+                        <% if (workout.exercises && workout.exercises.length > 0) { %>
+                            <% workout.exercises.forEach((ex, index) => { %>
+                                <div class="exercise-card">
+                                    <div style="padding: 20px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center;">
+                                        <div style="display: flex; gap: 15px; align-items: center;">
+                                            <div style="background: var(--primary); color: black; width: 30px; height: 30px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 800;">
+                                                <%= index + 1 %>
+                                            </div>
+                                            <div>
+                                                <h3 style="font-size: 1.2rem; color: white; margin: 0;"><%= ex.name %></h3>
+                                                <div style="font-size: 0.8rem; color: #666;">Descanso: <%= ex.rest_seconds || 60 %>s</div>
+                                            </div>
+                                        </div>
+                                        <% if(ex.video_url && ex.video_url !== '#') { %>
+                                            <a href="<%= ex.video_url %>" target="_blank" class="btn btn-outline" style="padding: 5px 12px; font-size: 0.8rem;">
+                                                <i class="fas fa-play"></i> Vídeo
+                                            </a>
                                         <% } %>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    <% }) %>
-                </div>
+                                    </div>
 
-                <div class="card" style="margin-top: 30px; text-align: center; border: 1px dashed var(--border-active);">
-                    <h3 style="margin-bottom: 15px;">Treino Finalizado?</h3>
-                    <div style="display: flex; gap: 15px; justify-content: center;">
-                        <input type="text" placeholder="Observações do treino (opcional)..." class="form-control" style="max-width: 400px;">
-                        <button class="btn btn-primary" style="padding: 0 40px;">CONCLUIR SESSÃO</button>
+                                    <div class="sets-container">
+                                        <div class="set-row" style="background: rgba(255,255,255,0.02); font-size: 0.75rem; color: #666; text-transform: uppercase; font-weight: 700;">
+                                            <div style="text-align: center;">SET</div>
+                                            <div style="text-align: center;">KG</div>
+                                            <div style="text-align: center;">REPS</div>
+                                            <div style="text-align: center;">RPE</div>
+                                            <div style="text-align: center;"><i class="fas fa-check"></i></div>
+                                        </div>
+
+                                        <% 
+                                           // Se não tiver sets definidos no DB, assume 3
+                                           const setsCount = ex.sets || 3; 
+                                        %>
+                                        <% for(let i=1; i <= setsCount; i++) { %>
+                                            <div class="set-row">
+                                                <div style="text-align: center; color: var(--primary); font-weight: 700;"><%= i %></div>
+                                                <div><input type="number" class="set-input" name="ex_<%= ex.id %>_set_<%= i %>_kg" placeholder="-" style="width: 100%;"></div>
+                                                <div><input type="number" class="set-input" name="ex_<%= ex.id %>_set_<%= i %>_reps" placeholder="<%= ex.reps || '10' %>" style="width: 100%;"></div>
+                                                <div><input type="number" class="set-input" name="ex_<%= ex.id %>_set_<%= i %>_rpe" placeholder="-" style="width: 100%;"></div>
+                                                <div style="text-align: center;">
+                                                    <input type="checkbox" class="set-check">
+                                                </div>
+                                            </div>
+                                        <% } %>
+                                    </div>
+                                </div>
+                            <% }) %>
+                        <% } else { %>
+                            <div class="card" style="text-align: center; padding: 40px;">
+                                <p>Este treino ainda não possui exercícios cadastrados.</p>
+                            </div>
+                        <% } %>
+
                     </div>
-                </div>
+
+                    <div style="position: fixed; bottom: 20px; left: 0; width: 100%; padding: 0 20px; z-index: 90; display: flex; justify-content: center; pointer-events: none;">
+                        <button type="submit" class="btn btn-primary" style="pointer-events: auto; padding: 15px 40px; box-shadow: 0 10px 30px rgba(190,242,2,0.3); border-radius: 50px; font-size: 1.1rem; min-width: 250px;">
+                            <i class="fas fa-check-circle" style="margin-right: 10px;"></i> CONCLUIR TREINO
+                        </button>
+                    </div>
+                    <div style="height: 80px;"></div> </form>
 
             </div>
         </div>
     </div>
+
+    <script src="/js/layout.js"></script>
+    <script>
+        // Simple Timer Logic
+        let seconds = 0;
+        const timerEl = document.getElementById('timer');
+        setInterval(() => {
+            seconds++;
+            const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
+            const secs = (seconds % 60).toString().padStart(2, '0');
+            timerEl.textContent = `${mins}:${secs}`;
+        }, 1000);
+    </script>
 </body>
 </html>
