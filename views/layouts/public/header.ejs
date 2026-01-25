@@ -1,7 +1,7 @@
 <header class="main-header">
     <div class="header-container">
         <a href="/" class="brand-logo">
-            <img src="/images/momentum-fit-icon.png" alt="Momentum Logo" class="logo-rounded" style="height: 35px; width: 35px;">
+            <img src="/images/momentum-fit-icon.png" alt="Momentum Logo" class="logo-rounded">
             <span>Momentum</span>
         </a>
         
@@ -19,7 +19,7 @@
     </div>
 
     <div class="mobile-menu" id="publicMenu">
-        <button onclick="togglePublicMenu()" style="position: absolute; top: 20px; right: 20px; background: none; border: none; color: white; font-size: 2rem; cursor: pointer;">
+        <button onclick="togglePublicMenu()" style="position: absolute; top: 25px; right: 20px; background: none; border: none; color: white; font-size: 2rem; cursor: pointer; z-index: 2002;">
             <i class="fas fa-times"></i>
         </button>
 
@@ -27,18 +27,20 @@
         <a href="/plans" class="side-link" onclick="togglePublicMenu()">Planos</a>
         <a href="/about" class="side-link" onclick="togglePublicMenu()">Sobre</a>
         <a href="/auth/login" class="side-link" onclick="togglePublicMenu()">Entrar</a>
-        <a href="/auth/register" class="btn btn-primary btn-lg w-100" style="color: black; margin-top: 20px;">Começar Agora</a>
+        <a href="/auth/register" class="btn btn-primary btn-lg w-100" style="color: black; margin-top: 20px;" onclick="togglePublicMenu()">Começar Agora</a>
     </div>
 </header>
 
 <script>
     function togglePublicMenu() {
         const menu = document.getElementById('publicMenu');
+        const body = document.body;
         menu.classList.toggle('active');
+        
         if (menu.classList.contains('active')) {
-            document.body.style.overflow = 'hidden';
+            body.style.overflow = 'hidden'; // Impede scroll do fundo
         } else {
-            document.body.style.overflow = '';
+            body.style.overflow = '';
         }
     }
 </script>
