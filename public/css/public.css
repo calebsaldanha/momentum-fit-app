@@ -1,61 +1,101 @@
-/* Ìºç PUBLIC - Landing Pages e Marketing 
-   Importa a base e define estilos visuais ricos.
-*/
+/* Ìºç PUBLIC - Landing Pages e Marketing (Refined) */
 @import url('./modules/base.css');
 
-/* Header P√∫blico */
+/* --- Header --- */
 .main-header {
     position: absolute; top: 0; left: 0; width: 100%; z-index: 1000;
-    padding: 20px 0; background: transparent;
+    padding: 30px 0; background: transparent;
 }
 .header-container { display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; padding: 0 20px; }
-.brand-logo { font-size: 1.5rem; font-weight: 800; color: white; display: flex; align-items: center; gap: 10px; }
-.logo-rounded { border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); width: 35px; height: 35px; }
+.brand-logo { font-size: 1.8rem; font-weight: 800; color: white; display: flex; align-items: center; gap: 12px; }
+.logo-rounded { border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); width: 40px; height: 40px; }
 
-.desktop-nav { display: flex; gap: 30px; align-items: center; }
-.desktop-nav a { font-weight: 500; color: #ccc; }
+.desktop-nav { display: flex; gap: 40px; align-items: center; }
+.desktop-nav a { font-weight: 500; color: #ccc; font-size: 1.05rem; }
 .desktop-nav a:hover { color: var(--primary); }
 .hamburger-btn, .mobile-menu { display: none; }
 
-/* Hero Section */
+/* --- Hero Section (Impacto) --- */
 .hero {
-    min-height: 85vh; display: flex; align-items: center;
+    min-height: 95vh; display: flex; align-items: center;
     background: url('../images/hero-bg.png') center/cover no-repeat;
-    position: relative; padding-top: 80px;
+    position: relative; padding-top: 100px;
 }
-.hero-overlay { position: absolute; inset: 0; background: linear-gradient(90deg, #050505 0%, rgba(5,5,5,0.8) 50%, rgba(5,5,5,0.2) 100%); z-index: 1; }
+.hero-overlay { position: absolute; inset: 0; background: linear-gradient(90deg, #050505 0%, rgba(5,5,5,0.9) 40%, rgba(5,5,5,0.4) 100%); z-index: 1; }
 .hero-container { position: relative; z-index: 2; }
-.hero-title { font-size: 3.5rem; font-weight: 800; line-height: 1.1; margin-bottom: 20px; }
-.hero-subtitle { font-size: 1.1rem; color: #ccc; margin-bottom: 30px; line-height: 1.6; }
 
-/* Grids & Cards Marketing */
-.features-grid, .plans-grid { display: grid; gap: 30px; grid-template-columns: 1fr; }
+/* T√≠tulos Gigantes */
+.hero-title { 
+    font-size: 4.5rem; /* Aumentado */
+    font-weight: 800; 
+    line-height: 1.1; 
+    margin-bottom: 30px; 
+    letter-spacing: -1px;
+}
+.hero-subtitle { 
+    font-size: 1.3rem; 
+    color: #bbb; 
+    margin-bottom: 50px; 
+    line-height: 1.6; 
+    max-width: 650px; 
+}
+
+/* --- Se√ß√µes Gerais (Espa√ßamento) --- */
+.section-padding { 
+    padding: 120px 0; /* Dobrado para evitar sensa√ß√£o de "grudado" */
+}
+
+.section-title { 
+    font-size: 3.2rem; /* Aumentado */
+    font-weight: 800; 
+    margin-bottom: 20px; 
+    letter-spacing: -1px;
+    color: white;
+}
+
+.center { text-align: center; margin-left: auto; margin-right: auto; max-width: 900px; }
+.mb-80 { margin-bottom: 80px; } /* Mais margem entre titulo e cards */
+
+/* --- Cards --- */
+.features-grid, .plans-grid { display: grid; gap: 40px; grid-template-columns: 1fr; }
 @media (min-width: 992px) { .features-grid, .plans-grid { grid-template-columns: repeat(3, 1fr); } }
 
 .feature-card {
-    background: #111; border: 1px solid #222; border-radius: 16px; padding: 30px;
+    background: #111; border: 1px solid #222; border-radius: 20px; padding: 40px; /* Mais padding interno */
     transition: 0.3s; display: flex; flex-direction: column;
 }
-.feature-card:hover { border-color: var(--primary); transform: translateY(-5px); }
+.feature-card:hover { border-color: var(--primary); transform: translateY(-10px); }
+
+.feature-card h3 { font-size: 1.8rem; margin-bottom: 15px; color: white; }
+.feature-card p { font-size: 1.1rem; color: #999; line-height: 1.6; }
+
 .icon-box {
-    width: 50px; height: 50px; background: rgba(190, 242, 2, 0.1); color: var(--primary);
-    border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;
+    width: 70px; height: 70px; /* √çcones maiores */
+    background: rgba(190, 242, 2, 0.1); color: var(--primary); font-size: 1.8rem;
+    border-radius: 14px; display: flex; align-items: center; justify-content: center; margin-bottom: 30px;
 }
 
-/* Footer */
-.main-footer { background: #000; border-top: 1px solid #222; padding: 60px 0 20px; margin-top: auto; }
-.footer-grid { display: grid; gap: 40px; grid-template-columns: 1fr; text-align: center; }
-@media (min-width: 992px) { .footer-grid { grid-template-columns: 1.5fr 1fr 1fr 1.5fr; text-align: left; } }
+/* --- Planos --- */
+.plan-card { padding: 0; overflow: hidden; background: #0f0f0f; }
+.plan-header { padding: 40px 30px 30px; border-bottom: 1px solid #222; text-align: center; }
+.plan-body { padding: 40px 30px; }
+.plan-name { font-size: 1.6rem; color: white; margin-bottom: 15px; }
+.plan-price { font-size: 3.5rem; font-weight: 800; color: white; line-height: 1; }
+.plan-price small { font-size: 1.2rem; color: #666; font-weight: 400; }
 
-/* Mobile Menu Logic */
+/* --- Mobile --- */
 @media (max-width: 991px) {
-    .main-header { position: fixed; background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); padding: 15px 0; border-bottom: 1px solid #222; }
+    .main-header { padding: 15px 0; background: rgba(0,0,0,0.95); }
     .desktop-nav { display: none; }
-    .hamburger-btn { display: block; background: none; border: none; color: white; font-size: 1.5rem; }
+    .hamburger-btn { display: block; font-size: 1.8rem; color: white; background: none; border: none; }
+    .hero-title { font-size: 3rem; }
+    .section-title { font-size: 2.2rem; }
+    .section-padding { padding: 80px 0; }
+    
     .mobile-menu {
         display: flex; flex-direction: column; position: fixed; top: 0; right: 0; width: 100%; height: 100vh;
         background: #000; z-index: 2000; padding: 40px; transform: translateX(100%); transition: 0.3s;
     }
     .mobile-menu.active { transform: translateX(0); }
-    .side-link { font-size: 1.5rem; font-weight: 700; border-bottom: 1px solid #222; padding-bottom: 20px; margin-bottom: 20px; display: block; }
+    .side-link { font-size: 1.5rem; font-weight: 700; border-bottom: 1px solid #222; padding-bottom: 20px; margin-bottom: 20px; display: block; color: white; }
 }
