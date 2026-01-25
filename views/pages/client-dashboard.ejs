@@ -1,62 +1,61 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title><%= title %> | Momentum Fit</title>
-    <link rel="icon" href="/images/momentum-fit-icon.png">
-    <link rel="stylesheet" href="/css/styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-</head>
-<body>
+<%- include('../layouts/app/head') %>
 
 <div class="dashboard-layout">
+    <%- include('../partials/sidebar') %>
     
-    <%- include('../partials/sidebar.ejs') %>
-    
-    <div id="dashboardOverlay" class="dashboard-overlay"></div>
-
     <main class="app-main">
-        <%- include('../partials/app-header.ejs') %>
-
+        <%- include('../partials/app-header') %>
+        
         <div class="dashboard-content">
-            <div style="margin-bottom: 30px;">
-                <h1 style="color: white; font-size: 1.8rem; margin-bottom: 5px;">Olá, <span style="color: var(--primary);"><%= user.name.split(' ')[0] %></span>!</h1>
-                <p style="color: #888; font-size: 0.95rem;">Resumo da sua jornada hoje.</p>
-            </div>
+            <div class="container-fluid">
+                <div style="margin-bottom: 30px;">
+                    <h2 style="color: white; margin-bottom: 5px;">Olá, <%= user.name.split(' ')[0] %>! ���</h2>
+                    <p style="color: #888;">Vamos fazer o treino de hoje render?</p>
+                </div>
 
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon"><i class="fas fa-dumbbell"></i></div>
-                    <div>
-                        <h3 style="margin:0; color:white; font-size: 1.5rem;"><%= stats.workoutsDone || 0 %></h3>
-                        <p style="margin:0; color:#888; font-size:0.85rem;">Treinos</p>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="icon-box"><i class="fas fa-dumbbell"></i></div>
+                        <div>
+                            <h3 style="color: white; margin: 0;"><%= stats.total_workouts || 0 %></h3>
+                            <span style="color: #888; font-size: 0.9rem;">Treinos Ativos</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="icon-box" style="background: rgba(0, 255, 255, 0.1); color: cyan;"><i class="fas fa-calendar-check"></i></div>
+                        <div>
+                            <h3 style="color: white; margin: 0;">0</h3>
+                            <span style="color: #888; font-size: 0.9rem;">Treinos Completos</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="icon-box" style="background: rgba(255, 255, 0, 0.1); color: yellow;"><i class="fas fa-star"></i></div>
+                        <div>
+                            <h3 style="color: white; margin: 0; font-size: 1.2rem;"><%= stats.plan_name || 'Free' %></h3>
+                            <span style="color: #888; font-size: 0.9rem;">Plano Atual</span>
+                        </div>
                     </div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-icon"><i class="fas fa-weight"></i></div>
-                    <div>
-                        <h3 style="margin:0; color:white; font-size: 1.5rem;"><%= stats.currentWeight || '--' %></h3>
-                        <p style="margin:0; color:#888; font-size:0.85rem;">Peso (kg)</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="grid-2-col">
-                <div class="feature-card">
-                    <h3 style="font-size: 1.2rem; display: flex; align-items: center; gap: 10px;">
-                        <i class="fas fa-play-circle" style="color: var(--primary);"></i> Treino Rápido
-                    </h3>
-                    <p style="margin-bottom: 20px;">Sem tempo? Gere um treino de 20min com IA.</p>
-                    <a href="/client/ai-coach" class="btn btn-outline btn-sm text-center">Gerar Agora</a>
-                </div>
-            </div>
 
+                <div class="app-card" style="margin-top: 30px; background: linear-gradient(135deg, #1a1a1a 0%, #111 100%); border: 1px solid #333; padding: 30px; border-radius: 16px; position: relative; overflow: hidden;">
+                    <div style="position: relative; z-index: 2;">
+                        <span style="background: var(--primary); color: black; padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 800; text-transform: uppercase;">Próximo</span>
+                        <h3 style="color: white; margin: 15px 0 10px; font-size: 1.8rem;">Treino A - Superiores</h3>
+                        <p style="color: #ccc; margin-bottom: 25px; max-width: 500px;">Foco em peitoral e tríceps com progressão de carga linear.</p>
+                        
+                        <div style="display: flex; gap: 15px;">
+                            <a href="/client/workouts/start" class="btn btn-primary" style="padding: 12px 30px; color: black; font-weight: 700;">
+                                <i class="fas fa-play"></i> Iniciar Agora
+                            </a>
+                            <a href="/client/workouts" class="btn btn-outline">Ver Detalhes</a>
+                        </div>
+                    </div>
+                    <i class="fas fa-running" style="position: absolute; right: -20px; bottom: -40px; font-size: 12rem; color: rgba(255,255,255,0.03); transform: rotate(-15deg);"></i>
+                </div>
+
+            </div>
         </div>
     </main>
 </div>
-
-<script src="/js/main.js"></script>
-</body>
-</html>

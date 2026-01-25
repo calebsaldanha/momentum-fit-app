@@ -1,52 +1,69 @@
 require('dotenv').config();
-const { pool } = require('../database/db');
+const { Pool } = require('pg');
 
-async function fixIntegrity() {
-    console.log("í»¡ï¸ Iniciando blindagem do banco de dados...");
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false }
+});
+
+async function fixDatabase() {
     const client = await pool.connect();
     try {
+        console.log("í» ï¸ Verificando integridade do schema...");
         await client.query('BEGIN');
 
-        // 1. Remover Constraints Antigas (Incorretas)
-        console.log("   - Removendo constraints antigas...");
-        await client.query('ALTER TABLE workouts DROP CONSTRAINT IF EXISTS workouts_client_id_fkey');
-        await client.query('ALTER TABLE workouts DROP CONSTRAINT IF EXISTS workouts_trainer_id_fkey');
-        await client.query('ALTER TABLE workouts DROP CONSTRAINT IF EXISTS workouts_user_id_fkey');
-
-        // 2. Adicionar Constraints Corretas
-        console.log("   - Aplicando novas constraints corretas...");
-        
-        // client_id DEVE apontar para a tabela clients (Perfil do Aluno)
+        // 1. Criar tabela ASSIGNMENTS (O Erro CrÃ­tico)
         await client.query(`
-            ALTER TABLE workouts 
-            ADD CONSTRAINT workouts_client_id_fkey 
-            FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE
+            CREATE TABLE IF NOT EXISTS assignments (
+                id SERIAL PRIMARY KEY,
+                trainer_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                client_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                status VARCHAR(20) DEFAULT 'active',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(trainer_id, client_id)
+            );
         `);
+        console.log("âœ… Tabela 'assignments' verificada/criada.");
 
-        // user_id DEVE apontar para users (Conta de Login do Aluno)
+        // 2. Criar tabela WORKOUTS (NecessÃ¡ria para dashboard)
         await client.query(`
-            ALTER TABLE workouts 
-            ADD CONSTRAINT workouts_user_id_fkey 
-            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            CREATE TABLE IF NOT EXISTS workouts (
+                id SERIAL PRIMARY KEY,
+                creator_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+                client_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                name VARCHAR(100) NOT NULL,
+                description TEXT,
+                level VARCHAR(20),
+                frequency INTEGER DEFAULT 0,
+                is_template BOOLEAN DEFAULT false,
+                is_active BOOLEAN DEFAULT true,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
         `);
+        console.log("âœ… Tabela 'workouts' verificada/criada.");
 
-        // trainer_id DEVE apontar para users (Conta de Login do Criador - Admin ou Trainer)
-        // Usamos 'users' aqui para permitir que Admins (que nÃ£o tÃªm perfil em 'trainers') criem treinos.
+        // 3. Atualizar USERS (Colunas necessÃ¡rias para listagem)
         await client.query(`
-            ALTER TABLE workouts 
-            ADD CONSTRAINT workouts_trainer_id_fkey 
-            FOREIGN KEY (trainer_id) REFERENCES users(id) ON DELETE SET NULL
+            ALTER TABLE users 
+            ADD COLUMN IF NOT EXISTS photo_url TEXT,
+            ADD COLUMN IF NOT EXISTS phone VARCHAR(20),
+            ADD COLUMN IF NOT EXISTS objective VARCHAR(100),
+            ADD COLUMN IF NOT EXISTS last_login TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
         `);
+        console.log("âœ… Colunas de 'users' verificadas.");
 
         await client.query('COMMIT');
-        console.log("âœ… Banco de dados corrigido e blindado com sucesso!");
-    } catch (err) {
+        console.log("íº€ Banco de dados reparado com sucesso!");
+
+    } catch (e) {
         await client.query('ROLLBACK');
-        console.error("âŒ Erro fatal ao corrigir banco:", err);
+        console.error("âŒ Falha no reparo:", e);
+        process.exit(1);
     } finally {
         client.release();
-        setTimeout(() => process.exit(0), 1000);
+        process.exit(0);
     }
 }
 
-fixIntegrity();
+fixDatabase();
