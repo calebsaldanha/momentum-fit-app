@@ -2,58 +2,106 @@
 <html lang="pt-BR">
 <head>
     <%- include('../layouts/app/head') %>
-    <title>Trainer | Momentum Fit</title>
+    <title>Painel Trainer | Momentum Fit</title>
 </head>
 <body>
     <div class="dashboard-wrapper">
         <%- include('../partials/sidebar') %>
+
         <div class="main-content">
-            <%- include('../partials/app-header') %>
-            
+            <%- include('../partials/app-header', { title: 'Gestão de Atletas' }) %>
+
             <div class="content-pad">
-                <div class="welcome-banner" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
-                    <h1>Painel do Treinador</h1>
-                    <p>Gerencie seus alunos e prescreva treinos.</p>
+                <div class="grid-3 mb-30">
+                    <div class="card">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <div>
+                                <p style="font-size: 0.9rem; font-weight: 600; text-transform: uppercase;">Alunos Ativos</p>
+                                <h2 style="font-size: 3rem; margin: 10px 0;"><%= stats.active_clients || 0 %></h2>
+                            </div>
+                            <div style="background: rgba(190, 242, 2, 0.1); padding: 10px; border-radius: 8px; color: var(--neon-primary);">
+                                <i class="fas fa-users" style="font-size: 1.5rem;"></i>
+                            </div>
+                        </div>
+                        <a href="/trainer/clients" style="font-size: 0.85rem; color: var(--neon-primary);">Ver lista completa &rarr;</a>
+                    </div>
+
+                    <div class="card">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <div>
+                                <p style="font-size: 0.9rem; font-weight: 600; text-transform: uppercase;">Treinos Prescritos</p>
+                                <h2 style="font-size: 3rem; margin: 10px 0;"><%= stats.total_workouts || 0 %></h2>
+                            </div>
+                            <div style="background: rgba(255, 255, 255, 0.05); padding: 10px; border-radius: 8px; color: white;">
+                                <i class="fas fa-dumbbell" style="font-size: 1.5rem;"></i>
+                            </div>
+                        </div>
+                        <span style="font-size: 0.85rem; color: var(--text-muted);">Neste mês</span>
+                    </div>
+
+                    <div class="card">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <div>
+                                <p style="font-size: 0.9rem; font-weight: 600; text-transform: uppercase;">Receita Estimada</p>
+                                <h2 style="font-size: 3rem; margin: 10px 0;">R$ <%= stats.revenue || '0,00' %></h2>
+                            </div>
+                            <div style="background: rgba(190, 242, 2, 0.1); padding: 10px; border-radius: 8px; color: var(--neon-primary);">
+                                <i class="fas fa-wallet" style="font-size: 1.5rem;"></i>
+                            </div>
+                        </div>
+                        <a href="/trainer/financial" style="font-size: 0.85rem; color: var(--neon-primary);">Ver extrato &rarr;</a>
+                    </div>
                 </div>
 
-                <div class="grid-3">
+                <div class="grid-2">
                     <div class="card">
-                        <div style="font-size: 2rem; font-weight: bold;"><%= stats.active_clients %></div>
-                        <div style="color: var(--text-secondary);">Alunos Ativos</div>
-                    </div>
-                    <div class="card">
-                        <div style="font-size: 2rem; font-weight: bold;"><%= stats.total_workouts %></div>
-                        <div style="color: var(--text-secondary);">Treinos Criados</div>
-                    </div>
-                </div>
-
-                <div class="card" style="margin-top: 2rem;">
-                    <div class="card-header">
-                        <h3 class="card-title">Alunos Recentes</h3>
-                        <a href="/trainer/clients" class="btn btn-outline" style="font-size: 0.8rem; padding: 0.4rem 1rem;">Ver Todos</a>
-                    </div>
-                    
-                    <div class="table-responsive">
-                        <table>
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-user-clock"></i> Atividade Recente</h3>
+                        </div>
+                        <table style="width: 100%;">
                             <thead>
                                 <tr>
-                                    <th>Nome</th>
-                                    <th>Email</th>
-                                    <th>Último Acesso</th>
-                                    <th>Ação</th>
+                                    <th style="color: #666;">Aluno</th>
+                                    <th style="color: #666;">Ação</th>
+                                    <th style="color: #666; text-align: right;">Horário</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <% recentClients.forEach(client => { %>
-                                <tr>
-                                    <td><%= client.name %></td>
-                                    <td><%= client.email %></td>
-                                    <td><%= client.last_login ? new Date(client.last_login).toLocaleDateString() : '-' %></td>
-                                    <td><a href="/trainer/clients/<%= client.id %>" style="color: var(--neon-blue);">Ver Perfil</a></td>
-                                </tr>
-                                <% }) %>
+                                <% if (recentActivity && recentActivity.length > 0) { %>
+                                    <% recentActivity.forEach(activity => { %>
+                                    <tr>
+                                        <td>
+                                            <div style="display: flex; align-items: center; gap: 10px;">
+                                                <div class="user-avatar" style="width: 30px; height: 30px; font-size: 0.8rem;"><%= activity.user_name.charAt(0) %></div>
+                                                <span style="font-weight: 500;"><%= activity.user_name %></span>
+                                            </div>
+                                        </td>
+                                        <td><span class="badge badge-neutral"><%= activity.action %></span></td>
+                                        <td style="text-align: right; color: #666; font-size: 0.85rem;"><%= activity.time %></td>
+                                    </tr>
+                                    <% }) %>
+                                <% } else { %>
+                                    <tr><td colspan="3" style="text-align: center; padding: 20px;">Nenhuma atividade recente.</td></tr>
+                                <% } %>
                             </tbody>
                         </table>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-bolt"></i> Ações Rápidas</h3>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 15px;">
+                            <a href="/trainer/workouts/create" class="btn btn-outline btn-block" style="justify-content: flex-start;">
+                                <i class="fas fa-plus" style="margin-right: 15px;"></i> Criar Novo Treino
+                            </a>
+                            <a href="/trainer/clients/invite" class="btn btn-outline btn-block" style="justify-content: flex-start;">
+                                <i class="fas fa-user-plus" style="margin-right: 15px;"></i> Convidar Aluno
+                            </a>
+                            <a href="/trainer/content/create" class="btn btn-outline btn-block" style="justify-content: flex-start;">
+                                <i class="fas fa-pen" style="margin-right: 15px;"></i> Escrever Artigo
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>

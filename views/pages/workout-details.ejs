@@ -1,168 +1,85 @@
-<%- include('../partials/header.ejs') %>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <%- include('../layouts/app/head') %>
+    <title>Executar Treino | Momentum Fit</title>
+</head>
+<body>
+    <div class="dashboard-wrapper">
+        <%- include('../partials/sidebar') %>
+        <div class="main-content">
+            <%- include('../partials/app-header', { title: 'Modo Foco' }) %>
 
-<div class="dashboard-container">
-    <% 
-       let sidebarPath = '/client/workouts';
-       if(user.role === 'trainer') sidebarPath = '/trainer/clients';
-       if(user.role.includes('admin')) sidebarPath = '/admin/users';
-    %>
-    <%- include('../partials/sidebar.ejs', { path: sidebarPath }) %>
-
-    <main class="dashboard-main">
-        <div class="mobile-dash-header">
-            <button id="sidebarOpenBtn" class="btn btn-outline btn-sm"><i class="fas fa-bars"></i></button>
-            <span class="text-muted">Treino</span>
-        </div>
-
-        <div class="page-header" style="display: flex; gap: 15px; align-items: center;">
-            <a href="javascript:history.back()" class="btn btn-outline btn-sm"><i class="fas fa-arrow-left"></i> Voltar</a>
-            <h1 style="margin: 0;"><%= workout.title %></h1>
-        </div>
-
-        <% if(messages.success) { %><div class="alert alert-success"><%= messages.success %></div><% } %>
-
-        <% if (user.role !== 'client') { %>
-            
-            <div class="card-box" style="margin-bottom: 20px;">
-                <h4 style="color: white; margin-bottom: 15px;">Editar Detalhes</h4>
-                <form action="/workouts/<%= workout.id %>/update" method="POST" style="display: grid; gap: 15px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
-                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                    <div>
-                        <label style="color: #888; font-size: 0.8rem;">Título</label>
-                        <input type="text" name="title" value="<%= workout.title %>" class="form-control" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: white;">
+            <div class="content-pad">
+                <div class="card" style="border-left: 4px solid var(--neon-primary);">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px;">
+                        <div>
+                            <span class="badge badge-neutral mb-10">HIPERTROFIA</span>
+                            <h1 style="font-size: 2rem; margin-bottom: 10px;"><%= workout.name %></h1>
+                            <p style="font-size: 1rem; color: #ccc; max-width: 600px;"><%= workout.description %></p>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 3rem; font-weight: 800; color: var(--text-white); font-variant-numeric: tabular-nums;">00:00</div>
+                            <button class="btn btn-outline btn-sm"><i class="fas fa-stopwatch"></i> Iniciar Timer</button>
+                        </div>
                     </div>
-                    <div>
-                        <label style="color: #888; font-size: 0.8rem;">Dia</label>
-                        <select name="day_of_week" class="form-control" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: white;">
-                            <% ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'].forEach(day => { %>
-                                <option value="<%= day %>" <%= workout.day_of_week === day ? 'selected' : '' %>><%= day %></option>
-                            <% }) %>
-                        </select>
-                    </div>
-                    <div style="grid-column: 1 / -1;">
-                        <label style="color: #888; font-size: 0.8rem;">Descrição</label>
-                        <input type="text" name="description" value="<%= workout.description %>" class="form-control" style="width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: white;">
-                    </div>
-                    <button class="btn btn-primary btn-sm" style="width: fit-content;">Salvar</button>
-                </form>
-            </div>
+                </div>
 
-            <div style="margin-bottom: 30px;">
-                <button class="btn btn-primary" onclick="document.getElementById('addExModal').style.display='flex'" style="width: 100%; justify-content: center; padding: 15px;">
-                    <i class="fas fa-plus-circle"></i> &nbsp; Adicionar Exercício da Biblioteca
-                </button>
-            </div>
-
-        <% } else { %>
-            <div style="margin-bottom: 20px;">
-                <p class="text-neon"><%= workout.day_of_week %></p>
-                <p class="text-muted"><%= workout.description || 'Siga a execução correta.' %></p>
-            </div>
-        <% } %>
-
-        <div class="card-box">
-            <h3 style="color: white; margin-bottom: 20px;">Exercícios</h3>
-            
-            <% if (exercises && exercises.length > 0) { %>
-                <div class="workout-list" style="display: flex; flex-direction: column; gap: 15px;">
-                    <% exercises.forEach(ex => { %>
-                        <div style="background: #1a1a1a; padding: 15px; border-radius: 10px; border-left: 4px solid var(--primary-color); display: flex; flex-wrap: wrap; align-items: center; gap: 20px;">
-                            
-                            <% if(ex.image_url) { %>
-                                <img src="<%= ex.image_url %>" alt="<%= ex.name %>" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px; background: #000;">
-                            <% } else { %>
-                                <div style="width: 80px; height: 80px; background: #333; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #666;">
-                                    <i class="fas fa-dumbbell fa-2x"></i>
+                <div style="display: flex; flex-direction: column; gap: 20px;">
+                    <% workout.exercises.forEach((ex, index) => { %>
+                        <div class="card" style="padding: 0; overflow: hidden;">
+                            <div style="padding: 20px; background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center;">
+                                <div style="display: flex; gap: 15px; align-items: center;">
+                                    <div style="background: var(--bg-input); width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-weight: 800; color: var(--neon-primary);">
+                                        <%= index + 1 %>
+                                    </div>
+                                    <h3 style="font-size: 1.2rem; margin: 0;"><%= ex.name %></h3>
                                 </div>
-                            <% } %>
-
-                            <div style="flex: 1; min-width: 200px;">
-                                <h4 style="color: white; margin-bottom: 5px; font-size: 1.1rem;"><%= ex.name %></h4>
-                                <span class="badge-neon" style="font-size: 0.7rem; background: rgba(255,255,255,0.1); color: #ccc; border:none;"><%= ex.muscle_group || 'Geral' %></span>
-                                <% if(ex.video_url) { %>
-                                    <a href="<%= ex.video_url %>" target="_blank" style="font-size: 0.85rem; color: var(--primary-color); margin-left: 10px;"><i class="fas fa-play-circle"></i> Vídeo</a>
-                                <% } %>
+                                <button class="btn btn-outline btn-sm"><i class="fas fa-video"></i> Vídeo</button>
                             </div>
 
-                            <% if (user.role !== 'client') { %>
-                                <form action="/workouts/<%= workout.id %>/update-exercise/<%= ex.id %>" method="POST" style="display: flex; gap: 10px; align-items: center;">
-                                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                    <div style="text-align: center;">
-                                        <label style="font-size: 0.6rem; color: #666;">Séries</label>
-                                        <input type="number" name="sets" value="<%= ex.sets %>" style="width: 50px; padding: 5px; background: #333; border: none; color: white; text-align: center; border-radius: 4px;">
-                                    </div>
-                                    <div style="text-align: center;">
-                                        <label style="font-size: 0.6rem; color: #666;">Reps</label>
-                                        <input type="number" name="reps" value="<%= ex.reps %>" style="width: 50px; padding: 5px; background: #333; border: none; color: white; text-align: center; border-radius: 4px;">
-                                    </div>
-                                    <div style="text-align: center;">
-                                        <label style="font-size: 0.6rem; color: #666;">Kg</label>
-                                        <input type="text" name="load" value="<%= ex.load %>" style="width: 50px; padding: 5px; background: #333; border: none; color: white; text-align: center; border-radius: 4px;">
-                                    </div>
-                                    <button class="btn btn-sm btn-primary" title="Salvar"><i class="fas fa-save"></i></button>
-                                </form>
-                                <form action="/workouts/<%= workout.id %>/remove-exercise/<%= ex.id %>" method="POST" onsubmit="return confirm('Remover?');">
-                                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                    <button class="btn btn-sm btn-outline" style="border-color: #ff4d4d; color: #ff4d4d;"><i class="fas fa-trash"></i></button>
-                                </form>
-                            <% } else { %>
-                                <div style="display: flex; gap: 20px;">
-                                    <div><small style="color:#888">Séries</small><br><strong style="color:white"><%= ex.sets %></strong></div>
-                                    <div><small style="color:#888">Reps</small><br><strong style="color:white"><%= ex.reps %></strong></div>
-                                    <div><small style="color:#888">Carga</small><br><strong style="color:var(--primary-color)"><%= ex.load %>kg</strong></div>
-                                </div>
-                            <% } %>
+                            <div style="padding: 20px;">
+                                <table style="width: 100%;">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 10%;">Série</th>
+                                            <th style="width: 25%;">Meta</th>
+                                            <th style="width: 20%;">Carga (kg)</th>
+                                            <th style="width: 20%;">Reps</th>
+                                            <th style="width: 10%;">RPE</th>
+                                            <th style="width: 15%; text-align: right;">Feito</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% for(let i = 1; i <= ex.sets; i++) { %>
+                                        <tr>
+                                            <td style="color: var(--neon-primary); font-weight: bold;"><%= i %></td>
+                                            <td style="font-size: 0.9rem;"><%= ex.reps %> reps</td>
+                                            <td><input type="number" class="form-control" placeholder="0" style="padding: 8px;"></td>
+                                            <td><input type="number" class="form-control" placeholder="0" style="padding: 8px;"></td>
+                                            <td><input type="number" class="form-control" placeholder="-" style="padding: 8px;"></td>
+                                            <td style="text-align: right;">
+                                                <input type="checkbox" style="width: 20px; height: 20px; accent-color: var(--neon-primary);">
+                                            </td>
+                                        </tr>
+                                        <% } %>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     <% }) %>
                 </div>
-            <% } else { %>
-                <p class="text-muted" style="text-align: center; padding: 20px;">Nenhum exercício adicionado ainda.</p>
-            <% } %>
-        </div>
-    </main>
-</div>
 
-<% if (user.role !== 'client') { %>
-<div id="addExModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; align-items: center; justify-content: center; padding: 20px;">
-    <div style="background: #111; padding: 30px; border-radius: 12px; width: 100%; max-width: 500px; border: 1px solid #333; max-height: 90vh; overflow-y: auto;">
-        <h3 style="color: white; margin-bottom: 20px;">Adicionar da Biblioteca</h3>
-        
-        <form action="/workouts/<%= workout.id %>/add-exercise" method="POST">
-            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-            
-            <div style="margin-bottom: 20px;">
-                <label style="color: #888; margin-bottom: 10px; display: block;">Selecione o exercício:</label>
-                <div style="max-height: 200px; overflow-y: auto; border: 1px solid #333; border-radius: 8px;">
-                    <% if(library) { library.forEach(ex => { %>
-                        <label style="display: flex; align-items: center; gap: 10px; padding: 10px; border-bottom: 1px solid #222; cursor: pointer;">
-                            <input type="radio" name="exercise_id" value="<%= ex.id %>" required>
-                            <% if(ex.image_url) { %>
-                                <img src="<%= ex.image_url %>" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">
-                            <% } else { %>
-                                <div style="width: 40px; height: 40px; background: #333; border-radius: 4px;"></div>
-                            <% } %>
-                            <div>
-                                <strong style="color: white; display: block;"><%= ex.name %></strong>
-                                <small style="color: #666;"><%= ex.muscle_group %></small>
-                            </div>
-                        </label>
-                    <% }) } %>
+                <div class="card" style="margin-top: 30px; text-align: center; border: 1px dashed var(--border-active);">
+                    <h3 style="margin-bottom: 15px;">Treino Finalizado?</h3>
+                    <div style="display: flex; gap: 15px; justify-content: center;">
+                        <input type="text" placeholder="Observações do treino (opcional)..." class="form-control" style="max-width: 400px;">
+                        <button class="btn btn-primary" style="padding: 0 40px;">CONCLUIR SESSÃO</button>
+                    </div>
                 </div>
-            </div>
 
-            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                <div style="flex: 1;"><label style="color:#888">Séries</label><input type="number" name="sets" value="3" class="form-control" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"></div>
-                <div style="flex: 1;"><label style="color:#888">Reps</label><input type="number" name="reps" value="12" class="form-control" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"></div>
-                <div style="flex: 1;"><label style="color:#888">Carga</label><input type="text" name="load" value="0" class="form-control" style="width:100%; padding:10px; background:#222; border:1px solid #444; color:white;"></div>
             </div>
-
-            <div style="display: flex; gap: 10px;">
-                <button type="submit" class="btn btn-primary" style="flex: 1;">Adicionar</button>
-                <button type="button" class="btn btn-outline" style="flex: 1;" onclick="document.getElementById('addExModal').style.display='none'">Cancelar</button>
-            </div>
-        </form>
+        </div>
     </div>
-</div>
-<% } %>
-
-<%- include('../partials/footer.ejs') %>
+</body>
+</html>

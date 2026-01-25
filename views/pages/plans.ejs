@@ -1,69 +1,56 @@
-<%- include('../layouts/public/head', { title: 'Planos e Preços' }) %>
-<%- include('../layouts/public/header') %>
-
-<main>
-    <section class="hero-page bg-home" style="min-height: 50vh;">
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <%- include('../layouts/public/head', { title: 'Planos' }) %>
+    <%- include('../layouts/public/header') %>
+</head>
+<body>
+    <main class="hero-page bg-home" style="align-items: flex-start; padding-top: 150px;">
         <div class="hero-overlay"></div>
-        <div class="container">
-            <span style="color: var(--primary); font-weight: 700; letter-spacing: 2px; font-size: 0.9rem;">INVESTIMENTO</span>
-            <h1 class="hero-title" style="font-size: 3.5rem;">Escolha o Seu <span class="text-gradient">Ritmo</span></h1>
-            <p class="hero-subtitle">Cancele ou mude de plano a qualquer momento.</p>
-        </div>
-    </section>
+        <div class="container" style="z-index: 2; width: 100%;">
+            <div class="center mb-80">
+                <h1 class="hero-title" style="font-size: 3rem;">Invista em <span class="text-gradient">Você.</span></h1>
+                <p class="hero-subtitle">Escolha o nível de suporte que sua ambição exige.</p>
+            </div>
 
-    <section class="section-padding bg-darker">
-        <div class="container">
-            <div class="grid-3" style="align-items: stretch;">
-                
+            <div class="grid-3">
                 <div class="feature-card plan-card">
-                    <div class="plan-header text-center mb-30">
-                        <h3 style="color: white; font-size: 1.5rem;">Start</h3>
-                        <div class="plan-price">R$ 0<span>/mês</span></div>
-                        <p style="color: #888; font-size: 0.9rem;">Para quem quer organização.</p>
-                    </div>
-                    <ul class="plan-features" style="flex: 1; list-style: none; padding: 0;">
-                        <li><i class="fas fa-check" style="color: var(--primary);"></i> Acesso ao App</li>
-                        <li><i class="fas fa-check" style="color: var(--primary);"></i> Biblioteca de Exercícios</li>
-                        <li><i class="fas fa-check" style="color: var(--primary);"></i> Histórico de Peso</li>
-                        <li class="muted" style="text-decoration: line-through; color: #444;"><i class="fas fa-times"></i> Coach IA</li>
+                    <h3 style="color: white; font-size: 1.8rem;">Start</h3>
+                    <div class="plan-price">R$ 0<span>/mês</span></div>
+                    <ul style="list-style: none; margin: 30px 0; color: #ccc;">
+                        <li class="mb-10"><i class="fas fa-check" style="color: var(--primary);"></i> Acesso ao App</li>
+                        <li class="mb-10"><i class="fas fa-check" style="color: var(--primary);"></i> Biblioteca Básica</li>
+                        <li class="mb-10"><i class="fas fa-check" style="color: var(--primary);"></i> Rastreio de Peso</li>
                     </ul>
-                    <a href="/auth/register?plan=free" class="btn btn-outline w-100 mt-30">Começar Grátis</a>
+                    <a href="/auth/register?plan=free" class="btn btn-outline w-100">Começar Grátis</a>
                 </div>
 
                 <div class="feature-card plan-card plan-featured">
-                    <div style="position: absolute; top: 0; left: 0; right: 0; background: var(--primary); color: black; text-align: center; font-weight: 800; padding: 6px; font-size: 0.8rem;">MAIS POPULAR</div>
-                    <div class="plan-header text-center mb-30" style="padding-top: 15px;">
-                        <h3 style="color: var(--primary); font-size: 1.5rem;">Momentum Pro</h3>
-                        <div class="plan-price">R$ 89,90<span>/mês</span></div>
-                        <p style="color: #ccc; font-size: 0.9rem;">A experiência completa com IA.</p>
-                    </div>
-                    <ul class="plan-features" style="flex: 1; list-style: none; padding: 0;">
-                        <li style="color: white;"><i class="fas fa-check-double" style="color: var(--primary);"></i> <strong>Tudo do Start</strong></li>
-                        <li><i class="fas fa-check" style="color: var(--primary);"></i> Coach IA Ilimitado</li>
-                        <li><i class="fas fa-check" style="color: var(--primary);"></i> Geração de Treinos IA</li>
-                        <li><i class="fas fa-check" style="color: var(--primary);"></i> Análise de Vídeo</li>
+                    <div style="position: absolute; top: 0; right: 0; background: var(--primary); color: black; font-weight: 800; padding: 5px 15px; border-bottom-left-radius: 10px;">BEST SELLER</div>
+                    <h3 style="color: var(--primary); font-size: 1.8rem;">Pro AI</h3>
+                    <div class="plan-price">R$ 89<span>/mês</span></div>
+                    <ul style="list-style: none; margin: 30px 0; color: white;">
+                        <li class="mb-10"><i class="fas fa-check-double" style="color: var(--primary);"></i> <strong>Coach IA Ilimitado</strong></li>
+                        <li class="mb-10"><i class="fas fa-check" style="color: var(--primary);"></i> Treinos Adaptativos</li>
+                        <li class="mb-10"><i class="fas fa-check" style="color: var(--primary);"></i> Análise de Execução</li>
                     </ul>
-                    <a href="/auth/register?plan=pro" class="btn btn-primary w-100 mt-30" style="color: black; font-weight: 700;">Assinar Pro</a>
+                    <a href="/auth/register?plan=pro" class="btn btn-primary w-100">Assinar Pro</a>
                 </div>
 
-                <div class="feature-card plan-card" style="opacity: 0.8;">
-                    <div class="plan-header text-center mb-30">
-                        <h3 style="color: white; font-size: 1.5rem;">VIP Personal</h3>
-                        <div class="plan-price">R$ 249,90<span>/mês</span></div>
-                        <p style="color: #888; font-size: 0.9rem;">Acompanhamento humano.</p>
-                    </div>
-                    <ul class="plan-features" style="flex: 1; list-style: none; padding: 0;">
-                        <li style="color: white;"><i class="fas fa-check-double" style="color: var(--primary);"></i> <strong>Tudo do Pro</strong></li>
-                        <li><i class="fas fa-check" style="color: var(--primary);"></i> Personal Trainer Real</li>
-                        <li><i class="fas fa-check" style="color: var(--primary);"></i> WhatsApp Direto</li>
-                        <li><i class="fas fa-check" style="color: var(--primary);"></i> Call Mensal</li>
+                <div class="feature-card plan-card" style="opacity: 0.7;">
+                    <h3 style="color: white; font-size: 1.8rem;">Personal VIP</h3>
+                    <div class="plan-price">R$ 249<span>/mês</span></div>
+                    <p style="color: #666; margin-bottom: 20px;">Vagas Limitadas</p>
+                    <ul style="list-style: none; margin: 30px 0; color: #ccc;">
+                        <li class="mb-10"><i class="fas fa-user" style="color: var(--primary);"></i> Treinador Humano</li>
+                        <li class="mb-10"><i class="fas fa-comments" style="color: var(--primary);"></i> WhatsApp Direto</li>
+                        <li class="mb-10"><i class="fas fa-video" style="color: var(--primary);"></i> Videoconferência</li>
                     </ul>
-                    <button class="btn btn-outline w-100 mt-30" disabled style="opacity: 0.5; cursor: not-allowed;">Vagas Esgotadas</button>
+                    <button class="btn btn-outline w-100" disabled>Lista de Espera</button>
                 </div>
-
             </div>
         </div>
-    </section>
-</main>
-
-<%- include('../layouts/public/footer') %>
+    </main>
+    <%- include('../layouts/public/footer') %>
+</body>
+</html>

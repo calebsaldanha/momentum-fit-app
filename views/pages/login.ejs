@@ -1,63 +1,53 @@
-<%- include('../layouts/public/head', { title: 'Entrar' }) %>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <%- include('../layouts/public/head', { title: 'Entrar' }) %>
+</head>
+<body>
+    <div class="auth-page">
+        <div class="auth-content">
+            <div class="auth-container">
+                <div class="mb-40">
+                    <a href="/" class="brand-logo" style="color: white; font-size: 1.8rem;">
+                        <span class="text-gradient">MOMENTUM</span> FIT
+                    </a>
+                    <h1 style="font-size: 2.5rem; font-weight: 800; color: white; margin-top: 20px;">Bem-vindo de volta.</h1>
+                    <p style="color: #888;">Digite suas credenciais para acessar o painel.</p>
+                </div>
 
-<div class="auth-page">
-    <header class="main-header" style="position: absolute; background: transparent;">
-        <div class="header-container">
-            <a href="/" class="brand-logo">
-                <img src="/images/momentum-fit-icon.png" alt="Logo" class="logo-rounded">
-                <span>Momentum</span>
-            </a>
-            <a href="/" style="color: white; text-decoration: none; font-size: 0.9rem;"><i class="fas fa-arrow-left"></i> Voltar</a>
-        </div>
-    </header>
+                <%- include('../partials/flash') %>
 
-    <div class="auth-content">
-        <div class="auth-container">
-            <div class="mb-40">
-                <h1 style="color: white; font-size: 2rem; margin-bottom: 10px; font-weight: 800;">Bem-vindo de volta</h1>
-                <p style="color: #888;">Digite suas credenciais para acessar o painel.</p>
+                <form action="/auth/login" method="POST">
+                    <div class="form-group">
+                        <label class="form-label" for="email">E-mail</label>
+                        <input type="email" id="email" name="email" class="form-control" placeholder="seu@email.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <div style="display: flex; justify-content: space-between;">
+                            <label class="form-label" for="password">Senha</label>
+                            <a href="/auth/forgot-password" style="font-size: 0.85rem; color: var(--primary);">Esqueceu?</a>
+                        </div>
+                        <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100" style="padding: 15px; font-size: 1rem;">ACESSAR CONTA</button>
+                </form>
+
+                <div class="text-center mt-4" style="margin-top: 30px;">
+                    <p style="color: #666;">Não tem uma conta? <a href="/auth/register" style="color: white; font-weight: 600;">Criar agora</a></p>
+                </div>
             </div>
+        </div>
 
-            <%- include('../partials/flash') %>
-
-            <form action="/auth/login" method="POST">
-                <div class="form-group">
-                    <label class="form-label">E-mail</label>
-                    <input type="email" name="email" class="form-control" placeholder="seu@email.com" required>
+        <div class="auth-image-side">
+            <div class="auth-overlay">
+                <div class="auth-quote">
+                    <p>"A dor é temporária. A glória é eterna. Construa sua melhor versão hoje."</p>
+                    <span>— Manifesto Momentum</span>
                 </div>
-
-                <div class="form-group">
-                    <label class="form-label" style="display: flex; justify-content: space-between;">
-                        Senha
-                        <a href="/auth/forgot-password" style="color: var(--primary); font-size: 0.8rem; text-decoration: none;">Esqueceu?</a>
-                    </label>
-                    <input type="password" name="password" class="form-control" placeholder="••••••••" required>
-                </div>
-
-                <button type="submit" class="btn btn-primary w-100" style="color: black; font-weight: 700; padding: 14px;">Entrar</button>
-            </form>
-
-            <div class="text-center mt-30" style="margin-top: 30px; color: #666; font-size: 0.9rem;">
-                Não tem uma conta? <a href="/auth/register" style="color: white; font-weight: 600; text-decoration: none;">Crie agora</a>
             </div>
         </div>
     </div>
-
-    <div class="auth-image-side">
-        <div class="auth-overlay">
-            <div class="auth-quote">
-                <p>"A única repetição ruim é aquela que você não fez."</p>
-                <span>Metodologia Momentum</span>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-    setTimeout(() => {
-        const alerts = document.querySelectorAll('.alert');
-        alerts.forEach(alert => alert.style.display = 'none');
-    }, 5000);
-</script>
 </body>
 </html>

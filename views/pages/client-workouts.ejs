@@ -7,45 +7,43 @@
 <body>
     <div class="dashboard-wrapper">
         <%- include('../partials/sidebar') %>
-
         <div class="main-content">
-            <%- include('../partials/app-header') %>
+            <%- include('../partials/app-header', { title: 'Biblioteca de Treinos' }) %>
 
             <div class="content-pad">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-                    <h1 style="font-size: 1.5rem; font-weight: 700;">Biblioteca de Treinos</h1>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                    <h1 style="font-size: 1.8rem;">Seus Programas</h1>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" placeholder="Buscar treino..." style="width: 250px; padding: 10px;">
+                    </div>
                 </div>
 
-                <% if (workouts.length > 0) { %>
-                    <div class="grid-3">
-                        <% workouts.forEach(function(workout) { %>
-                            <div class="card" style="display: flex; flex-direction: column;">
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
-                                    <div style="width: 40px; height: 40px; border-radius: 8px; background: rgba(59, 130, 246, 0.1); color: var(--neon-blue); display: flex; align-items: center; justify-content: center;">
-                                        <i class="fas fa-dumbbell"></i>
+                <div class="grid-3">
+                    <% if (workouts && workouts.length > 0) { %>
+                        <% workouts.forEach(w => { %>
+                            <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+                                <div>
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                                        <span class="badge badge-neutral"><%= w.category %></span>
+                                        <% if(w.difficulty === 'Hard') { %>
+                                            <span style="color: #ef4444; font-size: 0.8rem;"><i class="fas fa-fire"></i> Intenso</span>
+                                        <% } else { %>
+                                            <span style="color: var(--neon-primary); font-size: 0.8rem;"><i class="fas fa-bolt"></i> Normal</span>
+                                        <% } %>
                                     </div>
-                                    <% if(workout.is_active) { %>
-                                        <span class="badge badge-success">Ativo</span>
-                                    <% } else { %>
-                                        <span class="badge" style="background: rgba(255,255,255,0.1);">Arquivado</span>
-                                    <% } %>
+                                    <h3 style="font-size: 1.4rem; margin-bottom: 10px;"><%= w.name %></h3>
+                                    <p style="font-size: 0.9rem; margin-bottom: 20px;">Duração estimada: <%= w.duration %></p>
                                 </div>
-
-                                <h3 style="font-size: 1.2rem; font-weight: 600; margin-bottom: 0.5rem;"><%= workout.name %></h3>
-                                <p style="color: var(--text-secondary); font-size: 0.9rem; flex: 1; margin-bottom: 1.5rem;">
-                                    <%= workout.description ? workout.description : 'Sem descrição.' %>
-                                </p>
-
-                                <a href="/client/workouts/<%= workout.id %>" class="btn btn-outline btn-block">Ver Detalhes</a>
+                                <a href="/client/workouts/<%= w.id %>" class="btn btn-outline btn-block">Ver Detalhes</a>
                             </div>
-                        <% }); %>
-                    </div>
-                <% } else { %>
-                    <div class="card" style="text-align: center; padding: 4rem;">
-                        <i class="fas fa-inbox" style="font-size: 3rem; color: var(--text-secondary); margin-bottom: 1rem;"></i>
-                        <p>Você ainda não possui treinos.</p>
-                    </div>
-                <% } %>
+                        <% }) %>
+                    <% } else { %>
+                        <div style="grid-column: span 3; text-align: center; padding: 40px; background: rgba(255,255,255,0.02); border-radius: 12px;">
+                            <i class="fas fa-dumbbell" style="font-size: 3rem; color: #333; margin-bottom: 15px;"></i>
+                            <p>Nenhum treino disponível no momento.</p>
+                        </div>
+                    <% } %>
+                </div>
             </div>
         </div>
     </div>

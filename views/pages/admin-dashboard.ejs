@@ -7,34 +7,93 @@
 <body>
     <div class="dashboard-wrapper">
         <%- include('../partials/sidebar') %>
+
         <div class="main-content">
-            <%- include('../partials/app-header') %>
-            
+            <%- include('../partials/app-header', { title: 'Comando Central' }) %>
+
             <div class="content-pad">
-                <h1 style="font-size: 1.5rem; margin-bottom: 2rem;">Visão Geral Administrativa</h1>
-
-                <div class="grid-3">
-                    <div class="card">
-                        <div style="color: var(--text-secondary);">Receita Total</div>
-                        <div style="font-size: 2rem; font-weight: 700; color: var(--success);">R$ <%= revenue.total || '0.00' %></div>
+                <div class="grid-3 mb-30">
+                    <div class="card" style="border-left: 3px solid var(--neon-primary);">
+                        <p style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">Total Usuários</p>
+                        <h2 style="font-size: 2.5rem;"><%= stats.total_users || 0 %></h2>
                     </div>
-                    <div class="card">
-                        <div style="color: var(--text-secondary);">Usuários Ativos</div>
-                        <div style="font-size: 2rem; font-weight: 700; color: var(--neon-blue);"><%= users_count %></div>
+                    <div class="card" style="border-left: 3px solid #3b82f6;">
+                        <p style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">Personais</p>
+                        <h2 style="font-size: 2.5rem;"><%= stats.total_trainers || 0 %></h2>
+                    </div>
+                    <div class="card" style="border-left: 3px solid #ef4444;">
+                        <p style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">Aprovações Pendentes</p>
+                        <h2 style="font-size: 2.5rem;"><%= stats.pending_approvals || 0 %></h2>
                     </div>
                 </div>
 
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Manutenção do Sistema</h3>
+                <div class="grid-2">
+                    <div class="card" style="grid-column: span 2;">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-shield-alt"></i> Personais Aguardando Aprovação</h3>
+                            <a href="/admin/approvals" class="btn btn-outline" style="font-size: 0.8rem; padding: 5px 15px;">Ver Todos</a>
+                        </div>
+                        <table style="width: 100%;">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>CREF</th>
+                                    <th>Data Cadastro</th>
+                                    <th style="text-align: right;">Ação</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% if (pendingTrainers && pendingTrainers.length > 0) { %>
+                                    <% pendingTrainers.forEach(t => { %>
+                                    <tr>
+                                        <td><strong><%= t.name %></strong><br><span style="font-size: 0.8rem; color: #666;"><%= t.email %></span></td>
+                                        <td><span class="badge badge-neutral"><%= t.cref || 'N/A' %></span></td>
+                                        <td><%= new Date(t.created_at).toLocaleDateString() %></td>
+                                        <td style="text-align: right;">
+                                            <a href="/admin/approvals/<%= t.id %>" class="btn btn-primary" style="padding: 5px 15px; font-size: 0.8rem;">Analisar</a>
+                                        </td>
+                                    </tr>
+                                    <% }) %>
+                                <% } else { %>
+                                    <tr><td colspan="4" style="text-align: center; padding: 30px; color: #666;">Nenhuma aprovação pendente.</td></tr>
+                                <% } %>
+                            </tbody>
+                        </table>
                     </div>
-                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">Ferramentas de reparo para o banco de dados.</p>
-                    <form action="/admin/repair-db" method="POST">
-                        <button type="submit" class="btn btn-outline" style="color: var(--warning); border-color: var(--warning);">
-                            <i class="fas fa-tools"></i> Rodar Auto-Repair
-                        </button>
-                    </form>
                 </div>
+
+                <div class="grid-3 mt-4">
+                    <a href="/admin/users" class="card" style="display: flex; align-items: center; gap: 15px; transition: 0.2s; cursor: pointer;">
+                        <div style="background: #222; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 8px;">
+                            <i class="fas fa-users" style="color: white;"></i>
+                        </div>
+                        <div>
+                            <h4 style="color: white; font-size: 1rem;">Usuários</h4>
+                            <p style="font-size: 0.8rem;">Gerenciar acessos</p>
+                        </div>
+                    </a>
+
+                    <a href="/admin/finance" class="card" style="display: flex; align-items: center; gap: 15px; transition: 0.2s; cursor: pointer;">
+                        <div style="background: #222; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 8px;">
+                            <i class="fas fa-chart-pie" style="color: white;"></i>
+                        </div>
+                        <div>
+                            <h4 style="color: white; font-size: 1rem;">Financeiro</h4>
+                            <p style="font-size: 0.8rem;">Relatórios globais</p>
+                        </div>
+                    </a>
+
+                    <a href="/admin/settings" class="card" style="display: flex; align-items: center; gap: 15px; transition: 0.2s; cursor: pointer;">
+                        <div style="background: #222; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 8px;">
+                            <i class="fas fa-cogs" style="color: white;"></i>
+                        </div>
+                        <div>
+                            <h4 style="color: white; font-size: 1rem;">Configurações</h4>
+                            <p style="font-size: 0.8rem;">Parâmetros da IA</p>
+                        </div>
+                    </a>
+                </div>
+
             </div>
         </div>
     </div>

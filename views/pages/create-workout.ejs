@@ -1,181 +1,97 @@
-<%- include('../layouts/app/head') %>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <%- include('../layouts/app/head') %>
+    <title>Criar Treino | Momentum Fit</title>
+</head>
+<body>
+    <div class="dashboard-wrapper">
+        <%- include('../partials/sidebar') %>
+        <div class="main-content">
+            <%- include('../partials/app-header', { title: 'Novo Programa' }) %>
 
-<div class="dashboard-layout">
-    <%- include('../partials/sidebar') %>
-    
-    <main class="app-main">
-        <%- include('../partials/app-header') %>
-        
-        <div class="dashboard-content">
-            <div class="container-fluid" style="max-width: 1000px;">
-                
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h2 style="color: white; margin: 0;">Novo Treino</h2>
-                    <button onclick="submitWorkout()" class="btn btn-primary">Salvar Treino</button>
-                </div>
-
-                <div class="row" style="display: grid; grid-template-columns: 1fr 350px; gap: 30px;">
-                    
-                    <div class="app-card" style="background: #111; border: 1px solid #222; border-radius: 12px; padding: 20px;">
-                        
-                        <div style="margin-bottom: 20px;">
-                            <label class="form-label" style="color: #ccc;">Nome do Treino</label>
-                            <input type="text" id="workoutName" class="form-control" placeholder="Ex: Treino A - Peitoral" style="width: 100%; padding: 10px; background: #0a0a0a; border: 1px solid #333; color: white; border-radius: 5px;">
+            <div class="content-pad">
+                <form action="/trainer/workouts/create" method="POST">
+                    <div class="grid-3 mb-30">
+                        <div class="card" style="grid-column: span 2;">
+                            <div class="card-header">
+                                <h3 class="card-title"><i class="fas fa-info-circle"></i> Informações Básicas</h3>
+                            </div>
+                            <div class="form-group mb-20">
+                                <label>Nome do Treino</label>
+                                <input type="text" name="name" placeholder="Ex: Hipertrofia Fase 1 - A" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Descrição / Foco</label>
+                                <textarea name="description" rows="3" style="width: 100%; background: var(--bg-input); border: 1px solid var(--border-subtle); color: white; border-radius: 8px; padding: 10px;" placeholder="Instruções para o aluno..."></textarea>
+                            </div>
                         </div>
 
-                        <div style="margin-bottom: 20px;">
-                            <label class="form-label" style="color: #ccc;">Atribuir a Aluno (Opcional)</label>
-                            <select id="workoutClient" class="form-control" style="width: 100%; padding: 10px; background: #0a0a0a; border: 1px solid #333; color: white; border-radius: 5px;">
-                                <option value="">Salvar como Template</option>
-                                <% clients.forEach(client => { %>
-                                    <option value="<%= client.id %>"><%= client.name %></option>
-                                <% }) %>
-                            </select>
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title"><i class="fas fa-tags"></i> Configurações</h3>
+                            </div>
+                            <div class="form-group mb-20">
+                                <label>Dificuldade</label>
+                                <select name="difficulty">
+                                    <option value="Iniciante">Iniciante</option>
+                                    <option value="Intermediário" selected>Intermediário</option>
+                                    <option value="Avançado">Avançado</option>
+                                    <option value="Elite">Elite</option>
+                                </select>
+                            </div>
+                            <div class="form-group mb-20">
+                                <label>Categoria</label>
+                                <select name="category">
+                                    <option value="Força">Força</option>
+                                    <option value="Hipertrofia">Hipertrofia</option>
+                                    <option value="Resistência">Resistência</option>
+                                    <option value="Mobilidade">Mobilidade</option>
+                                </select>
+                            </div>
                         </div>
-
-                        <h4 style="color: white; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 20px;">Exercícios Selecionados</h4>
-                        <div id="selectedExercisesList" style="min-height: 200px;">
-                            <p id="emptyState" style="color: #666; text-align: center; padding: 40px;">Nenhum exercício adicionado. Selecione ao lado.</p>
-                        </div>
-
                     </div>
 
-                    <div class="app-card" style="background: #151515; border: 1px solid #222; border-radius: 12px; padding: 20px; height: fit-content;">
-                        <h4 style="color: white; margin-bottom: 15px;">Biblioteca</h4>
-                        <input type="text" id="searchEx" onkeyup="filterExercises()" placeholder="Buscar exercício..." style="width: 100%; padding: 8px; margin-bottom: 15px; background: #000; border: 1px solid #333; color: white; border-radius: 5px;">
-                        
-                        <div class="exercise-list" style="max-height: 500px; overflow-y: auto;">
-                            <% exercises.forEach(ex => { %>
-                                <div class="ex-item" onclick='addExercise(<%- JSON.stringify(ex) %>)' style="padding: 10px; border-bottom: 1px solid #222; cursor: pointer; transition: 0.2s;">
-                                    <div style="color: white; font-weight: 500;"><%= ex.name %></div>
-                                    <div style="color: #666; font-size: 0.8rem;"><%= ex.muscle_group %></div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-dumbbell"></i> Sequência de Exercícios</h3>
+                            <button type="button" class="btn btn-outline btn-sm"><i class="fas fa-plus"></i> Adicionar Exercício</button>
+                        </div>
+
+                        <div id="exercises-list">
+                            <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 20px; margin-bottom: 15px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                                    <h4 style="color: var(--neon-primary);">Exercício 1</h4>
+                                    <button type="button" style="background: none; border: none; color: #ef4444; cursor: pointer;"><i class="fas fa-trash"></i></button>
                                 </div>
-                            <% }) %>
+                                <div class="grid-3">
+                                    <div style="grid-column: span 3;">
+                                        <input type="text" placeholder="Buscar exercício (ex: Supino...)" style="margin-bottom: 10px;">
+                                    </div>
+                                    <div>
+                                        <label style="font-size: 0.8rem;">Séries</label>
+                                        <input type="number" value="4">
+                                    </div>
+                                    <div>
+                                        <label style="font-size: 0.8rem;">Repetições</label>
+                                        <input type="text" value="8-12">
+                                    </div>
+                                    <div>
+                                        <label style="font-size: 0.8rem;">Descanso (s)</label>
+                                        <input type="number" value="60">
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                </div>
+                    <div style="display: flex; justify-content: flex-end; gap: 20px; margin-top: 30px;">
+                        <button type="button" class="btn btn-outline">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Salvar Treino</button>
+                    </div>
+                </form>
             </div>
         </div>
-    </main>
-</div>
-
-<script>
-    let selectedExercises = [];
-
-    function addExercise(ex) {
-        document.getElementById('emptyState').style.display = 'none';
-        
-        // Adiciona ao array local
-        const newEx = {
-            id: ex.id,
-            name: ex.name,
-            sets: 3,
-            reps: '10',
-            rest: 60,
-            notes: ''
-        };
-        selectedExercises.push(newEx);
-        renderList();
-    }
-
-    function removeExercise(index) {
-        selectedExercises.splice(index, 1);
-        renderList();
-        if (selectedExercises.length === 0) document.getElementById('emptyState').style.display = 'block';
-    }
-
-    function updateEx(index, field, value) {
-        selectedExercises[index][field] = value;
-    }
-
-    function renderList() {
-        const container = document.getElementById('selectedExercisesList');
-        container.innerHTML = '';
-        
-        if (selectedExercises.length === 0) {
-            container.innerHTML = '<p id="emptyState" style="color: #666; text-align: center; padding: 40px;">Nenhum exercício adicionado.</p>';
-            return;
-        }
-
-        selectedExercises.forEach((ex, idx) => {
-            const html = `
-                <div style="background: #0a0a0a; border: 1px solid #333; padding: 15px; border-radius: 8px; margin-bottom: 10px; display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 10px; align-items: center;">
-                    <div style="grid-column: 1 / -1; display: flex; justify-content: space-between;">
-                        <strong style="color: var(--primary);">${idx + 1}. ${ex.name}</strong>
-                        <button onclick="removeExercise(${idx})" style="color: #ff6b6b; background: none; border: none; cursor: pointer;"><i class="fas fa-trash"></i></button>
-                    </div>
-                    
-                    <div>
-                        <label style="font-size: 0.7rem; color: #888;">Séries</label>
-                        <input type="number" value="${ex.sets}" onchange="updateEx(${idx}, 'sets', this.value)" style="width: 100%; background: #222; border: none; color: white; padding: 5px;">
-                    </div>
-                    <div>
-                        <label style="font-size: 0.7rem; color: #888;">Reps</label>
-                        <input type="text" value="${ex.reps}" onchange="updateEx(${idx}, 'reps', this.value)" style="width: 100%; background: #222; border: none; color: white; padding: 5px;">
-                    </div>
-                    <div>
-                        <label style="font-size: 0.7rem; color: #888;">Descanso (s)</label>
-                        <input type="number" value="${ex.rest}" onchange="updateEx(${idx}, 'rest', this.value)" style="width: 100%; background: #222; border: none; color: white; padding: 5px;">
-                    </div>
-                </div>
-            `;
-            container.insertAdjacentHTML('beforeend', html);
-        });
-    }
-
-    function filterExercises() {
-        const term = document.getElementById('searchEx').value.toLowerCase();
-        const items = document.querySelectorAll('.ex-item');
-        items.forEach(item => {
-            const text = item.innerText.toLowerCase();
-            item.style.display = text.includes(term) ? 'block' : 'none';
-        });
-    }
-
-    async function submitWorkout() {
-        const name = document.getElementById('workoutName').value;
-        const clientId = document.getElementById('workoutClient').value;
-        
-        if (!name) return alert('Dê um nome ao treino!');
-        if (selectedExercises.length === 0) return alert('Adicione pelo menos um exercício!');
-
-        const btn = document.querySelector('button[onclick="submitWorkout()"]');
-        btn.innerText = 'Salvando...';
-        btn.disabled = true;
-
-        try {
-            const res = await fetch('/trainer/workouts/create', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    name,
-                    client_id: clientId || null,
-                    description: 'Criado via Web Editor',
-                    exercises: JSON.stringify(selectedExercises)
-                })
-            });
-            
-            const data = await res.json();
-            if (data.success) {
-                window.location.href = data.redirect;
-            } else {
-                alert('Erro ao salvar: ' + (data.error || 'Erro desconhecido'));
-                btn.disabled = false;
-                btn.innerText = 'Salvar Treino';
-            }
-        } catch (e) {
-            console.error(e);
-            alert('Erro de conexão.');
-            btn.disabled = false;
-            btn.innerText = 'Salvar Treino';
-        }
-    }
-</script>
-
-<style>
-    @media (max-width: 991px) {
-        .row { grid-template-columns: 1fr !important; }
-        .app-card { margin-bottom: 20px; }
-    }
-</style>
+    </div>
+</body>
+</html>

@@ -1,48 +1,59 @@
-<%- include('../partials/header.ejs') %>
-<div class="dashboard-container">
-    <%- include('../partials/sidebar.ejs', { path: '/admin/users' }) %>
-    <main class="dashboard-main">
-        <div class="page-header">
-            <h1>Gerenciar <span class="text-neon">Usuários</span></h1>
-            <p>Visão geral de todos os cadastros do sistema.</p>
-        </div>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <%- include('../layouts/app/head') %>
+    <title>Usuários | Admin</title>
+</head>
+<body>
+    <div class="dashboard-wrapper">
+        <%- include('../partials/sidebar') %>
+        <div class="main-content">
+            <%- include('../partials/app-header', { title: 'Base de Usuários' }) %>
 
-        <div class="card-box">
-            <div class="table-responsive">
-                <table style="width:100%; text-align:left; border-collapse: collapse;">
-                    <thead>
-                        <tr style="border-bottom:1px solid #333; color:#888;">
-                            <th style="padding:15px;">Nome</th>
-                            <th style="padding:15px;">Email</th>
-                            <th style="padding:15px;">Função</th>
-                            <th style="padding:15px;">Status</th>
-                            <th style="padding:15px;">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% users.forEach(u => { %>
-                            <tr style="border-bottom:1px solid #222;">
-                                <td style="padding:15px; color:white;"><%= u.name %></td>
-                                <td style="padding:15px; color:#ccc;"><%= u.email %></td>
-                                <td style="padding:15px;">
-                                    <span style="padding:4px 8px; border-radius:4px; font-size:0.8rem; background:<%= u.role === 'admin' ? '#ff4d4d' : (u.role === 'trainer' ? '#4da6ff' : '#222') %>; color:white;">
-                                        <%= u.role.toUpperCase() %>
-                                    </span>
-                                </td>
-                                <td style="padding:15px;">
-                                    <span style="color:<%= u.status === 'active' ? '#bef202' : 'orange' %>">
-                                        <%= u.status %>
-                                    </span>
-                                </td>
-                                <td style="padding:15px;">
-                                    <a href="/admin/users/<%= u.id %>" class="btn btn-outline btn-sm">Detalhes</a>
-                                </td>
+            <div class="content-pad">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-database"></i> Todos os Usuários</h3>
+                        <input type="text" placeholder="Filtrar por e-mail..." style="padding: 8px; background: #222; border: 1px solid #333; color: white; border-radius: 4px;">
+                    </div>
+
+                    <table style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nome</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th style="text-align: right;">Ações</th>
                             </tr>
-                        <% }) %>
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            <% if (users && users.length > 0) { %>
+                                <% users.forEach(u => { %>
+                                <tr>
+                                    <td style="color: #666;">#<%= u.id %></td>
+                                    <td>
+                                        <strong><%= u.name %></strong><br>
+                                        <span style="font-size: 0.8rem; color: #666;"><%= u.email %></span>
+                                    </td>
+                                    <td>
+                                        <% if(u.role === 'admin') { %> <span class="badge badge-neutral" style="color: #ef4444; border-color: #ef4444;">ADMIN</span> <% } %>
+                                        <% if(u.role === 'trainer') { %> <span class="badge badge-neutral" style="color: var(--neon-primary); border-color: var(--neon-primary);">TRAINER</span> <% } %>
+                                        <% if(u.role === 'client') { %> <span class="badge badge-neutral">CLIENT</span> <% } %>
+                                    </td>
+                                    <td><span class="badge badge-success">ATIVO</span></td>
+                                    <td style="text-align: right;">
+                                        <button class="btn btn-outline" style="padding: 4px 10px; font-size: 0.75rem;"><i class="fas fa-edit"></i></button>
+                                        <button class="btn btn-outline" style="padding: 4px 10px; font-size: 0.75rem; color: #ef4444; border-color: #ef4444;"><i class="fas fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                                <% }) %>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
-    </main>
-</div>
-<%- include('../partials/footer.ejs') %>
+    </div>
+</body>
+</html>
