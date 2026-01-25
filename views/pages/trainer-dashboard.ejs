@@ -1,43 +1,118 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Painel do Treinador | Momentum Fit</title>
-    <link rel="icon" href="/images/momentum-fit-icon.png" type="image/png">
-    <link rel="stylesheet" href="/css/styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-</head>
-<body>
+<%- include('../layouts/app/head') %>
 
 <div class="dashboard-layout">
-    <%- include('../partials/sidebar.ejs', { path: '/trainer/dashboard' }) %>
-
+    <%- include('../partials/sidebar') %>
+    
     <main class="app-main">
-        <%- include('../partials/app-header.ejs', { title: 'Área do Treinador' }) %>
-
+        <%- include('../partials/app-header') %>
+        
         <div class="dashboard-content">
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon"><i class="fas fa-users"></i></div>
-                    <div>
-                        <h3 style="color:white; margin:0;">0</h3>
-                        <p style="color:#888; margin:0;">Alunos Ativos</p>
+            <div class="container-fluid">
+                <h2 style="color: white; margin-bottom: 20px;">Visão Geral</h2>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="icon-box" style="margin: 0; width: 50px; height: 50px; font-size: 1.2rem;"><i class="fas fa-users"></i></div>
+                        <div>
+                            <h3 style="color: white; margin: 0; font-size: 1.8rem;"><%= stats.active_clients %></h3>
+                            <span style="color: #888; font-size: 0.9rem;">Alunos Ativos</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="icon-box" style="margin: 0; width: 50px; height: 50px; font-size: 1.2rem;"><i class="fas fa-dumbbell"></i></div>
+                        <div>
+                            <h3 style="color: white; margin: 0; font-size: 1.8rem;"><%= stats.total_workouts || 0 %></h3>
+                            <span style="color: #888; font-size: 0.9rem;">Treinos Criados</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="icon-box" style="margin: 0; width: 50px; height: 50px; font-size: 1.2rem;"><i class="fas fa-wallet"></i></div>
+                        <div>
+                            <h3 style="color: white; margin: 0; font-size: 1.8rem;">R$ --</h3>
+                            <span style="color: #888; font-size: 0.9rem;">Receita Estimada</span>
+                        </div>
                     </div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-icon"><i class="fas fa-clipboard-list"></i></div>
-                    <div>
-                        <h3 style="color:white; margin:0;">0</h3>
-                        <p style="color:#888; margin:0;">Treinos Pendentes</p>
+
+                <div class="row" style="display: grid; grid-template-columns: 2fr 1fr; gap: 30px; margin-top: 30px;">
+                    <div class="app-card" style="background: #111; border: 1px solid #222; border-radius: 12px; padding: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h4 style="color: white; margin: 0;">Alunos Recentes</h4>
+                            <a href="/trainer/clients" class="btn btn-sm btn-outline">Ver Todos</a>
+                        </div>
+
+                        <% if (recentClients && recentClients.length > 0) { %>
+                            <div class="table-responsive">
+                                <table style="width: 100%; color: #ccc; border-collapse: collapse;">
+                                    <thead>
+                                        <tr style="border-bottom: 1px solid #333; color: #666; font-size: 0.85rem; text-align: left;">
+                                            <th style="padding: 10px;">Aluno</th>
+                                            <th style="padding: 10px;">Plano</th>
+                                            <th style="padding: 10px;">Status</th>
+                                            <th style="padding: 10px; text-align: right;">Ação</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% recentClients.forEach(client => { %>
+                                            <tr style="border-bottom: 1px solid #1a1a1a;">
+                                                <td style="padding: 15px 10px; display: flex; align-items: center; gap: 10px;">
+                                                    <div style="width: 30px; height: 30px; background: #333; border-radius: 50%; overflow: hidden;">
+                                                        <% if(client.photo_url) { %>
+                                                            <img src="<%= client.photo_url %>" style="width: 100%; height: 100%; object-fit: cover;">
+                                                        <% } else { %>
+                                                            <i class="fas fa-user" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #666;"></i>
+                                                        <% } %>
+                                                    </div>
+                                                    <span style="font-weight: 500; color: white;"><%= client.name %></span>
+                                                </td>
+                                                <td style="padding: 15px 10px; font-size: 0.9rem;">
+                                                    <%= client.plan_name || 'Sem Plano' %>
+                                                </td>
+                                                <td style="padding: 15px 10px;">
+                                                    <% if (client.plan_status === 'active') { %>
+                                                        <span style="background: rgba(190, 242, 2, 0.15); color: var(--primary); padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">ATIVO</span>
+                                                    <% } else { %>
+                                                        <span style="background: rgba(255, 107, 107, 0.15); color: #ff6b6b; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">INATIVO</span>
+                                                    <% } %>
+                                                </td>
+                                                <td style="padding: 15px 10px; text-align: right;">
+                                                    <a href="/trainer/client/<%= client.id %>" style="color: #888; transition: 0.2s;"><i class="fas fa-chevron-right"></i></a>
+                                                </td>
+                                            </tr>
+                                        <% }) %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <% } else { %>
+                            <div class="center" style="padding: 40px; color: #666;">
+                                <p>Você ainda não tem alunos vinculados.</p>
+                                <a href="/trainer/clients" class="btn btn-primary btn-sm">Adicionar Aluno</a>
+                            </div>
+                        <% } %>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 20px;">
+                        <div class="app-card" style="background: #151515; border: 1px solid #222; border-radius: 12px; padding: 20px;">
+                            <h4 style="color: white; margin-bottom: 15px;">Ações Rápidas</h4>
+                            <a href="/trainer/workouts/create" class="btn btn-outline w-100" style="margin-bottom: 10px; text-align: left; border-color: #333; color: #ccc;">
+                                <i class="fas fa-plus-circle" style="margin-right: 10px; color: var(--primary);"></i> Novo Treino
+                            </a>
+                            <a href="/trainer/clients" class="btn btn-outline w-100" style="text-align: left; border-color: #333; color: #ccc;">
+                                <i class="fas fa-user-plus" style="margin-right: 10px; color: var(--primary);"></i> Vincular Aluno
+                            </a>
+                        </div>
                     </div>
                 </div>
+
             </div>
         </div>
     </main>
 </div>
 
-<script src="/js/main.js"></script>
-</body>
-</html>
+<style>
+    @media (max-width: 991px) {
+        .row { grid-template-columns: 1fr !important; }
+        .stat-card { padding: 15px; }
+        .table-responsive { overflow-x: auto; }
+    }
+</style>
