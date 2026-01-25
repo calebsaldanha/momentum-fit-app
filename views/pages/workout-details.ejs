@@ -2,116 +2,164 @@
 <html lang="pt-BR">
 <head>
     <%- include('../layouts/app/head') %>
-    <title>Treino em Foco | Momentum</title>
+    <title>Treino: <%= workout.name %></title>
+    <style>
+        /* CSS Específico para Modo Foco de Treino */
+        .workout-mode-container { max-width: 800px; margin: 0 auto; padding-bottom: 100px; }
+        
+        .timer-sticky {
+            position: sticky; top: 80px; z-index: 30;
+            background: rgba(5,5,5,0.9); backdrop-filter: blur(10px);
+            border-bottom: 1px solid #222;
+            padding: 15px 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            margin: 0 -20px 20px -20px; /* Extrapola padding do container */
+        }
+
+        .exercise-card-modern {
+            background: #121212; border: 1px solid #222; border-radius: 16px;
+            overflow: hidden; margin-bottom: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+
+        .ex-header {
+            padding: 20px; background: linear-gradient(180deg, #1a1a1a 0%, #121212 100%);
+            border-bottom: 1px solid #222;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .set-grid-header {
+            display: grid; grid-template-columns: 0.5fr 1fr 1fr 1fr 0.5fr; gap: 10px;
+            padding: 10px 15px; background: #0a0a0a;
+            color: #666; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; text-align: center;
+        }
+
+        .set-row {
+            display: grid; grid-template-columns: 0.5fr 1fr 1fr 1fr 0.5fr; gap: 10px;
+            padding: 15px; border-bottom: 1px solid #1a1a1a; align-items: center;
+        }
+
+        .input-modern {
+            background: #222; border: 1px solid #333; color: white;
+            border-radius: 8px; padding: 10px; text-align: center; width: 100%;
+            font-size: 1.1rem; font-weight: 600;
+        }
+        .input-modern:focus { border-color: var(--primary); outline: none; background: #000; }
+
+        .check-wrapper {
+            display: flex; align-items: center; justify-content: center;
+        }
+        .check-box {
+            width: 28px; height: 28px; border-radius: 50%;
+            border: 2px solid #444; appearance: none; cursor: pointer;
+            transition: 0.2s; position: relative;
+        }
+        .check-box:checked { background: var(--primary); border-color: var(--primary); }
+        .check-box:checked::after {
+            content: '✓'; color: black; position: absolute;
+            top: 50%; left: 50%; transform: translate(-50%, -50%);
+            font-weight: 800; font-size: 14px;
+        }
+
+        .finish-bar {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            padding: 20px; background: linear-gradient(0deg, #000 0%, transparent 100%);
+            pointer-events: none; z-index: 40;
+            display: flex; justify-content: center;
+        }
+        .finish-btn {
+            pointer-events: auto; width: 100%; max-width: 400px;
+            background: var(--primary); color: black;
+            font-weight: 800; padding: 18px; border-radius: 50px;
+            font-size: 1.1rem; border: none; box-shadow: 0 10px 30px rgba(190, 242, 2, 0.2);
+            text-transform: uppercase; letter-spacing: 1px; cursor: pointer;
+        }
+    </style>
 </head>
 <body>
     <div class="dashboard-wrapper">
         <%- include('../partials/sidebar') %>
-        
         <div class="main-content">
             <%- include('../partials/app-header', { title: 'Modo Execução' }) %>
 
             <div class="content-scroll-area">
-                
-                <div class="workout-header">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px;">
+                <div class="workout-mode-container">
+                    
+                    <div class="timer-sticky">
                         <div>
-                            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                                <span class="badge badge-success">EM ANDAMENTO</span>
-                                <span class="badge badge-neutral"><%= workout.category || 'Geral' %></span>
-                            </div>
-                            <h1 style="font-size: 2.2rem; line-height: 1.1; margin-bottom: 10px;"><%= workout.name %></h1>
-                            <p style="color: #888; max-width: 600px;"><%= workout.description || 'Foco na técnica e controle do movimento.' %></p>
+                            <h2 style="font-size: 1.2rem; margin: 0; color: white;"><%= workout.name %></h2>
+                            <span style="font-size: 0.8rem; color: var(--primary);">Foco Total</span>
                         </div>
-                        
-                        <div style="text-align: right; min-width: 150px;">
-                            <div style="font-size: 0.8rem; color: #666; text-transform: uppercase; font-weight: 700;">Tempo Decorrido</div>
-                            <div style="font-size: 3rem; font-weight: 800; color: white; font-variant-numeric: tabular-nums;" id="timer">00:00</div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 1.8rem; font-weight: 700; font-variant-numeric: tabular-nums;" id="timer">00:00</div>
                         </div>
                     </div>
-                </div>
 
-                <form action="/client/workouts/finish" method="POST" id="workoutForm">
-                    <input type="hidden" name="workoutId" value="<%= workout.id %>">
-                    
-                    <div style="display: flex; flex-direction: column; gap: 10px;">
-                        
+                    <form action="/client/workouts/finish" method="POST">
+                        <input type="hidden" name="workoutId" value="<%= workout.id %>">
+
                         <% if (workout.exercises && workout.exercises.length > 0) { %>
-                            <% workout.exercises.forEach((ex, index) => { %>
-                                <div class="exercise-card">
-                                    <div style="padding: 20px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center;">
-                                        <div style="display: flex; gap: 15px; align-items: center;">
-                                            <div style="background: var(--primary); color: black; width: 30px; height: 30px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 800;">
-                                                <%= index + 1 %>
-                                            </div>
+                            <% workout.exercises.forEach((ex, i) => { %>
+                                <div class="exercise-card-modern">
+                                    <div class="ex-header">
+                                        <div style="display: flex; align-items: center; gap: 15px;">
+                                            <div style="width: 32px; height: 32px; background: #333; color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700;"><%= i + 1 %></div>
                                             <div>
-                                                <h3 style="font-size: 1.2rem; color: white; margin: 0;"><%= ex.name %></h3>
-                                                <div style="font-size: 0.8rem; color: #666;">Descanso: <%= ex.rest_seconds || 60 %>s</div>
+                                                <h3 style="font-size: 1.1rem; color: white; margin: 0;"><%= ex.name %></h3>
+                                                <% if(ex.video_url) { %>
+                                                    <a href="<%= ex.video_url %>" target="_blank" style="font-size: 0.8rem; color: var(--primary);"><i class="fas fa-play-circle"></i> Ver execução</a>
+                                                <% } %>
                                             </div>
                                         </div>
-                                        <% if(ex.video_url && ex.video_url !== '#') { %>
-                                            <a href="<%= ex.video_url %>" target="_blank" class="btn btn-outline" style="padding: 5px 12px; font-size: 0.8rem;">
-                                                <i class="fas fa-play"></i> Vídeo
-                                            </a>
-                                        <% } %>
                                     </div>
 
-                                    <div class="sets-container">
-                                        <div class="set-row" style="background: rgba(255,255,255,0.02); font-size: 0.75rem; color: #666; text-transform: uppercase; font-weight: 700;">
-                                            <div style="text-align: center;">SET</div>
-                                            <div style="text-align: center;">KG</div>
-                                            <div style="text-align: center;">REPS</div>
-                                            <div style="text-align: center;">RPE</div>
-                                            <div style="text-align: center;"><i class="fas fa-check"></i></div>
-                                        </div>
+                                    <div class="set-grid-header">
+                                        <div>Set</div>
+                                        <div>Kg</div>
+                                        <div>Reps</div>
+                                        <div>RPE</div>
+                                        <div>Ok</div>
+                                    </div>
 
-                                        <% 
-                                           // Se não tiver sets definidos no DB, assume 3
-                                           const setsCount = ex.sets || 3; 
-                                        %>
-                                        <% for(let i=1; i <= setsCount; i++) { %>
-                                            <div class="set-row">
-                                                <div style="text-align: center; color: var(--primary); font-weight: 700;"><%= i %></div>
-                                                <div><input type="number" class="set-input" name="ex_<%= ex.id %>_set_<%= i %>_kg" placeholder="-" style="width: 100%;"></div>
-                                                <div><input type="number" class="set-input" name="ex_<%= ex.id %>_set_<%= i %>_reps" placeholder="<%= ex.reps || '10' %>" style="width: 100%;"></div>
-                                                <div><input type="number" class="set-input" name="ex_<%= ex.id %>_set_<%= i %>_rpe" placeholder="-" style="width: 100%;"></div>
-                                                <div style="text-align: center;">
-                                                    <input type="checkbox" class="set-check">
-                                                </div>
+                                    <% const sets = ex.sets || 3; %>
+                                    <% for(let s=1; s<=sets; s++) { %>
+                                        <div class="set-row">
+                                            <div style="text-align: center; color: #555; font-weight: 700;"><%= s %></div>
+                                            <div><input type="number" name="ex_<%= ex.id %>_s<%= s %>_kg" class="input-modern" placeholder="-"></div>
+                                            <div><input type="number" name="ex_<%= ex.id %>_s<%= s %>_reps" class="input-modern" placeholder="<%= ex.reps %>"></div>
+                                            <div><input type="number" name="ex_<%= ex.id %>_s<%= s %>_rpe" class="input-modern" placeholder="-"></div>
+                                            <div class="check-wrapper">
+                                                <input type="checkbox" class="check-box">
                                             </div>
-                                        <% } %>
-                                    </div>
+                                        </div>
+                                    <% } %>
                                 </div>
                             <% }) %>
                         <% } else { %>
-                            <div class="card" style="text-align: center; padding: 40px;">
-                                <p>Este treino ainda não possui exercícios cadastrados.</p>
+                            <div style="text-align: center; padding: 50px; color: #666;">
+                                <i class="fas fa-dumbbell" style="font-size: 3rem; margin-bottom: 20px;"></i>
+                                <p>Nenhum exercício carregado.</p>
                             </div>
                         <% } %>
 
-                    </div>
-
-                    <div style="position: fixed; bottom: 20px; left: 0; width: 100%; padding: 0 20px; z-index: 90; display: flex; justify-content: center; pointer-events: none;">
-                        <button type="submit" class="btn btn-primary" style="pointer-events: auto; padding: 15px 40px; box-shadow: 0 10px 30px rgba(190,242,2,0.3); border-radius: 50px; font-size: 1.1rem; min-width: 250px;">
-                            <i class="fas fa-check-circle" style="margin-right: 10px;"></i> CONCLUIR TREINO
-                        </button>
-                    </div>
-                    <div style="height: 80px;"></div> </form>
-
+                        <div class="finish-bar">
+                            <button type="submit" class="finish-btn">
+                                <i class="fas fa-flag-checkered"></i> Finalizar Treino
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-
     <script src="/js/layout.js"></script>
     <script>
-        // Simple Timer Logic
-        let seconds = 0;
-        const timerEl = document.getElementById('timer');
+        let sec = 0;
         setInterval(() => {
-            seconds++;
-            const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
-            const secs = (seconds % 60).toString().padStart(2, '0');
-            timerEl.textContent = `${mins}:${secs}`;
+            sec++;
+            const m = Math.floor(sec / 60).toString().padStart(2,'0');
+            const s = (sec % 60).toString().padStart(2,'0');
+            document.getElementById('timer').innerText = `${m}:${s}`;
         }, 1000);
     </script>
 </body>

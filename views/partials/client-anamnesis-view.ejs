@@ -1,41 +1,56 @@
-<div class="anamnesis-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
-    <div class="card-box">
-        <h4 style="color: #bef202; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 5px;">Objetivo & Treino</h4>
-        <p><strong style="color:#ccc">Meta:</strong> <%= client.fitness_goals || client.goal || 'Não definido' %></p>
-        <p><strong style="color:#ccc">Detalhes:</strong> <%= client.goal_description || '-' %></p>
-        <p><strong style="color:#ccc">Nível:</strong> <%= client.training_experience || client.fitness_level || '-' %></p>
-        <p><strong style="color:#ccc">Horário:</strong> <%= client.preferred_training_time || '-' %></p>
-        <p><strong style="color:#ccc">Equipamentos:</strong> <%= client.available_equipment || 'Nenhum' %></p>
-    </div>
-
-    <div class="card-box">
-        <h4 style="color: #ff4d4d; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 5px;">Saúde</h4>
-        <p><strong style="color:#ccc">Histórico:</strong> <%= client.medical_history || 'Nada consta' %></p>
-        <p><strong style="color:#ccc">Medicamentos:</strong> <%= client.medications || '-' %></p>
-        <p><strong style="color:#ccc">Lesões:</strong> <%= client.injuries || 'Nenhuma' %></p>
-        <hr style="border-color:#333; margin: 10px 0;">
-        <p><strong style="color:#ff4d4d">Emergência:</strong> <%= client.emergency_contact || '-' %></p>
-        <p><strong style="color:#ff4d4d">Tel. Emergência:</strong> <%= client.emergency_phone || '-' %></p>
-    </div>
-
-    <div class="card-box">
-        <h4 style="color: #4da6ff; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 5px;">Estilo de Vida</h4>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-            <p><strong style="color:#ccc">Sono:</strong> <%= client.sleep_quality || '-' %></p>
-            <p><strong style="color:#ccc">Estresse:</strong> <%= client.stress_level || '-' %></p>
-            <p><strong style="color:#ccc">Água:</strong> <%= client.water_intake || '-' %></p>
-            <p><strong style="color:#ccc">Fumo:</strong> <%= client.smoking_status || '-' %></p>
-        </div>
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Ficha de Anamnese</h3>
     </div>
     
-    <div class="card-box">
-        <h4 style="color: white; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 5px;">Biometria Atual</h4>
-        <p><strong style="color:#ccc">Peso:</strong> <%= client.current_weight || client.weight || '-' %> kg</p>
-        <p><strong style="color:#ccc">Altura:</strong> <%= client.height || '-' %> cm</p>
-        <p><strong style="color:#ccc">Idade:</strong> 
-            <% if(client.birth_date) { %>
-                <%= new Date().getFullYear() - new Date(client.birth_date).getFullYear() %> anos
-            <% } else { %> - <% } %>
-        </p>
-    </div>
+    <% if (!client.anamnesis || Object.keys(client.anamnesis).length === 0) { %>
+        <p class="text-muted">O aluno ainda não preencheu a ficha.</p>
+    <% } else { %>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+            <div style="background: #1a1a1a; padding: 15px; border-radius: 8px;">
+                <h4 style="color: var(--primary); margin-bottom: 10px;">Identidade</h4>
+                <p><strong>Idade:</strong> <%= client.anamnesis.age || '-' %></p>
+                <p><strong>Gênero:</strong> <%= client.anamnesis.gender || '-' %></p>
+                <p><strong>Sexo Nasc.:</strong> <%= client.anamnesis.sex_at_birth || '-' %></p>
+                <% if(client.anamnesis.hormonal_transition === 'Sim') { %>
+                    <div style="margin-top: 5px; padding: 5px; background: rgba(190,242,2,0.1); border-radius: 4px;">
+                        <strong>Transição:</strong> <%= client.anamnesis.transition_details %>
+                    </div>
+                <% } %>
+            </div>
+
+            <div style="background: #1a1a1a; padding: 15px; border-radius: 8px;">
+                <h4 style="color: var(--primary); margin-bottom: 10px;">Objetivos</h4>
+                <p><strong>Principal:</strong> <%= client.anamnesis.primary_goal %></p>
+                <p><strong>Secundários:</strong> <%= client.anamnesis.secondary_goals %></p>
+                <p><strong>Evento:</strong> <%= client.anamnesis.target_event || 'Nenhum' %></p>
+            </div>
+
+            <div style="background: #1a1a1a; padding: 15px; border-radius: 8px;">
+                <h4 style="color: #ef4444; margin-bottom: 10px;">Saúde & Riscos</h4>
+                <p><strong>Condições:</strong> <%= client.anamnesis.medical_conditions || 'Nenhuma' %></p>
+                <p><strong>Medicamentos:</strong> <%= client.anamnesis.medications || 'Nenhum' %></p>
+                <p><strong>Lesões:</strong> <%= client.anamnesis.injuries || 'Nenhuma' %></p>
+                <p><strong>Alergias:</strong> <%= client.anamnesis.allergies || 'Nenhuma' %></p>
+            </div>
+
+            <div style="background: #1a1a1a; padding: 15px; border-radius: 8px;">
+                <h4 style="color: var(--primary); margin-bottom: 10px;">Rotina</h4>
+                <p><strong>Nível:</strong> <%= client.anamnesis.activity_level %></p>
+                <p><strong>Sono:</strong> <%= client.anamnesis.sleep_hours %>h</p>
+                <p><strong>Dieta:</strong> <%= client.anamnesis.diet_description %></p>
+                <p><strong>Desafios:</strong> <%= client.anamnesis.challenges %></p>
+            </div>
+
+            <div style="background: #1a1a1a; padding: 15px; border-radius: 8px;">
+                <h4 style="color: var(--primary); margin-bottom: 10px;">Preferências</h4>
+                <p><strong>Gosta:</strong> <%= client.anamnesis.liked_activities %></p>
+                <p><strong>Evita:</strong> <%= client.anamnesis.disliked_activities %></p>
+                <p><strong>Local:</strong> <%= client.anamnesis.workout_location %></p>
+                <p><strong>Dispon.:</strong> <%= client.anamnesis.availability %></p>
+            </div>
+        </div>
+
+    <% } %>
 </div>
