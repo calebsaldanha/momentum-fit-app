@@ -7,7 +7,6 @@ const isAdmin = [ensureAuthenticated, ensureRole('admin')];
 
 // Dashboard
 router.get('/dashboard', isAdmin, async (req, res) => {
-    // Valores padrão numéricos garantidos
     let stats = { users: 0, trainers: 0, revenue: 0.0 };
     
     try {
@@ -22,37 +21,66 @@ router.get('/dashboard', isAdmin, async (req, res) => {
             stats = {
                 users: parseInt(result.rows[0].users || 0),
                 trainers: parseInt(result.rows[0].trainers || 0),
-                revenue: parseFloat(result.rows[0].revenue || 0) // <--- O FIX ESTÁ AQUI (Conversão forçada)
+                revenue: parseFloat(result.rows[0].revenue || 0)
             };
         }
     } catch (e) {
-        console.warn("⚠️ Erro ao carregar stats (DB incompleto ou vazio):", e.message);
-        // Não quebra a página, apenas mostra zeros
+        console.warn("⚠️ Erro stats:", e.message);
     }
     
     res.render('pages/admin-dashboard', { user: req.user, stats, path: '/admin/dashboard' });
 });
 
-// ��� ROTA DE AUTO-CURA V2 (Versão Estável)
+// ��� ROTA DE AUTO-CURA V3 (Schema Migration)
 router.post('/repair-db', isAdmin, async (req, res) => {
     const client = await pool.connect();
     try {
         await client.query('BEGIN');
-        console.log("���️ Admin iniciou reparo de banco...");
+        console.log("���️ Admin: Iniciando Migração de Schema...");
 
-        // --- CORE TABLES ---
+        // 1. Tabela PLANS (O foco do erro)
+        // Se a tabela existe, garantimos que as colunas também existam
         await client.query(`
-            CREATE TABLE IF NOT EXISTS users (
+            CREATE TABLE IF NOT EXISTS plans (
                 id SERIAL PRIMARY KEY,
-                name VARCHAR(100), email VARCHAR(100) UNIQUE, password VARCHAR(255),
-                role VARCHAR(20) DEFAULT 'client',
-                photo_url TEXT, phone VARCHAR(20), objective VARCHAR(100),
-                current_plan_id INTEGER, plan_expires_at TIMESTAMP,
-                reset_token VARCHAR(255), reset_expires TIMESTAMP,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, last_login TIMESTAMP
+                name VARCHAR(50) NOT NULL
             );
         `);
 
+        // Migração de Colunas para PLANS
+        await client.query(`
+            DO $$ 
+            BEGIN 
+                -- Adicionar SLUG
+                IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='plans' AND column_name='slug') THEN 
+                    ALTER TABLE plans ADD COLUMN slug VARCHAR(50);
+                    ALTER TABLE plans ADD CONSTRAINT plans_slug_key UNIQUE (slug);
+                END IF;
+
+                -- Adicionar PRICE
+                IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='plans' AND column_name='price') THEN 
+                    ALTER TABLE plans ADD COLUMN price DECIMAL(10,2) DEFAULT 0; 
+                END IF;
+
+                -- Adicionar STRIPE_ID
+                IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='plans' AND column_name='stripe_price_id') THEN 
+                    ALTER TABLE plans ADD COLUMN stripe_price_id VARCHAR(100); 
+                END IF;
+
+                -- Adicionar FEATURES
+                IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='plans' AND column_name='features') THEN 
+                    ALTER TABLE plans ADD COLUMN features JSONB DEFAULT '[]'; 
+                END IF;
+
+                -- Adicionar IS_ACTIVE
+                IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='plans' AND column_name='is_active') THEN 
+                    ALTER TABLE plans ADD COLUMN is_active BOOLEAN DEFAULT true; 
+                END IF;
+            END 
+            $$;
+        `);
+
+        // 2. Tabela ASSIGNMENTS (Vínculo)
         await client.query(`
             CREATE TABLE IF NOT EXISTS assignments (
                 id SERIAL PRIMARY KEY,
@@ -62,41 +90,34 @@ router.post('/repair-db', isAdmin, async (req, res) => {
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 UNIQUE(trainer_id, client_id)
             );
-            CREATE INDEX IF NOT EXISTS idx_assignments_trainer ON assignments(trainer_id);
         `);
 
-        // --- EXERCISES & WORKOUTS ---
-        await client.query(`
-            CREATE TABLE IF NOT EXISTS exercises (
-                id SERIAL PRIMARY KEY,
-                name VARCHAR(100) NOT NULL,
-                muscle_group VARCHAR(50), equipment VARCHAR(50),
-                video_url TEXT, instructions TEXT, is_custom BOOLEAN DEFAULT false,
-                created_by INTEGER REFERENCES users(id),
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            );
-        `);
-
+        // 3. Tabela WORKOUTS (Com validação de coluna)
         await client.query(`
             CREATE TABLE IF NOT EXISTS workouts (
                 id SERIAL PRIMARY KEY,
                 creator_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
                 client_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-                name VARCHAR(100) NOT NULL, description TEXT,
-                is_active BOOLEAN DEFAULT true,
+                name VARCHAR(100) NOT NULL,
+                description TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         `);
         
-        // Patch para garantir is_active
+        // Migração Workouts
         await client.query(`
-            DO $$ BEGIN 
+            DO $$ 
+            BEGIN 
                 IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='workouts' AND column_name='is_active') THEN 
                     ALTER TABLE workouts ADD COLUMN is_active BOOLEAN DEFAULT true; 
+                END IF;
+                IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='workouts' AND column_name='is_template') THEN 
+                    ALTER TABLE workouts ADD COLUMN is_template BOOLEAN DEFAULT false; 
                 END IF;
             END $$;
         `);
 
+        // 4. Tabela WORKOUT_EXERCISES (Detalhes)
         await client.query(`
             CREATE TABLE IF NOT EXISTS workout_exercises (
                 id SERIAL PRIMARY KEY,
@@ -106,71 +127,38 @@ router.post('/repair-db', isAdmin, async (req, res) => {
                 notes TEXT, "order" INTEGER DEFAULT 0,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
-            CREATE INDEX IF NOT EXISTS idx_we_workout ON workout_exercises(workout_id);
         `);
+        await client.query('CREATE INDEX IF NOT EXISTS idx_we_workout ON workout_exercises(workout_id)');
 
-        // --- FINANCE & SYSTEM ---
+        // 5. Inserir/Atualizar Planos
+        // Agora seguro pois as colunas existem
         await client.query(`
-            CREATE TABLE IF NOT EXISTS plans (
-                id SERIAL PRIMARY KEY, name VARCHAR(50), slug VARCHAR(50) UNIQUE,
-                price DECIMAL(10,2), stripe_price_id VARCHAR(100), features JSONB,
-                is_active BOOLEAN DEFAULT true,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            );
-        `);
-
-        await client.query(`
-            CREATE TABLE IF NOT EXISTS payments (
-                id SERIAL PRIMARY KEY,
-                user_id INTEGER REFERENCES users(id), plan_id INTEGER REFERENCES plans(id),
-                amount DECIMAL(10,2), method VARCHAR(50), status VARCHAR(50),
-                stripe_checkout_session_id VARCHAR(255) UNIQUE,
-                stripe_payment_intent_id VARCHAR(255),
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            );
-        `);
-        
-        await client.query(`
-            CREATE TABLE IF NOT EXISTS notifications (
-                id SERIAL PRIMARY KEY, user_id INTEGER REFERENCES users(id),
-                type VARCHAR(50), title VARCHAR(100), message TEXT, is_read BOOLEAN DEFAULT false,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            );
-        `);
-
-        await client.query(`
-            CREATE TABLE IF NOT EXISTS site_content (
-                key VARCHAR(100) PRIMARY KEY, value TEXT NOT NULL, section VARCHAR(50),
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            );
-        `);
-
-        // Seed Plans (Garantia)
-        await client.query(`
-            INSERT INTO plans (name, slug, price, features, stripe_price_id)
+            INSERT INTO plans (name, slug, price, features, stripe_price_id, is_active)
             VALUES 
-                ('Start', 'start', 0.00, '["App", "IA Basic"]', 'price_1StT8zRrwP9b7RMz32gK7SOf'),
-                ('Momentum Pro', 'pro', 89.90, '["IA Pro", "Videos"]', 'price_1StT20RrwP9b7RMzWOohogE6'),
-                ('VIP Personal', 'vip', 249.90, '["Personal Humano"]', 'price_1StTA5RrwP9b7RMziXrKtPRe')
+                ('Start', 'start', 0.00, '["App", "IA Basic"]', 'price_1StT8zRrwP9b7RMz32gK7SOf', true),
+                ('Momentum Pro', 'pro', 89.90, '["IA Pro", "Videos"]', 'price_1StT20RrwP9b7RMzWOohogE6', true),
+                ('VIP Personal', 'vip', 249.90, '["Personal Humano"]', 'price_1StTA5RrwP9b7RMziXrKtPRe', true)
             ON CONFLICT (slug) DO UPDATE 
-            SET stripe_price_id = EXCLUDED.stripe_price_id;
+            SET stripe_price_id = EXCLUDED.stripe_price_id,
+                price = EXCLUDED.price,
+                features = EXCLUDED.features;
         `);
 
         await client.query('COMMIT');
-        req.flash('success', 'Banco de dados reparado com sucesso! Agora você pode criar treinos.');
+        console.log("✅ Migração concluída com sucesso.");
+        req.flash('success', 'Banco de dados migrado e corrigido!');
         res.redirect('/admin/dashboard');
 
     } catch (err) {
         await client.query('ROLLBACK');
         console.error(err);
-        req.flash('error', 'Erro no reparo: ' + err.message);
+        req.flash('error', 'Erro na migração: ' + err.message);
         res.redirect('/admin/dashboard');
     } finally {
         client.release();
     }
 });
 
-// Rotas Placeholder
 router.get('/users', isAdmin, (req, res) => res.render('pages/admin-users', { user: req.user, path: '/admin/users' }));
 router.get('/finance', isAdmin, (req, res) => res.render('pages/admin-finance', { user: req.user, path: '/admin/finance' }));
 router.get('/content', isAdmin, (req, res) => res.render('pages/admin-content', { user: req.user, path: '/admin/content' }));
