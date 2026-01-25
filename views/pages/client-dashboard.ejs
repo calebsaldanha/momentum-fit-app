@@ -1,61 +1,103 @@
-<%- include('../layouts/app/head') %>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <%- include('../layouts/app/head') %>
+    <title><%= title %> | Momentum Fit</title>
+</head>
+<body class="bg-gray-50">
+    <div class="flex h-screen overflow-hidden">
+        <%- include('../partials/sidebar') %>
 
-<div class="dashboard-layout">
-    <%- include('../partials/sidebar') %>
-    
-    <main class="app-main">
-        <%- include('../partials/app-header') %>
-        
-        <div class="dashboard-content">
-            <div class="container-fluid">
-                <div style="margin-bottom: 30px;">
-                    <h2 style="color: white; margin-bottom: 5px;">Ol√°, <%= user.name.split(' ')[0] %>! Ì±ã</h2>
-                    <p style="color: #888;">Vamos fazer o treino de hoje render?</p>
-                </div>
+        <div class="relative flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
+            <%- include('../partials/app-header') %>
 
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="icon-box"><i class="fas fa-dumbbell"></i></div>
+            <main class="w-full flex-grow p-6">
+                <div class="bg-gradient-to-r from-blue-900 to-blue-700 rounded-2xl shadow-lg p-6 mb-8 text-white flex justify-between items-center">
+                    <div>
+                        <h1 class="text-3xl font-bold mb-2">Ol√°, <%= user.name.split(' ')[0] %>! Ì∫Ä</h1>
+                        <p class="opacity-90">Vamos manter o foco hoje? Seu plano atual √©: <span class="font-bold bg-white/20 px-2 py-1 rounded text-sm"><%= stats.plan_name %></span></p>
+                    </div>
+                    <% if (trainer) { %>
+                    <div class="hidden md:flex items-center bg-white/10 rounded-lg p-3 backdrop-blur-sm">
+                        <% if(trainer.photo_url) { %>
+                            <img src="<%= trainer.photo_url %>" class="w-10 h-10 rounded-full border-2 border-white mr-3">
+                        <% } else { %>
+                            <div class="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold mr-3 border-2 border-white">
+                                <%= trainer.name.charAt(0) %>
+                            </div>
+                        <% } %>
                         <div>
-                            <h3 style="color: white; margin: 0;"><%= stats.total_workouts || 0 %></h3>
-                            <span style="color: #888; font-size: 0.9rem;">Treinos Ativos</span>
+                            <p class="text-xs opacity-75">Seu Treinador</p>
+                            <p class="font-semibold text-sm"><%= trainer.name %></p>
                         </div>
                     </div>
+                    <% } %>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     
-                    <div class="stat-card">
-                        <div class="icon-box" style="background: rgba(0, 255, 255, 0.1); color: cyan;"><i class="fas fa-calendar-check"></i></div>
-                        <div>
-                            <h3 style="color: white; margin: 0;">0</h3>
-                            <span style="color: #888; font-size: 0.9rem;">Treinos Completos</span>
+                    <div class="lg:col-span-2 space-y-6">
+                        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                            <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                                <span class="bg-blue-100 text-blue-600 p-2 rounded-lg mr-3">ÌøãÔ∏è</span>
+                                Treino de Hoje
+                            </h2>
+                            
+                            <% if (nextWorkout) { %>
+                                <div class="bg-gray-50 rounded-xl p-5 border border-gray-200">
+                                    <div class="flex justify-between items-start mb-3">
+                                        <div>
+                                            <h3 class="text-lg font-bold text-gray-900"><%= nextWorkout.name %></h3>
+                                            <p class="text-gray-500 text-sm"><%= nextWorkout.description || 'Foco em performance' %></p>
+                                        </div>
+                                        <span class="bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full">Ativo</span>
+                                    </div>
+                                    
+                                    <div class="flex items-center text-sm text-gray-600 mb-6 space-x-4">
+                                        <div class="flex items-center"><i class="fas fa-dumbbell mr-2"></i> <%= nextWorkout.exercises_count %> Exerc√≠cios</div>
+                                        <div class="flex items-center"><i class="fas fa-clock mr-2"></i> ~45 min</div>
+                                    </div>
+
+                                    <a href="/client/workouts/<%= nextWorkout.id %>" class="block w-full bg-blue-600 hover:bg-blue-700 text-white text-center font-bold py-3 rounded-lg transition shadow-md hover:shadow-lg">
+                                        Iniciar Treino Agora
+                                    </a>
+                                </div>
+                            <% } else { %>
+                                <div class="text-center py-8">
+                                    <div class="text-gray-300 text-5xl mb-3">Ì≥≠</div>
+                                    <p class="text-gray-500 mb-4">Nenhum treino atribu√≠do ainda.</p>
+                                    <p class="text-sm text-blue-600">Aguarde seu treinador enviar o planejamento.</p>
+                                </div>
+                            <% } %>
                         </div>
                     </div>
 
-                    <div class="stat-card">
-                        <div class="icon-box" style="background: rgba(255, 255, 0, 0.1); color: yellow;"><i class="fas fa-star"></i></div>
-                        <div>
-                            <h3 style="color: white; margin: 0; font-size: 1.2rem;"><%= stats.plan_name || 'Free' %></h3>
-                            <span style="color: #888; font-size: 0.9rem;">Plano Atual</span>
+                    <div class="space-y-6">
+                        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                            <h3 class="text-gray-800 font-bold mb-4">Seu Progresso</h3>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-gray-600 text-sm">Treinos Realizados</span>
+                                <span class="text-2xl font-bold text-blue-600"><%= stats.total_workouts %></span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+                                <div class="bg-blue-600 h-2.5 rounded-full" style="width: 45%"></div>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-2 text-right">Mantenha a const√¢ncia!</p>
+                        </div>
+
+                        <div class="bg-gradient-to-br from-purple-50 to-white rounded-xl shadow-sm p-6 border border-purple-100">
+                            <div class="flex items-center mb-3">
+                                <span class="bg-purple-100 text-purple-600 p-2 rounded-lg mr-3">Ì¥ñ</span>
+                                <h3 class="text-gray-800 font-bold">Coach IA</h3>
+                            </div>
+                            <p class="text-sm text-gray-600 mb-4">Tem d√∫vidas sobre a execu√ß√£o ou dieta? Eu posso ajudar.</p>
+                            <a href="/client/ai-coach" class="text-purple-600 font-semibold text-sm hover:underline">Falar com Coach &rarr;</a>
                         </div>
                     </div>
                 </div>
 
-                <div class="app-card" style="margin-top: 30px; background: linear-gradient(135deg, #1a1a1a 0%, #111 100%); border: 1px solid #333; padding: 30px; border-radius: 16px; position: relative; overflow: hidden;">
-                    <div style="position: relative; z-index: 2;">
-                        <span style="background: var(--primary); color: black; padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 800; text-transform: uppercase;">Pr√≥ximo</span>
-                        <h3 style="color: white; margin: 15px 0 10px; font-size: 1.8rem;">Treino A - Superiores</h3>
-                        <p style="color: #ccc; margin-bottom: 25px; max-width: 500px;">Foco em peitoral e tr√≠ceps com progress√£o de carga linear.</p>
-                        
-                        <div style="display: flex; gap: 15px;">
-                            <a href="/client/workouts/start" class="btn btn-primary" style="padding: 12px 30px; color: black; font-weight: 700;">
-                                <i class="fas fa-play"></i> Iniciar Agora
-                            </a>
-                            <a href="/client/workouts" class="btn btn-outline">Ver Detalhes</a>
-                        </div>
-                    </div>
-                    <i class="fas fa-running" style="position: absolute; right: -20px; bottom: -40px; font-size: 12rem; color: rgba(255,255,255,0.03); transform: rotate(-15deg);"></i>
-                </div>
-
-            </div>
+            </main>
         </div>
-    </main>
-</div>
+    </div>
+</body>
+</html>
