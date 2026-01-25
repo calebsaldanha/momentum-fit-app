@@ -2,48 +2,30 @@
 <html lang="pt-BR">
 <head>
     <%- include('../layouts/app/head') %>
-    <title><%= title %> | Momentum Fit</title>
+    <title>Meu Plano | Momentum Fit</title>
 </head>
-<body class="bg-gray-50">
-    <div class="flex h-screen overflow-hidden">
+<body>
+    <div class="dashboard-wrapper">
         <%- include('../partials/sidebar') %>
-        <div class="relative flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
-            <%- include('../partials/app-header') %>
-            <main class="w-full flex-grow p-6">
-                <div class="text-center mb-10">
-                    <h1 class="text-3xl font-bold text-gray-900">Escolha seu Plano</h1>
-                    <p class="text-gray-500 mt-2">Invista em você e leve seu treino para o próximo nível.</p>
-                </div>
+        <div class="main-content">
+            <%- include('../partials/app-header', { title: 'Assinatura' }) %>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                    <% plans.forEach(plan => { %>
-                        <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 flex flex-col transition hover:-translate-y-1 hover:shadow-xl">
-                            <div class="p-6 flex-grow">
-                                <h3 class="text-xl font-bold text-gray-900 mb-2"><%= plan.name %></h3>
-                                <div class="flex items-baseline mb-4">
-                                    <span class="text-3xl font-bold">R$ <%= parseFloat(plan.price).toFixed(2).replace('.', ',') %></span>
-                                    <span class="text-gray-500">/mês</span>
-                                </div>
-                                <p class="text-gray-600 text-sm mb-6"><%= plan.description %></p>
-                                <ul class="space-y-3 text-sm text-gray-600">
-                                    <% if (plan.features) { %>
-                                        <% JSON.parse(plan.features || '[]').forEach(feature => { %>
-                                            <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> <%= feature %></li>
-                                        <% }) %>
-                                    <% } else { %>
-                                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Acesso completo</li>
-                                    <% } %>
-                                </ul>
-                            </div>
-                            <div class="p-6 bg-gray-50 border-t border-gray-100">
-                                <a href="/payment/checkout/<%= plan.slug %>" class="block w-full bg-blue-600 hover:bg-blue-700 text-white text-center font-bold py-3 rounded-lg transition">
-                                    Assinar Agora
-                                </a>
-                            </div>
-                        </div>
-                    <% }) %>
+            <div class="content-pad">
+                <div class="card" style="max-width: 600px; margin: 0 auto; border-top: 4px solid var(--neon-primary);">
+                    <div style="text-align: center; padding: 40px 0;">
+                        <span class="badge badge-neutral" style="font-size: 1rem; margin-bottom: 15px;">PLANO ATUAL</span>
+                        <h1 style="font-size: 3rem; color: white; margin-bottom: 10px;"><%= plan.name %></h1>
+                        <p style="font-size: 1.5rem; color: var(--neon-primary);">R$ <%= plan.price %> <span style="font-size: 0.9rem; color: #888;">/ mês</span></p>
+                    </div>
+                    <ul style="margin: 0 auto 30px; max-width: 300px; list-style: none;">
+                        <% plan.features.forEach(f => { %>
+                            <li style="margin-bottom: 10px; color: #ccc;"><i class="fas fa-check" style="color: var(--neon-primary); margin-right: 10px;"></i> <%= f %></li>
+                        <% }) %>
+                    </ul>
+                    <button class="btn btn-outline btn-block">Gerenciar Assinatura</button>
+                    <button class="btn btn-primary btn-block" style="margin-top: 10px;">Fazer Upgrade</button>
                 </div>
-            </main>
+            </div>
         </div>
     </div>
 </body>

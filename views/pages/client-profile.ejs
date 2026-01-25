@@ -2,65 +2,78 @@
 <html lang="pt-BR">
 <head>
     <%- include('../layouts/app/head') %>
-    <title>Meu Perfil | Momentum Fit</title>
+    <title>Perfil & Anamnese | Momentum Fit</title>
 </head>
 <body>
     <div class="dashboard-wrapper">
         <%- include('../partials/sidebar') %>
         <div class="main-content">
-            <%- include('../partials/app-header', { title: 'Configurações de Conta' }) %>
+            <%- include('../partials/app-header', { title: 'Ficha do Atleta' }) %>
 
             <div class="content-pad">
-                <div class="grid-2">
-                    <div class="card">
-                        <div style="text-align: center; margin-bottom: 20px;">
-                            <div class="user-avatar" style="width: 100px; height: 100px; font-size: 2.5rem; margin: 0 auto 15px;">
-                                <%= user.name.charAt(0) %>
+                <%- include('../partials/flash') %>
+                
+                <form action="/client/profile/update" method="POST">
+                    <div class="grid-2">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title"><i class="fas fa-id-card"></i> Dados Pessoais</h3>
                             </div>
-                            <h2 style="font-size: 1.5rem;"><%= user.name %></h2>
-                            <p style="color: var(--neon-primary);">Membro Elite</p>
+                            <div class="form-group mb-20">
+                                <label>Nome Completo</label>
+                                <input type="text" name="name" value="<%= user.name %>" class="form-control">
+                            </div>
+                            <div class="form-group mb-20">
+                                <label>Email (Não editável)</label>
+                                <input type="email" value="<%= user.email %>" class="form-control" disabled style="opacity: 0.6;">
+                            </div>
+                            <div class="form-group">
+                                <label>Telefone</label>
+                                <input type="text" name="phone" placeholder="(11) 99999-9999" class="form-control">
+                            </div>
                         </div>
-                        
-                        <div style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px;">
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                                <span style="color: #888;">E-mail</span>
-                                <span><%= user.email %></span>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                                <span style="color: #888;">Membro desde</span>
-                                <span>2024</span>
-                            </div>
-                        </div>
-                    </div>
 
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title"><i class="fas fa-edit"></i> Editar Dados</h3>
-                        </div>
-                        <form action="/client/profile/update" method="POST">
-                            <div class="form-group" style="margin-bottom: 15px;">
-                                <label>Nome de Exibição</label>
-                                <input type="text" name="name" value="<%= user.name %>">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title"><i class="fas fa-notes-medical"></i> Anamnese</h3>
+                                <span class="badge badge-neutral">Importante</span>
                             </div>
                             
-                            <div class="form-group" style="margin-bottom: 15px;">
-                                <label>Telefone</label>
-                                <input type="text" name="phone" placeholder="(00) 00000-0000">
-                            </div>
-
-                            <div class="form-group" style="margin-bottom: 15px;">
+                            <div class="form-group mb-20">
                                 <label>Objetivo Principal</label>
-                                <select name="goal">
-                                    <option value="hypertrophy">Hipertrofia</option>
-                                    <option value="weight_loss">Perda de Peso</option>
-                                    <option value="endurance">Resistência</option>
+                                <select name="objective" class="form-control">
+                                    <option value="Hipertrofia" <%= anamnesis.objective === 'Hipertrofia' ? 'selected' : '' %>>Hipertrofia (Ganho de Massa)</option>
+                                    <option value="Emagrecimento" <%= anamnesis.objective === 'Emagrecimento' ? 'selected' : '' %>>Emagrecimento</option>
+                                    <option value="Resistência" <%= anamnesis.objective === 'Resistência' ? 'selected' : '' %>>Resistência / Condicionamento</option>
+                                    <option value="Saúde" <%= anamnesis.objective === 'Saúde' ? 'selected' : '' %>>Saúde / Bem-estar</option>
                                 </select>
                             </div>
 
-                            <button type="submit" class="btn btn-primary w-100">Salvar Alterações</button>
-                        </form>
+                            <div class="form-group mb-20">
+                                <label>Nível de Experiência</label>
+                                <select name="experience" class="form-control">
+                                    <option value="Iniciante">Iniciante (Nunca treinei)</option>
+                                    <option value="Intermediário">Intermediário (Treino há 6 meses+)</option>
+                                    <option value="Avançado">Avançado (Treino há 2 anos+)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group mb-20">
+                                <label>Possui lesões?</label>
+                                <textarea name="injuries" class="form-control" rows="2" placeholder="Descreva se houver..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Uso de medicação contínua?</label>
+                                <textarea name="medication" class="form-control" rows="2" placeholder="Descreva se houver..."></textarea>
+                            </div>
+                        </div>
                     </div>
-                </div>
+
+                    <div style="margin-top: 20px; text-align: right;">
+                        <button type="submit" class="btn btn-primary btn-lg">Salvar Alterações</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

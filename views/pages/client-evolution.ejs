@@ -2,25 +2,46 @@
 <html lang="pt-BR">
 <head>
     <%- include('../layouts/app/head') %>
-    <title><%= title %> | Momentum Fit</title>
+    <title>Evolução | Momentum Fit</title>
 </head>
-<body class="bg-gray-50">
-    <div class="flex h-screen overflow-hidden">
+<body>
+    <div class="dashboard-wrapper">
         <%- include('../partials/sidebar') %>
-        <div class="relative flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
-            <%- include('../partials/app-header') %>
-            <main class="w-full flex-grow p-6">
-                <div class="text-center py-20 bg-white rounded-xl shadow-sm border border-gray-100">
-                    <div class="text-6xl mb-4">���</div>
-                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Evolução em Construção</h2>
-                    <p class="text-gray-500 max-w-md mx-auto mb-6">
-                        Assim que você começar a registrar seus check-ins de treino, seus gráficos aparecerão aqui.
-                    </p>
-                    <a href="/client/workouts" class="btn-primary inline-block bg-blue-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-700">
-                        Ir para Treinos
-                    </a>
+        <div class="main-content">
+            <%- include('../partials/app-header', { title: 'Métricas de Performance' }) %>
+
+            <div class="content-pad">
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Peso Corporal (kg)</h3>
+                        </div>
+                        <div style="height: 200px; display: flex; align-items: flex-end; justify-content: space-around; padding-bottom: 10px; border-bottom: 1px solid #333;">
+                            <% data.weight.forEach(val => { %>
+                                <div style="width: 40px; background: var(--neon-primary); height: <%= val %>px; border-radius: 4px 4px 0 0; position: relative;">
+                                    <span style="position: absolute; top: -20px; left: 5px; font-size: 0.7rem; color: white;"><%= val %></span>
+                                </div>
+                            <% }) %>
+                        </div>
+                        <div style="display: flex; justify-content: space-around; margin-top: 10px; color: #888; font-size: 0.8rem;">
+                            <% data.labels.forEach(l => { %> <span><%= l %></span> <% }) %>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">1RM Supino (Estimado)</h3>
+                        </div>
+                        <div style="height: 200px; display: flex; align-items: flex-end; justify-content: space-around; padding-bottom: 10px; border-bottom: 1px solid #333;">
+                            <% data.benchPress.forEach(val => { %>
+                                <div style="width: 40px; background: #3b82f6; height: <%= val * 1.5 %>px; border-radius: 4px 4px 0 0; position: relative;">
+                                    <span style="position: absolute; top: -20px; left: 5px; font-size: 0.7rem; color: white;"><%= val %></span>
+                                </div>
+                            <% }) %>
+                        </div>
+                    </div>
                 </div>
-            </main>
+            </div>
         </div>
     </div>
 </body>
