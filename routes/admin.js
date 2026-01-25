@@ -23,14 +23,14 @@ router.get('/dashboard', isAdmin, async (req, res) => {
     res.render('pages/admin-dashboard', { user: req.user, stats, path: '/admin/dashboard' });
 });
 
-// íº‘ ROTA DE AUTO-CURA (SELF-HEALING V2)
+// íº‘ ROTA DE AUTO-CURA V2 (CompatÃ­vel com POSTGRES_URL)
 router.post('/repair-db', isAdmin, async (req, res) => {
     const client = await pool.connect();
     try {
         await client.query('BEGIN');
-        console.log("í» ï¸ Admin iniciou reparo de banco...");
+        console.log("í» ï¸ Admin iniciou reparo de banco (Vercel Mode)...");
 
-        // 1. Core Tables
+        // --- CORE TABLES ---
         await client.query(`
             CREATE TABLE IF NOT EXISTS users (
                 id SERIAL PRIMARY KEY,
@@ -52,9 +52,10 @@ router.post('/repair-db', isAdmin, async (req, res) => {
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 UNIQUE(trainer_id, client_id)
             );
+            CREATE INDEX IF NOT EXISTS idx_assignments_trainer ON assignments(trainer_id);
         `);
 
-        // 2. Workout System
+        // --- EXERCISES & WORKOUTS ---
         await client.query(`
             CREATE TABLE IF NOT EXISTS exercises (
                 id SERIAL PRIMARY KEY,
@@ -72,12 +73,21 @@ router.post('/repair-db', isAdmin, async (req, res) => {
                 creator_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
                 client_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
                 name VARCHAR(100) NOT NULL, description TEXT,
-                is_active BOOLEAN DEFAULT true,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                is_active BOOLEAN DEFAULT true, -- Coluna crÃ­tica
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         `);
+        
+        // Patch para garantir is_active
+        await client.query(`
+            DO $$ BEGIN 
+                IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='workouts' AND column_name='is_active') THEN 
+                    ALTER TABLE workouts ADD COLUMN is_active BOOLEAN DEFAULT true; 
+                END IF;
+            END $$;
+        `);
 
-        // A TABELA QUE FALTOU NO ÃšLTIMO COMMIT
         await client.query(`
             CREATE TABLE IF NOT EXISTS workout_exercises (
                 id SERIAL PRIMARY KEY,
@@ -90,11 +100,12 @@ router.post('/repair-db', isAdmin, async (req, res) => {
             CREATE INDEX IF NOT EXISTS idx_we_workout ON workout_exercises(workout_id);
         `);
 
-        // 3. Financeiro
+        // --- FINANCE & SYSTEM ---
         await client.query(`
             CREATE TABLE IF NOT EXISTS plans (
                 id SERIAL PRIMARY KEY, name VARCHAR(50), slug VARCHAR(50) UNIQUE,
                 price DECIMAL(10,2), stripe_price_id VARCHAR(100), features JSONB,
+                is_active BOOLEAN DEFAULT true,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         `);
@@ -105,11 +116,11 @@ router.post('/repair-db', isAdmin, async (req, res) => {
                 user_id INTEGER REFERENCES users(id), plan_id INTEGER REFERENCES plans(id),
                 amount DECIMAL(10,2), method VARCHAR(50), status VARCHAR(50),
                 stripe_checkout_session_id VARCHAR(255) UNIQUE,
+                stripe_payment_intent_id VARCHAR(255),
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         `);
         
-        // 4. NotificaÃ§Ãµes e CMS
         await client.query(`
             CREATE TABLE IF NOT EXISTS notifications (
                 id SERIAL PRIMARY KEY, user_id INTEGER REFERENCES users(id),
@@ -125,8 +136,19 @@ router.post('/repair-db', isAdmin, async (req, res) => {
             );
         `);
 
+        // Seed Plans (Garantia)
+        await client.query(`
+            INSERT INTO plans (name, slug, price, features, stripe_price_id)
+            VALUES 
+                ('Start', 'start', 0.00, '["App", "IA Basic"]', 'price_1StT8zRrwP9b7RMz32gK7SOf'),
+                ('Momentum Pro', 'pro', 89.90, '["IA Pro", "Videos"]', 'price_1StT20RrwP9b7RMzWOohogE6'),
+                ('VIP Personal', 'vip', 249.90, '["Personal Humano"]', 'price_1StTA5RrwP9b7RMziXrKtPRe')
+            ON CONFLICT (slug) DO UPDATE 
+            SET stripe_price_id = EXCLUDED.stripe_price_id;
+        `);
+
         await client.query('COMMIT');
-        req.flash('success', 'Banco de dados reparado (Tabelas de Treino criadas)!');
+        req.flash('success', 'Infraestrutura de Banco reparada com sucesso!');
         res.redirect('/admin/dashboard');
 
     } catch (err) {
