@@ -36,7 +36,7 @@ router.get('/dashboard', requireSuperAdmin, async (req, res) => {
 
 router.get('/manage', requireSuperAdmin, async (req, res) => {
     try {
-        const result = await pool.query("SELECT * FROM users ORDER BY created_at DESC");
+        const result = await pool.query("SELECT id, name, email, role, status, created_at FROM users ORDER BY created_at DESC");
         const allUsers = result.rows;
         const trainers = allUsers.filter(u => u.role === 'trainer');
         const clients = allUsers.filter(u => u.role === 'client');
