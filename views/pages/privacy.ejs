@@ -1,29 +1,29 @@
-<%- include('../layouts/public/head') %>
+<%- include('../layouts/public/head', { title: 'Política de Privacidade' }) %>
 <%- include('../layouts/public/header') %>
 
-<main class="page-spacer">
-    <div class="container" style="max-width: 800px;">
-        <h1 class="section-title" style="font-size: 2.5rem; margin-bottom: 40px; border-bottom: 1px solid #222; padding-bottom: 20px;">Política de Privacidade</h1>
-        
-        <div style="color: #ccc; line-height: 1.8; font-size: 1rem;">
-            <p style="margin-bottom: 20px;">Sua privacidade é nossa prioridade. Esta política descreve como coletamos e usamos seus dados.</p>
+<main class="public-content">
+    <section class="page-spacer" style="padding-top: 140px; padding-bottom: 80px;">
+        <div class="container" style="max-width: 800px;">
+            <h1 class="section-title" style="margin-bottom: 40px;">Política de Privacidade</h1>
+            
+            <div style="background: #111; padding: 40px; border-radius: 16px; border: 1px solid #222; color: #ccc; line-height: 1.8;">
+                <p style="margin-bottom: 30px;">Na Momentum Fit, seus dados servem apenas para uma coisa: melhorar sua performance. Não vendemos suas informações.</p>
 
-            <h3 style="color: white; margin: 30px 0 15px;">1. Coleta de Dados</h3>
-            <p style="margin-bottom: 20px;">
-                Coletamos informações como nome, e-mail e dados antropométricos (peso, altura) estritamente para personalizar sua experiência de treino e alimentar os modelos de IA.
-            </p>
+                <h3 style="color: white; margin-bottom: 15px;">1. Dados Coletados</h3>
+                <ul style="list-style: disc; padding-left: 20px; margin-bottom: 20px;">
+                    <li>Dados de cadastro (Nome, Email).</li>
+                    <li>Dados fisiológicos (Peso, Altura, Idade) para cálculos de treino.</li>
+                    <li>Histórico de treinos e logs de acesso.</li>
+                </ul>
 
-            <h3 style="color: white; margin: 30px 0 15px;">2. Uso das Informações</h3>
-            <p style="margin-bottom: 20px;">
-                Seus dados de treino são usados para gerar gráficos de evolução e sugestões de carga. Não vendemos seus dados para terceiros.
-            </p>
-
-            <h3 style="color: white; margin: 30px 0 15px;">3. Segurança</h3>
-            <p style="margin-bottom: 20px;">
-                Empregamos criptografia de ponta e práticas de segurança modernas para proteger suas informações pessoais contra acesso não autorizado.
-            </p>
+                <h3 style="color: white; margin-bottom: 15px;">2. Uso dos Dados</h3>
+                <p style="margin-bottom: 20px;">Utilizamos seus dados para personalizar a experiência do IA Coach e gerar relatórios de evolução. Seus dados de pagamento são processados exclusivamente pelo Stripe.</p>
+                
+                <h3 style="color: white; margin-bottom: 15px;">3. Segurança</h3>
+                <p>Utilizamos criptografia de ponta a ponta e seguimos as normas da LGPD.</p>
+            </div>
         </div>
-    </div>
+    </section>
 </main>
 
 <%- include('../layouts/public/footer') %>

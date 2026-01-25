@@ -1,29 +1,26 @@
-<%- include('../layouts/public/head') %>
+<%- include('../layouts/public/head', { title: 'Termos de Uso' }) %>
 <%- include('../layouts/public/header') %>
 
-<main class="page-spacer">
-    <div class="container" style="max-width: 800px;">
-        <h1 class="section-title" style="font-size: 2.5rem; margin-bottom: 40px; border-bottom: 1px solid #222; padding-bottom: 20px;">Termos de Uso</h1>
-        
-        <div style="color: #ccc; line-height: 1.8; font-size: 1rem;">
-            <p style="margin-bottom: 20px;">Última atualização: Janeiro de 2026</p>
+<main class="public-content">
+    <section class="page-spacer" style="padding-top: 140px; padding-bottom: 80px;">
+        <div class="container" style="max-width: 800px;">
+            <h1 class="section-title" style="margin-bottom: 40px;">Termos de Uso</h1>
+            
+            <div style="background: #111; padding: 40px; border-radius: 16px; border: 1px solid #222; color: #ccc; line-height: 1.8;">
+                <h3 style="color: white; margin-bottom: 15px;">1. Aceitação</h3>
+                <p style="margin-bottom: 20px;">Ao acessar a Momentum Fit, você concorda com estes termos. O serviço é destinado a maiores de 18 anos ou menores com autorização.</p>
 
-            <h3 style="color: white; margin: 30px 0 15px;">1. Aceitação dos Termos</h3>
-            <p style="margin-bottom: 20px;">
-                Ao acessar e usar a plataforma Momentum Fit, você aceita e concorda em estar vinculado aos termos e disposições deste acordo.
-            </p>
+                <h3 style="color: white; margin-bottom: 15px;">2. Serviços</h3>
+                <p style="margin-bottom: 20px;">Oferecemos ferramentas de gestão de treino e análise de dados. A responsabilidade pela execução dos exercícios é exclusivamente do usuário. Consulte um médico antes de iniciar atividades físicas.</p>
 
-            <h3 style="color: white; margin: 30px 0 15px;">2. Uso da Plataforma</h3>
-            <p style="margin-bottom: 20px;">
-                A Momentum Fit fornece ferramentas para gestão de treinos e acompanhamento físico. O uso indevido da plataforma para fins ilegais ou não autorizados é estritamente proibido.
-            </p>
-
-            <h3 style="color: white; margin: 30px 0 15px;">3. Responsabilidades Médicas</h3>
-            <p style="margin-bottom: 20px;">
-                O conteúdo da plataforma não substitui o conselho médico profissional. Consulte sempre um médico antes de iniciar qualquer programa de exercícios.
-            </p>
+                <h3 style="color: white; margin-bottom: 15px;">3. Assinaturas e Pagamentos</h3>
+                <p style="margin-bottom: 20px;">Os pagamentos são processados via Stripe. O cancelamento pode ser feito a qualquer momento através do painel do usuário, sem multa, respeitando o ciclo de cobrança vigente.</p>
+                
+                <h3 style="color: white; margin-bottom: 15px;">4. Propriedade Intelectual</h3>
+                <p>Todo o código, design e metodologia da Momentum Fit são protegidos por direitos autorais.</p>
+            </div>
         </div>
-    </div>
+    </section>
 </main>
 
 <%- include('../layouts/public/footer') %>

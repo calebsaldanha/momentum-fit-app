@@ -1,18 +1,20 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <title>Erro - Momentum</title>
-    <link rel="stylesheet" href="/css/styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-</head>
-<body style="display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #050505;">
-    <div style="text-align: center;">
-        <h1 style="color: white; font-size: 3rem; margin-bottom: 20px;">Ops!</h1>
-        <p style="color: #999; margin-bottom: 30px;">
-            <%= typeof message !== 'undefined' ? message : 'Ocorreu um erro inesperado.' %>
-        </p>
-        <a href="/" class="btn btn-primary">Voltar ao Início</a>
-    </div>
-</body>
-</html>
+<%- include('../layouts/public/head', { title: 'Erro' }) %>
+<%- include('../layouts/public/header') %>
+
+<main class="public-content">
+    <section class="hero hero-small" style="min-height: 80vh; display: flex; align-items: center; text-align: center;">
+        <div class="hero-overlay"></div>
+        <div class="container hero-container">
+            <div style="font-size: 5rem; color: var(--primary); margin-bottom: 20px;">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h1 class="hero-title" style="font-size: 3rem; margin-bottom: 20px;">Algo deu errado</h1>
+            <p class="hero-subtitle" style="margin: 0 auto; margin-bottom: 40px;">
+                <%= typeof message !== 'undefined' ? message : 'Erro interno do servidor.' %>
+            </p>
+            <a href="/" class="btn btn-primary">Voltar para o Início</a>
+        </div>
+    </section>
+</main>
+
+<%- include('../layouts/public/footer') %>

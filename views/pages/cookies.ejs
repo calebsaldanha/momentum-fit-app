@@ -1,28 +1,23 @@
-<%- include('../layouts/public/head') %>
+<%- include('../layouts/public/head', { title: 'Política de Cookies' }) %>
 <%- include('../layouts/public/header') %>
 
-<main class="page-spacer">
-    <div class="container" style="max-width: 800px;">
-        <h1 class="section-title" style="font-size: 2.5rem; margin-bottom: 40px; border-bottom: 1px solid #222; padding-bottom: 20px;">Política de Cookies</h1>
-        
-        <div style="color: #ccc; line-height: 1.8; font-size: 1rem;">
-            <h3 style="color: white; margin: 30px 0 15px;">O que são Cookies?</h3>
-            <p style="margin-bottom: 20px;">
-                Cookies são pequenos arquivos de texto armazenados no seu dispositivo para melhorar a funcionalidade do site e lembrar suas preferências.
-            </p>
+<main class="public-content">
+    <section class="page-spacer" style="padding-top: 140px; padding-bottom: 80px;">
+        <div class="container" style="max-width: 800px;">
+            <h1 class="section-title" style="margin-bottom: 40px;">Cookies</h1>
+            
+            <div style="background: #111; padding: 40px; border-radius: 16px; border: 1px solid #222; color: #ccc; line-height: 1.8;">
+                <h3 style="color: white; margin-bottom: 15px;">O que são?</h3>
+                <p style="margin-bottom: 20px;">Cookies são pequenos arquivos salvos no seu navegador para manter sua sessão ativa e lembrar suas preferências.</p>
 
-            <h3 style="color: white; margin: 30px 0 15px;">Como usamos</h3>
-            <ul style="list-style: disc; margin-left: 20px; margin-bottom: 20px;">
-                <li><strong>Essenciais:</strong> Para manter você logado.</li>
-                <li><strong>Analíticos:</strong> Para entender como você usa a plataforma e melhorarmos nossos serviços.</li>
-            </ul>
-
-            <h3 style="color: white; margin: 30px 0 15px;">Gerenciamento</h3>
-            <p style="margin-bottom: 20px;">
-                Você pode desativar os cookies nas configurações do seu navegador, mas isso pode afetar o funcionamento da plataforma.
-            </p>
+                <h3 style="color: white; margin-bottom: 15px;">Como usamos</h3>
+                <ul style="list-style: disc; padding-left: 20px; margin-bottom: 20px;">
+                    <li><strong>Essenciais:</strong> Para manter você logado.</li>
+                    <li><strong>Analíticos:</strong> Para entender como o site é usado (anônimo).</li>
+                </ul>
+            </div>
         </div>
-    </div>
+    </section>
 </main>
 
 <%- include('../layouts/public/footer') %>

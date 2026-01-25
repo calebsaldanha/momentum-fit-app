@@ -1,53 +1,31 @@
-<%- include('../partials/header.ejs', { title: 'Contato', path: '/contact' }) %>
+<%- include('../layouts/public/head', { title: 'Contato' }) %>
+<%- include('../layouts/public/header') %>
 
 <main class="public-content">
-    <section class="hero" style="min-height: 100vh; align-items: center; padding-top: 100px;">
-        <div class="hero-overlay"></div>
-        <div class="container" style="position: relative; z-index: 2; width: 100%;">
-            <div class="section-header center">
+    <section class="page-spacer" style="padding-top: 140px; padding-bottom: 80px; min-height: 80vh; display: flex; align-items: center;">
+        <div class="container">
+            <div class="center mb-80" style="margin-bottom: 60px;">
                 <h1 class="section-title">Fale Conosco</h1>
-                <p style="color: #ccc;">Estamos prontos para ajudar você a alcançar seus objetivos.</p>
+                <p class="text-muted" style="font-size: 1.1rem; max-width: 600px; margin: 0 auto;">Dúvidas sobre os planos ou suporte técnico? Estamos aqui para ajudar.</p>
             </div>
 
-            <div class="contact-wrapper">
-                <div class="contact-info-box" style="display: flex; flex-direction: column; justify-content: center;">
-                    <h3 style="color:white; margin-bottom:20px;">Canais de Atendimento</h3>
-                    <ul style="list-style:none; padding:0;">
-                        <li style="margin-bottom:20px; display:flex; align-items:center; gap:15px; color:#ccc;">
-                            <div class="icon-box" style="margin-bottom: 0; width: 50px; height: 50px;">
-                                <i class="fas fa-envelope" style="color:var(--primary)"></i>
-                            </div>
-                            <div>
-                                <strong style="display:block; color:white;">Email</strong>
-                                <a href="mailto:admin@momentumfitness.com.br" style="color: #ccc; text-decoration: none;">admin@momentumfitness.com.br</a>
-                            </div>
-                        </li>
-                    </ul>
-                    <p style="color: #888; margin-top: 20px; font-size: 0.9rem;">
-                        Nosso tempo médio de resposta é de 24 horas úteis.
-                    </p>
+            <div class="features-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px;">
+                <div class="feature-card" style="text-align: center; align-items: center;">
+                    <div class="icon-box"><i class="fas fa-envelope"></i></div>
+                    <h3 style="color: white; margin-bottom: 10px;">E-mail</h3>
+                    <p style="margin-bottom: 20px;">Para suporte geral e dúvidas comerciais.</p>
+                    <a href="mailto:contato@momentumfit.com.br" class="btn btn-outline">contato@momentumfit.com.br</a>
                 </div>
 
-                <div class="contact-form-box">
-                    <form onsubmit="event.preventDefault(); alert('Mensagem enviada! Em breve entraremos em contato.');">
-                        <div class="form-group" style="margin-bottom:15px;">
-                            <label style="color:#ccc; display:block; margin-bottom:5px;">Nome</label>
-                            <input type="text" class="form-control" style="width:100%; padding:12px; background:#222; border:1px solid #333; color:white; border-radius:8px;" required>
-                        </div>
-                        <div class="form-group" style="margin-bottom:15px;">
-                            <label style="color:#ccc; display:block; margin-bottom:5px;">Email</label>
-                            <input type="email" class="form-control" style="width:100%; padding:12px; background:#222; border:1px solid #333; color:white; border-radius:8px;" required>
-                        </div>
-                        <div class="form-group" style="margin-bottom:20px;">
-                            <label style="color:#ccc; display:block; margin-bottom:5px;">Mensagem</label>
-                            <textarea rows="4" class="form-control" style="width:100%; padding:12px; background:#222; border:1px solid #333; color:white; border-radius:8px;" required></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary" style="width:100%;">Enviar Mensagem</button>
-                    </form>
+                <div class="feature-card" style="text-align: center; align-items: center;">
+                    <div class="icon-box"><i class="fab fa-whatsapp"></i></div>
+                    <h3 style="color: white; margin-bottom: 10px;">WhatsApp</h3>
+                    <p style="margin-bottom: 20px;">Atendimento exclusivo para assinantes VIP.</p>
+                    <span class="text-muted" style="font-size: 0.9rem;">(11) 95760-2740</span>
                 </div>
             </div>
         </div>
     </section>
 </main>
 
-<%- include('../partials/footer.ejs') %>
+<%- include('../layouts/public/footer') %>
