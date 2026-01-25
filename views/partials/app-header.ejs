@@ -1,27 +1,30 @@
-<header class="app-header">
-    <div style="display: flex; align-items: center; gap: 15px;">
-        <button class="mobile-toggle" onclick="toggleSidebar()" style="color: white; background: none; border: none; font-size: 1.4rem; cursor: pointer;">
-            <i class="fas fa-bars"></i>
-        </button>
-        <h2 style="font-size: 1.2rem; font-weight: 700; color: white; margin: 0;">
-            <%= typeof title !== 'undefined' ? title : 'Momentum Fit' %>
+<header class="bg-white border-b border-gray-200 h-16 flex items-center justify-between px-6 lg:px-10 sticky top-0 z-10">
+    <button id="sidebar-toggle" class="lg:hidden text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md p-1 mr-4">
+        <i class="fas fa-bars text-xl"></i>
+    </button>
+
+    <div class="flex items-center">
+        <h2 class="text-lg font-semibold text-gray-800 truncate max-w-[200px] md:max-w-none">
+            <%= title || 'Dashboard' %>
         </h2>
     </div>
 
-    <div class="header-actions" style="display: flex; align-items: center; gap: 20px;">
-        <a href="/notifications" style="position: relative; color: #ccc; text-decoration: none;">
-            <i class="fas fa-bell"></i>
-            <% if (typeof notifications !== 'undefined' && notifications.length > 0) { %>
-                <span style="position: absolute; top: -2px; right: -2px; width: 8px; height: 8px; background: var(--primary); border-radius: 50%;"></span>
-            <% } %>
-        </a>
+    <div class="flex items-center gap-4">
+        <%- include('./notification-bell') %>
         
-        <div class="user-profile" style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
-            <span style="display: none; color: #ccc; font-size: 0.9rem; font-weight: 500; @media(min-width: 768px){ display: inline; }">
-                <%= user.name.split(' ')[0] %>
-            </span>
-            <div style="width: 35px; height: 35px; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; border: 1px solid #444;">
-                <%= user.name.charAt(0).toUpperCase() %>
+        <div class="relative hidden md:block">
+            <div class="flex items-center gap-3">
+                <div class="text-right hidden sm:block">
+                    <p class="text-sm font-semibold text-gray-800"><%= user.name %></p>
+                    <p class="text-xs text-gray-500 capitalize"><%= user.role === 'client' ? 'Aluno' : user.role %></p>
+                </div>
+                <% if (user.photo_url) { %>
+                    <img src="<%= user.photo_url %>" alt="Profile" class="h-10 w-10 rounded-full object-cover border border-gray-200">
+                <% } else { %>
+                    <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold">
+                        <%= user.name.charAt(0) %>
+                    </div>
+                <% } %>
             </div>
         </div>
     </div>

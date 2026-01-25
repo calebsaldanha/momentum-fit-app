@@ -1,1 +1,50 @@
-<%- include('../layouts/app/head', {title: 'Planos'}) %><div class='dashboard-layout'><%- include('../partials/sidebar') %><main class='app-main'><%- include('../partials/app-header') %><div class='dashboard-content'><h1 style='color:white'>Planos (Em Breve)</h1></div></main></div>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <%- include('../layouts/app/head') %>
+    <title><%= title %> | Momentum Fit</title>
+</head>
+<body class="bg-gray-50">
+    <div class="flex h-screen overflow-hidden">
+        <%- include('../partials/sidebar') %>
+        <div class="relative flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
+            <%- include('../partials/app-header') %>
+            <main class="w-full flex-grow p-6">
+                <div class="text-center mb-10">
+                    <h1 class="text-3xl font-bold text-gray-900">Escolha seu Plano</h1>
+                    <p class="text-gray-500 mt-2">Invista em você e leve seu treino para o próximo nível.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                    <% plans.forEach(plan => { %>
+                        <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 flex flex-col transition hover:-translate-y-1 hover:shadow-xl">
+                            <div class="p-6 flex-grow">
+                                <h3 class="text-xl font-bold text-gray-900 mb-2"><%= plan.name %></h3>
+                                <div class="flex items-baseline mb-4">
+                                    <span class="text-3xl font-bold">R$ <%= parseFloat(plan.price).toFixed(2).replace('.', ',') %></span>
+                                    <span class="text-gray-500">/mês</span>
+                                </div>
+                                <p class="text-gray-600 text-sm mb-6"><%= plan.description %></p>
+                                <ul class="space-y-3 text-sm text-gray-600">
+                                    <% if (plan.features) { %>
+                                        <% JSON.parse(plan.features || '[]').forEach(feature => { %>
+                                            <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> <%= feature %></li>
+                                        <% }) %>
+                                    <% } else { %>
+                                        <li class="flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Acesso completo</li>
+                                    <% } %>
+                                </ul>
+                            </div>
+                            <div class="p-6 bg-gray-50 border-t border-gray-100">
+                                <a href="/payment/checkout/<%= plan.slug %>" class="block w-full bg-blue-600 hover:bg-blue-700 text-white text-center font-bold py-3 rounded-lg transition">
+                                    Assinar Agora
+                                </a>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+</html>
