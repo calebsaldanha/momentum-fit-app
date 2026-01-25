@@ -1,6 +1,6 @@
 <div class="mobile-overlay"></div>
 
-<aside class="sidebar">
+<aside class="sidebar" id="sidebar">
     <div class="brand">
         <div style="display: flex; align-items: center;">
             <span style="font-size: 1.5rem;">⚡</span> MOMENTUM
@@ -11,7 +11,7 @@
     </div>
 
     <nav class="nav-links">
-        <% const role = user.role ? user.role.toLowerCase() : 'client'; %>
+        <% const role = user && user.role ? user.role.toLowerCase() : 'client'; %>
 
         <% if (role === 'client') { %>
             <div class="nav-category">Performance</div>
@@ -19,10 +19,8 @@
             <a href="/client/workouts" class="nav-item <%= path.includes('workouts') ? 'active' : '' %>"><i class="fas fa-dumbbell"></i> Treinos</a>
             <a href="/client/evolution" class="nav-item <%= path.includes('evolution') ? 'active' : '' %>"><i class="fas fa-chart-line"></i> Evolução</a>
             <a href="/client/ai-coach" class="nav-item <%= path.includes('ai-coach') ? 'active' : '' %>"><i class="fas fa-robot"></i> AI Coach</a>
-            
-            <div class="nav-category">Conta</div>
+            <a href="/client/profile" class="nav-item <%= path.includes('profile') ? 'active' : '' %>"><i class="fas fa-user-cog"></i> Perfil</a>
             <a href="/client/plans" class="nav-item <%= path.includes('plans') ? 'active' : '' %>"><i class="fas fa-credit-card"></i> Planos</a>
-            <a href="/client/profile" class="nav-item <%= path.includes('profile') ? 'active' : '' %>"><i class="fas fa-user-cog"></i> Configurações</a>
         <% } %>
 
         <% if (role === 'trainer') { %>
@@ -38,6 +36,9 @@
             <a href="/admin/dashboard" class="nav-item <%= path.includes('dashboard') ? 'active' : '' %>"><i class="fas fa-chart-pie"></i> KPIs</a>
             <a href="/admin/users" class="nav-item <%= path.includes('users') ? 'active' : '' %>"><i class="fas fa-users-cog"></i> Usuários</a>
             <a href="/admin/approvals" class="nav-item <%= path.includes('approvals') ? 'active' : '' %>"><i class="fas fa-check-circle"></i> Aprovações</a>
+            <a href="/admin/content/edit" class="nav-item <%= path.includes('/content/edit') ? 'active' : '' %>">
+                <i class="fas fa-pen-square"></i> Editor do Site
+            </a>
             <a href="/admin/settings" class="nav-item <%= path.includes('settings') ? 'active' : '' %>"><i class="fas fa-cogs"></i> Sistema</a>
         <% } %>
     </nav>

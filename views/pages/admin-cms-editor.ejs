@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <%- include('../layouts/app/head') %>
+    <title>Editor de Site | Admin</title>
+</head>
+<body>
+    <div class="dashboard-wrapper">
+        <%- include('../partials/sidebar') %>
+        <div class="main-content">
+            <%- include('../partials/app-header', { title: 'Gestão de Conteúdo Público' }) %>
+
+            <div class="content-scroll-area">
+                <form action="/admin/content/update" method="POST">
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                        <p class="text-muted">Edite os textos das páginas públicas em tempo real.</p>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Salvar Alterações
+                        </button>
+                    </div>
+
+                    <% Object.keys(content).forEach(page => { %>
+                        <div class="card mb-30">
+                            <div class="card-header" style="background: #1a1a1a;">
+                                <h3 class="card-title" style="text-transform: uppercase; letter-spacing: 1px;">
+                                    Página: <span style="color: var(--primary);"><%= page %></span>
+                                </h3>
+                            </div>
+                            <div style="display: grid; gap: 20px;">
+                                <% content[page].forEach(item => { %>
+                                    <div class="form-group">
+                                        <label style="color: #888; font-size: 0.8rem; text-transform: uppercase;">
+                                            <%= item.section %> / <%= item.key.replace(/_/g, ' ') %>
+                                        </label>
+                                        <% if (item.value.length > 50) { %>
+                                            <textarea name="content_<%= item.id %>" class="form-control" rows="3"><%= item.value %></textarea>
+                                        <% } else { %>
+                                            <input type="text" name="content_<%= item.id %>" value="<%= item.value %>" class="form-control">
+                                        <% } %>
+                                    </div>
+                                <% }) %>
+                            </div>
+                        </div>
+                    <% }) %>
+
+                    <div style="height: 100px;"></div> </form>
+            </div>
+        </div>
+    </div>
+    <script src="/js/layout.js"></script>
+</body>
+</html>

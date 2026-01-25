@@ -1,172 +1,51 @@
-<%- include('../layouts/public/head', { title: 'Início' }) %>
-<%- include('../layouts/public/header') %>
-
-<main class="home-main">
-    
-    <section class="hero-page bg-home center-mobile">
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <%- include('../layouts/public/head', { title: 'Home' }) %>
+    <%- include('../layouts/public/header') %>
+</head>
+<body>
+    <section class="hero-section bg-home">
         <div class="hero-overlay"></div>
-        <div class="container">
-            <div class="hero-badge">
-                <i class="fas fa-bolt"></i> Tecnologia de Elite
-            </div>
-            
-            <h1 class="hero-title">
-                Seu Corpo é a Máquina. <br>
-                <span class="text-gradient">Nós somos o Código.</span>
-            </h1>
-            
-            <p class="hero-subtitle">
-                A primeira plataforma que une Inteligência Artificial e Fisiologia para criar treinos que se adaptam à sua biologia em tempo real.
-            </p>
-            
-            <div style="display: flex; gap: 15px; flex-wrap: wrap; justify-content: center;">
-                <% if (!user) { %>
-                    <a href="/auth/register" class="btn btn-primary btn-lg" style="color: black; padding: 18px 45px;">Começar Grátis</a>
-                    <a href="#plans" class="btn btn-outline btn-lg" style="padding: 18px 45px;">Ver Planos</a>
-                <% } else { %>
-                    <a href="/<%= user.role %>/dashboard" class="btn btn-primary btn-lg" style="color: black;">
-                        <i class="fas fa-columns" style="margin-right: 8px;"></i> Acessar Painel
-                    </a>
-                <% } %>
-            </div>
-        </div>
-    </section>
-
-    <section class="section-padding bg-features-section">
-        <div class="hero-overlay" style="opacity: 0.9;"></div>
-        <div class="container">
-            <div class="grid-2">
-                <div>
-                    <h2 class="hero-title" style="font-size: 3rem;">Treino não é sorte. <br><span class="text-gradient">É Ciência de Dados.</span></h2>
-                    <p class="text-muted" style="font-size: 1.2rem; line-height: 1.8; margin-bottom: 40px;">
-                        Esqueça as planilhas estáticas. O algoritmo da Momentum recalcula suas cargas, volume e descanso a cada repetição registrada.
-                    </p>
-                    
-                    <div style="display: flex; flex-direction: column; gap: 20px;">
-                        <div style="display: flex; gap: 20px; align-items: flex-start;">
-                            <div class="icon-box" style="margin: 0; min-width: 60px;"><i class="fas fa-brain"></i></div>
-                            <div>
-                                <h4 style="color: white; font-size: 1.2rem; margin-bottom: 5px;">IA Adaptativa</h4>
-                                <p style="color: #888;">Ajuste automático de carga baseado no seu RPE e histórico.</p>
-                            </div>
-                        </div>
-                        <div style="display: flex; gap: 20px; align-items: flex-start;">
-                            <div class="icon-box" style="margin: 0; min-width: 60px;"><i class="fas fa-chart-area"></i></div>
-                            <div>
-                                <h4 style="color: white; font-size: 1.2rem; margin-bottom: 5px;">Periodização Real</h4>
-                                <p style="color: #888;">Controle de fadiga e volume semanal calculado cientificamente.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="feature-card" style="border-color: var(--primary); background: linear-gradient(145deg, #151515, #050505);">
-                    <div class="center">
-                        <i class="fas fa-mobile-alt" style="font-size: 8rem; color: #222; margin-bottom: 30px; display: block;"></i>
-                        <h3 style="color: white; margin-bottom: 10px;">App do Aluno</h3>
-                        <p style="color: #888;">Disponível via Web App (PWA) para iOS e Android. Acesso instantâneo sem download.</p>
-                    </div>
+        <div class="container hero-content">
+            <div class="hero-text-wrapper">
+                <h1 class="hero-title">
+                    <%= getText('home', 'hero', 'title_line1', 'Seu Corpo.') %><br>
+                    <span class="text-gradient"><%= getText('home', 'hero', 'title_line2', 'Sua Obra.') %></span>
+                </h1>
+                <p class="hero-subtitle">
+                    <%= getText('home', 'hero', 'subtitle', 'Texto padrão se o banco falhar.') %>
+                </p>
+                <div class="hero-buttons">
+                    <a href="/auth/register" class="btn btn-primary btn-lg glow-effect"><%= getText('home', 'hero', 'cta_primary', 'Começar') %></a>
+                    <a href="/plans" class="btn btn-outline btn-lg">Ver Planos</a>
                 </div>
             </div>
         </div>
     </section>
 
-    <section class="section-padding" id="plans" style="background: #080808;">
+    <section class="section-padding bg-dark">
         <div class="container">
-            <div class="center mb-80">
-                <span style="color: var(--primary); font-weight: 700; letter-spacing: 2px; text-transform: uppercase;">Investimento</span>
-                <h2 class="hero-title" style="font-size: 3rem; margin-top: 10px;">Escolha seu Ritmo</h2>
-            </div>
-
-            <div class="grid-3" style="align-items: stretch;">
-                
-                <div class="feature-card plan-card">
-                    <h3 style="color: white; font-size: 1.5rem;">Start</h3>
-                    <div class="plan-price">R$ 0<span>/mês</span></div>
-                    <ul style="list-style: none; padding: 0; margin-bottom: 30px; flex: 1;">
-                        <li style="margin-bottom: 15px; color: #ccc;"><i class="fas fa-check" style="color: var(--primary); margin-right: 10px;"></i> App de Treino</li>
-                        <li style="margin-bottom: 15px; color: #ccc;"><i class="fas fa-check" style="color: var(--primary); margin-right: 10px;"></i> Biblioteca Completa</li>
-                        <li style="margin-bottom: 15px; color: #ccc;"><i class="fas fa-check" style="color: var(--primary); margin-right: 10px;"></i> Diário de Peso</li>
-                    </ul>
-                    <a href="/auth/register?plan=free" class="btn btn-outline w-100">Começar</a>
-                </div>
-
-                <div class="feature-card plan-card plan-featured">
-                    <div style="position: absolute; top: 0; right: 0; background: var(--primary); color: black; font-weight: 800; padding: 5px 15px; font-size: 0.8rem; border-bottom-left-radius: 10px;">POPULAR</div>
-                    <h3 style="color: var(--primary); font-size: 1.5rem;">Pro AI</h3>
-                    <div class="plan-price">R$ 89,90<span>/mês</span></div>
-                    <ul style="list-style: none; padding: 0; margin-bottom: 30px; flex: 1;">
-                        <li style="margin-bottom: 15px; color: white;"><i class="fas fa-check-double" style="color: var(--primary); margin-right: 10px;"></i> <strong>Coach IA Ilimitado</strong></li>
-                        <li style="margin-bottom: 15px; color: #ccc;"><i class="fas fa-check" style="color: var(--primary); margin-right: 10px;"></i> Geração de Treino</li>
-                        <li style="margin-bottom: 15px; color: #ccc;"><i class="fas fa-check" style="color: var(--primary); margin-right: 10px;"></i> Análise de Vídeo</li>
-                        <li style="margin-bottom: 15px; color: #ccc;"><i class="fas fa-check" style="color: var(--primary); margin-right: 10px;"></i> Dieta Inteligente</li>
-                    </ul>
-                    <a href="/auth/register?plan=pro" class="btn btn-primary w-100" style="color: black;">Assinar Pro</a>
-                </div>
-
-                <div class="feature-card plan-card" style="opacity: 0.7;">
-                    <h3 style="color: white; font-size: 1.5rem;">Personal VIP</h3>
-                    <div class="plan-price">R$ 249,90<span>/mês</span></div>
-                    <ul style="list-style: none; padding: 0; margin-bottom: 30px; flex: 1;">
-                        <li style="margin-bottom: 15px; color: #ccc;"><i class="fas fa-user" style="color: var(--primary); margin-right: 10px;"></i> Treinador Humano</li>
-                        <li style="margin-bottom: 15px; color: #ccc;"><i class="fas fa-comments" style="color: var(--primary); margin-right: 10px;"></i> WhatsApp Direto</li>
-                        <li style="margin-bottom: 15px; color: #ccc;"><i class="fas fa-video" style="color: var(--primary); margin-right: 10px;"></i> Call Mensal</li>
-                    </ul>
-                    <button class="btn btn-outline w-100" disabled>Lista de Espera</button>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="section-padding bg-darker">
-        <div class="container">
-            <div class="mb-80" style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 20px;">
-                <div>
-                    <h2 class="hero-title" style="font-size: 2.8rem; margin-bottom: 10px;">Time de Elite</h2>
-                    <p class="text-muted" style="font-size: 1.1rem;">Metodologia supervisionada pelos melhores.</p>
-                </div>
-            </div>
-
             <div class="grid-3">
-                <div class="trainer-card">
-                    <div class="trainer-image-placeholder">
-                        <i class="fas fa-user-astronaut"></i>
-                    </div>
-                    <div class="trainer-info">
-                        <h4 class="trainer-name">Carlos Silva</h4>
-                        <div class="trainer-role">Hipertrofia</div>
-                    </div>
+                <div class="feature-card">
+                    <i class="fas fa-brain feature-icon"></i>
+                    <h3><%= getText('home', 'features', 'card1_title', 'IA') %></h3>
+                    <p><%= getText('home', 'features', 'card1_text', '...') %></p>
                 </div>
-
-                <div class="trainer-card">
-                    <div class="trainer-image-placeholder">
-                        <i class="fas fa-running"></i>
-                    </div>
-                    <div class="trainer-info">
-                        <h4 class="trainer-name">Ana Costa</h4>
-                        <div class="trainer-role">Mobilidade & Core</div>
-                    </div>
+                <div class="feature-card">
+                    <i class="fas fa-chart-line feature-icon"></i>
+                    <h3>Dados Reais</h3>
+                    <p>Métricas precisas sobre sua evolução de carga e volume.</p>
                 </div>
-
-                <div class="trainer-card">
-                    <div class="trainer-image-placeholder">
-                        <i class="fas fa-dumbbell"></i>
-                    </div>
-                    <div class="trainer-info">
-                        <h4 class="trainer-name">Pedro Santos</h4>
-                        <div class="trainer-role">Powerlifting</div>
-                    </div>
+                <div class="feature-card">
+                    <i class="fas fa-user-astronaut feature-icon"></i>
+                    <h3>Coach 24/7</h3>
+                    <p>Dúvidas sobre execução ou dieta? Sua IA responde na hora.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <section style="padding: 120px 0; border-top: 1px solid #151515; text-align: center;">
-        <div class="container">
-            <h2 class="hero-title" style="margin-bottom: 40px;">Comece sua evolução hoje</h2>
-            <a href="/auth/register" class="btn btn-primary btn-lg" style="padding: 20px 60px; font-size: 1.2rem; color: black;">Criar Conta Gratuita</a>
-        </div>
-    </section>
-</main>
-
-<%- include('../layouts/public/footer') %>
+    <%- include('../layouts/public/footer') %>
+</body>
+</html>
