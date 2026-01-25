@@ -1,112 +1,107 @@
-<%- include('../partials/header.ejs', { title: 'Planos e Preços', path: '/plans' }) %>
+<%- include('../layouts/public/head', { title: 'Planos e Preços' }) %>
+<%- include('../layouts/public/header') %>
 
-<main class="public-content">
-    
-    <section class="hero hero-small" style="min-height: 50vh; display: flex; align-items: center;">
-        <div class="hero-overlay"></div>
-        <div class="container hero-container">
-            <div class="hero-content center" style="margin: 0 auto; text-align: center;">
-                <span style="color: var(--primary); font-weight: 600; letter-spacing: 2px;">PLANOS</span>
-                <h1 class="hero-title" style="font-size: 3rem;">
-                    Escolha o Seu <span class="text-gradient">Ritmo</span>
-                </h1>
-                <p class="hero-subtitle" style="margin: 0 auto;">
-                    Planos flexíveis desenhados para cada estágio da sua jornada fitness.
-                </p>
-            </div>
+<main>
+    <section class="hero-page" style="min-height: 50vh;">
+        <div class="container">
+            <span style="color: var(--primary); font-weight: 600; letter-spacing: 2px; font-size: 0.9rem;">PLANOS</span>
+            <h1 class="hero-title">Escolha o Seu <span class="text-gradient">Ritmo</span></h1>
+            <p class="hero-subtitle">Planos flexíveis desenhados para cada estágio da sua jornada fitness.</p>
         </div>
     </section>
 
-    <section class="section-padding bg-subtle">
+    <section class="section-padding bg-darker">
         <div class="container">
-            <div class="plans-grid">
+            <div class="grid-3" style="align-items: stretch;">
                 
-                <div class="feature-card">
+                <div class="feature-card plan-card">
                     <div class="plan-header">
-                        <h3 class="plan-title">Start</h3>
+                        <h3 style="color: white; font-size: 1.5rem;">Start</h3>
                         <div class="plan-price">R$ 0<span>/mês</span></div>
-                        <p class="plan-desc">Para quem quer começar a se movimentar com organização.</p>
+                        <p style="color: #888; font-size: 0.9rem;">Para começar com organização.</p>
                     </div>
-                    <ul class="plan-features">
-                        <li><i class="fas fa-check"></i> Acesso ao App</li>
-                        <li><i class="fas fa-check"></i> Biblioteca de Exercícios</li>
-                        <li><i class="fas fa-check"></i> Tracking de Peso</li>
+                    <ul class="plan-features" style="flex: 1;">
+                        <li><i class="fas fa-check" style="color: var(--primary);"></i> Acesso ao App</li>
+                        <li><i class="fas fa-check" style="color: var(--primary);"></i> Biblioteca de Exercícios</li>
+                        <li><i class="fas fa-check" style="color: var(--primary);"></i> Tracking de Peso</li>
                         <li class="muted"><i class="fas fa-times"></i> Coach IA</li>
                         <li class="muted"><i class="fas fa-times"></i> Dieta Personalizada</li>
                     </ul>
-                    <a href="/auth/register?plan=free" class="btn btn-outline w-100" style="margin-top: auto;">Começar Grátis</a>
+                    <a href="/auth/register?plan=free" class="btn btn-outline w-100">Começar Grátis</a>
                 </div>
 
-                <div class="feature-card plan-featured">
+                <div class="feature-card plan-card plan-featured">
+                    <div style="background: var(--primary); color: black; text-align: center; font-weight: 800; padding: 5px; font-size: 0.8rem; margin: -40px -40px 20px;">MAIS POPULAR</div>
                     <div class="plan-header">
-                        <h3 class="plan-title" style="color: var(--primary);">Momentum Pro</h3>
+                        <h3 style="color: var(--primary); font-size: 1.5rem;">Momentum Pro</h3>
                         <div class="plan-price">R$ 89,90<span>/mês</span></div>
-                        <p class="plan-desc">A experiência completa com inteligência artificial.</p>
+                        <p style="color: #ccc; font-size: 0.9rem;">A experiência completa com IA.</p>
                     </div>
-                    <ul class="plan-features">
-                        <li><i class="fas fa-check"></i> <strong>Tudo do Start</strong></li>
-                        <li><i class="fas fa-check"></i> Coach IA Ilimitado</li>
-                        <li><i class="fas fa-check"></i> Geração de Treinos IA</li>
-                        <li><i class="fas fa-check"></i> Dieta Inteligente</li>
-                        <li><i class="fas fa-check"></i> Análise de Execução (Vídeo)</li>
+                    <ul class="plan-features" style="flex: 1;">
+                        <li><i class="fas fa-check-double" style="color: var(--primary);"></i> <strong>Tudo do Start</strong></li>
+                        <li><i class="fas fa-check" style="color: var(--primary);"></i> Coach IA Ilimitado</li>
+                        <li><i class="fas fa-check" style="color: var(--primary);"></i> Geração de Treinos IA</li>
+                        <li><i class="fas fa-check" style="color: var(--primary);"></i> Dieta Inteligente</li>
+                        <li><i class="fas fa-check" style="color: var(--primary);"></i> Análise de Vídeo</li>
                     </ul>
-                    <a href="/auth/register?plan=pro" class="btn btn-primary w-100" style="margin-top: auto;">Assinar Pro</a>
+                    <a href="/auth/register?plan=pro" class="btn btn-primary w-100" style="color: black;">Assinar Pro</a>
                 </div>
 
-                <div class="feature-card">
+                <div class="feature-card plan-card">
                     <div class="plan-header">
-                        <h3 class="plan-title">VIP Personal</h3>
+                        <h3 style="color: white; font-size: 1.5rem;">VIP Personal</h3>
                         <div class="plan-price">R$ 249,90<span>/mês</span></div>
-                        <p class="plan-desc">Acompanhamento humano dedicado para resultados máximos.</p>
+                        <p style="color: #888; font-size: 0.9rem;">Acompanhamento humano dedicado.</p>
                     </div>
-                    <ul class="plan-features">
-                        <li><i class="fas fa-check"></i> <strong>Tudo do Pro</strong></li>
-                        <li><i class="fas fa-check"></i> Personal Trainer Real</li>
-                        <li><i class="fas fa-check"></i> Chat Direto (WhatsApp)</li>
-                        <li><i class="fas fa-check"></i> Ajustes Semanais</li>
-                        <li><i class="fas fa-check"></i> Videoconferência Mensal</li>
+                    <ul class="plan-features" style="flex: 1;">
+                        <li><i class="fas fa-check-double" style="color: var(--primary);"></i> <strong>Tudo do Pro</strong></li>
+                        <li><i class="fas fa-check" style="color: var(--primary);"></i> Personal Trainer Real</li>
+                        <li><i class="fas fa-check" style="color: var(--primary);"></i> WhatsApp Direto</li>
+                        <li><i class="fas fa-check" style="color: var(--primary);"></i> Ajustes Semanais</li>
+                        <li><i class="fas fa-check" style="color: var(--primary);"></i> Call Mensal</li>
                     </ul>
-                    <button class="btn btn-outline w-100" style="margin-top: auto;" disabled>Vagas Esgotadas</button>
+                    <button class="btn btn-outline w-100" disabled style="opacity: 0.5; cursor: not-allowed;">Vagas Esgotadas</button>
                 </div>
 
             </div>
-        </div>
-    </section>
 
-    <section class="section-padding">
-        <div class="container">
-            <div class="section-header center">
-                <h2 class="section-title">Compare os Recursos</h2>
-            </div>
-            <div class="comparison-table-wrapper" style="overflow-x: auto;">
-                <table class="comparison-table" style="width: 100%; border-collapse: collapse;">
+            <div class="comparison-wrapper">
+                <div class="center mb-40">
+                    <h2 style="color: white;">Comparativo Detalhado</h2>
+                </div>
+                <table class="comparison-table">
                     <thead>
                         <tr>
-                            <th style="text-align: left; padding: 15px; border-bottom: 1px solid #333;">Recurso</th>
-                            <th style="padding: 15px; border-bottom: 1px solid #333; text-align: center;">Start</th>
-                            <th style="padding: 15px; border-bottom: 1px solid #333; text-align: center; color: var(--primary);">Pro</th>
-                            <th style="padding: 15px; border-bottom: 1px solid #333; text-align: center;">VIP</th>
+                            <th>Recurso</th>
+                            <th>Start</th>
+                            <th style="color: var(--primary);">Pro</th>
+                            <th>VIP</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td style="padding: 15px; border-bottom: 1px solid #222; color: #ccc;">App Mobile</td>
-                            <td style="text-align: center; padding: 15px; border-bottom: 1px solid #222;"><i class="fas fa-check text-success"></i></td>
-                            <td style="text-align: center; padding: 15px; border-bottom: 1px solid #222;"><i class="fas fa-check text-success"></i></td>
-                            <td style="text-align: center; padding: 15px; border-bottom: 1px solid #222;"><i class="fas fa-check text-success"></i></td>
+                            <td>App Mobile</td>
+                            <td><i class="fas fa-check" style="color: var(--primary);"></i></td>
+                            <td><i class="fas fa-check" style="color: var(--primary);"></i></td>
+                            <td><i class="fas fa-check" style="color: var(--primary);"></i></td>
                         </tr>
                         <tr>
-                            <td style="padding: 15px; border-bottom: 1px solid #222; color: #ccc;">Treinos</td>
-                            <td style="text-align: center; padding: 15px; border-bottom: 1px solid #222; color: #666;">Básico</td>
-                            <td style="text-align: center; padding: 15px; border-bottom: 1px solid #222; color: white;">IA Avançada</td>
-                            <td style="text-align: center; padding: 15px; border-bottom: 1px solid #222; color: white;">Humano + IA</td>
+                            <td>Inteligência Artificial</td>
+                            <td class="muted">-</td>
+                            <td>Ilimitado</td>
+                            <td>Ilimitado</td>
+                        </tr>
+                        <tr>
+                            <td>Suporte Humano</td>
+                            <td class="muted">-</td>
+                            <td>Técnico</td>
+                            <td>Personal Dedicado</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </div>
     </section>
-
 </main>
 
-<%- include('../partials/footer.ejs') %>
+<%- include('../layouts/public/footer') %>
