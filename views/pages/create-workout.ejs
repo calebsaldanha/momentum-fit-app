@@ -1,205 +1,181 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <%- include('../partials/header', { title: 'Novo Treino' }) %>
-    <link rel="stylesheet" href="/css/dashboard.css">
-    <style>
-        .exercise-item {
-            background: var(--bg-app);
-            border: 1px solid var(--border-subtle);
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            display: grid;
-            grid-template-columns: 60px 1fr auto;
-            gap: 1rem;
-            align-items: center;
-        }
-        .exercise-inputs {
-            display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin-top: 0.5rem;
-        }
-        .exercise-inputs input {
-            background: var(--bg-card); border: 1px solid var(--border);
-            color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.9rem;
-        }
-    </style>
-</head>
-<body>
-    <div class="dashboard-container">
-        <%- include('../partials/sidebar', { currentPage: 'create-workout' }) %>
-        
-        <main class="dashboard-main">
-            <header class="page-header">
-                <div>
-                    <h1>Novo Treino</h1>
-                    <p>Monte a rotina ideal para seu aluno.</p>
-                </div>
-                <a href="/admin/clients" class="btn btn-ghost"><i class="fas fa-times"></i> Cancelar</a>
-            </header>
+<%- include('../layouts/app/head') %>
 
-            <form id="createWorkoutForm">
-                <div class="grid-2-col" style="grid-template-columns: 1fr 350px;">
-                    <div class="card-modern">
-                        <div class="d-flex justify-content-between align-items-center mb-4">
-                            <h3 class="h5 m-0">Sequência de Exercícios</h3>
-                            <div class="d-flex gap-2">
-                                <button type="button" onclick="openLibraryModal()" class="btn btn-primary btn-sm">
-                                    <i class="fas fa-search"></i> Biblioteca
-                                </button>
-                                <button type="button" id="addManualBtn" class="btn btn-ghost btn-sm">
-                                    <i class="fas fa-pen"></i> Manual
-                                </button>
-                            </div>
+<div class="dashboard-layout">
+    <%- include('../partials/sidebar') %>
+    
+    <main class="app-main">
+        <%- include('../partials/app-header') %>
+        
+        <div class="dashboard-content">
+            <div class="container-fluid" style="max-width: 1000px;">
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2 style="color: white; margin: 0;">Novo Treino</h2>
+                    <button onclick="submitWorkout()" class="btn btn-primary">Salvar Treino</button>
+                </div>
+
+                <div class="row" style="display: grid; grid-template-columns: 1fr 350px; gap: 30px;">
+                    
+                    <div class="app-card" style="background: #111; border: 1px solid #222; border-radius: 12px; padding: 20px;">
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label class="form-label" style="color: #ccc;">Nome do Treino</label>
+                            <input type="text" id="workoutName" class="form-control" placeholder="Ex: Treino A - Peitoral" style="width: 100%; padding: 10px; background: #0a0a0a; border: 1px solid #333; color: white; border-radius: 5px;">
                         </div>
 
-                        <div id="exercisesList">
-                            <div class="text-center py-5 text-muted border rounded border-dashed" style="border-style: dashed; border-color: var(--border);">
-                                <i class="fas fa-dumbbell mb-2 opacity-50"></i>
-                                <p class="m-0 small">Adicione exercícios da biblioteca ou manualmente.</p>
-                            </div>
+                        <div style="margin-bottom: 20px;">
+                            <label class="form-label" style="color: #ccc;">Atribuir a Aluno (Opcional)</label>
+                            <select id="workoutClient" class="form-control" style="width: 100%; padding: 10px; background: #0a0a0a; border: 1px solid #333; color: white; border-radius: 5px;">
+                                <option value="">Salvar como Template</option>
+                                <% clients.forEach(client => { %>
+                                    <option value="<%= client.id %>"><%= client.name %></option>
+                                <% }) %>
+                            </select>
+                        </div>
+
+                        <h4 style="color: white; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 20px;">Exercícios Selecionados</h4>
+                        <div id="selectedExercisesList" style="min-height: 200px;">
+                            <p id="emptyState" style="color: #666; text-align: center; padding: 40px;">Nenhum exercício adicionado. Selecione ao lado.</p>
+                        </div>
+
+                    </div>
+
+                    <div class="app-card" style="background: #151515; border: 1px solid #222; border-radius: 12px; padding: 20px; height: fit-content;">
+                        <h4 style="color: white; margin-bottom: 15px;">Biblioteca</h4>
+                        <input type="text" id="searchEx" onkeyup="filterExercises()" placeholder="Buscar exercício..." style="width: 100%; padding: 8px; margin-bottom: 15px; background: #000; border: 1px solid #333; color: white; border-radius: 5px;">
+                        
+                        <div class="exercise-list" style="max-height: 500px; overflow-y: auto;">
+                            <% exercises.forEach(ex => { %>
+                                <div class="ex-item" onclick='addExercise(<%- JSON.stringify(ex) %>)' style="padding: 10px; border-bottom: 1px solid #222; cursor: pointer; transition: 0.2s;">
+                                    <div style="color: white; font-weight: 500;"><%= ex.name %></div>
+                                    <div style="color: #666; font-size: 0.8rem;"><%= ex.muscle_group %></div>
+                                </div>
+                            <% }) %>
                         </div>
                     </div>
 
-                    <aside>
-                        <div class="card-modern sticky-top" style="top: 2rem;">
-                            <div class="mb-3">
-                                <label class="text-muted small mb-1">Aluno</label>
-                                <select name="client_id" id="client_id" class="select-modern" required>
-                                    <option value="" disabled <%= !selectedClientId ? 'selected' : '' %>>Selecione...</option>
-                                    <% if (clients && clients.length > 0) { %>
-                                        <% clients.forEach(c => { %>
-                                            <option value="<%= c.id %>" <%= selectedClientId == c.id ? 'selected' : '' %>><%= c.name %></option>
-                                        <% }) %>
-                                    <% } %>
-                                </select>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="text-muted small mb-1">Título do Treino</label>
-                                <input type="text" id="title" class="input-modern" placeholder="Ex: Hipertrofia A" required>
-                            </div>
-
-                            <div class="mb-4">
-                                <label class="text-muted small mb-1">Observações</label>
-                                <textarea id="description" class="textarea-modern" rows="3" placeholder="Instruções gerais..."></textarea>
-                            </div>
-
-                            <button type="submit" class="btn btn-primary w-100 py-3">
-                                <i class="fas fa-save"></i> Salvar Treino
-                            </button>
-                        </div>
-                    </aside>
                 </div>
-            </form>
-        </main>
-    </div>
-
-    <div id="libraryModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:9999; align-items:center; justify-content:center;">
-        <div class="card-modern" style="width: 90%; max-width: 800px; max-height: 80vh; overflow: hidden; display: flex; flex-direction: column;">
-            <div class="d-flex justify-content-between p-3 border-bottom border-secondary">
-                <h3 class="m-0 h5">Biblioteca de Exercícios</h3>
-                <button onclick="document.getElementById('libraryModal').style.display='none'" class="btn btn-ghost btn-sm"><i class="fas fa-times"></i></button>
-            </div>
-            <div style="padding: 1rem; overflow-y: auto;">
-                <input type="text" id="searchLib" class="input-modern mb-3" placeholder="Buscar...">
-                <div id="libraryGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem;"></div>
             </div>
         </div>
-    </div>
+    </main>
+</div>
 
-    <script>
-        // Lógica mantida, apenas classes CSS atualizadas visualmente
-        const libraryData = <%- JSON.stringify(exerciseLibrary || []) %>;
-        const listContainer = document.getElementById('exercisesList');
+<script>
+    let selectedExercises = [];
+
+    function addExercise(ex) {
+        document.getElementById('emptyState').style.display = 'none';
         
-        function openLibraryModal() {
-            document.getElementById('libraryModal').style.display = 'flex';
-            const grid = document.getElementById('libraryGrid');
-            grid.innerHTML = libraryData.map(ex => `
-                <div onclick="addExercise('${ex.id}')" style="cursor:pointer; background:var(--bg-app); padding:0.5rem; border-radius:8px; border:1px solid var(--border);">
-                    <img src="${ex.image_url || '/images/momentum-fit-icon.png'}" style="width:100%; height:80px; object-fit:cover; margin-bottom:0.5rem;">
-                    <div style="font-size:0.8rem; font-weight:bold;">${ex.name}</div>
-                </div>
-            `).join('');
+        // Adiciona ao array local
+        const newEx = {
+            id: ex.id,
+            name: ex.name,
+            sets: 3,
+            reps: '10',
+            rest: 60,
+            notes: ''
+        };
+        selectedExercises.push(newEx);
+        renderList();
+    }
+
+    function removeExercise(index) {
+        selectedExercises.splice(index, 1);
+        renderList();
+        if (selectedExercises.length === 0) document.getElementById('emptyState').style.display = 'block';
+    }
+
+    function updateEx(index, field, value) {
+        selectedExercises[index][field] = value;
+    }
+
+    function renderList() {
+        const container = document.getElementById('selectedExercisesList');
+        container.innerHTML = '';
+        
+        if (selectedExercises.length === 0) {
+            container.innerHTML = '<p id="emptyState" style="color: #666; text-align: center; padding: 40px;">Nenhum exercício adicionado.</p>';
+            return;
         }
 
-        function addExercise(id) {
-            const ex = libraryData.find(e => String(e.id) === String(id));
-            if(!ex) return;
-            document.getElementById('libraryModal').style.display = 'none';
-            
-            // Remove placeholder se existir
-            if(listContainer.querySelector('.text-center')) listContainer.innerHTML = '';
-
-            const div = document.createElement('div');
-            div.className = 'exercise-item';
-            div.innerHTML = `
-                <img src="${ex.image_url || ''}" style="width:50px; height:50px; object-fit:cover; border-radius:6px; background:#000;">
-                <div>
-                    <input type="text" class="input-modern ex-name mb-1" value="${ex.name}" style="border:none; background:transparent; padding:0; font-weight:bold;">
-                    <div class="exercise-inputs">
-                        <input type="text" class="ex-sets" placeholder="Séries">
-                        <input type="text" class="ex-reps" placeholder="Reps">
-                        <input type="text" class="ex-weight" placeholder="Carga">
+        selectedExercises.forEach((ex, idx) => {
+            const html = `
+                <div style="background: #0a0a0a; border: 1px solid #333; padding: 15px; border-radius: 8px; margin-bottom: 10px; display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 10px; align-items: center;">
+                    <div style="grid-column: 1 / -1; display: flex; justify-content: space-between;">
+                        <strong style="color: var(--primary);">${idx + 1}. ${ex.name}</strong>
+                        <button onclick="removeExercise(${idx})" style="color: #ff6b6b; background: none; border: none; cursor: pointer;"><i class="fas fa-trash"></i></button>
+                    </div>
+                    
+                    <div>
+                        <label style="font-size: 0.7rem; color: #888;">Séries</label>
+                        <input type="number" value="${ex.sets}" onchange="updateEx(${idx}, 'sets', this.value)" style="width: 100%; background: #222; border: none; color: white; padding: 5px;">
+                    </div>
+                    <div>
+                        <label style="font-size: 0.7rem; color: #888;">Reps</label>
+                        <input type="text" value="${ex.reps}" onchange="updateEx(${idx}, 'reps', this.value)" style="width: 100%; background: #222; border: none; color: white; padding: 5px;">
+                    </div>
+                    <div>
+                        <label style="font-size: 0.7rem; color: #888;">Descanso (s)</label>
+                        <input type="number" value="${ex.rest}" onchange="updateEx(${idx}, 'rest', this.value)" style="width: 100%; background: #222; border: none; color: white; padding: 5px;">
                     </div>
                 </div>
-                <button type="button" class="btn btn-danger btn-sm" onclick="this.closest('.exercise-item').remove()"><i class="fas fa-trash"></i></button>
-                <input type="hidden" class="ex-id" value="${ex.id}">
             `;
-            listContainer.appendChild(div);
-        }
+            container.insertAdjacentHTML('beforeend', html);
+        });
+    }
+
+    function filterExercises() {
+        const term = document.getElementById('searchEx').value.toLowerCase();
+        const items = document.querySelectorAll('.ex-item');
+        items.forEach(item => {
+            const text = item.innerText.toLowerCase();
+            item.style.display = text.includes(term) ? 'block' : 'none';
+        });
+    }
+
+    async function submitWorkout() {
+        const name = document.getElementById('workoutName').value;
+        const clientId = document.getElementById('workoutClient').value;
         
-        // Manual Add
-        document.getElementById('addManualBtn').addEventListener('click', () => {
-             if(listContainer.querySelector('.text-center')) listContainer.innerHTML = '';
-             const div = document.createElement('div');
-             div.className = 'exercise-item';
-             div.innerHTML = `
-                <div style="width:50px; height:50px; background:#333; border-radius:6px; display:flex; align-items:center; justify-content:center;"><i class="fas fa-pen"></i></div>
-                <div>
-                    <input type="text" class="input-modern ex-name mb-1" placeholder="Nome do Exercício" style="background:var(--bg-input);">
-                    <div class="exercise-inputs">
-                        <input type="text" class="ex-sets" placeholder="Séries">
-                        <input type="text" class="ex-reps" placeholder="Reps">
-                        <input type="text" class="ex-weight" placeholder="Carga">
-                    </div>
-                </div>
-                <button type="button" class="btn btn-danger btn-sm" onclick="this.closest('.exercise-item').remove()"><i class="fas fa-trash"></i></button>
-                <input type="hidden" class="ex-id" value="">
-             `;
-             listContainer.appendChild(div);
-        });
+        if (!name) return alert('Dê um nome ao treino!');
+        if (selectedExercises.length === 0) return alert('Adicione pelo menos um exercício!');
 
-        // Submit Logic (Mantida)
-        document.getElementById('createWorkoutForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const exercises = Array.from(document.querySelectorAll('.exercise-item')).map((item, idx) => ({
-                id: item.querySelector('.ex-id').value || null,
-                name: item.querySelector('.ex-name').value,
-                sets: item.querySelector('.ex-sets').value,
-                reps: item.querySelector('.ex-reps').value,
-                weight: item.querySelector('.ex-weight').value,
-                order_index: idx
-            }));
+        const btn = document.querySelector('button[onclick="submitWorkout()"]');
+        btn.innerText = 'Salvando...';
+        btn.disabled = true;
+
+        try {
+            const res = await fetch('/trainer/workouts/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name,
+                    client_id: clientId || null,
+                    description: 'Criado via Web Editor',
+                    exercises: JSON.stringify(selectedExercises)
+                })
+            });
             
-            if(exercises.length === 0) return alert("Adicione exercícios.");
+            const data = await res.json();
+            if (data.success) {
+                window.location.href = data.redirect;
+            } else {
+                alert('Erro ao salvar: ' + (data.error || 'Erro desconhecido'));
+                btn.disabled = false;
+                btn.innerText = 'Salvar Treino';
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Erro de conexão.');
+            btn.disabled = false;
+            btn.innerText = 'Salvar Treino';
+        }
+    }
+</script>
 
-            try {
-                const res = await fetch('/workouts/create', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'CSRF-Token': '<%= csrfToken %>' },
-                    body: JSON.stringify({
-                        client_id: document.getElementById('client_id').value,
-                        title: document.getElementById('title').value,
-                        description: document.getElementById('description').value,
-                        exercises
-                    })
-                });
-                const json = await res.json();
-                if(json.success) window.location.href = `/admin/clients/${document.getElementById('client_id').value}`;
-                else alert(json.message);
-            } catch(e) { alert("Erro ao salvar"); }
-        });
-    </script>
-</body>
-</html>
+<style>
+    @media (max-width: 991px) {
+        .row { grid-template-columns: 1fr !important; }
+        .app-card { margin-bottom: 20px; }
+    }
+</style>

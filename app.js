@@ -1,116 +1,81 @@
+// 1. CARREGAMENTO DE AMBIENTE (DEVE SER A PRIMEIRA LINHA)
 require('dotenv').config();
+
 const express = require('express');
-const app = express();
-const path = require('path');
 const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
-const flash = require('./middleware/flash'); 
 const passport = require('passport');
-const pool = require('./database/db'); 
+const path = require('path');
+const flash = require('connect-flash');
+const pool = require('./database/db'); // Agora seguro importar
 
-// í»¡ï¸ 1. INFRAESTRUTURA
-app.set('trust proxy', 1);
-require('./config/passport')(passport);
+const app = express();
+
+// ConfiguraÃ§Ãµes do Express
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
-
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
 
-// í»¡ï¸ 2. SESSÃƒO ROBUSTA
-const sessionStore = new pgSession({
-    pool: pool,
-    tableName: 'session',
-    createTableIfMissing: true,
-    pruneSessionInterval: 60 * 15
-});
-
-sessionStore.on('error', (err) => console.error('í´¥ Session Store Error:', err.message));
-
-const isProduction = process.env.NODE_ENV === 'production';
-
+// ConfiguraÃ§Ã£o de SessÃ£o (Robusta para Prod)
+app.set('trust proxy', 1); // NecessÃ¡rio para Vercel/Heroku (HTTPS)
 app.use(session({
-    store: sessionStore,
-    secret: process.env.SESSION_SECRET || 'secret_dev_key_123',
+    store: new pgSession({
+        pool: pool,
+        tableName: 'session'
+    }),
+    secret: process.env.SESSION_SECRET || 'secret_dev_key',
     resave: false,
     saveUninitialized: false,
-    proxy: true,
-    rolling: true,
-    cookie: { 
-        maxAge: 30 * 24 * 60 * 60 * 1000, 
-        secure: isProduction, 
+    cookie: {
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 dias
+        secure: process.env.NODE_ENV === 'production', // Apenas HTTPS em prod
         httpOnly: true,
-        sameSite: 'lax' 
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
     }
 }));
 
+// InicializaÃ§Ã£o do Passport
+require('./config/passport')(passport);
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
 
-// í»¡ï¸ 3. DIAGNÃ“STICO DE TRÃFEGO
+// Middleware Global (VariÃ¡veis para Views)
 app.use((req, res, next) => {
-    if (!req.path.match(/\.(css|js|png|jpg|ico|svg|woff)$/)) {
-        console.log(`íº¦ [${req.method}] ${req.path}`);
-        console.log(`   í±¤ Auth: ${req.isAuthenticated()} | User: ${req.user ? req.user.email : 'Visitante'}`);
-    }
-    next();
-});
-
-// í»¡ï¸ 4. VARIÃVEIS GLOBAIS (CORREÃ‡ÃƒO AQUI)
-app.use((req, res, next) => {
-    res.locals.success_msg = req.flash('success_msg');
-    res.locals.error_msg = req.flash('error_msg');
-    res.locals.error = req.flash('error');
-    
-    // í·± CMS MOCK (Injetado via Script)
-    res.locals.content = { 
-        hero_title: 'Transforme Seu Potencial em Performance', 
-        hero_subtitle: 'Plataforma para Personal Trainers e Alunos.', 
-        cta_primary: 'ComeÃ§ar Agora', 
-        cta_secondary: 'Ver Planos' 
-    };
     res.locals.user = req.user || null;
-    
-    // ï¿½ï¿½ FIX: Injeta o caminho da rota atual para uso no header.ejs
     res.locals.path = req.path;
+    res.locals.error_msg = req.flash('error');
+    res.locals.success_msg = req.flash('success');
+    res.locals.error = req.flash('error'); // Passport usa 'error'
     
+    // CMS Mock (Fallback se DB falhar)
+    res.locals.content = {
+        hero_title: 'Transforme Potencial em Performance',
+        hero_subtitle: 'A plataforma definitiva para personal trainers.',
+    };
     next();
 });
 
-// í»¡ï¸ 5. ROTAS
-try {
-    app.use('/auth', require('./routes/auth'));
-    app.use('/api', require('./routes/api'));
-    app.use('/admin', require('./routes/admin'));
-    app.use('/trainer', require('./routes/trainer'));
-    app.use('/client', require('./routes/client'));
-    app.use('/workouts', require('./routes/workouts'));
-    app.use('/notifications', require('./routes/notifications'));
-    
-    // Index por Ãºltimo para nÃ£o sombrear rotas
-    app.use('/', require('./routes/index'));
-} catch (err) {
-    console.error("âŒ ERRO FATAL NAS ROTAS:", err);
-}
-
-// Health Check
-app.get('/health', (req, res) => res.send('OK'));
+// Rotas
+app.use('/', require('./routes/index'));
+app.use('/auth', require('./routes/auth'));
+app.use('/admin', require('./routes/admin'));
+app.use('/trainer', require('./routes/trainer'));
+app.use('/trainer/workouts', require('./routes/workouts'));
+app.use('/client', require('./routes/client'));
+app.use('/payment', require('./routes/payment'));
+// app.use('/api', require('./routes/api')); // API separada se necessÃ¡rio
 
 // 404 Handler
 app.use((req, res) => {
-    if (req.path.match(/\.(css|js|png|jpg|ico|map|json)$/)) return res.status(404).end();
-    console.warn(`âš ï¸ 404: ${req.path}`);
-    res.locals.path = req.path; // Garante path no 404 tambÃ©m
-    res.status(404).render('pages/error', { message: 'PÃ¡gina nÃ£o encontrada' });
+    res.status(404).render('pages/error', { 
+        message: 'PÃ¡gina nÃ£o encontrada', 
+        error: {},
+        title: '404'
+    });
 });
 
-module.exports = app;
-
-if (require.main === module) {
-    const PORT = process.env.PORT || 3000;
-    app.listen(PORT, () => {
-        console.log(`âœ… Servidor ONLINE na porta ${PORT}`);
-    });
-}
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`íº€ Servidor rodando na porta ${PORT}`));

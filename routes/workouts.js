@@ -1,87 +1,107 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../database/db');
-const notificationService = require('../utils/notificationService');
+const { ensureAuthenticated, ensureRole } = require('../middleware/auth');
+const pool = require('../database/db');
 
-router.use((req, res, next) => {
-    if (!req.session.user) return res.redirect('/auth/login');
-    next();
-});
+const isTrainer = [ensureAuthenticated, ensureRole('trainer')];
 
-// Criar Treino
-router.post('/create', async (req, res) => {
-    const { clientId, title, description, day_of_week } = req.body;
+// Listar Meus Treinos (Templates e Atribuídos)
+router.get('/', isTrainer, async (req, res) => {
     try {
-        await db.query('BEGIN');
-        const w = await db.query(
-            "INSERT INTO workouts (user_id, trainer_id, title, description, day_of_week) VALUES ($1, $2, $3, $4, $5) RETURNING id",
-            [clientId, req.session.user.id, title, description, day_of_week]
-        );
-        // (Inserção de exercícios omitida para brevidade)
-        await db.query('COMMIT');
-
-        // Notificar Cliente (Novo Treino)
-        await notificationService.notify({
-            userId: clientId,
-            type: 'workout_created',
-            title: 'Novo Treino Disponível',
-            message: `O treino "${title}" foi adicionado à sua rotina.`,
-            link: `/workouts/${w.rows[0].id}`,
-            data: { workoutTitle: title }
-        });
-
-        // Notificar Admin (Monitoramento)
-        await notificationService.notify({
-            userId: 'ADMIN_GROUP',
-            type: 'workout_created',
-            title: 'Novo Treino Criado',
-            message: `Treinador ${req.session.user.name} criou treino para cliente ID ${clientId}.`,
-            link: `/admin/users/${clientId}`,
-            data: { workoutTitle: title }
-        });
-
-        req.flash('success', 'Treino criado.');
-        res.redirect(req.session.user.role === 'admin' ? `/admin/users/${clientId}` : `/trainer/clients/${clientId}`);
-    } catch (e) { await db.query('ROLLBACK'); res.redirect('/'); }
-});
-
-// Editar Treino (Ex: Admin editando treino de um Trainer)
-router.post('/:id/update', async (req, res) => {
-    const { title, description } = req.body;
-    try {
-        const old = await db.query("SELECT * FROM workouts WHERE id = $1", [req.params.id]);
-        await db.query("UPDATE workouts SET title=$1, description=$2 WHERE id=$3", [title, description, req.params.id]);
+        const result = await pool.query(`
+            SELECT w.*, u.name as client_name 
+            FROM workouts w
+            LEFT JOIN users u ON w.client_id = u.id
+            WHERE w.creator_id = $1 AND w.is_active = true
+            ORDER BY w.created_at DESC
+        `, [req.user.id]);
         
-        const workout = old.rows[0];
+        res.render('pages/trainer-workouts', {
+            user: req.user,
+            workouts: result.rows,
+            path: '/trainer/workouts',
+            title: 'Gestão de Treinos'
+        });
+    } catch (err) {
+        console.error(err);
+        res.render('pages/error', { message: 'Erro ao listar treinos', error: err, title: 'Erro' });
+    }
+});
 
-        // Se quem editou não foi o dono original (Ex: Admin editou treino do Trainer)
-        if (req.session.user.role === 'admin' && workout.trainer_id && workout.trainer_id !== req.session.user.id) {
-            await notificationService.notify({
-                userId: workout.trainer_id,
-                type: 'workout_edited',
-                title: 'Treino Editado pelo Admin',
-                message: `O treino "${title}" do seu aluno foi alterado pela administração.`,
-                link: `/workouts/${req.params.id}`,
-                data: { workoutTitle: title }
-            });
+// Tela de Criação (Wizard)
+router.get('/create', isTrainer, async (req, res) => {
+    try {
+        // Buscar alunos para o select
+        const clients = await pool.query(`
+            SELECT u.id, u.name FROM assignments a
+            JOIN users u ON a.client_id = u.id
+            WHERE a.trainer_id = $1 AND a.status = 'active'
+        `, [req.user.id]);
+
+        // Buscar exercícios para a biblioteca
+        const exercises = await pool.query('SELECT * FROM exercises ORDER BY name ASC');
+
+        res.render('pages/create-workout', {
+            user: req.user,
+            clients: clients.rows,
+            exercises: exercises.rows,
+            path: '/trainer/workouts/create',
+            title: 'Novo Treino'
+        });
+    } catch (err) {
+        console.error(err);
+        res.redirect('/trainer/workouts');
+    }
+});
+
+// Processar Criação (POST)
+router.post('/create', isTrainer, async (req, res) => {
+    const client = await pool.connect();
+    try {
+        const { name, description, client_id, exercises } = req.body;
+        // exercises vem como JSON string do front ou array de objetos
+        const exerciseList = JSON.parse(exercises);
+
+        await client.query('BEGIN');
+
+        // 1. Criar o Header do Treino
+        const workoutRes = await client.query(`
+            INSERT INTO workouts (creator_id, client_id, name, description, is_active)
+            VALUES ($1, $2, $3, $4, true)
+            RETURNING id
+        `, [req.user.id, client_id || null, name, description]);
+
+        const workoutId = workoutRes.rows[0].id;
+
+        // 2. Inserir Exercícios
+        let order = 0;
+        for (const ex of exerciseList) {
+            await client.query(`
+                INSERT INTO workout_exercises (workout_id, exercise_id, sets, reps, rest_seconds, notes, "order")
+                VALUES ($1, $2, $3, $4, $5, $6, $7)
+            `, [workoutId, ex.id, ex.sets, ex.reps, ex.rest, ex.notes, order++]);
         }
+
+        await client.query('COMMIT');
         
-        // Avisar Cliente da mudança
-        await notificationService.notify({
-            userId: workout.user_id,
-            type: 'workout_edited',
-            title: 'Treino Atualizado',
-            message: `Houve alterações no seu treino "${title}".`,
-            link: `/workouts/${req.params.id}`,
-            data: { workoutTitle: title }
-        });
+        // Notificar aluno se foi atribuído
+        if (client_id) {
+             await client.query(`
+                INSERT INTO notifications (user_id, type, title, message)
+                VALUES ($1, 'workout', 'Novo Treino', 'Seu treinador enviou um novo treino: ' || $2)
+            `, [client_id, name]);
+        }
 
-        res.redirect(`/workouts/${req.params.id}`);
-    } catch(e){ res.redirect('/'); }
+        req.flash('success', 'Treino criado com sucesso!');
+        res.json({ success: true, redirect: '/trainer/workouts' });
+
+    } catch (err) {
+        await client.query('ROLLBACK');
+        console.error(err);
+        res.status(500).json({ error: 'Erro ao salvar treino' });
+    } finally {
+        client.release();
+    }
 });
-
-// Rotas GET essenciais
-router.get('/create', async (req, res) => { res.render('pages/create-workout', { client: {}, exercises: [] }); }); 
-router.get('/:id', async (req, res) => { res.render('pages/workout-details', { workout: {}, exercises: [], library: [] }); });
 
 module.exports = router;
