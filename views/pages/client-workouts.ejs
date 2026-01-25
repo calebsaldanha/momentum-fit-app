@@ -2,55 +2,51 @@
 <html lang="pt-BR">
 <head>
     <%- include('../layouts/app/head') %>
-    <title><%= title %> | Momentum Fit</title>
+    <title>Meus Treinos | Momentum Fit</title>
 </head>
-<body class="bg-gray-50">
-    <div class="flex h-screen overflow-hidden">
+<body>
+    <div class="dashboard-wrapper">
         <%- include('../partials/sidebar') %>
 
-        <div class="relative flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
+        <div class="main-content">
             <%- include('../partials/app-header') %>
 
-            <main class="w-full flex-grow p-6">
-                <h1 class="text-2xl font-bold text-gray-800 mb-6">Meus Treinos</h1>
+            <div class="content-pad">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <h1 style="font-size: 1.5rem; font-weight: 700;">Biblioteca de Treinos</h1>
+                </div>
 
                 <% if (workouts.length > 0) { %>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="grid-3">
                         <% workouts.forEach(function(workout) { %>
-                            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition">
-                                <div class="p-6">
-                                    <div class="flex justify-between items-start mb-4">
-                                        <div class="p-3 bg-blue-50 text-blue-600 rounded-lg">
-                                            <i class="fas fa-dumbbell text-xl"></i>
-                                        </div>
-                                        <% if(workout.is_active) { %>
-                                            <span class="bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded-full">Ativo</span>
-                                        <% } else { %>
-                                            <span class="bg-gray-100 text-gray-500 text-xs font-bold px-2 py-1 rounded-full">Arquivado</span>
-                                        <% } %>
+                            <div class="card" style="display: flex; flex-direction: column;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                                    <div style="width: 40px; height: 40px; border-radius: 8px; background: rgba(59, 130, 246, 0.1); color: var(--neon-blue); display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-dumbbell"></i>
                                     </div>
-                                    <h3 class="text-lg font-bold text-gray-900 mb-2"><%= workout.name %></h3>
-                                    <p class="text-gray-500 text-sm mb-4 line-clamp-2"><%= workout.description || 'Sem descrição.' %></p>
-                                    
-                                    <div class="text-xs text-gray-400 mb-6">
-                                        Criado por: <%= workout.trainer_name || 'Sistema' %>
-                                    </div>
-
-                                    <a href="/client/workouts/<%= workout.id %>" class="block w-full border border-blue-600 text-blue-600 hover:bg-blue-50 text-center font-bold py-2 rounded-lg transition">
-                                        Ver Detalhes
-                                    </a>
+                                    <% if(workout.is_active) { %>
+                                        <span class="badge badge-success">Ativo</span>
+                                    <% } else { %>
+                                        <span class="badge" style="background: rgba(255,255,255,0.1);">Arquivado</span>
+                                    <% } %>
                                 </div>
+
+                                <h3 style="font-size: 1.2rem; font-weight: 600; margin-bottom: 0.5rem;"><%= workout.name %></h3>
+                                <p style="color: var(--text-secondary); font-size: 0.9rem; flex: 1; margin-bottom: 1.5rem;">
+                                    <%= workout.description ? workout.description : 'Sem descrição.' %>
+                                </p>
+
+                                <a href="/client/workouts/<%= workout.id %>" class="btn btn-outline btn-block">Ver Detalhes</a>
                             </div>
                         <% }); %>
                     </div>
                 <% } else { %>
-                    <div class="bg-white rounded-xl shadow-sm p-12 text-center">
-                        <div class="text-gray-200 text-6xl mb-4">���‍♂️</div>
-                        <h3 class="text-xl font-bold text-gray-800 mb-2">Tudo calmo por aqui</h3>
-                        <p class="text-gray-500">Você ainda não tem treinos atribuídos.</p>
+                    <div class="card" style="text-align: center; padding: 4rem;">
+                        <i class="fas fa-inbox" style="font-size: 3rem; color: var(--text-secondary); margin-bottom: 1rem;"></i>
+                        <p>Você ainda não possui treinos.</p>
                     </div>
                 <% } %>
-            </main>
+            </div>
         </div>
     </div>
 </body>

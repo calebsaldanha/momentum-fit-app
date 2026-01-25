@@ -1,54 +1,52 @@
-<div id="sidebar-overlay" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-20 hidden lg:hidden transition-opacity duration-300"></div>
+<div id="sidebar-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:45;"></div>
 
-<aside id="sidebar" class="fixed inset-y-0 left-0 z-30 w-64 bg-white border-r border-gray-200 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col h-screen">
-    
-    <div class="flex items-center justify-between h-16 px-6 border-b border-gray-200 bg-white">
-        <a href="/client/dashboard" class="flex items-center gap-2 font-bold text-xl text-blue-700">
-            <i class="fas fa-bolt"></i> Momentum
-        </a>
-        <button id="close-sidebar" class="lg:hidden text-gray-500 hover:text-gray-700 focus:outline-none">
-            <i class="fas fa-times text-xl"></i>
-        </button>
+<aside class="sidebar" id="sidebar">
+    <div class="brand">
+        <i class="fas fa-bolt"></i> Momentum Fit
     </div>
 
-    <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1">
-        <% 
-        const isActive = (p) => path.startsWith(p) ? 'bg-blue-50 text-blue-700 border-r-4 border-blue-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900';
-        %>
-
-        <a href="/client/dashboard" class="<%= isActive('/client/dashboard') %> flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors group">
-            <i class="fas fa-home w-6 text-lg group-hover:text-blue-600"></i>
-            Painel
-        </a>
-
-        <a href="/client/workouts" class="<%= isActive('/client/workouts') %> flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors group">
-            <i class="fas fa-dumbbell w-6 text-lg group-hover:text-blue-600"></i>
-            Meus Treinos
-        </a>
-
-        <a href="/client/evolution" class="<%= isActive('/client/evolution') %> flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors group">
-            <i class="fas fa-chart-line w-6 text-lg group-hover:text-blue-600"></i>
-            Minha Evolução
-        </a>
-
-        <a href="/client/ai-coach" class="<%= isActive('/client/ai-coach') %> flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors group">
-            <i class="fas fa-robot w-6 text-lg group-hover:text-blue-600"></i>
-            IA Coach
-        </a>
-
-        <a href="/client/plans" class="<%= isActive('/client/plans') %> flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors group">
-            <i class="fas fa-credit-card w-6 text-lg group-hover:text-blue-600"></i>
-            Meu Plano
-        </a>
-
-        <div class="pt-4 mt-4 border-t border-gray-100">
-            <a href="/client/profile" class="<%= isActive('/client/profile') %> flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors group">
-                <i class="fas fa-user-circle w-6 text-lg group-hover:text-blue-600"></i>
-                Perfil
+    <nav class="nav-links">
+        <% const role = user.role; %>
+        
+        <% if (role === 'client') { %>
+            <a href="/client/dashboard" class="nav-item <%= path === '/client/dashboard' ? 'active' : '' %>">
+                <i class="fas fa-home"></i> Painel
             </a>
-            <a href="/auth/logout" class="flex items-center px-4 py-3 text-sm font-medium text-red-600 rounded-lg hover:bg-red-50 transition-colors group">
-                <i class="fas fa-sign-out-alt w-6 text-lg"></i>
-                Sair
+            <a href="/client/workouts" class="nav-item <%= path.includes('workouts') ? 'active' : '' %>">
+                <i class="fas fa-dumbbell"></i> Meus Treinos
+            </a>
+            <a href="/client/evolution" class="nav-item <%= path.includes('evolution') ? 'active' : '' %>">
+                <i class="fas fa-chart-line"></i> Evolução
+            </a>
+            <a href="/client/profile" class="nav-item <%= path.includes('profile') ? 'active' : '' %>">
+                <i class="fas fa-user"></i> Perfil
+            </a>
+        <% } %>
+
+        <% if (role === 'trainer') { %>
+            <a href="/trainer/dashboard" class="nav-item <%= path === '/trainer/dashboard' ? 'active' : '' %>">
+                <i class="fas fa-chart-pie"></i> Dashboard
+            </a>
+            <a href="/trainer/clients" class="nav-item <%= path.includes('clients') ? 'active' : '' %>">
+                <i class="fas fa-users"></i> Alunos
+            </a>
+            <a href="/trainer/workouts" class="nav-item <%= path.includes('workouts') ? 'active' : '' %>">
+                <i class="fas fa-list-alt"></i> Biblioteca
+            </a>
+        <% } %>
+
+        <% if (role === 'admin' || role === 'superadmin') { %>
+            <a href="/admin/dashboard" class="nav-item <%= path.includes('dashboard') ? 'active' : '' %>">
+                <i class="fas fa-lock"></i> Admin
+            </a>
+            <a href="/admin/users" class="nav-item <%= path.includes('users') ? 'active' : '' %>">
+                <i class="fas fa-users-cog"></i> Usuários
+            </a>
+        <% } %>
+
+        <div style="margin-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
+            <a href="/auth/logout" class="nav-item" style="color: var(--danger);">
+                <i class="fas fa-sign-out-alt"></i> Sair
             </a>
         </div>
     </nav>

@@ -1,61 +1,42 @@
-<%- include('../layouts/app/head', {title: 'Admin Dashboard'}) %>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <%- include('../layouts/app/head') %>
+    <title>Admin | Momentum Fit</title>
+</head>
+<body>
+    <div class="dashboard-wrapper">
+        <%- include('../partials/sidebar') %>
+        <div class="main-content">
+            <%- include('../partials/app-header') %>
+            
+            <div class="content-pad">
+                <h1 style="font-size: 1.5rem; margin-bottom: 2rem;">Visão Geral Administrativa</h1>
 
-<div class="dashboard-layout">
-    <%- include('../partials/sidebar') %>
-    
-    <main class="app-main">
-        <%- include('../partials/app-header') %>
-        
-        <div class="dashboard-content">
-            <div class="container-fluid">
-                
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-                    <h2 style="color: white; margin: 0;">Painel Administrativo</h2>
-                    
-                    <form action="/admin/repair-db" method="POST" onsubmit="return confirm('Isso criará as tabelas que faltam. Continuar?');">
-                        <button type="submit" class="btn btn-sm btn-outline" style="border-color: var(--primary); color: var(--primary);">
-                            <i class="fas fa-tools"></i> Reparar Banco de Dados
+                <div class="grid-3">
+                    <div class="card">
+                        <div style="color: var(--text-secondary);">Receita Total</div>
+                        <div style="font-size: 2rem; font-weight: 700; color: var(--success);">R$ <%= revenue.total || '0.00' %></div>
+                    </div>
+                    <div class="card">
+                        <div style="color: var(--text-secondary);">Usuários Ativos</div>
+                        <div style="font-size: 2rem; font-weight: 700; color: var(--neon-blue);"><%= users_count %></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Manutenção do Sistema</h3>
+                    </div>
+                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">Ferramentas de reparo para o banco de dados.</p>
+                    <form action="/admin/repair-db" method="POST">
+                        <button type="submit" class="btn btn-outline" style="color: var(--warning); border-color: var(--warning);">
+                            <i class="fas fa-tools"></i> Rodar Auto-Repair
                         </button>
                     </form>
                 </div>
-
-                <% if (typeof error_msg !== 'undefined' && error_msg.length > 0) { %>
-                    <div class="alert alert-danger"><%= error_msg %></div>
-                <% } %>
-                <% if (typeof success_msg !== 'undefined' && success_msg.length > 0) { %>
-                    <div class="alert alert-success"><%= success_msg %></div>
-                <% } %>
-
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="icon-box"><i class="fas fa-users"></i></div>
-                        <div>
-                            <h3 style="color: white; margin: 0;"><%= stats.users || 0 %></h3>
-                            <span style="color: #888; font-size: 0.9rem;">Usuários</span>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="icon-box"><i class="fas fa-user-ninja"></i></div>
-                        <div>
-                            <h3 style="color: white; margin: 0;"><%= stats.trainers || 0 %></h3>
-                            <span style="color: #888; font-size: 0.9rem;">Personais</span>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="icon-box"><i class="fas fa-dollar-sign"></i></div>
-                        <div>
-                            <h3 style="color: white; margin: 0;">R$ <%= parseFloat(stats.revenue || 0).toFixed(2) %></h3>
-                            <span style="color: #888; font-size: 0.9rem;">Receita Mensal</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="app-card" style="margin-top: 30px; padding: 20px; background: #111; border: 1px solid #222; border-radius: 12px;">
-                    <h4 style="color: white; margin-bottom: 15px;">Ações Críticas</h4>
-                    <p style="color: #888;">Se você está vendo erros de "Relation 'assignments' does not exist" no log, clique no botão "Reparar Banco de Dados" acima.</p>
-                </div>
-
             </div>
         </div>
-    </main>
-</div>
+    </div>
+</body>
+</html>

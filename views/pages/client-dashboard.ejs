@@ -2,101 +2,84 @@
 <html lang="pt-BR">
 <head>
     <%- include('../layouts/app/head') %>
-    <title><%= title %> | Momentum Fit</title>
+    <title>Painel | Momentum Fit</title>
 </head>
-<body class="bg-gray-50">
-    <div class="flex h-screen overflow-hidden">
+<body>
+    <div class="dashboard-wrapper">
         <%- include('../partials/sidebar') %>
 
-        <div class="relative flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
+        <div class="main-content">
             <%- include('../partials/app-header') %>
 
-            <main class="w-full flex-grow p-6">
-                <div class="bg-gradient-to-r from-blue-900 to-blue-700 rounded-2xl shadow-lg p-6 mb-8 text-white flex justify-between items-center">
-                    <div>
-                        <h1 class="text-3xl font-bold mb-2">Ol√°, <%= user.name.split(' ')[0] %>! Ì∫Ä</h1>
-                        <p class="opacity-90">Vamos manter o foco hoje? Seu plano atual √©: <span class="font-bold bg-white/20 px-2 py-1 rounded text-sm"><%= stats.plan_name %></span></p>
-                    </div>
-                    <% if (trainer) { %>
-                    <div class="hidden md:flex items-center bg-white/10 rounded-lg p-3 backdrop-blur-sm">
-                        <% if(trainer.photo_url) { %>
-                            <img src="<%= trainer.photo_url %>" class="w-10 h-10 rounded-full border-2 border-white mr-3">
-                        <% } else { %>
-                            <div class="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold mr-3 border-2 border-white">
-                                <%= trainer.name.charAt(0) %>
-                            </div>
-                        <% } %>
-                        <div>
-                            <p class="text-xs opacity-75">Seu Treinador</p>
-                            <p class="font-semibold text-sm"><%= trainer.name %></p>
-                        </div>
-                    </div>
-                    <% } %>
+            <div class="content-pad">
+                <div class="welcome-banner">
+                    <h1 style="font-size: 1.8rem; margin-bottom: 0.5rem;">Ol√°, <%= user.name.split(' ')[0] %>! Ì∫Ä</h1>
+                    <p style="opacity: 0.9;">Vamos manter o foco hoje? Seu plano atual √©: <strong><%= stats.plan_name %></strong></p>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    
-                    <div class="lg:col-span-2 space-y-6">
-                        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-                            <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
-                                <span class="bg-blue-100 text-blue-600 p-2 rounded-lg mr-3">ÌøãÔ∏è</span>
-                                Treino de Hoje
-                            </h2>
+                <div class="grid-3">
+                    <div style="grid-column: span 2;">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title"><i class="fas fa-dumbbell" style="color:var(--neon-blue); margin-right:8px;"></i> Treino de Hoje</h3>
+                            </div>
                             
                             <% if (nextWorkout) { %>
-                                <div class="bg-gray-50 rounded-xl p-5 border border-gray-200">
-                                    <div class="flex justify-between items-start mb-3">
-                                        <div>
-                                            <h3 class="text-lg font-bold text-gray-900"><%= nextWorkout.name %></h3>
-                                            <p class="text-gray-500 text-sm"><%= nextWorkout.description || 'Foco em performance' %></p>
-                                        </div>
-                                        <span class="bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full">Ativo</span>
-                                    </div>
+                                <div style="background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: var(--radius); border: 1px solid rgba(255,255,255,0.05);">
+                                    <h2 style="font-size: 1.4rem; color: white; margin-bottom: 0.5rem;"><%= nextWorkout.name %></h2>
+                                    <p style="color: var(--text-secondary); margin-bottom: 1.5rem;"><%= nextWorkout.description || 'Foco e consist√™ncia.' %></p>
                                     
-                                    <div class="flex items-center text-sm text-gray-600 mb-6 space-x-4">
-                                        <div class="flex items-center"><i class="fas fa-dumbbell mr-2"></i> <%= nextWorkout.exercises_count %> Exerc√≠cios</div>
-                                        <div class="flex items-center"><i class="fas fa-clock mr-2"></i> ~45 min</div>
+                                    <div style="display:flex; gap: 1.5rem; margin-bottom: 1.5rem; font-size: 0.9rem; color: var(--text-secondary);">
+                                        <span><i class="fas fa-list"></i> <%= nextWorkout.exercises_count %> Exerc√≠cios</span>
+                                        <span><i class="fas fa-clock"></i> ~45 min</span>
                                     </div>
 
-                                    <a href="/client/workouts/<%= nextWorkout.id %>" class="block w-full bg-blue-600 hover:bg-blue-700 text-white text-center font-bold py-3 rounded-lg transition shadow-md hover:shadow-lg">
+                                    <a href="/client/workouts/<%= nextWorkout.id %>" class="btn btn-primary btn-block">
                                         Iniciar Treino Agora
                                     </a>
                                 </div>
                             <% } else { %>
-                                <div class="text-center py-8">
-                                    <div class="text-gray-300 text-5xl mb-3">Ì≥≠</div>
-                                    <p class="text-gray-500 mb-4">Nenhum treino atribu√≠do ainda.</p>
-                                    <p class="text-sm text-blue-600">Aguarde seu treinador enviar o planejamento.</p>
+                                <div style="text-align: center; padding: 2rem;">
+                                    <i class="fas fa-check-circle" style="font-size: 3rem; color: var(--text-secondary); opacity: 0.5; margin-bottom: 1rem;"></i>
+                                    <p style="color: var(--text-secondary);">Nenhum treino pendente para hoje.</p>
                                 </div>
                             <% } %>
                         </div>
                     </div>
 
-                    <div class="space-y-6">
-                        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-                            <h3 class="text-gray-800 font-bold mb-4">Seu Progresso</h3>
-                            <div class="flex items-center justify-between mb-2">
-                                <span class="text-gray-600 text-sm">Treinos Realizados</span>
-                                <span class="text-2xl font-bold text-blue-600"><%= stats.total_workouts %></span>
+                    <div>
+                        <div class="card">
+                            <h3 class="card-title" style="margin-bottom: 1rem;">Seu Progresso</h3>
+                            <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                                <div>
+                                    <div style="font-size: 2.5rem; font-weight: 700; color: var(--neon-purple); line-height: 1;"><%= stats.total_workouts %></div>
+                                    <div style="font-size: 0.85rem; color: var(--text-secondary);">Treinos totais</div>
+                                </div>
+                                <i class="fas fa-chart-bar" style="font-size: 2rem; color: rgba(255,255,255,0.1);"></i>
                             </div>
-                            <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
-                                <div class="bg-blue-600 h-2.5 rounded-full" style="width: 45%"></div>
-                            </div>
-                            <p class="text-xs text-gray-400 mt-2 text-right">Mantenha a const√¢ncia!</p>
                         </div>
 
-                        <div class="bg-gradient-to-br from-purple-50 to-white rounded-xl shadow-sm p-6 border border-purple-100">
-                            <div class="flex items-center mb-3">
-                                <span class="bg-purple-100 text-purple-600 p-2 rounded-lg mr-3">Ì¥ñ</span>
-                                <h3 class="text-gray-800 font-bold">Coach IA</h3>
+                        <% if(trainer) { %>
+                        <div class="card">
+                            <h3 class="card-title" style="margin-bottom: 1rem;">Seu Treinador</h3>
+                            <div style="display: flex; align-items: center; gap: 1rem;">
+                                <% if(trainer.photo_url) { %>
+                                    <img src="<%= trainer.photo_url %>" style="width: 50px; height: 50px; border-radius: 50%;">
+                                <% } else { %>
+                                    <div style="width: 50px; height: 50px; border-radius: 50%; background: var(--bg-surface-hover); display: flex; align-items: center; justify-content: center;">
+                                        <%= trainer.name.charAt(0) %>
+                                    </div>
+                                <% } %>
+                                <div>
+                                    <div style="font-weight: 600;"><%= trainer.name %></div>
+                                    <a href="/client/chat" style="font-size: 0.85rem; color: var(--neon-blue);">Enviar mensagem</a>
+                                </div>
                             </div>
-                            <p class="text-sm text-gray-600 mb-4">Tem d√∫vidas sobre a execu√ß√£o ou dieta? Eu posso ajudar.</p>
-                            <a href="/client/ai-coach" class="text-purple-600 font-semibold text-sm hover:underline">Falar com Coach &rarr;</a>
                         </div>
+                        <% } %>
                     </div>
                 </div>
-
-            </main>
+            </div>
         </div>
     </div>
 </body>

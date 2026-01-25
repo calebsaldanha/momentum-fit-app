@@ -1,31 +1,22 @@
-<header class="bg-white border-b border-gray-200 h-16 flex items-center justify-between px-6 lg:px-10 sticky top-0 z-10">
-    <button id="sidebar-toggle" class="lg:hidden text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md p-1 mr-4">
-        <i class="fas fa-bars text-xl"></i>
-    </button>
-
-    <div class="flex items-center">
-        <h2 class="text-lg font-semibold text-gray-800 truncate max-w-[200px] md:max-w-none">
-            <%= title || 'Dashboard' %>
-        </h2>
+<header class="app-header">
+    <div style="display: flex; align-items: center;">
+        <button id="sidebar-toggle" style="background:none; border:none; color:white; font-size:1.5rem; margin-right:1rem; cursor:pointer;" class="lg-hidden">
+            <i class="fas fa-bars"></i>
+        </button>
+        <h2 class="header-title"><%= title %></h2>
     </div>
 
-    <div class="flex items-center gap-4">
-        <%- include('./notification-bell') %>
-        
-        <div class="relative hidden md:block">
-            <div class="flex items-center gap-3">
-                <div class="text-right hidden sm:block">
-                    <p class="text-sm font-semibold text-gray-800"><%= user.name %></p>
-                    <p class="text-xs text-gray-500 capitalize"><%= user.role === 'client' ? 'Aluno' : user.role %></p>
-                </div>
-                <% if (user.photo_url) { %>
-                    <img src="<%= user.photo_url %>" alt="Profile" class="h-10 w-10 rounded-full object-cover border border-gray-200">
-                <% } else { %>
-                    <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold">
-                        <%= user.name.charAt(0) %>
-                    </div>
-                <% } %>
-            </div>
+    <div class="user-menu">
+        <div style="text-align: right; display: none; @media(min-width:768px){display:block;}">
+            <span style="display:block; font-size:0.9rem; font-weight:600;"><%= user.name %></span>
+            <span style="display:block; font-size:0.75rem; color:var(--text-secondary); text-transform:capitalize;"><%= user.role %></span>
+        </div>
+        <div class="user-avatar">
+            <%= user.name.charAt(0) %>
         </div>
     </div>
 </header>
+
+<style>
+    @media(min-width: 1024px) { .lg-hidden { display: none !important; } }
+</style>
