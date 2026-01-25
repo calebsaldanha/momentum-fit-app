@@ -4,40 +4,31 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeBtn = document.getElementById('sidebar-close');
     const overlay = document.getElementById('mobile-overlay');
 
-    function openSidebar() {
-        sidebar.classList.add('open');
-        overlay.classList.add('active');
-        document.body.style.overflow = 'hidden'; // Trava scroll do body
+    function toggleSidebar() {
+        const isOpen = sidebar.classList.contains('open');
+        if (isOpen) {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('active');
+            document.body.style.overflow = ''; // Libera scroll
+        } else {
+            sidebar.classList.add('open');
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden'; // Trava scroll
+        }
     }
 
-    function closeSidebar() {
-        sidebar.classList.remove('open');
-        overlay.classList.remove('active');
-        document.body.style.overflow = ''; // Destrava scroll
-    }
+    if (toggleBtn) toggleBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleSidebar();
+    });
 
-    if (toggleBtn) {
-        toggleBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            openSidebar();
-        });
-    }
-
-    if (closeBtn) {
-        closeBtn.addEventListener('click', closeSidebar);
-    }
-
-    if (overlay) {
-        overlay.addEventListener('click', closeSidebar);
-    }
-
-    // Fecha sidebar ao clicar em um link (navegação SPA feel)
-    const navLinks = sidebar.querySelectorAll('.nav-item');
-    navLinks.forEach(link => {
+    if (closeBtn) closeBtn.addEventListener('click', toggleSidebar);
+    if (overlay) overlay.addEventListener('click', toggleSidebar);
+    
+    // Auto-close em links no mobile
+    sidebar.querySelectorAll('a').forEach(link => {
         link.addEventListener('click', () => {
-            if (window.innerWidth <= 1024) {
-                closeSidebar();
-            }
+            if (window.innerWidth <= 1024) toggleSidebar();
         });
     });
 });

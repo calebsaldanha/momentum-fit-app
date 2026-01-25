@@ -7,70 +7,62 @@ router.use(ensureAuthenticated);
 router.use(ensureRole('trainer'));
 
 // --- DASHBOARD ---
-router.get('/dashboard', (req, res) => {
-    const stats = {
-        active_clients: 5,
-        total_workouts: 24,
-        revenue: '1.250,00'
-    };
-    const recentActivity = [
-        { user_name: 'João Silva', action: 'Check-in realizado', time: '10:30' }
-    ];
-
-    res.render('pages/trainer-dashboard', {
-        user: req.user,
-        stats,
-        recentActivity,
-        path: '/trainer/dashboard'
-    });
-});
-
-// --- CLIENTS MANAGEMENT ---
-router.get('/clients', (req, res) => {
-    const clients = [
-        { id: 1, name: 'João Silva', email: 'joao@email.com', plan: 'Consultoria', status: 'Ativo' },
-        { id: 2, name: 'Maria Souza', email: 'maria@email.com', plan: 'Personal VIP', status: 'Ativo' }
-    ];
-    res.render('pages/trainer-clients', { user: req.user, clients, path: '/trainer/clients' });
-});
-
-router.get('/clients/invite', (req, res) => {
-    res.render('pages/initial-form', { // Reusando form ou criar view específica
-        user: req.user,
-        path: '/trainer/clients' 
-    }); 
-});
-
-router.get('/clients/:id', (req, res) => {
-    // Detalhe do aluno + Anamnese (Read Only para o Trainer)
-    const client = { 
-        id: req.params.id, 
-        name: 'João Silva', 
-        email: 'joao@email.com', 
-        anamnesis: {
-            objective: 'Emagrecimento',
-            injuries: 'Joelho direito',
-            experience: 'Intermediário'
-        }
-    };
-    res.render('pages/trainer-details', { user: req.user, client, path: '/trainer/clients' });
-});
-
-// --- WORKOUTS LIBRARY (Fix Internal Server Error) ---
-router.get('/workouts', (req, res) => {
+router.get('/dashboard', async (req, res) => {
     try {
-        const workouts = [
-            { id: 1, name: 'Full Body A', created_at: '2024-01-20' },
-            { id: 2, name: 'Full Body B', created_at: '2024-01-22' }
-        ];
-        res.render('pages/trainer-library', { 
-            user: req.user, 
-            workouts, // Variável que faltava e causava erro
-            path: '/trainer/workouts' 
+        // Contar alunos
+        const clientCountRes = await db.query("SELECT COUNT(*) FROM users WHERE role = 'client'"); // Idealmente filtrar por trainer_id se existir associação
+        const activeClients = clientCountRes.rows[0].count;
+
+        // Contar treinos criados
+        const workoutCountRes = await db.query("SELECT COUNT(*) FROM workouts"); // Filtrar por criador se possível
+        const totalWorkouts = workoutCountRes.rows[0].count;
+
+        const stats = {
+            active_clients: activeClients,
+            total_workouts: totalWorkouts,
+            revenue: '0,00'
+        };
+
+        res.render('pages/trainer-dashboard', {
+            user: req.user,
+            stats,
+            recentActivity: [],
+            path: '/trainer/dashboard'
         });
     } catch (err) {
         console.error(err);
-        res.render('pages/error', { message: 'Erro na biblioteca', user: req.user, path: '' });
+        res.render('pages/error', { message: 'Erro DB Trainer', user: req.user, path: '' });
+    }
+});
+
+// --- LISTA DE ALUNOS ---
+router.get('/clients', async (req, res) => {
+    try {
+        // Busca todos os clientes (Num sistema real, buscaria WHERE trainer_id = X)
+        const result = await db.query("SELECT id, name, email, plan FROM users WHERE role = 'client' ORDER BY created_at DESC");
+        
+        res.render('pages/trainer-clients', {
+            user: req.user,
+            clients: result.rows,
+            path: '/trainer/clients'
+        });
+    } catch (err) {
+        console.error(err);
+        res.render('pages/trainer-clients', { user: req.user, clients: [], path: '/trainer/clients' });
+    }
+});
+
+// --- BIBLIOTECA DE TREINOS ---
+router.get('/workouts', async (req, res) => {
+    try {
+        const result = await db.query("SELECT * FROM workouts ORDER BY created_at DESC");
+        res.render('pages/trainer-library', { 
+            user: req.user, 
+            workouts: result.rows, 
+            path: '/trainer/workouts' 
+        });
+    } catch (err) {
+        res.render('pages/trainer-library', { user: req.user, workouts: [], path: '/trainer/workouts' });
     }
 });
 
@@ -78,26 +70,34 @@ router.get('/workouts/create', (req, res) => {
     res.render('pages/create-workout', { user: req.user, path: '/trainer/workouts' });
 });
 
-// Rota para criar programa específico para um aluno
-router.get('/program/:clientId', (req, res) => {
-    res.render('pages/create-workout', { 
-        user: req.user, 
-        path: '/trainer/clients',
-        targetClient: req.params.clientId 
-    });
+// POST criar treino
+router.post('/workouts/create', async (req, res) => {
+    try {
+        const { name, description, difficulty, category } = req.body;
+        // Inserir no banco
+        await db.query(
+            'INSERT INTO workouts (name, description, difficulty, category, created_by, is_public) VALUES ($1, $2, $3, $4, $5, $6)',
+            [name, description, difficulty, category, req.user.id, true]
+        );
+        req.flash('success_msg', 'Treino criado com sucesso!');
+        res.redirect('/trainer/workouts');
+    } catch (err) {
+        console.error(err);
+        req.flash('error_msg', 'Erro ao criar treino.');
+        res.redirect('/trainer/workouts/create');
+    }
 });
 
-// --- FINANCIAL ---
 router.get('/financial', (req, res) => {
-    const transactions = [
-        { id: 101, client: 'Maria Souza', amount: 250.00, date: '25/01/2026', status: 'Pago' }
-    ];
-    res.render('pages/trainer-financial', { user: req.user, transactions, path: '/trainer/financial' });
+    res.render('pages/trainer-financial', { user: req.user, transactions: [], path: '/trainer/financial' });
 });
 
-// --- CONTENT ---
-router.get('/content/create', (req, res) => {
-    res.render('pages/create-article', { user: req.user, path: '/trainer/content' });
+router.get('/content', (req, res) => {
+    res.render('pages/trainer-content', { user: req.user, path: '/trainer/content' });
+});
+
+router.get('/settings', (req, res) => {
+    res.render('pages/trainer-settings', { user: req.user, path: '/trainer/settings' });
 });
 
 module.exports = router;

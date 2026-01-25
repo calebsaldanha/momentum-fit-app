@@ -6,111 +6,150 @@ const db = require('../database/db');
 router.use(ensureAuthenticated);
 router.use(ensureRole('client'));
 
-// --- DASHBOARD ---
+// --- DASHBOARD COM DADOS REAIS ---
 router.get('/dashboard', async (req, res) => {
     try {
-        // Dados de Fallback (Mock) caso DB falhe
-        const stats = { plan_name: req.user.plan || 'Free', total_workouts: 12, streak: 3 };
-        const nextWorkout = { id: 1, name: 'Upper Body Power', description: 'Foco em força.', exercises_count: 6 };
-        const trainer = null; // null aciona a IA na view
+        const userId = req.user.id;
+
+        // 1. Contagem de treinos realizados (Simulado ou Real se tiver tabela history)
+        // Se não tiver tabela de histórico, usamos uma dummy query
+        const historyQuery = `
+            SELECT COUNT(*) as total 
+            FROM (SELECT 1) AS dummy 
+            WHERE 1=0 -- Placeholder para evitar erro se tabela não existir
+        `;
+        // Tente executar query real se as tabelas existirem
+        let totalWorkouts = 0;
+        try {
+            const resHistory = await db.query('SELECT COUNT(*) as total FROM workout_history WHERE user_id = $1', [userId]);
+            totalWorkouts = resHistory.rows[0].total;
+        } catch (e) { totalWorkouts = 0; } // Fallback silencioso
+
+        // 2. Próximo Treino (Busca um treino atribuído)
+        let nextWorkout = null;
+        try {
+            const resWorkouts = await db.query('SELECT * FROM workouts WHERE user_id = $1 OR is_public = true LIMIT 1', [userId]);
+            if (resWorkouts.rows.length > 0) {
+                nextWorkout = resWorkouts.rows[0];
+            }
+        } catch (e) { console.error("Erro ao buscar treinos:", e.message); }
+
+        // 3. Stats Gerais
+        const stats = {
+            plan_name: req.user.plan || 'Free',
+            total_workouts: totalWorkouts,
+            streak: 0
+        };
 
         res.render('pages/client-dashboard', {
             user: req.user,
             stats,
             nextWorkout,
-            trainer,
+            trainer: null, // Pode ser preenchido se tiver tabela de associação
             path: '/client/dashboard'
         });
+
     } catch (err) {
-        console.error("Dashboard Error:", err);
-        res.status(500).render('pages/error', { message: 'Erro ao carregar dashboard', user: req.user, path: '' });
+        console.error("Dashboard Fatal Error:", err);
+        res.status(500).render('pages/error', { message: 'Erro crítico no painel.', user: req.user, path: '' });
     }
 });
 
-// --- EVOLUTION (Novo) ---
+// --- LISTA DE TREINOS DO BANCO ---
+router.get('/workouts', async (req, res) => {
+    try {
+        const result = await db.query(`
+            SELECT * FROM workouts 
+            WHERE user_id = $1 OR is_public = true 
+            ORDER BY created_at DESC
+        `, [req.user.id]);
+
+        res.render('pages/client-workouts', {
+            user: req.user,
+            workouts: result.rows,
+            path: '/client/workouts'
+        });
+    } catch (err) {
+        console.error(err);
+        res.render('pages/client-workouts', { user: req.user, workouts: [], path: '/client/workouts' });
+    }
+});
+
+// --- DETALHE DO TREINO ---
+router.get('/workouts/:id', async (req, res) => {
+    try {
+        // Busca Treino
+        const wResult = await db.query('SELECT * FROM workouts WHERE id = $1', [req.params.id]);
+        if (wResult.rows.length === 0) return res.redirect('/client/workouts');
+        const workout = wResult.rows[0];
+
+        // Busca Exercícios (Se a tabela existir)
+        let exercises = [];
+        try {
+            const exResult = await db.query(`
+                SELECT we.*, e.name, e.video_url 
+                FROM workout_exercises we 
+                JOIN exercises e ON we.exercise_id = e.id 
+                WHERE we.workout_id = $1 
+                ORDER BY we.order_index
+            `, [req.params.id]);
+            exercises = exResult.rows;
+        } catch (e) {
+            // Fallback se não tiver exercícios vinculados no banco ainda
+            exercises = [
+                { name: 'Exercício Exemplo (Dados pendentes)', sets: 3, reps: '10', rpe: 8 }
+            ];
+        }
+
+        workout.exercises = exercises;
+
+        res.render('pages/workout-details', {
+            user: req.user,
+            workout,
+            path: '/client/workouts'
+        });
+    } catch (err) {
+        console.error(err);
+        res.redirect('/client/workouts');
+    }
+});
+
 router.get('/evolution', (req, res) => {
-    // Dados simulados de evolução de peso/carga
-    const evolutionData = {
-        labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai'],
-        weight: [80, 79, 78.5, 77, 76],
-        benchPress: [60, 65, 70, 75, 80]
-    };
-    
+    // Dados de evolução ainda podem ser mockados se não houver tabela de métricas
     res.render('pages/client-evolution', {
         user: req.user,
-        data: evolutionData,
+        data: { labels: ['Jan', 'Fev'], weight: [70, 71], benchPress: [50, 55] },
         path: '/client/evolution'
     });
 });
 
-// --- PLANS (Novo) ---
 router.get('/plans', (req, res) => {
-    const currentPlan = {
-        name: req.user.plan || 'Free',
-        price: '0,00',
-        features: ['Acesso Básico', 'Publicidade', 'Sem Coach Humano']
-    };
-
     res.render('pages/client-plans', {
         user: req.user,
-        plan: currentPlan,
+        plan: { name: req.user.plan || 'Free', price: '0,00', features: ['Básico'] },
         path: '/client/plans'
     });
 });
 
-// --- WORKOUTS ---
-router.get('/workouts', (req, res) => {
-    const workouts = [
-        { id: 1, name: 'Leg Day Insano', category: 'Pernas', duration: '60 min', difficulty: 'Hard' },
-        { id: 2, name: 'Push A', category: 'Superiores', duration: '45 min', difficulty: 'Medium' }
-    ];
-    res.render('pages/client-workouts', { user: req.user, workouts, path: '/client/workouts' });
-});
-
-router.get('/workouts/:id', (req, res) => {
-    // Simula busca no DB
-    const workout = {
-        id: req.params.id,
-        name: 'Leg Day Insano',
-        description: 'Foco total em quadríceps hoje.',
-        exercises: [
-            { id: 1, name: 'Agachamento Livre', sets: 4, reps: '8-10', rpe: 9, video_url: '#' },
-            { id: 2, name: 'Leg Press 45', sets: 3, reps: '12-15', rpe: 9, video_url: '#' }
-        ]
-    };
-    res.render('pages/workout-details', { user: req.user, workout, path: '/client/workouts' });
-});
-
-// --- PROFILE / ANAMNESIS ---
-router.get('/profile', async (req, res) => {
-    // Tenta buscar anamnese, se não existir, objeto vazio
-    const anamnesis = req.user.anamnesis || {
-        injury: false,
-        medication: false,
-        objective: 'Hipertrofia',
-        experience: 'Iniciante'
-    };
-
-    res.render('pages/client-profile', { 
-        user: req.user, 
-        anamnesis,
-        path: '/client/profile' 
-    });
-});
-
-// Post para salvar Anamnese
-router.post('/profile/update', async (req, res) => {
-    // TODO: Implementar Update no DB
-    req.flash('success_msg', 'Perfil atualizado com sucesso (Simulação).');
-    res.redirect('/client/profile');
-});
-
-// --- AI COACH ---
 router.get('/ai-coach', (req, res) => {
-    const messages = [
-        { sender: 'ai', text: 'Olá! Sou sua IA. Como foi o treino de ontem?', time: '08:00' }
-    ];
-    res.render('pages/client-ai-coach', { user: req.user, messages, path: '/client/ai-coach' });
+    res.render('pages/client-ai-coach', { user: req.user, messages: [], path: '/client/ai-coach' });
+});
+
+router.get('/profile', (req, res) => {
+    const anamnesis = req.user.anamnesis || {};
+    res.render('pages/client-profile', { user: req.user, anamnesis, path: '/client/profile' });
+});
+
+router.post('/profile/update', async (req, res) => {
+    // Atualizar no banco
+    try {
+        const { name, phone } = req.body;
+        await db.query('UPDATE users SET name = $1, phone = $2 WHERE id = $3', [name, phone, req.user.id]);
+        req.flash('success_msg', 'Perfil atualizado.');
+    } catch (e) {
+        req.flash('error_msg', 'Erro ao atualizar.');
+    }
+    res.redirect('/client/profile');
 });
 
 module.exports = router;
