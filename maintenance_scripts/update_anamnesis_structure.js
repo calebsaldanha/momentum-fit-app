@@ -1,27 +1,32 @@
 const { Pool } = require('pg');
 require('dotenv').config();
 
+// Pega a URL correta
+const connectionString = process.env.POSTGRES_URL || process.env.DATABASE_URL;
+
+if (!connectionString) {
+    console.error("❌ ERRO: Defina POSTGRES_URL no seu arquivo .env");
+    process.exit(1);
+}
+
 const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false }
+    connectionString: connectionString,
+    ssl: { rejectUnauthorized: false } // Neon exige SSL
 });
 
 async function migrate() {
     try {
-        console.log('��� Atualizando estrutura de Anamnese...');
+        console.log('��� Conectando ao Neon para atualizar Anamnese...');
         
-        // Garante que a coluna existe e é do tipo JSONB
+        // Garante que a coluna existe como JSONB
         await pool.query(`
             ALTER TABLE users 
             ADD COLUMN IF NOT EXISTS anamnesis JSONB DEFAULT '{}'::jsonb;
         `);
 
-        // Opcional: Adicionar colunas físicas para dados críticos de busca se necessário
-        // Mas para anamnese detalhada, JSONB é ideal.
-
-        console.log('✅ Banco de dados pronto para nova ficha.');
+        console.log('✅ Estrutura de Anamnese atualizada/verificada com sucesso.');
     } catch (error) {
-        console.error('❌ Erro na migração:', error);
+        console.error('❌ Erro na migração:', error.message);
     } finally {
         pool.end();
     }
