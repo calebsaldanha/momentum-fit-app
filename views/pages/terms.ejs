@@ -1,23 +1,29 @@
-<%- include('../partials/header.ejs', { title: 'Termos de Uso', path: '/terms' }) %>
+<%- include('../layouts/public/head') %>
+<%- include('../layouts/public/header') %>
 
-<main class="public-content bg-subtle">
-    <div class="container" style="padding-top: 40px; padding-bottom: 60px;">
-        <div class="feature-card" style="max-width: 800px; margin: 0 auto;">
-            <h1 class="section-title" style="margin-bottom: 30px;">Termos de Uso</h1>
-            <div style="color: #ccc; line-height: 1.8;">
-                <p>Última atualização: Janeiro de 2026</p>
-                <br>
-                <h3>1. Aceitação</h3>
-                <p>Ao acessar e usar o Momentum Fit, você aceita e concorda em estar vinculado a estes termos.</p>
-                <br>
-                <h3>2. Uso do Serviço</h3>
-                <p>Você concorda em usar o serviço apenas para fins legais e de acordo com as instruções fornecidas.</p>
-                <br>
-                <h3>3. Contas</h3>
-                <p>Você é responsável por manter a confidencialidade de sua conta e senha.</p>
-            </div>
+<main style="padding-top: 160px; padding-bottom: 80px; min-height: 80vh;">
+    <div class="container" style="max-width: 800px;">
+        <h1 class="section-title" style="font-size: 2.5rem; margin-bottom: 40px; border-bottom: 1px solid #222; padding-bottom: 20px;">Termos de Uso</h1>
+        
+        <div style="color: #ccc; line-height: 1.8; font-size: 1rem;">
+            <p style="margin-bottom: 20px;">Última atualização: Janeiro de 2026</p>
+
+            <h3 style="color: white; margin: 30px 0 15px;">1. Aceitação dos Termos</h3>
+            <p style="margin-bottom: 20px;">
+                Ao acessar e usar a plataforma Momentum Fit, você aceita e concorda em estar vinculado aos termos e disposições deste acordo.
+            </p>
+
+            <h3 style="color: white; margin: 30px 0 15px;">2. Uso da Plataforma</h3>
+            <p style="margin-bottom: 20px;">
+                A Momentum Fit fornece ferramentas para gestão de treinos e acompanhamento físico. O uso indevido da plataforma para fins ilegais ou não autorizados é estritamente proibido.
+            </p>
+
+            <h3 style="color: white; margin: 30px 0 15px;">3. Responsabilidades Médicas</h3>
+            <p style="margin-bottom: 20px;">
+                O conteúdo da plataforma não substitui o conselho médico profissional. Consulte sempre um médico antes de iniciar qualquer programa de exercícios.
+            </p>
         </div>
     </div>
 </main>
 
-<%- include('../partials/footer.ejs') %>
+<%- include('../layouts/public/footer') %>

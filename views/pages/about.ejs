@@ -1,37 +1,73 @@
-<%- include('../partials/header.ejs', { title: 'Sobre Nós', path: '/about' }) %>
+<%- include('../layouts/public/head') %>
+<%- include('../layouts/public/header') %>
 
-<main class="public-content">
-    <section class="hero hero-small" style="min-height: 60vh;">
-        <div class="hero-overlay"></div>
-        <div class="container hero-container">
-            <div class="hero-content center">
-                <h1 class="hero-title">Revolucionando o <span class="text-gradient">Fitness</span></h1>
-                <p class="hero-subtitle">Unimos tecnologia de ponta e expertise humana para democratizar o acesso a treinos de alta performance.</p>
+<main>
+    <section style="padding: 180px 0 80px; background: linear-gradient(180deg, #050505 0%, #111 100%); text-align: center;">
+        <div class="container">
+            <h1 class="hero-title" style="font-size: 3.5rem; margin-bottom: 20px;">Nossa Missão</h1>
+            <p class="text-muted" style="max-width: 700px; margin: 0 auto; font-size: 1.2rem;">
+                Democratizar a tecnologia de alta performance para Personal Trainers e seus alunos.
+            </p>
+        </div>
+    </section>
+
+    <section class="section-padding" style="background: #0a0a0a;">
+        <div class="container">
+            <div class="features-grid" style="grid-template-columns: 1fr 1fr; align-items: center; gap: 60px;">
+                <div>
+                    <span style="color: var(--primary); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; font-size: 0.9rem;">Como tudo começou</span>
+                    <h2 class="section-title" style="margin-top: 10px; font-size: 2.5rem;">A fusão entre Fisiologia e Dados</h2>
+                    
+                    <p style="color: #ccc; line-height: 1.8; margin-bottom: 20px; font-size: 1.05rem;">
+                        A Momentum Fit nasceu de uma inquietação: por que apenas atletas olímpicos têm acesso a métricas precisas de treino?
+                    </p>
+                    <p style="color: #ccc; line-height: 1.8; margin-bottom: 20px; font-size: 1.05rem;">
+                        Combinando anos de experiência prática em <strong>Educação Física</strong> com o poder analítico da <strong>Ciência de Dados</strong>, criamos uma plataforma que elimina o "achismo" da prescrição de exercícios.
+                    </p>
+                    <p style="color: #ccc; line-height: 1.8; margin-bottom: 20px; font-size: 1.05rem;">
+                        Não somos apenas um app de anotar séries. Somos um ecossistema de inteligência que entende sua fadiga, calcula seu volume ideal e garante que cada gota de suor se transforme em resultado mensurável.
+                    </p>
+                </div>
+
+                <div style="background: #111; padding: 40px; border-radius: 20px; border: 1px solid #222; position: relative;">
+                    <div style="position: absolute; top: -20px; right: -20px; background: var(--primary); color: black; padding: 15px; border-radius: 10px; font-weight: 800;">
+                        EST. 2025
+                    </div>
+                    <h3 style="color: white; margin-bottom: 20px;"><i class="fas fa-bullseye" style="color: var(--primary); margin-right: 10px;"></i> Nossos Pilares</h3>
+                    <ul style="list-style: none; padding: 0;">
+                        <li style="margin-bottom: 20px; display: flex; gap: 15px;">
+                            <i class="fas fa-database" style="color: #555; margin-top: 5px;"></i>
+                            <div>
+                                <strong style="color: white; display: block; margin-bottom: 5px;">Data-Driven</strong>
+                                <span style="color: #888; font-size: 0.9rem;">Decisões baseadas em números reais, não em intuição.</span>
+                            </div>
+                        </li>
+                        <li style="margin-bottom: 20px; display: flex; gap: 15px;">
+                            <i class="fas fa-users" style="color: #555; margin-top: 5px;"></i>
+                            <div>
+                                <strong style="color: white; display: block; margin-bottom: 5px;">Conexão Humana</strong>
+                                <span style="color: #888; font-size: 0.9rem;">A tecnologia potencializa o treinador, não o substitui.</span>
+                            </div>
+                        </li>
+                        <li style="margin-bottom: 0; display: flex; gap: 15px;">
+                            <i class="fas fa-chart-line" style="color: #555; margin-top: 5px;"></i>
+                            <div>
+                                <strong style="color: white; display: block; margin-bottom: 5px;">Evolução Constante</strong>
+                                <span style="color: #888; font-size: 0.9rem;">Melhoria contínua do código e do corpo.</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
     </section>
 
-    <section class="section-padding">
+    <section style="padding: 100px 0; border-top: 1px solid #222; text-align: center;">
         <div class="container">
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="icon-box"><i class="fas fa-bullseye"></i></div>
-                    <h3>Foco no Resultado</h3>
-                    <p style="color:#888">Não acreditamos em soluções mágicas. Acreditamos em dados, consistência e progressão mensurável.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="icon-box"><i class="fas fa-brain"></i></div>
-                    <h3>Inteligência Real</h3>
-                    <p style="color:#888">Nossa IA não apenas gera treinos, ela aprende com você a cada repetição para otimizar sua rotina.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="icon-box"><i class="fas fa-users"></i></div>
-                    <h3>Comunidade</h3>
-                    <p style="color:#888">Conectamos alunos a treinadores de elite, criando um ecossistema de motivação e suporte.</p>
-                </div>
-            </div>
+            <h2 style="color: white; margin-bottom: 20px;">Faça parte dessa história</h2>
+            <a href="/auth/register" class="btn btn-primary">Começar Agora</a>
         </div>
     </section>
 </main>
 
-<%- include('../partials/footer.ejs') %>
+<%- include('../layouts/public/footer') %>
