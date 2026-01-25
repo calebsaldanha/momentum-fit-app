@@ -7,7 +7,9 @@ const isAdmin = [ensureAuthenticated, ensureRole('admin')];
 
 // Dashboard
 router.get('/dashboard', isAdmin, async (req, res) => {
-    let stats = { users: 0, trainers: 0, revenue: 0 };
+    // Valores padrÃ£o numÃ©ricos garantidos
+    let stats = { users: 0, trainers: 0, revenue: 0.0 };
+    
     try {
         const result = await pool.query(`
             SELECT 
@@ -15,20 +17,28 @@ router.get('/dashboard', isAdmin, async (req, res) => {
                 (SELECT COUNT(*) FROM users WHERE role = 'trainer') as trainers,
                 (SELECT COALESCE(SUM(amount), 0) FROM payments WHERE status = 'paid') as revenue
         `);
-        stats = result.rows[0];
+        
+        if (result.rows[0]) {
+            stats = {
+                users: parseInt(result.rows[0].users || 0),
+                trainers: parseInt(result.rows[0].trainers || 0),
+                revenue: parseFloat(result.rows[0].revenue || 0) // <--- O FIX ESTÃ AQUI (ConversÃ£o forÃ§ada)
+            };
+        }
     } catch (e) {
-        console.warn("âš ï¸ Erro ao carregar stats (DB incompleto?)", e.message);
+        console.warn("âš ï¸ Erro ao carregar stats (DB incompleto ou vazio):", e.message);
+        // NÃ£o quebra a pÃ¡gina, apenas mostra zeros
     }
     
     res.render('pages/admin-dashboard', { user: req.user, stats, path: '/admin/dashboard' });
 });
 
-// íº‘ ROTA DE AUTO-CURA V2 (CompatÃ­vel com POSTGRES_URL)
+// íº‘ ROTA DE AUTO-CURA V2 (VersÃ£o EstÃ¡vel)
 router.post('/repair-db', isAdmin, async (req, res) => {
     const client = await pool.connect();
     try {
         await client.query('BEGIN');
-        console.log("í» ï¸ Admin iniciou reparo de banco (Vercel Mode)...");
+        console.log("í» ï¸ Admin iniciou reparo de banco...");
 
         // --- CORE TABLES ---
         await client.query(`
@@ -73,9 +83,8 @@ router.post('/repair-db', isAdmin, async (req, res) => {
                 creator_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
                 client_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
                 name VARCHAR(100) NOT NULL, description TEXT,
-                is_active BOOLEAN DEFAULT true, -- Coluna crÃ­tica
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                is_active BOOLEAN DEFAULT true,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         `);
         
@@ -148,7 +157,7 @@ router.post('/repair-db', isAdmin, async (req, res) => {
         `);
 
         await client.query('COMMIT');
-        req.flash('success', 'Infraestrutura de Banco reparada com sucesso!');
+        req.flash('success', 'Banco de dados reparado com sucesso! Agora vocÃª pode criar treinos.');
         res.redirect('/admin/dashboard');
 
     } catch (err) {

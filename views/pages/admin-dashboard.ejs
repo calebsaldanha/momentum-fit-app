@@ -12,7 +12,7 @@
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
                     <h2 style="color: white; margin: 0;">Painel Administrativo</h2>
                     
-                    <form action="/admin/repair-db" method="POST" onsubmit="return confirm('Isso verificará todas as tabelas. Continuar?');">
+                    <form action="/admin/repair-db" method="POST" onsubmit="return confirm('Isso criará as tabelas que faltam. Continuar?');">
                         <button type="submit" class="btn btn-sm btn-outline" style="border-color: var(--primary); color: var(--primary);">
                             <i class="fas fa-tools"></i> Reparar Banco de Dados
                         </button>
@@ -31,7 +31,7 @@
                         <div class="icon-box"><i class="fas fa-users"></i></div>
                         <div>
                             <h3 style="color: white; margin: 0;"><%= stats.users || 0 %></h3>
-                            <span style="color: #888; font-size: 0.9rem;">Usuários Totais</span>
+                            <span style="color: #888; font-size: 0.9rem;">Usuários</span>
                         </div>
                     </div>
                     <div class="stat-card">
@@ -44,28 +44,15 @@
                     <div class="stat-card">
                         <div class="icon-box"><i class="fas fa-dollar-sign"></i></div>
                         <div>
-                            <h3 style="color: white; margin: 0;">R$ <%= (stats.revenue || 0).toFixed(2) %></h3>
+                            <h3 style="color: white; margin: 0;">R$ <%= parseFloat(stats.revenue || 0).toFixed(2) %></h3>
                             <span style="color: #888; font-size: 0.9rem;">Receita Mensal</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="app-card" style="margin-top: 30px; padding: 20px; background: #111; border: 1px solid #222; border-radius: 12px;">
-                    <h4 style="color: white; margin-bottom: 15px;">Status do Sistema</h4>
-                    <ul style="list-style: none; padding: 0; color: #ccc;">
-                        <li style="margin-bottom: 10px;">
-                            <i class="fas fa-check-circle" style="color: var(--primary); margin-right: 10px;"></i>
-                            Integração Stripe: <strong>Ativa</strong>
-                        </li>
-                        <li style="margin-bottom: 10px;">
-                            <i class="fas fa-check-circle" style="color: var(--primary); margin-right: 10px;"></i>
-                            Banco de Dados: <strong>Conectado (Neon PostgreSQL)</strong>
-                        </li>
-                        <li>
-                            <i class="fas fa-server" style="color: var(--primary); margin-right: 10px;"></i>
-                            Ambiente: <strong><%= process.env.NODE_ENV === 'production' ? 'Produção' : 'Desenvolvimento' %></strong>
-                        </li>
-                    </ul>
+                    <h4 style="color: white; margin-bottom: 15px;">Ações Críticas</h4>
+                    <p style="color: #888;">Se você está vendo erros de "Relation 'assignments' does not exist" no log, clique no botão "Reparar Banco de Dados" acima.</p>
                 </div>
 
             </div>
