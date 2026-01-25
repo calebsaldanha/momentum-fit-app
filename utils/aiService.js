@@ -1,7 +1,8 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const notificationService = require('./notificationService');
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || 'AIzaSyARoaW9QAA-3PSNztzJNpVZR10WQdcszTc');
+// CORREÇÃO DE SEGURANÇA: Removido fallback hardcoded
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 async function getChatResponse(userId, userMessage) {
     try {

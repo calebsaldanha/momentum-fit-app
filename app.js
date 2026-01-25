@@ -55,5 +55,11 @@ app.use('/trainer', require('./routes/trainer'));
 app.use('/client', require('./routes/client'));
 app.use('/payment', require('./routes/payment'));
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`íº€ Server running on ${PORT}`));
+// CORREÃ‡ÃƒO SERVERLESS: SÃ³ roda o listen se for execuÃ§Ã£o direta (local)
+if (require.main === module) {
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => console.log(`íº€ Server running on ${PORT}`));
+}
+
+// Exporta o app para o Vercel conseguir executar
+module.exports = app;
