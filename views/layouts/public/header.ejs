@@ -1,43 +1,32 @@
 <header class="public-header">
-    <div class="container public-nav">
-        <a href="/" class="logo-text">
-            MOMENTUM<span style="font-weight:300">FIT</span>
-        </a>
+    <div class="container">
+        <div class="logo-container">
+            <a href="/">
+                <img src="/images/momentum-fit-logo-completo.png" alt="Momentum Fit" onerror="this.src='https://placehold.co/150x40?text=Momentum+Fit'">
+            </a>
+        </div>
         
+        <button class="mobile-menu-btn">☰</button>
+
         <nav class="nav-links">
-            <a href="/">Home</a>
-            <a href="/about">Sobre</a>
-            <a href="/features">Funcionalidades</a>
-            <a href="/plans">Planos</a>
-            <a href="/articles">Blog</a>
+            <a href="/" class="nav-link">Início</a>
+            <a href="/about" class="nav-link">Sobre</a>
+            <a href="/plans" class="nav-link">Planos</a>
+            <a href="/articles" class="nav-link">Blog</a>
+            <a href="/contact" class="nav-link">Contato</a>
             
             <% if (typeof user !== 'undefined' && user) { %>
-                <a href="/app/dashboard" class="btn btn-primary">Meu Painel</a>
+                <% if (user.role === 'admin' || user.role === 'superadmin') { %>
+                    <a href="/admin/dashboard" class="btn-login solid">Dashboard</a>
+                <% } else if (user.role === 'trainer') { %>
+                    <a href="/trainer/dashboard" class="btn-login solid">Painel</a>
+                <% } else { %>
+                    <a href="/client/dashboard" class="btn-login solid">Meu Treino</a>
+                <% } %>
             <% } else { %>
-                <a href="/auth/login" class="btn btn-outline">Entrar</a>
-                <a href="/auth/register" class="btn btn-primary">Começar Agora</a>
+                <a href="/login" class="btn-login outline">Entrar</a>
+                <a href="/register" class="btn-login solid">Começar Agora</a>
             <% } %>
         </nav>
-
-        <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
-            <i class="fas fa-bars"></i>
-        </button>
     </div>
 </header>
-
-<script>
-    function toggleMobileMenu() {
-        const nav = document.querySelector('.nav-links');
-        nav.style.display = nav.style.display === 'flex' ? 'none' : 'flex';
-        if(nav.style.display === 'flex') {
-            nav.style.flexDirection = 'column';
-            nav.style.position = 'absolute';
-            nav.style.top = '70px';
-            nav.style.left = '0';
-            nav.style.width = '100%';
-            nav.style.background = 'white';
-            nav.style.padding = '20px';
-            nav.style.boxShadow = '0 5px 10px rgba(0,0,0,0.1)';
-        }
-    }
-</script>

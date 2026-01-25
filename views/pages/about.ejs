@@ -1,91 +1,81 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<%- include('../layouts/public/head') %>
+<head>
+    <%- include('../layouts/public/head') %>
+    <title>Sobre Nós | Momentum Fit</title>
+    <meta name="description" content="Conheça a história e a missão da Momentum Fit. Transformando vidas através de tecnologia e fitness.">
+</head>
 <body>
-    <%- include('../layouts/public/header') %>
+    <div class="public-wrapper">
+        <%- include('../layouts/public/header') %>
 
-    <main>
-        <section class="about-hero">
-            <div class="container">
-                <h1>Nossa Missão é o Seu Movimento</h1>
-                <p style="font-size: 1.2rem; max-width: 600px; margin: 0 auto; opacity: 0.9;">
-                    Conectamos tecnologia de ponta com a expertise humana para criar a plataforma de fitness definitiva.
-                </p>
-            </div>
-        </section>
+        <main class="main-content">
+            <section class="about-hero">
+                <div class="container">
+                    <h1>Mais que um app,<br>um movimento.</h1>
+                    <p style="font-size: 1.2rem; opacity: 0.9; max-width: 700px; margin: 0 auto;">
+                        Nascemos para conectar profissionais de elite a alunos que buscam resultados reais.
+                        Sem planilhas perdidas, sem treinos genéricos.
+                    </p>
+                </div>
+            </section>
 
-        <section class="container">
-            <div class="mission-grid">
-                <div class="mission-card">
-                    <div class="mission-icon"><i class="fas fa-heartbeat"></i></div>
-                    <h3>Saúde Primeiro</h3>
-                    <p>Não é sobre estética, é sobre longevidade e qualidade de vida através do movimento consciente.</p>
-                </div>
-                <div class="mission-card">
-                    <div class="mission-icon"><i class="fas fa-brain"></i></div>
-                    <h3>Inteligência de Dados</h3>
-                    <p>Usamos IA para adaptar treinos em tempo real, respeitando seus limites e potencializando resultados.</p>
-                </div>
-                <div class="mission-card">
-                    <div class="mission-icon"><i class="fas fa-users"></i></div>
-                    <h3>Comunidade</h3>
-                    <p>Unimos alunos e personal trainers em um ecossistema transparente e eficiente.</p>
-                </div>
-            </div>
-        </section>
-
-        <section class="about-content">
-            <div class="container">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center;">
-                    <div>
-                        <h2 style="font-size: 2.5rem; margin-bottom: 20px; color: var(--secondary);">A Origem</h2>
-                        <p style="margin-bottom: 20px; font-size: 1.1rem; color: #555;">
-                            O Momentum Fit nasceu da frustração com planilhas de treino estáticas e aplicativos que não entendem a individualidade biológica.
-                        </p>
-                        <p style="margin-bottom: 20px; font-size: 1.1rem; color: #555;">
-                            Criado por Caleb Saldanha, unindo a ciência da computação com a educação física, nossa plataforma visa democratizar o acesso a treinos de alta performance.
-                        </p>
+            <section class="about-content-section">
+                <div class="container">
+                    <div class="mission-grid">
+                        <div class="mission-card">
+                            <div class="mission-icon">���</div>
+                            <h3>Nossa Missão</h3>
+                            <p>Democratizar o acesso a treinos de alta performance através de uma plataforma inteligente e intuitiva.</p>
+                        </div>
+                        <div class="mission-card">
+                            <div class="mission-icon">���️</div>
+                            <h3>Nossa Visão</h3>
+                            <p>Ser a maior plataforma de conexão entre personal trainers e alunos da América Latina até 2026.</p>
+                        </div>
+                        <div class="mission-card">
+                            <div class="mission-icon">���</div>
+                            <h3>Nossos Valores</h3>
+                            <p>Transparência, foco no resultado, saúde baseada em ciência e tecnologia a serviço do humano.</p>
+                        </div>
                     </div>
-                    <div>
-                        <div style="background: #eee; height: 400px; border-radius: 20px; display: flex; align-items: center; justify-content: center; color: #aaa;">
-                            <i class="fas fa-image" style="font-size: 3rem;"></i>
+
+                    <div class="story-section">
+                        <div class="story-text">
+                            <h2>A História da Momentum</h2>
+                            <p>
+                                Tudo começou com uma frustração: a desconexão entre o treino prescrito e a execução real. 
+                                Víamos personais excelentes perdendo tempo com gestão burocrática e alunos desmotivados por falta de acompanhamento.
+                            </p>
+                            <p>
+                                A Momentum Fit surgiu para preencher essa lacuna. Desenvolvemos uma IA capaz de auxiliar na periodização, 
+                                mas mantendo o Personal Trainer no centro da decisão. Não substituímos o humano; nós o tornamos um super-humano.
+                            </p>
+                        </div>
+                        <div class="story-image">
+                            <img src="/images/features-bg.png" alt="Momentum Fit Team" onerror="this.style.display='none';">
                         </div>
                     </div>
                 </div>
-            </div>
-        </section>
+            </section>
+        </main>
 
-        <section class="timeline-section">
-            <div class="container">
-                <h2 style="text-align: center; margin-bottom: 60px;">Nossa Jornada</h2>
-                
-                <div style="max-width: 800px; margin: 0 auto;">
-                    <div class="timeline-item">
-                        <div class="timeline-year">2024</div>
-                        <div class="timeline-content">
-                            <h3>A Ideia</h3>
-                            <p>Conceituação do algoritmo de adaptação de carga e validação com primeiros personais.</p>
-                        </div>
-                    </div>
-                    <div class="timeline-item">
-                        <div class="timeline-year">2025</div>
-                        <div class="timeline-content">
-                            <h3>Lançamento Beta</h3>
-                            <p>Início das operações com grupo fechado de alunos e implementação do módulo de IA.</p>
-                        </div>
-                    </div>
-                    <div class="timeline-item">
-                        <div class="timeline-year">2026</div>
-                        <div class="timeline-content">
-                            <h3>Expansão</h3>
-                            <p>Lançamento oficial da plataforma Momentum Fit Pro para todo o Brasil.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
+        <%- include('../layouts/public/footer') %>
+    </div>
 
-    <%- include('../layouts/public/footer') %>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const menuBtn = document.querySelector('.mobile-menu-btn');
+            const navLinks = document.querySelector('.nav-links');
+            
+            if(menuBtn && navLinks) {
+                menuBtn.addEventListener('click', () => {
+                    navLinks.classList.toggle('active');
+                    const icon = navLinks.classList.contains('active') ? '✕' : '☰';
+                    menuBtn.textContent = icon;
+                });
+            }
+        });
+    </script>
 </body>
 </html>
