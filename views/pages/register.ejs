@@ -1,63 +1,102 @@
-<%- include('../layouts/public/head') %>
-<%- include('../layouts/public/header') %>
+<%- include('../layouts/public/head', { title: 'Criar Conta' }) %>
 
-<section class="hero" style="min-height: 100vh; align-items: center; justify-content: center; padding-top: 120px; padding-bottom: 40px;">
-    <div class="hero-overlay"></div>
-    
-    <div class="container hero-container" style="display: flex; justify-content: center;">
-        <div class="feature-card" style="max-width: 450px; width: 100%; border-top: 4px solid var(--primary);">
-            <div class="center" style="margin-bottom: 20px;">
-                <h2 style="color: white; margin-bottom: 10px;">Criar Conta</h2>
-                <p style="color: #888; font-size: 0.9rem;">Comece sua jornada no Momentum Fit.</p>
+<div class="auth-page">
+    <header class="main-header" style="position: absolute; background: transparent;">
+        <div class="header-container">
+            <a href="/" class="brand-logo">
+                <img src="/images/momentum-fit-icon.png" alt="Logo" class="logo-rounded">
+                <span>Momentum</span>
+            </a>
+            <a href="/auth/login" style="color: white; text-decoration: none; font-size: 0.9rem;">Já tenho conta</a>
+        </div>
+    </header>
+
+    <div class="auth-content">
+        <div class="auth-container">
+            <div class="mb-30">
+                <h1 style="color: white; font-size: 2rem; margin-bottom: 10px; font-weight: 800;">Comece sua jornada</h1>
+                <p style="color: #888;">Crie sua conta gratuitamente e evolua seu treino.</p>
             </div>
 
-            <% if (typeof error_msg !== 'undefined' && error_msg.length > 0) { %>
-                <div class="alert alert-danger" style="background: rgba(255, 107, 107, 0.1); color: #ff6b6b; padding: 10px; border-radius: 5px; margin-bottom: 15px; font-size: 0.9rem;"><%= error_msg %></div>
-            <% } %>
+            <%- include('../partials/flash') %>
 
             <form action="/auth/register" method="POST">
-                <div style="margin-bottom: 15px;">
-                    <label style="color: #ccc; font-size: 0.9rem; margin-bottom: 5px; display: block;">Nome Completo</label>
-                    <input type="text" name="name" required 
-                           style="width: 100%; padding: 12px; background: #050505; border: 1px solid #333; color: white; border-radius: 6px;">
+                <div class="grid-2" style="gap: 20px; grid-template-columns: 1fr 1fr; margin-bottom: 20px;">
+                    <div>
+                        <label class="form-label">Nome</label>
+                        <input type="text" name="name" class="form-control" placeholder="Seu nome" required>
+                    </div>
+                    <div>
+                        <label class="form-label">Sobrenome</label>
+                        <input type="text" name="lastname" class="form-control" placeholder="Sobrenome" required>
+                    </div>
                 </div>
 
-                <div style="margin-bottom: 15px;">
-                    <label style="color: #ccc; font-size: 0.9rem; margin-bottom: 5px; display: block;">E-mail</label>
-                    <input type="email" name="email" required 
-                           style="width: 100%; padding: 12px; background: #050505; border: 1px solid #333; color: white; border-radius: 6px;">
-                </div>
-                
-                <div style="margin-bottom: 15px;">
-                    <label style="color: #ccc; font-size: 0.9rem; margin-bottom: 5px; display: block;">Senha</label>
-                    <input type="password" name="password" required minlength="6"
-                           style="width: 100%; padding: 12px; background: #050505; border: 1px solid #333; color: white; border-radius: 6px;">
+                <div class="form-group">
+                    <label class="form-label">E-mail</label>
+                    <input type="email" name="email" class="form-control" placeholder="seu@email.com" required>
                 </div>
 
-                <div style="margin-bottom: 15px;">
-                    <label style="color: #ccc; font-size: 0.9rem; margin-bottom: 5px; display: block;">Confirmar Senha</label>
-                    <input type="password" name="confirm_password" required minlength="6"
-                           style="width: 100%; padding: 12px; background: #050505; border: 1px solid #333; color: white; border-radius: 6px;">
+                <div class="form-group">
+                    <label class="form-label">Senha</label>
+                    <input type="password" name="password" class="form-control" placeholder="Mínimo 6 caracteres" required>
                 </div>
 
-                <div style="margin-bottom: 20px;">
-                    <label style="color: #ccc; font-size: 0.9rem; margin-bottom: 5px; display: block;">Eu sou:</label>
-                    <select name="role" class="w-100" style="padding: 12px; background: #050505; border: 1px solid #333; color: white; border-radius: 6px;">
-                        <option value="client">Aluno</option>
-                        <option value="trainer">Personal Trainer</option>
-                    </select>
+                <div class="form-group">
+                    <label class="form-label">Eu sou:</label>
+                    <div style="display: flex; gap: 15px;">
+                        <label style="flex: 1; cursor: pointer;">
+                            <input type="radio" name="role" value="client" checked style="display: none;" onchange="updateRoleUI(this)">
+                            <div class="role-card active" id="role-client" style="border: 1px solid var(--primary); background: rgba(190, 242, 2, 0.1); padding: 15px; border-radius: 8px; text-align: center; color: white; transition: 0.3s;">
+                                <i class="fas fa-user" style="margin-bottom: 5px; display: block;"></i> Aluno
+                            </div>
+                        </label>
+                        <label style="flex: 1; cursor: pointer;">
+                            <input type="radio" name="role" value="trainer" style="display: none;" onchange="updateRoleUI(this)">
+                            <div class="role-card" id="role-trainer" style="border: 1px solid #333; background: #111; padding: 15px; border-radius: 8px; text-align: center; color: #666; transition: 0.3s;">
+                                <i class="fas fa-dumbbell" style="margin-bottom: 5px; display: block;"></i> Personal
+                            </div>
+                        </label>
+                    </div>
                 </div>
 
-                <button type="submit" class="btn btn-primary w-100">Criar Conta</button>
+                <input type="hidden" name="plan" value="<%= typeof query !== 'undefined' && query.plan ? query.plan : 'free' %>">
+
+                <button type="submit" class="btn btn-primary w-100" style="color: black; font-weight: 700; padding: 14px;">Criar Conta</button>
             </form>
 
-            <div class="center" style="margin-top: 20px; font-size: 0.9rem;">
-                <p style="color: #666;">
-                    Já possui uma conta? <a href="/auth/login" style="color: white; text-decoration: underline;">Fazer Login</a>
-                </p>
+            <div class="text-center mt-30" style="margin-top: 20px; color: #666; font-size: 0.85rem;">
+                Ao se registrar, você concorda com nossos <a href="/terms" style="color: #888;">Termos</a> e <a href="/privacy" style="color: #888;">Privacidade</a>.
             </div>
         </div>
     </div>
-</section>
 
-<%- include('../layouts/public/footer') %>
+    <div class="auth-image-side" style="background-image: url('/images/features-bg.png');">
+        <div class="auth-overlay">
+            <div class="auth-quote">
+                <p>"Disciplina é fazer o que precisa ser feito, mesmo quando você não quer."</p>
+                <span>Filosofia Momentum</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function updateRoleUI(radio) {
+        document.getElementById('role-client').style.borderColor = '#333';
+        document.getElementById('role-client').style.background = '#111';
+        document.getElementById('role-client').style.color = '#666';
+        
+        document.getElementById('role-trainer').style.borderColor = '#333';
+        document.getElementById('role-trainer').style.background = '#111';
+        document.getElementById('role-trainer').style.color = '#666';
+
+        const activeId = 'role-' + radio.value;
+        const activeEl = document.getElementById(activeId);
+        activeEl.style.borderColor = 'var(--primary)';
+        activeEl.style.background = 'rgba(190, 242, 2, 0.1)';
+        activeEl.style.color = 'white';
+    }
+</script>
+</body>
+</html>
