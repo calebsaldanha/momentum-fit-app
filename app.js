@@ -38,7 +38,6 @@ app.use((req, res, next) => {
     res.locals.user = req.user || null;
     res.locals.path = req.path;
     
-    // Fix: Capture error flash once to avoid clearing it before assignment
     const errorFlash = req.flash('error');
     res.locals.error_msg = errorFlash;
     res.locals.error = errorFlash;
@@ -48,18 +47,19 @@ app.use((req, res, next) => {
     next();
 });
 
+// --- ROTAS ---
 app.use('/', require('./routes/index'));
 app.use('/auth', require('./routes/auth'));
 app.use('/admin', require('./routes/admin'));
+app.use('/superadmin', require('./routes/superadmin')); // Conectado!
 app.use('/trainer', require('./routes/trainer'));
+app.use('/trainer/workouts', require('./routes/workouts')); // Conectado!
 app.use('/client', require('./routes/client'));
 app.use('/payment', require('./routes/payment'));
 
-// CORREÃ‡ÃƒO SERVERLESS: SÃ³ roda o listen se for execuÃ§Ã£o direta (local)
 if (require.main === module) {
     const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => console.log(`íº€ Server running on ${PORT}`));
 }
 
-// Exporta o app para o Vercel conseguir executar
 module.exports = app;
