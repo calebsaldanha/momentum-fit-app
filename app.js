@@ -1,11 +1,11 @@
-require('dotenv').config(); // Linha 1
+require('dotenv').config();
 
 const express = require('express');
 const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
 const passport = require('passport');
 const path = require('path');
-const flash = require('connect-flash'); // Esta linha estava quebrando antes da instalação
+const flash = require('connect-flash');
 const pool = require('./database/db');
 
 const app = express();
@@ -37,9 +37,13 @@ app.use(flash());
 app.use((req, res, next) => {
     res.locals.user = req.user || null;
     res.locals.path = req.path;
-    res.locals.error_msg = req.flash('error');
+    
+    // Fix: Capture error flash once to avoid clearing it before assignment
+    const errorFlash = req.flash('error');
+    res.locals.error_msg = errorFlash;
+    res.locals.error = errorFlash;
+    
     res.locals.success_msg = req.flash('success');
-    res.locals.error = req.flash('error');
     res.locals.content = { hero_title: 'Momentum Fit', hero_subtitle: 'Performance' };
     next();
 });
