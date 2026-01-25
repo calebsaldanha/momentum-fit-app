@@ -1,181 +1,181 @@
-/* í¾¨ PUBLIC CSS - ARQUITETURA RESPONSIVA (V2)
-   Autor: Senior Architect
-   Contexto: Landing Pages, Sobre, Planos, Home
-*/
+/* í¾¨ PUBLIC CSS - V3 (DESIGN SYSTEM) */
 @import url('./modules/base.css');
 
 :root {
     --header-height: 80px;
-    --hero-padding-desktop: 180px 0 100px;
-    --hero-padding-mobile: 120px 0 60px;
+    --hero-padding-desktop: 180px 0 120px;
+    --hero-padding-mobile: 140px 0 80px;
     --card-bg: #111;
     --card-border: #222;
+    --section-gap: 120px;
 }
 
 /* --- UTILS --- */
-.text-justify { text-align: justify; }
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-gradient {
+    background: linear-gradient(90deg, #fff 0%, var(--primary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: inline-block;
+}
 .w-100 { width: 100%; }
-.mb-10 { margin-bottom: 10px; }
 .mb-20 { margin-bottom: 20px; }
 .mb-40 { margin-bottom: 40px; }
 .mb-80 { margin-bottom: 80px; }
-.text-center { text-align: center; }
-.text-left { text-align: left; }
-.mx-auto { margin-left: auto; margin-right: auto; }
 
-/* --- HEADER & NAV --- */
+/* --- HEADER --- */
 .main-header {
     position: absolute; top: 0; left: 0; width: 100%; z-index: 1000;
-    padding: 20px 0; transition: all 0.3s ease;
+    padding: 25px 0; transition: all 0.3s ease;
+    background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, transparent 100%);
 }
 .header-container {
     display: flex; justify-content: space-between; align-items: center;
-    max-width: 1200px; margin: 0 auto; padding: 0 20px;
+    max-width: 1280px; margin: 0 auto; padding: 0 30px;
 }
 .brand-logo { 
-    font-size: 1.5rem; font-weight: 800; color: white; display: flex; align-items: center; gap: 10px; z-index: 2001; 
+    font-size: 1.5rem; font-weight: 800; color: white; display: flex; align-items: center; gap: 12px; 
+    letter-spacing: -0.5px; z-index: 2001;
 }
-.logo-rounded { border-radius: 50%; width: 40px; height: 40px; border: 2px solid var(--primary); object-fit: cover; }
+.logo-rounded { border-radius: 12px; width: 40px; height: 40px; border: 1px solid var(--primary); }
 
-.desktop-nav { display: flex; gap: 30px; align-items: center; }
-.desktop-nav a { font-weight: 500; color: #ccc; font-size: 0.95rem; }
+.desktop-nav { display: flex; gap: 40px; align-items: center; }
+.desktop-nav a { font-weight: 500; color: #ccc; font-size: 0.95rem; transition: 0.3s; }
 .desktop-nav a:hover { color: var(--primary); }
 
 .hamburger-btn { display: none; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; z-index: 2001; }
 .mobile-menu { display: none; }
 
-/* --- HERO SECTIONS --- */
+/* --- HERO & SECTIONS --- */
 .hero-page {
-    background: linear-gradient(180deg, #050505 0%, #111 100%);
-    text-align: center;
+    position: relative;
     padding: var(--hero-padding-desktop);
-    min-height: 60vh;
-    display: flex; flex-direction: column; justify-content: center;
+    min-height: 85vh;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    text-align: center;
+    overflow: hidden;
+}
+
+/* Backgrounds EspecÃ­ficos */
+.bg-home {
+    background: url('../images/hero-bg.png') center/cover no-repeat fixed;
+}
+.bg-features-section {
+    background: url('../images/features-bg.png') center/cover no-repeat;
     position: relative;
 }
-
-/* Home Specific Hero */
-.hero-home {
-    background: url('../images/hero-bg.png') center/cover no-repeat;
-    min-height: 90vh;
+.bg-auth-pattern {
+    background: url('../images/auth-bg.png') center/cover no-repeat;
 }
 .hero-overlay {
-    position: absolute; inset: 0; 
-    background: linear-gradient(90deg, #050505 0%, rgba(5,5,5,0.9) 30%, rgba(5,5,5,0.4) 100%);
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0.6) 0%, #050505 100%);
     z-index: 1;
 }
-.hero-container { position: relative; z-index: 2; width: 100%; }
-.hero-content { max-width: 700px; } /* Alinhado a esquerda na home desktop */
 
-.hero-title { font-size: 3.8rem; font-weight: 800; margin-bottom: 20px; line-height: 1.1; letter-spacing: -2px; color: white; }
-.hero-subtitle { color: #bbb; font-size: 1.25rem; margin-bottom: 40px; line-height: 1.6; }
-.hero-buttons { display: flex; gap: 15px; flex-wrap: wrap; }
+.container { position: relative; z-index: 2; max-width: 1280px; margin: 0 auto; padding: 0 30px; }
 
-/* Badge da Hero */
+/* Tipografia Hero */
 .hero-badge {
-    display: inline-flex; align-items: center; gap: 8px;
-    background: rgba(190, 242, 2, 0.1); border: 1px solid rgba(190, 242, 2, 0.2);
-    color: var(--primary); padding: 8px 16px; border-radius: 50px;
-    font-size: 0.85rem; font-weight: 700; margin-bottom: 25px;
-    text-transform: uppercase; letter-spacing: 1px;
+    display: inline-flex; align-items: center; gap: 10px;
+    background: rgba(190, 242, 2, 0.1); border: 1px solid rgba(190, 242, 2, 0.3);
+    color: var(--primary); padding: 8px 20px; border-radius: 100px;
+    font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+    margin-bottom: 30px; backdrop-filter: blur(5px);
+}
+.hero-title { 
+    font-size: 4.5rem; font-weight: 800; margin-bottom: 25px; 
+    line-height: 1.05; letter-spacing: -2px; color: white; 
+}
+.hero-subtitle { 
+    color: #bbb; font-size: 1.35rem; max-width: 700px; margin: 0 auto 40px; 
+    line-height: 1.6; font-weight: 300; 
 }
 
-/* --- SECTIONS & GRIDS --- */
-.section-padding { padding: 100px 0; }
-.bg-darker { background: #0a0a0a; }
+/* --- GRIDS & CARDS --- */
+.section-padding { padding: var(--section-gap) 0; }
 
-.grid-2, .grid-3 { display: grid; gap: 30px; }
-.grid-2 { grid-template-columns: repeat(2, 1fr); align-items: center; }
-.grid-3 { grid-template-columns: repeat(3, 1fr); align-items: stretch; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
 
-/* --- CARDS (Features & Trainers) --- */
+/* Feature Card (Glassmorphism Lite) */
 .feature-card {
-    background: var(--card-bg); border: 1px solid var(--card-border); 
-    border-radius: 16px; padding: 40px 30px;
-    display: flex; flex-direction: column; height: 100%; transition: transform 0.3s;
+    background: rgba(20, 20, 20, 0.6); border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 20px; padding: 40px; backdrop-filter: blur(10px);
+    transition: transform 0.3s, border-color 0.3s;
 }
-.feature-card:hover { transform: translateY(-5px); border-color: var(--primary); }
+.feature-card:hover { transform: translateY(-10px); border-color: var(--primary); background: rgba(20, 20, 20, 0.9); }
 
 .icon-box {
-    width: 60px; height: 60px; background: rgba(190, 242, 2, 0.1); color: var(--primary);
-    border-radius: 12px; display: flex; align-items: center; justify-content: center;
-    font-size: 1.5rem; margin-bottom: 25px;
+    width: 60px; height: 60px; background: #1a1a1a; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; color: var(--primary); margin-bottom: 25px;
+    border: 1px solid #333;
 }
-.feature-card h3 { color: white; font-size: 1.5rem; margin-bottom: 15px; }
-.feature-card p { color: #999; line-height: 1.6; }
 
-/* Trainer Card */
+/* Trainer Card (Profile Style) */
 .trainer-card {
-    padding: 0; overflow: hidden; background: #151515;
-    border: 1px solid var(--card-border); border-radius: 16px;
-    transition: 0.3s;
+    background: #111; border-radius: 20px; overflow: hidden; border: 1px solid #222;
+    transition: 0.4s ease;
 }
-.trainer-card:hover { border-color: var(--primary); transform: translateY(-5px); }
-.trainer-img {
-    height: 280px; background: #222; display: flex; align-items: center; justify-content: center;
-    font-size: 5rem; color: #333; position: relative;
+.trainer-card:hover { border-color: var(--primary); transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+
+.trainer-image-placeholder {
+    height: 320px; background: #1a1a1a;
+    display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
 }
-.trainer-img img { width: 100%; height: 100%; object-fit: cover; }
-.trainer-info { padding: 25px; }
-.trainer-name { color: white; font-size: 1.3rem; margin-bottom: 5px; font-weight: 700; }
-.trainer-spec { color: var(--primary); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; }
+.trainer-image-placeholder i { font-size: 6rem; color: #252525; transition: 0.4s; }
+.trainer-card:hover .trainer-image-placeholder i { color: var(--primary); transform: scale(1.1); }
 
-/* Planos */
-.plan-card { position: relative; padding: 40px 30px; }
-.plan-featured { border-color: var(--primary); background: linear-gradient(180deg, #151515 0%, #050505 100%); transform: scale(1.05); z-index: 2; }
-.plan-header { text-align: center; border-bottom: 1px solid #222; padding-bottom: 20px; margin-bottom: 20px; }
-.plan-price { font-size: 3rem; font-weight: 800; color: white; margin: 10px 0; }
-.plan-price span { font-size: 1rem; color: #666; font-weight: 400; }
-.plan-features li { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; color: #ccc; font-size: 0.95rem; }
-.plan-features li.muted { color: #555; text-decoration: line-through; }
+.trainer-info { padding: 25px; position: relative; z-index: 2; background: #111; }
+.trainer-name { font-size: 1.4rem; color: white; margin-bottom: 5px; font-weight: 700; }
+.trainer-role { color: var(--primary); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
 
-/* --- TABELA COMPARATIVA --- */
-.comparison-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 40px; }
-.comparison-table { width: 100%; min-width: 600px; border-collapse: collapse; }
-.comparison-table th, .comparison-table td { padding: 20px; border-bottom: 1px solid #222; text-align: center; }
-.comparison-table th:first-child, .comparison-table td:first-child { text-align: left; color: #ccc; }
+/* Plans */
+.plan-card { position: relative; padding: 50px 30px; display: flex; flex-direction: column; }
+.plan-featured { 
+    background: linear-gradient(180deg, #1a1a1a 0%, #050505 100%); 
+    border: 1px solid var(--primary); box-shadow: 0 0 30px rgba(190, 242, 2, 0.05);
+}
+.plan-price { font-size: 3.5rem; font-weight: 800; color: white; margin: 20px 0; letter-spacing: -1px; }
+.plan-price span { font-size: 1rem; color: #666; font-weight: 400; margin-left: 5px; }
+
+/* Table */
+.comparison-wrapper { margin-top: 60px; background: #0f0f0f; border-radius: 20px; padding: 10px; border: 1px solid #222; }
+.comparison-table th, .comparison-table td { padding: 25px; border-bottom: 1px solid #222; }
+.comparison-table tr:last-child td { border-bottom: none; }
 
 /* =========================================
-   í³± MOBILE & TABLET (< 992px)
+   í³± MOBILE (< 992px)
    ========================================= */
 @media (max-width: 991px) {
-    /* Header Mobile */
-    .main-header { padding: 15px 0; background: rgba(5,5,5,0.95); backdrop-filter: blur(10px); position: fixed; border-bottom: 1px solid #222; }
+    :root { 
+        --section-gap: 80px; 
+    }
+    
+    .hero-page { padding: var(--hero-padding-mobile); text-align: left; align-items: flex-start; }
+    .hero-page.center-mobile { text-align: center; align-items: center; }
+    
+    .hero-title { font-size: 3rem; }
+    .hero-subtitle { font-size: 1.15rem; margin-bottom: 30px; }
+    
+    .grid-3, .grid-2 { grid-template-columns: 1fr; gap: 40px; }
+    
+    /* Mobile Menu */
     .desktop-nav { display: none; }
     .hamburger-btn { display: block; }
-
-    /* Mobile Menu Drawer */
+    
     .mobile-menu {
         display: flex; flex-direction: column;
-        position: fixed; top: 0; right: 0; width: 100%; height: 100vh;
-        background: #000; z-index: 2000; padding: 100px 30px;
-        transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        overflow-y: auto;
+        position: fixed; inset: 0; background: #050505; z-index: 2000;
+        padding: 100px 30px; transform: translateX(100%); transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .mobile-menu.active { transform: translateX(0); }
-    .side-link { font-size: 1.4rem; font-weight: 700; border-bottom: 1px solid #222; padding: 15px 0; color: white; display: block; }
-
-    /* Layout Ajustes */
-    .hero-page, .hero-home { padding: var(--hero-padding-mobile); min-height: auto; text-align: center; background-position: center top; }
-    .hero-overlay { background: linear-gradient(180deg, rgba(5,5,5,0.7) 0%, #050505 100%); }
+    .side-link { font-size: 2rem; font-weight: 800; border-bottom: 1px solid #1a1a1a; padding: 20px 0; color: white; letter-spacing: -1px; }
     
-    .hero-content { margin: 0 auto; }
-    .hero-title { font-size: 2.5rem; letter-spacing: -1px; }
-    .hero-subtitle { font-size: 1.1rem; }
-    .hero-buttons { justify-content: center; flex-direction: column; }
-    .hero-buttons .btn { width: 100%; }
-    
-    .grid-2, .grid-3 { grid-template-columns: 1fr; gap: 30px; }
-    
-    .feature-card { padding: 30px 20px; text-align: center; }
-    .icon-box { margin-left: auto; margin-right: auto; }
-    
-    .trainer-card { max-width: 400px; margin: 0 auto; width: 100%; }
-    
-    /* Planos no Mobile */
-    .plan-featured { transform: scale(1); border: 2px solid var(--primary); margin: 20px 0; }
-    
-    .comparison-table th, .comparison-table td { padding: 10px; font-size: 0.85rem; }
-    
-    .section-padding { padding: 60px 0; }
+    .trainer-image-placeholder { height: 280px; }
+    .comparison-wrapper { padding: 0; }
+    .comparison-table th, .comparison-table td { padding: 15px; font-size: 0.9rem; }
 }

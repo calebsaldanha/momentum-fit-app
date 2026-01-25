@@ -2,11 +2,12 @@
 <%- include('../layouts/public/header') %>
 
 <main>
-    <section class="hero-page">
+    <section class="hero-page bg-home" style="min-height: 50vh;">
+        <div class="hero-overlay"></div>
         <div class="container">
             <h1 class="hero-title">Nossa Missão</h1>
             <p class="hero-subtitle">
-                Democratizar a tecnologia de alta performance para Personal Trainers e seus alunos.
+                Democratizar a ciência do esporte para quem leva o treino a sério.
             </p>
         </div>
     </section>
@@ -15,59 +16,55 @@
         <div class="container">
             <div class="grid-2">
                 <div>
-                    <span style="color: var(--primary); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; font-size: 0.9rem;">Como tudo começou</span>
-                    <h2 style="font-size: 2.5rem; color: white; margin: 10px 0 20px; line-height: 1.1;">A fusão entre Fisiologia e Dados</h2>
+                    <span style="color: var(--primary); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; font-size: 0.9rem;">Manifesto</span>
+                    <h2 class="hero-title" style="font-size: 2.8rem; margin: 15px 0 30px;">Fisiologia + Dados = <span class="text-gradient">Performance</span></h2>
                     
-                    <div style="color: #ccc; line-height: 1.8; font-size: 1.05rem;">
-                        <p class="mb-20">A Momentum Fit nasceu de uma inquietação: por que apenas atletas olímpicos têm acesso a métricas precisas de treino?</p>
-                        <p class="mb-20">Combinando anos de experiência prática em <strong>Educação Física</strong> com o poder analítico da <strong>Ciência de Dados</strong>, criamos uma plataforma que elimina o "achismo" da prescrição de exercícios.</p>
-                        <p>Não somos apenas um app de anotar séries. Somos um ecossistema de inteligência que entende sua fadiga, calcula seu volume ideal e garante que cada gota de suor se transforme em resultado mensurável.</p>
+                    <div style="color: #ccc; line-height: 1.8; font-size: 1.1rem; text-align: justify;">
+                        <p class="mb-20">A Momentum Fit nasceu de uma frustração: ferramentas de treino eram apenas "blocos de notas digitais". Ninguém usava os dados para <strong>gerar insights</strong>.</p>
+                        <p class="mb-20">Nós mudamos isso. Nosso sistema não apenas registra o que você fez, mas <strong>aprende com sua fadiga</strong>. Se você dormiu mal, o treino muda. Se você bateu um PR, o volume ajusta.</p>
+                        <p>Somos a ponte entre o conhecimento empírico do treinador e a precisão algorítmica da máquina.</p>
                     </div>
                 </div>
 
-                <div style="background: #111; padding: 40px; border-radius: 20px; border: 1px solid #222; position: relative;">
+                <div style="background: #111; padding: 50px; border-radius: 20px; border: 1px solid #222; position: relative;">
                     <div style="position: absolute; top: -15px; right: -15px; background: var(--primary); color: black; padding: 10px 20px; border-radius: 50px; font-weight: 800; font-size: 0.9rem;">
                         EST. 2025
                     </div>
                     
-                    <h3 style="color: white; margin-bottom: 25px;"><i class="fas fa-bullseye" style="color: var(--primary); margin-right: 10px;"></i> Nossos Pilares</h3>
+                    <h3 style="color: white; margin-bottom: 30px; font-size: 1.5rem;">Nossos Pilares</h3>
                     
-                    <ul style="list-style: none;">
-                        <li class="mb-20" style="display: flex; gap: 15px;">
-                            <i class="fas fa-database" style="color: #555; margin-top: 5px;"></i>
+                    <div style="display: flex; flex-direction: column; gap: 30px;">
+                        <div style="display: flex; gap: 20px;">
+                            <i class="fas fa-database" style="font-size: 1.5rem; color: #555;"></i>
                             <div>
-                                <strong style="color: white; display: block; margin-bottom: 5px;">Data-Driven</strong>
-                                <span style="color: #888; font-size: 0.9rem;">Decisões baseadas em números reais, não em intuição.</span>
+                                <strong style="color: white; display: block; margin-bottom: 5px; font-size: 1.1rem;">Data-Driven</strong>
+                                <span style="color: #888;">Decisões baseadas em métricas, não em "feeling".</span>
                             </div>
-                        </li>
-                        <li class="mb-20" style="display: flex; gap: 15px;">
-                            <i class="fas fa-users" style="color: #555; margin-top: 5px;"></i>
+                        </div>
+                        <div style="display: flex; gap: 20px;">
+                            <i class="fas fa-users" style="font-size: 1.5rem; color: #555;"></i>
                             <div>
-                                <strong style="color: white; display: block; margin-bottom: 5px;">Conexão Humana</strong>
-                                <span style="color: #888; font-size: 0.9rem;">A tecnologia potencializa o treinador, não o substitui.</span>
+                                <strong style="color: white; display: block; margin-bottom: 5px; font-size: 1.1rem;">Fator Humano</strong>
+                                <span style="color: #888;">A tecnologia serve ao treinador, não o substitui.</span>
                             </div>
-                        </li>
-                        <li style="display: flex; gap: 15px;">
-                            <i class="fas fa-chart-line" style="color: #555; margin-top: 5px;"></i>
+                        </div>
+                        <div style="display: flex; gap: 20px;">
+                            <i class="fas fa-code-branch" style="font-size: 1.5rem; color: #555;"></i>
                             <div>
-                                <strong style="color: white; display: block; margin-bottom: 5px;">Evolução Constante</strong>
-                                <span style="color: #888; font-size: 0.9rem;">Melhoria contínua do código e do corpo.</span>
+                                <strong style="color: white; display: block; margin-bottom: 5px; font-size: 1.1rem;">Iteração Contínua</strong>
+                                <span style="color: #888;">Código limpo, treino pesado.</span>
                             </div>
-                        </li>
-                    </ul>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <section class="section-padding center" style="border-top: 1px solid #222;">
+    <section class="section-padding center">
         <div class="container">
-            <h2 style="color: white; margin-bottom: 30px;">Faça parte dessa história</h2>
-            <% if (typeof user !== 'undefined' && user) { %>
-                <a href="/<%= user.role %>/dashboard" class="btn btn-primary btn-lg">Ir para meu Painel</a>
-            <% } else { %>
-                <a href="/auth/register" class="btn btn-primary btn-lg">Começar Agora</a>
-            <% } %>
+            <h2 class="hero-title" style="font-size: 2.5rem;">Faça parte do movimento</h2>
+            <a href="/auth/register" class="btn btn-primary btn-lg" style="margin-top: 20px; color: black;">Começar Agora</a>
         </div>
     </section>
 </main>
