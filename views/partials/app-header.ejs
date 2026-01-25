@@ -1,22 +1,18 @@
 <header class="app-header">
     <div style="display: flex; align-items: center;">
-        <button id="sidebar-toggle" style="background:none; border:none; color:white; font-size:1.5rem; margin-right:1rem; cursor:pointer;" class="lg-hidden">
+        <button id="sidebar-toggle" class="sidebar-toggle-btn">
             <i class="fas fa-bars"></i>
         </button>
-        <h2 class="header-title"><%= title %></h2>
+        <h2 class="header-title"><%= typeof title !== 'undefined' ? title : 'Momentum' %></h2>
     </div>
 
-    <div class="user-menu">
-        <div style="text-align: right; display: none; @media(min-width:768px){display:block;}">
-            <span style="display:block; font-size:0.9rem; font-weight:600;"><%= user.name %></span>
-            <span style="display:block; font-size:0.75rem; color:var(--text-secondary); text-transform:capitalize;"><%= user.role %></span>
-        </div>
-        <div class="user-avatar">
+    <div style="display: flex; align-items: center; gap: 20px;">
+        <a href="/notifications" style="position: relative; color: white;">
+            <i class="fas fa-bell" style="font-size: 1.1rem;"></i>
+            <span style="position: absolute; top: -5px; right: -5px; width: 8px; height: 8px; background: var(--neon-primary); border-radius: 50%;"></span>
+        </a>
+        <div class="user-avatar" style="width: 35px; height: 35px; border-radius: 50%; font-size: 0.9rem;">
             <%= user.name.charAt(0) %>
         </div>
     </div>
 </header>
-
-<style>
-    @media(min-width: 1024px) { .lg-hidden { display: none !important; } }
-</style>
