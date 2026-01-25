@@ -11,108 +11,43 @@
         <div class="main-content">
             <%- include('../partials/app-header', { title: 'Visão Geral' }) %>
 
-            <div class="content-pad">
-                <div class="welcome-banner">
-                    <div style="position: relative; z-index: 2;">
-                        <h1>Vamos esmagar, <%= user.name.split(' ')[0] %>! ⚡</h1>
-                        <p style="opacity: 0.9;">
-                            Seu foco hoje está em <span style="color: var(--neon-primary); font-weight: 700;">Hipertrofia</span>. 
-                            Plano atual: <span class="badge badge-neutral"><%= stats.plan_name || 'Free' %></span>
-                        </p>
-                    </div>
+            <div class="content-scroll-area"> <div class="welcome-banner" style="margin-bottom: 30px; padding: 30px; background: linear-gradient(180deg, #111 0%, #050505 100%); border: 1px solid #222; border-radius: 12px; border-left: 4px solid var(--primary);">
+                    <h1 style="font-size: 1.8rem; margin-bottom: 5px;">Olá, <%= user.name.split(' ')[0] %>! ⚡</h1>
+                    <p style="color: #888;">Foco total hoje. Seu plano: <span class="badge badge-success"><%= stats.plan_name %></span></p>
                 </div>
 
                 <div class="grid-3">
-                    <div style="grid-column: span 2;">
-                        
-                        <div class="card">
-                            <div class="card-header">
-                                <h3 class="card-title"><i class="fas fa-fire"></i> Treino do Dia</h3>
-                                <span class="badge badge-success">PRIORIDADE</span>
-                            </div>
-
-                            <% if (nextWorkout) { %>
-                                <div style="display: flex; flex-direction: column; gap: 20px;">
-                                    <div>
-                                        <h2 style="font-size: 1.8rem; margin-bottom: 5px;"><%= nextWorkout.name %></h2>
-                                        <p><%= nextWorkout.description || 'Siga o plano. Respeite o descanso.' %></p>
-                                    </div>
-
-                                    <div style="display: flex; gap: 30px; padding: 20px; background: rgba(255,255,255,0.02); border-radius: 8px;">
-                                        <div>
-                                            <span style="display: block; font-size: 1.5rem; font-weight: 800; color: var(--neon-primary);">
-                                                <%= nextWorkout.exercises_count || 0 %>
-                                            </span>
-                                            <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Exercícios</span>
-                                        </div>
-                                        <div>
-                                            <span style="display: block; font-size: 1.5rem; font-weight: 800; color: white;">45-60</span>
-                                            <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Minutos Est.</span>
-                                        </div>
-                                    </div>
-
-                                    <a href="/client/workouts/<%= nextWorkout.id %>" class="btn btn-primary btn-block">
-                                        <i class="fas fa-play" style="margin-right: 10px;"></i> INICIAR SESSÃO
-                                    </a>
-                                </div>
-                            <% } else { %>
-                                <div style="text-align: center; padding: 40px 0;">
-                                    <i class="fas fa-check-circle" style="font-size: 3rem; color: #222; margin-bottom: 20px;"></i>
-                                    <h3 style="color: #666;">Descanso Merecido</h3>
-                                    <p>Nenhum treino agendado para hoje.</p>
-                                    <a href="/client/workouts" class="btn btn-outline" style="margin-top: 20px;">Ver Biblioteca</a>
-                                </div>
-                            <% } %>
+                    <div class="card" style="grid-column: span 2;">
+                        <div class="card-header">
+                            <h3 class="card-title">Próximo Treino</h3>
                         </div>
-
-                        <div class="card">
-                            <div class="card-header">
-                                <h3 class="card-title"><i class="fas fa-chart-line"></i> Evolução de Carga</h3>
-                            </div>
-                            <div style="height: 200px; display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; padding-bottom: 10px;">
-                                <% [40, 55, 45, 70, 65, 85, 90].forEach(h => { %>
-                                    <div style="width: 100%; background: linear-gradient(0deg, var(--neon-subtle) 0%, var(--neon-primary) 100%); height: <%= h %>%; border-radius: 4px; opacity: 0.8;"></div>
-                                <% }) %>
-                            </div>
-                            <p style="text-align: center; font-size: 0.8rem; margin-top: 10px;">Últimos 7 dias</p>
-                        </div>
+                        <% if(nextWorkout) { %>
+                            <h2 style="font-size: 1.5rem; margin-bottom: 10px;"><%= nextWorkout.name %></h2>
+                            <p style="color: #888; margin-bottom: 20px;"><%= nextWorkout.description || 'Sem descrição.' %></p>
+                            <a href="/client/workouts/<%= nextWorkout.id %>" class="btn btn-primary">Iniciar Agora</a>
+                        <% } else { %>
+                            <p>Nenhum treino programado.</p>
+                            <a href="/client/workouts" class="btn btn-outline" style="margin-top: 10px;">Ver Biblioteca</a>
+                        <% } %>
                     </div>
 
-                    <div style="display: flex; flex-direction: column; gap: 30px;">
-                        
-                        <div class="card" style="background: radial-gradient(circle at top right, rgba(190, 242, 2, 0.1), transparent);">
-                            <h3 class="card-title" style="color: var(--neon-primary); margin-bottom: 5px;">TOTAL TREINOS</h3>
-                            <div style="font-size: 3.5rem; font-weight: 800; line-height: 1;"><%= stats.total_workouts || 0 %></div>
-                            <p style="font-size: 0.85rem; margin-top: 10px;">Sessões concluídas</p>
+                    <div class="card">
+                        <h3 class="card-title" style="margin-bottom: 15px;">Resumo</h3>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span style="color: #888;">Treinos Totais</span>
+                            <span style="font-weight: 700;"><%= stats.total_workouts %></span>
                         </div>
-
-                        <div class="card">
-                            <div class="card-header">
-                                <h3 class="card-title"><i class="fas fa-user-astronaut"></i> Seu Treinador</h3>
-                            </div>
-                            <% if(trainer) { %>
-                                <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
-                                    <div class="user-avatar" style="width: 60px; height: 60px; font-size: 1.5rem;">
-                                        <%= trainer.name.charAt(0) %>
-                                    </div>
-                                    <div>
-                                        <div style="font-weight: 700; font-size: 1.1rem;"><%= trainer.name %></div>
-                                        <div style="font-size: 0.8rem; color: var(--neon-primary);">Personal Pro</div>
-                                    </div>
-                                </div>
-                                <a href="/client/chat" class="btn btn-outline btn-block">Enviar Mensagem</a>
-                            <% } else { %>
-                                <div style="text-align: center;">
-                                    <p style="margin-bottom: 20px;">Você está usando o <strong>Momentum AI</strong>.</p>
-                                    <a href="/client/ai-coach" class="btn btn-primary btn-block" style="color: black;">Falar com IA</a>
-                                </div>
-                            <% } %>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: #888;">Sequência</span>
+                            <span style="font-weight: 700; color: var(--primary);"><%= stats.streak || 0 %> dias</span>
                         </div>
-                        
                     </div>
                 </div>
+
             </div>
         </div>
     </div>
+    
+    <script src="/js/layout.js"></script>
 </body>
 </html>

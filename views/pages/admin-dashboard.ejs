@@ -2,130 +2,45 @@
 <html lang="pt-BR">
 <head>
     <%- include('../layouts/app/head') %>
-    <title>Comando Admin | Momentum Fit</title>
+    <title>Admin | Momentum Fit</title>
 </head>
 <body>
     <div class="dashboard-wrapper">
         <%- include('../partials/sidebar') %>
-
         <div class="main-content">
-            <%- include('../partials/app-header', { title: 'Visão Geral do Sistema' }) %>
-
-            <div class="content-pad">
+            <%- include('../partials/app-header', { title: 'Painel Administrativo' }) %>
+            <div class="content-scroll-area">
+                
                 <div class="grid-3 mb-30">
-                    <div class="card" style="border-left: 4px solid var(--neon-primary);">
-                        <div style="display: flex; justify-content: space-between;">
-                            <div>
-                                <p class="text-muted" style="text-transform: uppercase; font-size: 0.8rem; font-weight: 700;">Usuários Totais</p>
-                                <h2 style="font-size: 2.5rem; margin-top: 5px;"><%= stats.total_users || 0 %></h2>
-                            </div>
-                            <i class="fas fa-users" style="font-size: 2rem; color: #333;"></i>
-                        </div>
-                        <span class="badge badge-success">+12% este mês</span>
+                    <div class="card" style="border-left: 4px solid var(--primary);">
+                        <p>USUÁRIOS TOTAIS</p>
+                        <h2><%= stats.total_users %></h2>
                     </div>
-
                     <div class="card" style="border-left: 4px solid #3b82f6;">
-                        <div style="display: flex; justify-content: space-between;">
-                            <div>
-                                <p class="text-muted" style="text-transform: uppercase; font-size: 0.8rem; font-weight: 700;">Personais Ativos</p>
-                                <h2 style="font-size: 2.5rem; margin-top: 5px;"><%= stats.total_trainers || 0 %></h2>
-                            </div>
-                            <i class="fas fa-dumbbell" style="font-size: 2rem; color: #333;"></i>
-                        </div>
+                        <p>PERSONAIS</p>
+                        <h2><%= stats.total_trainers %></h2>
                     </div>
-
                     <div class="card" style="border-left: 4px solid #ef4444;">
-                        <div style="display: flex; justify-content: space-between;">
-                            <div>
-                                <p class="text-muted" style="text-transform: uppercase; font-size: 0.8rem; font-weight: 700;">Aprovações Pendentes</p>
-                                <h2 style="font-size: 2.5rem; margin-top: 5px;"><%= stats.pending_approvals || 0 %></h2>
-                            </div>
-                            <i class="fas fa-exclamation-circle" style="font-size: 2rem; color: #ef4444;"></i>
-                        </div>
-                        <% if(stats.pending_approvals > 0) { %>
-                            <a href="/admin/approvals" style="color: #ef4444; font-size: 0.8rem; margin-top: 10px; display: block;">Resolver agora &rarr;</a>
-                        <% } %>
+                        <p>APROVAÇÕES</p>
+                        <h2><%= stats.pending_approvals %></h2>
                     </div>
                 </div>
 
                 <div class="grid-2">
-                    <div class="card" style="grid-column: span 2;">
-                        <div class="card-header">
-                            <h3 class="card-title"><i class="fas fa-user-clock"></i> Últimos Cadastros de Personal</h3>
-                            <a href="/admin/approvals" class="btn btn-outline" style="font-size: 0.8rem; padding: 5px 15px;">Ver Todos</a>
-                        </div>
-                        
-                        <% if (pendingTrainers && pendingTrainers.length > 0) { %>
-                            <table style="width: 100%;">
-                                <thead>
-                                    <tr>
-                                        <th>Nome</th>
-                                        <th>Email</th>
-                                        <th>CREF</th>
-                                        <th style="text-align: right;">Ação</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <% pendingTrainers.forEach(t => { %>
-                                    <tr>
-                                        <td><strong><%= t.name %></strong></td>
-                                        <td style="color: #888;"><%= t.email %></td>
-                                        <td><span class="badge badge-neutral"><%= t.cref %></span></td>
-                                        <td style="text-align: right;">
-                                            <a href="/admin/approvals/<%= t.id %>" class="btn btn-primary" style="padding: 5px 15px; font-size: 0.8rem;">Analisar</a>
-                                        </td>
-                                    </tr>
-                                    <% }) %>
-                                </tbody>
-                            </table>
-                        <% } else { %>
-                            <div style="text-align: center; padding: 30px; color: #666;">
-                                <i class="fas fa-check-circle" style="font-size: 2rem; margin-bottom: 10px;"></i>
-                                <p>Tudo limpo! Nenhuma pendência.</p>
-                            </div>
-                        <% } %>
-                    </div>
-
                     <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title"><i class="fas fa-server"></i> Status do Sistema</h3>
-                        </div>
-                        <ul style="list-style: none;">
-                            <li style="display: flex; justify-content: space-between; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #222;">
-                                <span>Database</span>
-                                <span class="badge badge-success">ONLINE</span>
-                            </li>
-                            <li style="display: flex; justify-content: space-between; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #222;">
-                                <span>IA Model (GPT-4)</span>
-                                <span class="badge badge-success">OPERACIONAL</span>
-                            </li>
-                            <li style="display: flex; justify-content: space-between;">
-                                <span>Email Service</span>
-                                <span class="badge badge-success">ATIVO</span>
-                            </li>
-                        </ul>
+                        <h3>Status do Sistema</h3>
+                        <p class="text-muted mt-10"><i class="fas fa-check-circle" style="color: var(--primary);"></i> Banco de Dados Online</p>
+                        <p class="text-muted mt-5"><i class="fas fa-check-circle" style="color: var(--primary);"></i> API Online</p>
                     </div>
-
                     <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title"><i class="fas fa-bolt"></i> Ações Rápidas</h3>
-                        </div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                            <a href="/admin/users" class="btn btn-outline" style="text-align: center; display: flex; flex-direction: column; padding: 20px;">
-                                <i class="fas fa-search" style="font-size: 1.5rem; margin-bottom: 10px;"></i>
-                                Buscar Usuário
-                            </a>
-                            <a href="/admin/settings" class="btn btn-outline" style="text-align: center; display: flex; flex-direction: column; padding: 20px;">
-                                <i class="fas fa-lock" style="font-size: 1.5rem; margin-bottom: 10px;"></i>
-                                Moderação
-                            </a>
-                        </div>
+                        <h3>Gerenciamento</h3>
+                        <a href="/admin/users" class="btn btn-outline btn-block mt-10">Ver Usuários</a>
                     </div>
                 </div>
 
             </div>
         </div>
     </div>
-    
-    <script src="/js/layout.js"></script> </body>
+    <script src="/js/layout.js"></script>
+</body>
 </html>

@@ -1,18 +1,21 @@
 <header class="app-header">
-    <div style="display: flex; align-items: center;">
-        <button id="sidebar-toggle" class="sidebar-toggle-btn">
+    <div style="display: flex; align-items: center; gap: 15px;">
+        <button class="sidebar-toggle-btn" aria-label="Menu">
             <i class="fas fa-bars"></i>
         </button>
-        <h2 class="header-title"><%= typeof title !== 'undefined' ? title : 'Momentum' %></h2>
+        <h2 class="header-title" style="margin: 0; font-size: 1.1rem; color: white;">
+            <%= typeof title !== 'undefined' ? title : 'Momentum' %>
+        </h2>
     </div>
 
     <div style="display: flex; align-items: center; gap: 20px;">
-        <a href="/notifications" style="position: relative; color: white;">
-            <i class="fas fa-bell" style="font-size: 1.1rem;"></i>
-            <span style="position: absolute; top: -5px; right: -5px; width: 8px; height: 8px; background: var(--neon-primary); border-radius: 50%;"></span>
+        <a href="/notifications" style="position: relative; color: #ccc;">
+            <i class="fas fa-bell"></i>
+            <span style="position: absolute; top: -2px; right: -2px; width: 8px; height: 8px; background: var(--primary); border-radius: 50%;"></span>
         </a>
-        <div class="user-avatar" style="width: 35px; height: 35px; border-radius: 50%; font-size: 0.9rem;">
-            <%= user.name.charAt(0) %>
-        </div>
+        
+        <a href="/profile" class="user-avatar" style="width: 32px; height: 32px; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.9rem;">
+            <%= user.name ? user.name.charAt(0).toUpperCase() : 'U' %>
+        </a>
     </div>
 </header>

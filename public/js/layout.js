@@ -1,34 +1,42 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const sidebar = document.getElementById('sidebar');
-    const toggleBtn = document.getElementById('sidebar-toggle');
-    const closeBtn = document.getElementById('sidebar-close');
-    const overlay = document.getElementById('mobile-overlay');
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.querySelector('.mobile-overlay');
+    const toggleBtn = document.querySelector('.sidebar-toggle-btn');
+    const closeBtn = document.querySelector('.sidebar-close-btn');
 
-    function toggleSidebar() {
-        const isOpen = sidebar.classList.contains('open');
-        if (isOpen) {
-            sidebar.classList.remove('open');
-            overlay.classList.remove('active');
-            document.body.style.overflow = ''; // Libera scroll
-        } else {
-            sidebar.classList.add('open');
-            overlay.classList.add('active');
-            document.body.style.overflow = 'hidden'; // Trava scroll
-        }
+    if (!sidebar || !toggleBtn) return;
+
+    function openSidebar() {
+        sidebar.classList.add('open');
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden'; // Trava scroll do fundo
     }
 
-    if (toggleBtn) toggleBtn.addEventListener('click', (e) => {
+    function closeSidebar() {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('active');
+        document.body.style.overflow = ''; // Libera scroll
+    }
+
+    toggleBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        toggleSidebar();
+        openSidebar();
     });
 
-    if (closeBtn) closeBtn.addEventListener('click', toggleSidebar);
-    if (overlay) overlay.addEventListener('click', toggleSidebar);
-    
-    // Auto-close em links no mobile
+    if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+    if (overlay) overlay.addEventListener('click', closeSidebar);
+
+    // Fechar ao clicar em links (UX Mobile)
     sidebar.querySelectorAll('a').forEach(link => {
         link.addEventListener('click', () => {
-            if (window.innerWidth <= 1024) toggleSidebar();
+            if (window.innerWidth <= 1024) closeSidebar();
         });
+    });
+
+    // Fechar com ESC
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && sidebar.classList.contains('open')) {
+            closeSidebar();
+        }
     });
 });
