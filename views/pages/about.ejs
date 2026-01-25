@@ -1,73 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
 <%- include('../layouts/public/head') %>
-<%- include('../layouts/public/header') %>
+<body>
+    <%- include('../layouts/public/header') %>
 
-<main>
-    <section style="padding: 180px 0 80px; background: linear-gradient(180deg, #050505 0%, #111 100%); text-align: center;">
-        <div class="container">
-            <h1 class="hero-title" style="font-size: 3.5rem; margin-bottom: 20px;">Nossa Missão</h1>
-            <p class="text-muted" style="max-width: 700px; margin: 0 auto; font-size: 1.2rem;">
-                Democratizar a tecnologia de alta performance para Personal Trainers e seus alunos.
-            </p>
-        </div>
-    </section>
+    <main>
+        <section class="about-hero">
+            <div class="container">
+                <h1>Nossa Missão é o Seu Movimento</h1>
+                <p style="font-size: 1.2rem; max-width: 600px; margin: 0 auto; opacity: 0.9;">
+                    Conectamos tecnologia de ponta com a expertise humana para criar a plataforma de fitness definitiva.
+                </p>
+            </div>
+        </section>
 
-    <section class="section-padding" style="background: #0a0a0a;">
-        <div class="container">
-            <div class="features-grid" style="grid-template-columns: 1fr 1fr; align-items: center; gap: 60px;">
-                <div>
-                    <span style="color: var(--primary); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; font-size: 0.9rem;">Como tudo começou</span>
-                    <h2 class="section-title" style="margin-top: 10px; font-size: 2.5rem;">A fusão entre Fisiologia e Dados</h2>
-                    
-                    <p style="color: #ccc; line-height: 1.8; margin-bottom: 20px; font-size: 1.05rem;">
-                        A Momentum Fit nasceu de uma inquietação: por que apenas atletas olímpicos têm acesso a métricas precisas de treino?
-                    </p>
-                    <p style="color: #ccc; line-height: 1.8; margin-bottom: 20px; font-size: 1.05rem;">
-                        Combinando anos de experiência prática em <strong>Educação Física</strong> com o poder analítico da <strong>Ciência de Dados</strong>, criamos uma plataforma que elimina o "achismo" da prescrição de exercícios.
-                    </p>
-                    <p style="color: #ccc; line-height: 1.8; margin-bottom: 20px; font-size: 1.05rem;">
-                        Não somos apenas um app de anotar séries. Somos um ecossistema de inteligência que entende sua fadiga, calcula seu volume ideal e garante que cada gota de suor se transforme em resultado mensurável.
-                    </p>
+        <section class="container">
+            <div class="mission-grid">
+                <div class="mission-card">
+                    <div class="mission-icon"><i class="fas fa-heartbeat"></i></div>
+                    <h3>Saúde Primeiro</h3>
+                    <p>Não é sobre estética, é sobre longevidade e qualidade de vida através do movimento consciente.</p>
                 </div>
-
-                <div style="background: #111; padding: 40px; border-radius: 20px; border: 1px solid #222; position: relative;">
-                    <div style="position: absolute; top: -20px; right: -20px; background: var(--primary); color: black; padding: 15px; border-radius: 10px; font-weight: 800;">
-                        EST. 2025
-                    </div>
-                    <h3 style="color: white; margin-bottom: 20px;"><i class="fas fa-bullseye" style="color: var(--primary); margin-right: 10px;"></i> Nossos Pilares</h3>
-                    <ul style="list-style: none; padding: 0;">
-                        <li style="margin-bottom: 20px; display: flex; gap: 15px;">
-                            <i class="fas fa-database" style="color: #555; margin-top: 5px;"></i>
-                            <div>
-                                <strong style="color: white; display: block; margin-bottom: 5px;">Data-Driven</strong>
-                                <span style="color: #888; font-size: 0.9rem;">Decisões baseadas em números reais, não em intuição.</span>
-                            </div>
-                        </li>
-                        <li style="margin-bottom: 20px; display: flex; gap: 15px;">
-                            <i class="fas fa-users" style="color: #555; margin-top: 5px;"></i>
-                            <div>
-                                <strong style="color: white; display: block; margin-bottom: 5px;">Conexão Humana</strong>
-                                <span style="color: #888; font-size: 0.9rem;">A tecnologia potencializa o treinador, não o substitui.</span>
-                            </div>
-                        </li>
-                        <li style="margin-bottom: 0; display: flex; gap: 15px;">
-                            <i class="fas fa-chart-line" style="color: #555; margin-top: 5px;"></i>
-                            <div>
-                                <strong style="color: white; display: block; margin-bottom: 5px;">Evolução Constante</strong>
-                                <span style="color: #888; font-size: 0.9rem;">Melhoria contínua do código e do corpo.</span>
-                            </div>
-                        </li>
-                    </ul>
+                <div class="mission-card">
+                    <div class="mission-icon"><i class="fas fa-brain"></i></div>
+                    <h3>Inteligência de Dados</h3>
+                    <p>Usamos IA para adaptar treinos em tempo real, respeitando seus limites e potencializando resultados.</p>
+                </div>
+                <div class="mission-card">
+                    <div class="mission-icon"><i class="fas fa-users"></i></div>
+                    <h3>Comunidade</h3>
+                    <p>Unimos alunos e personal trainers em um ecossistema transparente e eficiente.</p>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <section style="padding: 100px 0; border-top: 1px solid #222; text-align: center;">
-        <div class="container">
-            <h2 style="color: white; margin-bottom: 20px;">Faça parte dessa história</h2>
-            <a href="/auth/register" class="btn btn-primary">Começar Agora</a>
-        </div>
-    </section>
-</main>
+        <section class="about-content">
+            <div class="container">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center;">
+                    <div>
+                        <h2 style="font-size: 2.5rem; margin-bottom: 20px; color: var(--secondary);">A Origem</h2>
+                        <p style="margin-bottom: 20px; font-size: 1.1rem; color: #555;">
+                            O Momentum Fit nasceu da frustração com planilhas de treino estáticas e aplicativos que não entendem a individualidade biológica.
+                        </p>
+                        <p style="margin-bottom: 20px; font-size: 1.1rem; color: #555;">
+                            Criado por Caleb Saldanha, unindo a ciência da computação com a educação física, nossa plataforma visa democratizar o acesso a treinos de alta performance.
+                        </p>
+                    </div>
+                    <div>
+                        <div style="background: #eee; height: 400px; border-radius: 20px; display: flex; align-items: center; justify-content: center; color: #aaa;">
+                            <i class="fas fa-image" style="font-size: 3rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-<%- include('../layouts/public/footer') %>
+        <section class="timeline-section">
+            <div class="container">
+                <h2 style="text-align: center; margin-bottom: 60px;">Nossa Jornada</h2>
+                
+                <div style="max-width: 800px; margin: 0 auto;">
+                    <div class="timeline-item">
+                        <div class="timeline-year">2024</div>
+                        <div class="timeline-content">
+                            <h3>A Ideia</h3>
+                            <p>Conceituação do algoritmo de adaptação de carga e validação com primeiros personais.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-year">2025</div>
+                        <div class="timeline-content">
+                            <h3>Lançamento Beta</h3>
+                            <p>Início das operações com grupo fechado de alunos e implementação do módulo de IA.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-year">2026</div>
+                        <div class="timeline-content">
+                            <h3>Expansão</h3>
+                            <p>Lançamento oficial da plataforma Momentum Fit Pro para todo o Brasil.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <%- include('../layouts/public/footer') %>
+</body>
+</html>

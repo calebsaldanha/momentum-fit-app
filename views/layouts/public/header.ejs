@@ -1,46 +1,43 @@
-<header class="main-header">
-    <div class="header-container">
-        <a href="/" class="brand-logo">
-            <img src="/images/momentum-fit-icon.png" alt="Momentum Logo" class="logo-rounded">
-            <span>Momentum</span>
+<header class="public-header">
+    <div class="container public-nav">
+        <a href="/" class="logo-text">
+            MOMENTUM<span style="font-weight:300">FIT</span>
         </a>
         
-        <nav class="desktop-nav">
-            <a href="/">Início</a>
-            <a href="/plans">Planos</a>
+        <nav class="nav-links">
+            <a href="/">Home</a>
             <a href="/about">Sobre</a>
-            <a href="/auth/login">Entrar</a>
-            <a href="/auth/register" class="btn btn-primary btn-sm" style="color: black;">Começar</a>
+            <a href="/features">Funcionalidades</a>
+            <a href="/plans">Planos</a>
+            <a href="/articles">Blog</a>
+            
+            <% if (typeof user !== 'undefined' && user) { %>
+                <a href="/app/dashboard" class="btn btn-primary">Meu Painel</a>
+            <% } else { %>
+                <a href="/auth/login" class="btn btn-outline">Entrar</a>
+                <a href="/auth/register" class="btn btn-primary">Começar Agora</a>
+            <% } %>
         </nav>
 
-        <button class="hamburger-btn" onclick="togglePublicMenu()" aria-label="Menu">
+        <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
             <i class="fas fa-bars"></i>
         </button>
-    </div>
-
-    <div class="mobile-menu" id="publicMenu">
-        <button onclick="togglePublicMenu()" style="position: absolute; top: 25px; right: 20px; background: none; border: none; color: white; font-size: 2rem; cursor: pointer; z-index: 2002;">
-            <i class="fas fa-times"></i>
-        </button>
-
-        <a href="/" class="side-link" onclick="togglePublicMenu()">Início</a>
-        <a href="/plans" class="side-link" onclick="togglePublicMenu()">Planos</a>
-        <a href="/about" class="side-link" onclick="togglePublicMenu()">Sobre</a>
-        <a href="/auth/login" class="side-link" onclick="togglePublicMenu()">Entrar</a>
-        <a href="/auth/register" class="btn btn-primary btn-lg w-100" style="color: black; margin-top: 20px;" onclick="togglePublicMenu()">Começar Agora</a>
     </div>
 </header>
 
 <script>
-    function togglePublicMenu() {
-        const menu = document.getElementById('publicMenu');
-        const body = document.body;
-        menu.classList.toggle('active');
-        
-        if (menu.classList.contains('active')) {
-            body.style.overflow = 'hidden'; // Impede scroll do fundo
-        } else {
-            body.style.overflow = '';
+    function toggleMobileMenu() {
+        const nav = document.querySelector('.nav-links');
+        nav.style.display = nav.style.display === 'flex' ? 'none' : 'flex';
+        if(nav.style.display === 'flex') {
+            nav.style.flexDirection = 'column';
+            nav.style.position = 'absolute';
+            nav.style.top = '70px';
+            nav.style.left = '0';
+            nav.style.width = '100%';
+            nav.style.background = 'white';
+            nav.style.padding = '20px';
+            nav.style.boxShadow = '0 5px 10px rgba(0,0,0,0.1)';
         }
     }
 </script>

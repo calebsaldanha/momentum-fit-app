@@ -1,0 +1,14 @@
+/* ARQUIVO DE TEMA APP - ISOLADO
+   Carregado APENAS quando logado.
+*/
+:root {
+    --sidebar-width: 280px;
+    --header-height: 70px;
+    --primary: #FF4D00;
+    --bg-app: #f8f9fa;
+}
+
+body.app-body { background-color: var(--bg-app); display: flex; }
+.app-main { flex: 1; margin-left: var(--sidebar-width); min-height: 100vh; padding: 20px; }
+@media (max-width: 991px) { .app-main { margin-left: 0; } }
+/* ... Resto dos estilos do dashboard ... */

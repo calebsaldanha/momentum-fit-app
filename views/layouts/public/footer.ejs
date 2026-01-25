@@ -1,50 +1,28 @@
-<footer class="main-footer" style="background: #000; border-top: 1px solid #222; padding: 60px 0 30px;">
+<footer class="public-footer">
     <div class="container">
-        <div class="footer-grid" style="display: grid; gap: 40px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
-            
+        <div class="footer-grid">
             <div class="footer-col">
-                <a href="/" class="brand-logo" style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px; color: white; text-decoration: none; font-size: 1.5rem; font-weight: 800;">
-                    <img src="/images/momentum-fit-icon.png" alt="Logo" style="width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--primary);">
-                    <span>Momentum</span>
-                </a>
-                <p style="color: #666; font-size: 0.9rem; line-height: 1.6;">
-                    Tecnologia e performance para quem leva o treino a sério.
+                <h4>Momentum Fit</h4>
+                <p style="color: #aaa; font-size: 0.9rem;">
+                    Transformando vidas através da inteligência de dados e acompanhamento profissional.
                 </p>
             </div>
-            
             <div class="footer-col">
-                <h4 style="color: white; margin-bottom: 20px; font-size: 1rem;">Navegação</h4>
-                <ul style="list-style: none; padding: 0;">
-                    <li style="margin-bottom: 12px;"><a href="/" style="color: #888; transition: 0.2s;">Início</a></li>
-                    <li style="margin-bottom: 12px;"><a href="/plans" style="color: #888; transition: 0.2s;">Planos</a></li>
-                    <li style="margin-bottom: 12px;"><a href="/about" style="color: #888; transition: 0.2s;">Sobre</a></li>
-                </ul>
+                <h4>Plataforma</h4>
+                <a href="/features">Como funciona</a>
+                <a href="/plans">Planos e Preços</a>
+                <a href="/trainers">Para Personais</a>
             </div>
-            
             <div class="footer-col">
-                <h4 style="color: white; margin-bottom: 20px; font-size: 1rem;">Legal & Suporte</h4>
-                <ul style="list-style: none; padding: 0;">
-                    <li style="margin-bottom: 12px;"><a href="/terms" style="color: #888; transition: 0.2s;">Termos de Uso</a></li>
-                    <li style="margin-bottom: 12px;"><a href="/privacy" style="color: #888; transition: 0.2s;">Privacidade</a></li>
-                    <li style="margin-bottom: 12px;"><a href="/cookies" style="color: #888; transition: 0.2s;">Cookies</a></li>
-                    <li style="margin-bottom: 12px;"><a href="/contact" style="color: #888; transition: 0.2s;">Contato</a></li>
-                </ul>
-            </div>
-
-            <div class="footer-col">
-                <h4 style="color: white; margin-bottom: 20px; font-size: 1rem;">Social</h4>
-                <div style="display: flex; gap: 15px;">
-                    <a href="#" style="color: #666; font-size: 1.2rem;"><i class="fab fa-instagram"></i></a>
-                    <a href="#" style="color: #666; font-size: 1.2rem;"><i class="fab fa-linkedin"></i></a>
-                </div>
+                <h4>Institucional</h4>
+                <a href="/about">Sobre Nós</a>
+                <a href="/contact">Contato</a>
+                <a href="/privacy">Privacidade</a>
+                <a href="/terms">Termos de Uso</a>
             </div>
         </div>
-        
-        <div style="border-top: 1px solid #1a1a1a; margin-top: 50px; padding-top: 30px; text-align: center; color: #444; font-size: 0.85rem;">
-            <p>&copy; 2026 Momentum Fit. Todos os direitos reservados.</p>
+        <div class="footer-bottom">
+            &copy; <%= new Date().getFullYear() %> Momentum Fit. Todos os direitos reservados.
         </div>
     </div>
 </footer>
-<script src="/js/main.js"></script>
-</body>
-</html>
