@@ -7,40 +7,40 @@ document.addEventListener('DOMContentLoaded', () => {
     function toggleSidebar() {
         if (!sidebar) return;
         
-        // Lógica para Mobile: Usa classes de translação
-        const isClosed = sidebar.classList.contains('-translate-x-full');
+        // Tailwind usa classes para visibilidade.
+        // No mobile, sidebar começa com -translate-x-full (escondido)
+        const isHidden = sidebar.classList.contains('-translate-x-full');
         
-        if (isClosed) {
+        if (isHidden) {
+            // Abrir
             sidebar.classList.remove('-translate-x-full');
-            if (sidebarOverlay) sidebarOverlay.classList.remove('hidden');
+            if (sidebarOverlay) {
+                sidebarOverlay.classList.remove('hidden');
+                setTimeout(() => sidebarOverlay.classList.remove('opacity-0'), 10); // Fade in
+            }
         } else {
+            // Fechar
             sidebar.classList.add('-translate-x-full');
-            if (sidebarOverlay) sidebarOverlay.classList.add('hidden');
+            if (sidebarOverlay) {
+                sidebarOverlay.classList.add('opacity-0');
+                setTimeout(() => sidebarOverlay.classList.add('hidden'), 300); // Wait for fade out
+            }
         }
     }
 
-    if (sidebarToggle) {
-        sidebarToggle.addEventListener('click', (e) => {
-            e.stopPropagation();
-            toggleSidebar();
-        });
-    }
+    if (sidebarToggle) sidebarToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleSidebar();
+    });
 
-    if (sidebarOverlay) {
-        sidebarOverlay.addEventListener('click', toggleSidebar);
-    }
-    
-    if (closeSidebarBtn) {
-        closeSidebarBtn.addEventListener('click', toggleSidebar);
-    }
+    if (sidebarOverlay) sidebarOverlay.addEventListener('click', toggleSidebar);
+    if (closeSidebarBtn) closeSidebarBtn.addEventListener('click', toggleSidebar);
 
-    // Fecha sidebar ao redimensionar para Desktop (previne bugs visuais)
+    // Reset ao redimensionar a tela
     window.addEventListener('resize', () => {
         if (window.innerWidth >= 1024 && sidebar) {
             sidebar.classList.remove('-translate-x-full'); // Sempre visível no desktop
             if (sidebarOverlay) sidebarOverlay.classList.add('hidden');
-        } else if (sidebar) {
-            sidebar.classList.add('-translate-x-full'); // Escondido por padrão no mobile
         }
     });
 });
