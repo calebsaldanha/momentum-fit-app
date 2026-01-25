@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { ensureAuthenticated, checkRole } = require('../middleware/auth');
+const { ensureAuthenticated, ensureRole } = require('../middleware/auth'); // Corrigido para ensureRole
 
 router.use(ensureAuthenticated);
-router.use(checkRole('admin'));
+router.use(ensureRole('admin')); // Corrigido chamada
 
 router.get('/dashboard', (req, res) => {
     const stats = {

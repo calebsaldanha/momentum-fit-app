@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const { ensureAuthenticated, checkRole } = require('../middleware/auth');
+const { ensureAuthenticated, ensureRole } = require('../middleware/auth'); // Corrigido para ensureRole
 const db = require('../database/db');
 
 router.use(ensureAuthenticated);
-router.use(checkRole('trainer'));
+router.use(ensureRole('trainer')); // Corrigido chamada
 
 // DASHBOARD
 router.get('/dashboard', (req, res) => {
